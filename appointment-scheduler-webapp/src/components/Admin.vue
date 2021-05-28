@@ -1,0 +1,295 @@
+<template>
+  <div class="columns">
+    <div class="column is-1">
+      <aside class="menu">
+        <p class="menu-label">Hello, {{ alias }}</p>
+        <ul class="menu-list">
+          <li>
+            <div class="field">
+              <div class="control">
+                <input class="input" type="text" v-model="searchBar" placeholder="Search..." />
+              </div>
+            </div>
+          </li>
+        </ul>
+      </aside>
+    </div>
+    <div class="column">
+      <section class="hero is-primary is-fullheight" style="padding: 15">
+        <div class="hero-body">
+          <div class="container is-widescreen is-fullhd customField">
+            <table class="table is-striped is-narrow is-fullwidth">
+              <thead>
+                <tr>
+                  <th class="subtitle has-text-black-ter">Controls</th>
+                  <th class="subtitle has-text-black-ter">No.</th>
+                  <th class="subtitle has-text-black-ter">First Name</th>
+                  <th class="subtitle has-text-black-ter">Last Name</th>
+                  <th class="subtitle has-text-black-ter">Email Address</th>
+                  <th class="subtitle has-text-black-ter">Contact Number</th>
+                  <th class="subtitle has-text-black-ter">Month</th>
+                  <th class="subtitle has-text-black-ter">Date</th>
+                  <th class="subtitle has-text-black-ter">Day</th>
+                  <th class="subtitle has-text-black-ter">Stated Hour</th>
+                  <th class="subtitle has-text-black-ter">Expiry Hour</th>
+                </tr>
+              </thead>
+              <tbody
+                v-for="(appointments, index) in appointmentSched"
+                :key="appointments._id"
+              >
+                <tr>
+                  <button
+                    class="dropdown-item button has-text-info"
+                    type="button"
+                    @click="toggleModal"
+                  >
+                    Update
+                  </button>
+                  <button
+                    class="dropdown-item button has-text-danger"
+                    type="button"
+                    @click="deleteData(appointments._id)"
+                  >
+                    Delete</button
+                  ><br />
+                  <div class="modal" :class="{ 'is-active': isActiveModal }">
+                    <div class="modal-background"></div>
+                    <div class="modal-content">
+                      <form
+                        class="field customField animate__animated animate__fadeInLeft has-text-centered"
+                      >
+                        <label class="label">First Name</label>
+                        <div class="control">
+                          <input
+                            class="input customWidth"
+                            type="text"
+                            v-model="firstName"
+                            placeholder="First Name"
+                            required
+                          />
+                        </div>
+                        <label class="label">Last Name</label>
+                        <div class="control">
+                          <input
+                            class="input customWidth"
+                            type="text"
+                            v-model="lastName"
+                            placeholder="Last Name"
+                            required
+                          />
+                        </div>
+                        <label class="label">E-mail Address</label>
+                        <div class="control">
+                          <input
+                            class="input customWidth"
+                            type="text"
+                            v-model="emailAddress"
+                            placeholder="E-mail Address"
+                            required
+                          />
+                        </div>
+                        <label class="label">Contact Number</label>
+                        <div class="control">
+                          <input
+                            class="input customWidth"
+                            type="number"
+                            v-model="contactNum"
+                            placeholder="Contact Number"
+                            required
+                          />
+                        </div>
+                        <label class="label">Month</label>
+                        <div class="control">
+                          <input
+                            class="input customWidth"
+                            type="text"
+                            v-model="month"
+                            placeholder="Month"
+                            required
+                          />
+                        </div>
+                        <label class="label">Date</label>
+                        <div class="control">
+                          <input
+                            class="input customWidth"
+                            type="number"
+                            v-model="dateNum"
+                            placeholder="Date"
+                            required
+                          />
+                        </div>
+                        <label class="label">Day</label>
+                        <div class="control">
+                          <input
+                            class="input customWidth"
+                            type="text"
+                            v-model="day"
+                            placeholder="Day"
+                            required
+                          />
+                        </div>
+                        <label class="label">Stated Hour</label>
+                        <div class="control">
+                          <input
+                            class="input customWidth"
+                            type="number"
+                            v-model="statedHr"
+                            placeholder="Stated Hour"
+                            required
+                          />
+                        </div>
+                        <label class="label">Expiry Hour</label>
+                        <div class="control">
+                          <input
+                            class="input customWidth"
+                            type="number"
+                            v-model="expireHr"
+                            placeholder="Expiry Hour"
+                            required
+                          />
+                        </div>
+                        <button
+                          class="button is-primary"
+                          type="button"
+                          @click="updateData(appointments._id)"
+                        >
+                          Submit
+                        </button>
+                      </form>
+                    </div>
+                    <button
+                      class="modal-close is-large"
+                      aria-label="close"
+                      @click="toggleModal"
+                    ></button>
+                  </div>
+                  <th class="subtitle has-text-black-ter">{{ index + 1 }}</th>
+                  <td class="subtitle has-text-black-ter">
+                    {{ appointments.firstName }}
+                  </td>
+                  <td class="subtitle has-text-black-ter">
+                    {{ appointments.lastName }}
+                  </td>
+                  <td class="subtitle has-text-black-ter">
+                    {{ appointments.emailAdd }}
+                  </td>
+                  <td class="subtitle has-text-black-ter">
+                    {{ appointments.contactNum }}
+                  </td>
+                  <td class="subtitle has-text-black-ter">
+                    {{ appointments.month }}
+                  </td>
+                  <td class="subtitle has-text-black-ter">
+                    {{ appointments.dateNum }}
+                  </td>
+                  <td class="subtitle has-text-black-ter">
+                    {{ appointments.day }}
+                  </td>
+                  <td class="subtitle has-text-black-ter">
+                    {{ appointments.statedHr }}
+                  </td>
+                  <td class="subtitle has-text-black-ter">
+                    {{ appointments.expireHr }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from "axios";
+import store from "../store";
+import { mapState } from "vuex";
+
+export default {
+  name: "Admin",
+  data() {
+    return {
+      alias: store.state.alias,
+      isActiveModal: false,
+      firstName: "",
+      lastName: "",
+      emailAddress: "",
+      contactNum: "",
+      month: "",
+      day: "",
+      date: "",
+      dateNum: "",
+      statedHr: "",
+      expireHr: "",
+      searchBar: "",
+    };
+  },
+  computed: mapState(["appointmentSched"]),
+  mounted() {
+    this.$store.dispatch("appointmentItems");
+  },
+  methods: {
+    async deleteData(_id) {
+      await axios.delete(`api/appointmentList/${_id}`);
+      await this.$store.dispatch("appointmentItems");
+    },
+    async updateData(_id) {
+      await axios.put(`api/appointmentList/${_id}`, {
+        firstName: this.firstName,
+        lastName: this.lastName,
+        emailAdd: this.emailAddress,
+        contactNum: this.contactNum,
+        month: this.month,
+        day: this.day,
+        dateNum: this.dateNum,
+        statedHr: this.statedHr,
+        expireHr: this.expireHr,
+      });
+      await this.$store.dispatch("appointmentItems");
+      this.isActiveModal = !this.isActiveModal;
+      this.firstName = null;
+      this.lastName = null;
+      this.emailAddress = null;
+      this.contactNum = null;
+      this.month = null;
+      this.day = null;
+      this.dateNum = null;
+      this.statedHr = null;
+      this.expireHr = null;
+    },
+    toggleModal() {
+      this.isActiveModal = !this.isActiveModal;
+    },
+  },
+};
+</script>
+
+<style scoped>
+.customField {
+  padding: 1%;
+  margin: auto;
+  border-radius: 15px;
+  width: 100%;
+}
+.customWidth {
+  width: 50%;
+}
+.customField,
+.table {
+  background-color: whitesmoke;
+}
+th {
+  font-weight: bold;
+  font-size: 18px !important;
+  max-width: 1000px !important;
+}
+@media (max-width: 991.98px) {
+  .customField,
+  table {
+    width: 600% !important;
+    overflow: auto;
+  }
+}
+</style>

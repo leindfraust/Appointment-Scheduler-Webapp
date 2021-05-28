@@ -1,0 +1,25 @@
+{
+  "name": "appontment_scheduler_webapp_expressmongodb",
+  "version": "1.0.0",
+  "description": "appointment scheduler web server with express and mongodbatlas",
+  "main": "index.js",
+  "scripts": {
+    "server": "nodemon index.js --ignore 'appointment-scheduler-webapp/",
+    "client": "npm run serve --prefix appointment-scheduler-webapp",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "author": "Leindfraust",
+  "license": "ISC",
+  "dependencies": {
+    "connect-mongo": "^4.4.1",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "mongoose": "^5.12.7",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "concurrently": "^6.1.0",
+    "nodemon": "^2.0.7"
+  }
+}
