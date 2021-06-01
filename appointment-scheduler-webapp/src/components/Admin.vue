@@ -2,7 +2,7 @@
   <div class="columns">
     <div class="column is-1">
       <aside class="menu">
-        <p class="menu-label">Hello, {{ alias }}</p>
+        <p class="menu-label">Hellosss, {{ alias }}</p>
         <ul class="menu-list">
           <li>
             <div class="field">
