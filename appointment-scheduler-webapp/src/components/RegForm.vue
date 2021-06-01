@@ -10,7 +10,8 @@
               type="text"
               v-model="firstName"
               placeholder="First Name"
-            required/>
+              required
+            />
           </div>
           <label class="label">Last Name</label>
           <div class="control">
@@ -19,7 +20,8 @@
               type="text"
               v-model="lastName"
               placeholder="Last Name"
-            required/>
+              required
+            />
           </div>
           <label class="label">E-mail Address</label>
           <div class="control">
@@ -28,7 +30,8 @@
               type="text"
               v-model="emailAddress"
               placeholder="E-mail Address"
-            required/>
+              required
+            />
           </div>
           <label class="label">Contact Number:</label>
           <div class="control">
@@ -37,7 +40,8 @@
               type="number"
               v-model="contactNum"
               placeholder="Contact Number"
-            required/>
+              required
+            />
           </div>
           <button class="button is-primary" @click="appoint">Submit</button>
         </form>
@@ -67,21 +71,25 @@ export default {
   },
   methods: {
     async appoint() {
-      if(firstName == null || lastName == null || emailAddress == null || contactNum == null){
-        console.log('hakdog')
-      } else {
-      await axios.post("api/appointmentList", { 
-        firstName: this.firstName,
-        lastName: this.lastName,
-        emailAdd: this.emailAddress,
-        contactNum: this.contactNum,
-        month: this.month,
-        day: this.day,
-        dateNum: this.dateNum,
-        statedHr: this.statedHr,
-        expireHr: this.expireHr,
-      });
-    }}
+      if (
+        this.firstName != null &&
+        this.lastName != null &&
+        this.emailAddress != null &&
+        this.contactNum != null
+      ) {
+        await axios.post("api/appointmentList", {
+          firstName: this.firstName,
+          lastName: this.lastName,
+          emailAdd: this.emailAddress,
+          contactNum: this.contactNum,
+          month: this.month,
+          day: this.day,
+          dateNum: this.dateNum,
+          statedHr: this.statedHr,
+          expireHr: this.expireHr,
+        });
+      }
+    },
   },
 };
 </script>

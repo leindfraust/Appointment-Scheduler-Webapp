@@ -3,7 +3,12 @@
     <div class="hero-body">
       <div class="container has-text-centered">
         <h1 class="title">{{ title }}</h1>
-        <v-date-picker v-model="date" mode="date" :min-date="new Date()" :disabled-dates='{ weekdays: [1] }' />
+        <v-date-picker
+          v-model="date"
+          mode="date"
+          :min-date="new Date()"
+          :disabled-dates="{ weekdays: [1] }"
+        />
         <br />
         <button class="button is-danger" @click="getDate">
           Check Availability
@@ -71,7 +76,6 @@ export default {
       this.$router.push("/registration");
     },
     async getDate() {
-      //only test for now
       const sunday = 0;
       const currYear = this.date.getFullYear();
       const currMonth = this.date.getMonth();
@@ -93,8 +97,8 @@ export default {
       ) {
         if (
           // check system hour and if it is not sunday
-          currHour >= this.startHr &&
-          currHour < this.closeHr &&
+          currHour >= this.startHr ||
+          currHour <= this.closeHr &&
           sunday != this.date.getDay()
         ) {
           // pass today system hour to registere
@@ -112,10 +116,10 @@ export default {
       } else {
         await axios
           .get("api/appointmentList") // get month,day,statedHr and expiry hr and compare to the targeted date(still in works)
-          .then(response => this.checkServer = response.data);
+          .then((response) => (this.checkServer = response.data));
         if (
           await this.checkServer.find(
-            item =>
+            (item) =>
               item.month == currMonth &&
               item.day == currDay &&
               item.statedHr <= currHour
@@ -124,13 +128,18 @@ export default {
           this.displayAvailability = false;
           this.textAvailability = "Unavailable";
         } else {
-          this.displayAvailability = true;
-          this.textAvailability = "Available";
-          store.commit("month", stringMonth);
-          store.commit("day", stringDay);
-          store.commit("dateNum", currDay);
-          store.commit("stateHr", currHour + 1);
-          store.commit("expireHr", currHour + 3);
+          if (currHour >= this.startHr || currHour <= this.closeHr) {
+            this.displayAvailability = false;
+            this.textAvailability = "Unavailable";
+          } else {
+            this.displayAvailability = true;
+            this.textAvailability = "Available";
+            store.commit("month", stringMonth);
+            store.commit("day", stringDay);
+            store.commit("dateNum", currDay);
+            store.commit("stateHr", currHour + 1);
+            store.commit("expireHr", currHour + 3);
+          }
         }
       }
     },

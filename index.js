@@ -36,9 +36,11 @@ app.get('/', (req, res) => {
 });
 
 app.use(session({
+    path: 'admin/user/:user',
     secret: 'leindfraust',
     resave: false,
     saveUninitialized: true,
+    cookie: { maxAge: 60000 },
     store: MongoStore.create({
         mongoUrl: encodeURI(mongoUri),
     })

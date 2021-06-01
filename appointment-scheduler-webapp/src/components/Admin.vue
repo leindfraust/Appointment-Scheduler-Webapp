@@ -7,10 +7,16 @@
           <li>
             <div class="field">
               <div class="control">
-                <input class="input" type="text" v-model="searchBar" placeholder="Search..." />
+                <input
+                  class="input"
+                  type="text"
+                  v-model="searchBar"
+                  placeholder="Search..."
+                />
               </div>
             </div>
           </li>
+          <li><a>Users</a></li>
         </ul>
       </aside>
     </div>
@@ -42,7 +48,20 @@
                   <button
                     class="dropdown-item button has-text-info"
                     type="button"
-                    @click="toggleModal"
+                    @click="
+                      toggleModal(
+                        appointments.firstName,
+                        appointments.lastName,
+                        appointments.emailAdd,
+                        appointments.contactNum,
+                        appointments.month,
+                        appointments.dateNum,
+                        appointments.day,
+                        appointments.statedHr,
+                        appointments.expireHr,
+                        appointments._id
+                      )
+                    "
                   >
                     Update
                   </button>
@@ -152,7 +171,7 @@
                         <button
                           class="button is-primary"
                           type="button"
-                          @click="updateData(appointments._id)"
+                          @click="updateData"
                         >
                           Submit
                         </button>
@@ -213,18 +232,27 @@ export default {
     return {
       alias: store.state.alias,
       isActiveModal: false,
-      firstName: "",
-      lastName: "",
-      emailAddress: "",
-      contactNum: "",
-      month: "",
-      day: "",
-      date: "",
-      dateNum: "",
-      statedHr: "",
-      expireHr: "",
-      searchBar: "",
+      id: null,
+      firstName: null,
+      lastName: null,
+      emailAddress: null,
+      contactNum: null,
+      month: null,
+      day: null,
+      date: null,
+      dateNum: null,
+      statedHr: null,
+      expireHr: null,
+      searchBar: null,
     };
+  },
+  created(){
+    //validate for user expiration
+    if(this.firstName == null){
+      console.log('hey')
+    } else {
+      console.log('none')
+    }
   },
   computed: mapState(["appointmentSched"]),
   mounted() {
@@ -232,11 +260,11 @@ export default {
   },
   methods: {
     async deleteData(_id) {
-      await axios.delete(`api/appointmentList/${_id}`);
+      await axios.delete(`/api/appointmentList/${_id}`);
       await this.$store.dispatch("appointmentItems");
     },
-    async updateData(_id) {
-      await axios.put(`api/appointmentList/${_id}`, {
+    async updateData() {
+      await axios.put(`/api/appointmentList/${this.id}`, {
         firstName: this.firstName,
         lastName: this.lastName,
         emailAdd: this.emailAddress,
@@ -249,18 +277,30 @@ export default {
       });
       await this.$store.dispatch("appointmentItems");
       this.isActiveModal = !this.isActiveModal;
-      this.firstName = null;
-      this.lastName = null;
-      this.emailAddress = null;
-      this.contactNum = null;
-      this.month = null;
-      this.day = null;
-      this.dateNum = null;
-      this.statedHr = null;
-      this.expireHr = null;
     },
-    toggleModal() {
+    async toggleModal(
+      firstName,
+      lastName,
+      emailAdd,
+      contactNum,
+      month,
+      dateNum,
+      day,
+      statedHr,
+      expiredHr,
+      _id
+    ) {
       this.isActiveModal = !this.isActiveModal;
+      this.firstName = firstName;
+      this.lastName = lastName;
+      this.emailAddress = emailAdd;
+      this.contactNum = contactNum;
+      this.month = month;
+      this.dateNum = dateNum;
+      this.day = day;
+      this.statedHr = statedHr;
+      this.expireHr = expiredHr;
+      this.id = _id;
     },
   },
 };
