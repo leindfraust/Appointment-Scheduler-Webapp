@@ -3,7 +3,9 @@ const router = express.Router();
 const AppointmentList = require('../../model/appointmentList');
 
 router.get('/', async (req, res) => {
-    res.send("hello world")
+    if(req.session){
+        res.send('Hello')
+    }
 });
 
 module.exports = router;

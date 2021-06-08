@@ -10,6 +10,7 @@ const {
 const appointmentListRoute = require('./routes/api/appointmentList')
 const adminRoute = require('./routes/api/adminList')
 const helloRoute = require('./routes/api/helloworld')
+const sess = require('./sessions/users/user')
 
 const cors = require('cors');
 const morgan = require('morgan');
@@ -20,32 +21,31 @@ app.use(express.json());
 
 const dbConnect = async () => {
     await mongoose.connect(encodeURI(mongoUri), {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false
-})};
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        useUnifiedTopology: true,
+        useFindAndModify: false
+    })
+};
 
 dbConnect().then(() => console.log('MongoDB online')).catch((err) => console.log(err))
+
+app.use(session({
+    secret: 'leindfraust',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        maxAge: 24 * 60 * 60 * 1000
+    },
+    store: MongoStore.create({
+        mongoUrl: encodeURI(mongoUri),
+    })
+}));
 
 app.use('/api/hello', helloRoute)
 app.use('/api/appointmentList', appointmentListRoute)
 app.use('/api/admin', adminRoute)
-app.get('/', (req, res) => {
-    res.send('Hello world');
-});
-
-app.use(session({
-    path: 'admin/user/:user',
-    secret: 'leindfraust',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 60000 },
-    store: MongoStore.create({
-        mongoUrl: encodeURI(mongoUri),
-    })
-  }));
-  
+app.use('/session/user', sess)
 
 app.listen(PORT, () => {
     console.log(`listening to ${PORT}`);

@@ -6,8 +6,8 @@ import {
 const store = createStore({
     state: {
         userAuth: false,
-        alias: '',
         statusAvailability: false,
+        alias: '',
         appointmentSched: [],
         month: '',
         dateNum: '',

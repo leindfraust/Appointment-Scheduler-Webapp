@@ -3,6 +3,7 @@
     <div class="column is-1">
       <aside class="menu">
         <p class="menu-label">Hello, {{ alias }}</p>
+        <button @click="logout" class="button is-danger" type="button">Logout</button>
         <ul class="menu-list">
           <li>
             <div class="field">
@@ -246,19 +247,16 @@ export default {
       searchBar: null,
     };
   },
-  created(){
-    //validate for user expiration
-    if(this.firstName == null){
-      console.log('hey')
-    } else {
-      console.log('none')
-    }
-  },
   computed: mapState(["appointmentSched"]),
-  mounted() {
+  async mounted() {
     this.$store.dispatch("appointmentItems");
   },
   methods: {
+    async logout(){
+      store.commit("alias", null)
+      await axios.delete('/session/user')
+      await this.$router.push('/login')
+    },
     async deleteData(_id) {
       await axios.delete(`/api/appointmentList/${_id}`);
       await this.$store.dispatch("appointmentItems");

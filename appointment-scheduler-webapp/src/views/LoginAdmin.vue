@@ -28,7 +28,11 @@
           >
             {{ validateMessage }}
           </h1>
-          <h1 v-else-if="incorrectUserPass == false" class="subtitle has-text-danger" style="margin-top: 5%">
+          <h1
+            v-else-if="incorrectUserPass == false"
+            class="subtitle has-text-danger"
+            style="margin-top: 5%"
+          >
             {{ validateMessage }}
           </h1>
           <button type="button" class="button is-primary" @click="login">
@@ -58,6 +62,19 @@ export default {
       validateMessage: "",
     };
   },
+  async mounted() {
+    await axios
+      .get("session/user")
+      .then(
+        (response) =>
+          (this.userAdmin = response.data)
+      );
+      if(await this.userAdmin.alias){
+        store.commit("alias", this.userAdmin.alias)
+        store.commit("userTrue");
+        await this.$router.push(`/admin/user/${this.userAdmin.alias}`);
+      }
+  },
   methods: {
     async login() {
       if (this.username == null && this.password == null) {
@@ -75,14 +92,19 @@ export default {
               ))
           );
         if (await this.userAdmin) {
-          store.commit("alias", this.userAdmin.alias);
+          store.commit("alias", this.userAdmin.alias)
           store.commit("userTrue");
           await this.$router.push(`/admin/user/${this.userAdmin.alias}`);
+          await axios.post("/session/user", {
+            alias: this.userAdmin.alias,
+            username: this.username,
+            password: this.password,
+          });
         } else {
           this.validateMessage = "Incorrect username or password";
           this.incorrectUserPass = true;
-          this.username = null
-          this.password = null
+          this.username = null;
+          this.password = null;
         }
       }
     },
