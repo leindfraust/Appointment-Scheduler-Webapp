@@ -97,8 +97,8 @@ export default {
       ) {
         if (
           // check system hour and if it is not sunday
-          currHour >= this.startHr ||
-          currHour <= this.closeHr &&
+          currHour >= this.startHr &&
+          currHour != this.closeHr &&
           sunday != this.date.getDay()
         ) {
           // pass today system hour to registere
@@ -113,6 +113,7 @@ export default {
           this.displayAvailability = false;
           this.textAvailability = "Already closed today";
         }
+      // appoint for another date
       } else {
         await axios
           .get("api/appointmentList") // get month,day,statedHr and expiry hr and compare to the targeted date(still in works)
@@ -130,7 +131,7 @@ export default {
         } else {
           if (currHour >= this.startHr || currHour <= this.closeHr) {
             this.displayAvailability = false;
-            this.textAvailability = "Unavailable";
+            this.textAvailability = "Please register only in working hours 8AM-5PM";
           } else {
             this.displayAvailability = true;
             this.textAvailability = "Available";
