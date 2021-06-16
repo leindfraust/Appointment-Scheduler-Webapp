@@ -64,14 +64,13 @@ export default {
   },
   async mounted() {
     await axios
-      .get("session/user")
+      .get("/session/user")
       .then(
         (response) =>
           (this.userAdmin = response.data)
       );
       if(await this.userAdmin.alias){
         store.commit("alias", this.userAdmin.alias)
-        store.commit("userTrue");
         await this.$router.push(`/admin/user/${this.userAdmin.alias}`);
       }
   },
@@ -82,7 +81,7 @@ export default {
         this.validateMessage = "empty username or password";
       } else {
         await axios
-          .get("api/admin")
+          .get("/api/admin")
           .then(
             (response) =>
               (this.userAdmin = response.data.find(
@@ -93,7 +92,6 @@ export default {
           );
         if (await this.userAdmin) {
           store.commit("alias", this.userAdmin.alias)
-          store.commit("userTrue");
           await this.$router.push(`/admin/user/${this.userAdmin.alias}`);
           await axios.post("/session/user", {
             alias: this.userAdmin.alias,
