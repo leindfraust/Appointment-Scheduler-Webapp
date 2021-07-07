@@ -85,7 +85,6 @@ export default {
     username: String,
     password: String,
     passwordRepeat: String,
-    imgFile: String
   },
   methods: {
     async create() {
