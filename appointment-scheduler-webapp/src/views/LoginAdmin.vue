@@ -71,6 +71,7 @@ export default {
       );
       if(await this.userAdmin.alias){
         store.commit("alias", this.userAdmin.alias)
+        store.commit("userID", this.userAdmin._id)
         await this.$router.push(`/admin/user/${this.userAdmin.alias}`);
       }
   },
@@ -90,13 +91,17 @@ export default {
                   item.password == this.password
               ))
           );
+        // if username and password matched to a user
         if (await this.userAdmin) {
           store.commit("alias", this.userAdmin.alias)
+          store.commit("userID", this.userAdmin._id)
           await this.$router.push(`/admin/user/${this.userAdmin.alias}`);
           await axios.post("/session/user", {
+            _id: this.userAdmin._id,
             alias: this.userAdmin.alias,
             username: this.username,
             password: this.password,
+            schedule: this.userAdmin.schedule
           });
         } else {
           this.validateMessage = "Incorrect username or password";

@@ -14,12 +14,13 @@
     "connect-mongo": "^4.4.1",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "express-session": "^1.17.1",
-    "mongoose": "^5.12.7",
+    "express-fileupload": "^1.2.1",
+    "express-session": "^1.17.2",
+    "mongoose": "^5.12.14",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
-    "concurrently": "^6.1.0",
+    "concurrently": "^6.2.0",
     "nodemon": "^2.0.7"
   }
 }

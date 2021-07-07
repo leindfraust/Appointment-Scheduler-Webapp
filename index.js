@@ -1,15 +1,19 @@
 const express = require('express');
-const session = require('express-session')
-const MongoStore = require('connect-mongo')
+const session = require('express-session');
+const fileUpload = require('express-fileupload');
+const fs = require('fs');
+const MongoStore = require('connect-mongo');
 const app = express();
 const mongoose = require('mongoose');
 const {
     PORT,
     mongoUri
 } = require('./config');
+
+//schemas
+const specializationRoute = require('./routes/api/specializationList')
 const appointmentListRoute = require('./routes/api/appointmentList')
 const adminRoute = require('./routes/api/adminList')
-const helloRoute = require('./routes/api/helloworld')
 const sess = require('./sessions/users/user')
 
 const cors = require('cors');
@@ -18,6 +22,7 @@ const morgan = require('morgan');
 app.use(cors());
 app.use(morgan('tiny'));
 app.use(express.json());
+app.use(fileUpload());
 
 const dbConnect = async () => {
     await mongoose.connect(encodeURI(mongoUri), {
@@ -42,10 +47,40 @@ app.use(session({
     })
 }));
 
-app.use('/api/hello', helloRoute)
+// routes
+app.use('/api/specialistList', specializationRoute)
 app.use('/api/appointmentList', appointmentListRoute)
 app.use('/api/admin', adminRoute)
 app.use('/session/user', sess)
+
+//file upload
+app.post('/api/upload', function(req,res){
+    let alias;
+    let imgFile;
+    let uploadDir;
+
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).send('No files were uploaded.');
+      }
+    
+      // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+      alias = req.body.alias
+      imgFile = req.files.imgFile;
+    
+      uploadDir = __dirname + '/appointment-scheduler-webapp/src/assets/doctors/' + imgFile.name;
+      completeDir = __dirname + '/appointment-scheduler-webapp/src/assets/doctors/' + alias + '.jpg'
+
+      // Use the mv() method to place the file somewhere on your server
+      imgFile.mv(uploadDir, function(err) {
+        if (err)
+          return res.status(500).send(err);
+    
+        res.status(200);
+      });
+      fs.rename(uploadDir, completeDir, (err) => {
+        if(err) throw err
+    });
+});
 
 app.listen(PORT, () => {
     console.log(`listening to ${PORT}`);

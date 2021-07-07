@@ -8,6 +8,7 @@ const store = createStore({
         userAuth: false,
         statusAvailability: false,
         alias: '',
+        userID: null,
         appointmentSched: [],
         month: '',
         dateNum: '',
@@ -25,29 +26,14 @@ const store = createStore({
         alias(state, alias) {
             state.alias = alias
         },
-        userTrue(state) {
-            state.userAuth = true;
+        userID(state, userID) {
+            state.userID = userID
         },
         statusTrue(state) {
             state.statusAvailability = true;
         },
         appointmentList(state, appointmentSched) {
             state.appointmentSched = appointmentSched
-        },
-        month(state, month) {
-            state.month = month
-        },
-        dateNum(state, dateNum){
-            state.dateNum = dateNum
-        },
-        day(state, day) {
-            state.day = day
-        },
-        stateHr(state, hour) {
-            state.statedHr = hour
-        },
-        expireHr(state, hour) {
-            state.expireHr = hour
         },
     },
     actions: {

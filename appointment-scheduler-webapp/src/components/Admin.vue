@@ -17,7 +17,8 @@
               </div>
             </div>
           </li>
-          <li><a>Users</a></li>
+          <li><a>Profile</a></li>
+          <li><a @click="openSchedule">Schedule</a></li>
         </ul>
       </aside>
     </div>
@@ -34,11 +35,8 @@
                   <th class="subtitle has-text-black-ter">Last Name</th>
                   <th class="subtitle has-text-black-ter">Email Address</th>
                   <th class="subtitle has-text-black-ter">Contact Number</th>
-                  <th class="subtitle has-text-black-ter">Month</th>
-                  <th class="subtitle has-text-black-ter">Date</th>
-                  <th class="subtitle has-text-black-ter">Day</th>
-                  <th class="subtitle has-text-black-ter">Stated Hour</th>
-                  <th class="subtitle has-text-black-ter">Expiry Hour</th>
+                  <th class="subtitle has-text-black-ter">Birthday</th>
+                  <th class="subtitle has-text-black-ter">Schedule</th>
                 </tr>
               </thead>
               <tbody
@@ -55,11 +53,8 @@
                         appointments.lastName,
                         appointments.emailAdd,
                         appointments.contactNum,
-                        appointments.month,
-                        appointments.dateNum,
-                        appointments.day,
-                        appointments.statedHr,
-                        appointments.expireHr,
+                        appointments.birthDay,
+                        appointments.sched,
                         appointments._id
                       )
                     "
@@ -198,19 +193,13 @@
                     {{ appointments.contactNum }}
                   </td>
                   <td class="subtitle has-text-black-ter">
-                    {{ appointments.month }}
+                    {{ appointments.birthDay}}
                   </td>
                   <td class="subtitle has-text-black-ter">
-                    {{ appointments.dateNum }}
+                    {{ appointments.sched.date }}
                   </td>
                   <td class="subtitle has-text-black-ter">
-                    {{ appointments.day }}
-                  </td>
-                  <td class="subtitle has-text-black-ter">
-                    {{ appointments.statedHr }}
-                  </td>
-                  <td class="subtitle has-text-black-ter">
-                    {{ appointments.expireHr }}
+                    {{ appointments.sched.time }}
                   </td>
                 </tr>
               </tbody>
@@ -236,15 +225,8 @@ export default {
       id: null,
       firstName: null,
       lastName: null,
-      emailAddress: null,
-      contactNum: null,
-      month: null,
-      day: null,
-      date: null,
-      dateNum: null,
-      statedHr: null,
-      expireHr: null,
-      searchBar: null,
+      birthDay: null,
+      sched: null
     };
   },
   computed: mapState(["appointmentSched"]),
@@ -267,11 +249,8 @@ export default {
         lastName: this.lastName,
         emailAdd: this.emailAddress,
         contactNum: this.contactNum,
-        month: this.month,
-        day: this.day,
-        dateNum: this.dateNum,
-        statedHr: this.statedHr,
-        expireHr: this.expireHr,
+        birthDay: this.birthDay,
+        sched: this.sched,
       });
       await this.$store.dispatch("appointmentItems");
       this.isActiveModal = !this.isActiveModal;
@@ -281,11 +260,8 @@ export default {
       lastName,
       emailAdd,
       contactNum,
-      month,
-      dateNum,
-      day,
-      statedHr,
-      expiredHr,
+      birthDay,
+      sched,
       _id
     ) {
       this.isActiveModal = !this.isActiveModal;
@@ -293,12 +269,12 @@ export default {
       this.lastName = lastName;
       this.emailAddress = emailAdd;
       this.contactNum = contactNum;
-      this.month = month;
-      this.dateNum = dateNum;
-      this.day = day;
-      this.statedHr = statedHr;
-      this.expireHr = expiredHr;
+      this.birthDay = birthDay;
+      this.sched = sched;
       this.id = _id;
+    },
+    async openSchedule(){
+      await this.$router.push(`/admin/user/${this.alias}/schedule`)
     },
   },
 };

@@ -4,15 +4,22 @@ import {
 } from 'vue-router'
 import store from '../store'
 import Home from '../views/Home.vue'
+import DoctorList from '../components/DoctorList.vue'
 import Registration from '../views/Registration.vue'
 import LoginAdmin from '../views/LoginAdmin.vue'
 import Admin from '../components/Admin.vue'
 import SignUpAdmin from '../views/SignUpAdmin.vue'
+import Scheduler from '../components/Scheduler.vue'
 
     const routes = [{
         path: '/',
         name: 'Home',
         component: Home,
+    },
+    {
+        path: '/doctors',
+        name: 'DoctorList',
+        component: DoctorList,
     },
     {
         path: '/registration',
@@ -40,13 +47,18 @@ import SignUpAdmin from '../views/SignUpAdmin.vue'
             requiresAuth: true
         },
     },
+    {
+        path: '/admin/user/:user/schedule',
+        name: 'Scheduler',
+        component: Scheduler,
+    }
 ]
 const router = createRouter({
     history: createWebHistory(process.env.BASE_URL),
     routes
 });
 
-router.beforeEach((to, from, next) => {
+/* router.beforeEach((to, from, next) => {
     if (to.matched.some(route => route.meta.requireProcess)) {
         if (store.state.statusAvailability) {
             return next();
@@ -55,7 +67,7 @@ router.beforeEach((to, from, next) => {
         }
     }
     next();
-});
+}); */
 
 router.beforeEach((to, from, next) => {
     if (to.matched.some(route => route.meta.requiresAuth)) {

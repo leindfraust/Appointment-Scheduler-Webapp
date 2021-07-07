@@ -34,14 +34,36 @@
             />
           </div>
           <label class="label">Contact Number:</label>
-          <div class="control">
+          <div class="block control">
             <input
               class="input"
               type="number"
-              v-model="contactNum"
+              v-model="contsactNum"
               placeholder="Contact Number"
               required
             />
+          </div>
+          <label class="label">Birthday</label>
+          <div class="control" style="margin: auto; width: 50%">
+            <v-date-picker class="block" v-model="date" >
+              <template v-slot="{ inputValue, togglePopover }">
+                <div class="is-block" style="margin: auto; width: 50%">
+                  <button
+                    class="
+                      button is-primary" style="margin: auto;"
+                    @click="togglePopover()"
+                  >Select date
+                  </button>
+                  <input
+                    :value="inputValue"
+                    class="
+                      input
+                    "
+                    readonly
+                  />
+                </div>
+              </template>
+            </v-date-picker>
           </div>
           <button class="button is-primary" @click="appoint">Submit</button>
         </form>
@@ -58,6 +80,7 @@ export default {
   name: "RegForm",
   data() {
     return {
+      date: new Date(),
       firstName: null,
       lastName: null,
       emailAddress: null,

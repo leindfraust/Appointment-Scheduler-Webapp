@@ -1,15 +1,11 @@
 <template>
-  <Calendar title="Schedule your Appointment" />
+  <h1>Official landing page</h1>
 </template>
 
 <script>
-import Calendar from "../components/Calendar";
 
 export default {
   name: "Home",
-  components: {
-    Calendar,
-  },
 };
 </script>
 

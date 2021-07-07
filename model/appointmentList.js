@@ -12,30 +12,16 @@ const appointmentSchema = new Schema({
         type: String,
         required: true,
     },
-    emailAdd: {
-        type: String,
+    birthDay: {
+        type: Number,
         required: true,
     },
     contactNum: Number,
-    date: {
-        type: Date,
-        default: Date.now
+    sched: {
+        type: Array,
+        required: true,
     },
-    month: {
-        type: String,
-    },
-    dateNum: {
-        type: Number,
-    },
-    day: {
-        type: String,
-    },
-    statedHr: {
-        type: Number,
-    },
-    expireHr: {
-        type: Number,
-    }
+    priorityNum: String
 });
 
 const appointmentList = mongoose.model('appointmentList', appointmentSchema);

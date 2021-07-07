@@ -8,6 +8,14 @@ const adminSchema = new Schema({
         type: String,
         required: true,
     },
+    name: {
+        type: String,
+        required: true,
+    },
+    specialist: {
+        type: String,
+        required: true
+    },
     username: {
         type: String,
         required: true,
@@ -16,6 +24,9 @@ const adminSchema = new Schema({
         type: String,
         required: true,
     },
+    schedule: {
+        type: Array,
+    }
 });
 
 const admin = mongoose.model('admin', adminSchema);
