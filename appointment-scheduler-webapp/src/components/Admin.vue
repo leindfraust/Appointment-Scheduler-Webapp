@@ -3,6 +3,13 @@
     <div class="column is-1">
       <aside class="menu">
         <p class="menu-label">Hello, {{ alias }}</p>
+        <figure class="media block">
+            <p class="image is-64x64">
+              <img
+                :src="require(`../assets/doctors/${alias}` + '.jpg')"
+              />
+            </p>
+          </figure>
         <button @click="logout" class="button is-danger" type="button">Logout</button>
         <ul class="menu-list">
           <li>
@@ -17,30 +24,31 @@
               </div>
             </div>
           </li>
+          <li><a @click="routeHome">Home</a></li>
           <li><a>Profile</a></li>
           <li><a @click="openSchedule">Schedule</a></li>
         </ul>
       </aside>
     </div>
     <div class="column">
-      <section class="hero is-primary is-fullheight" style="padding: 15">
+      <section class="hero is-info is-fullheight" style="padding: 15">
         <div class="hero-body">
           <div class="container is-widescreen is-fullhd customField">
             <table class="table is-striped is-narrow is-fullwidth">
               <thead>
                 <tr>
                   <th class="subtitle has-text-black-ter">Controls</th>
-                  <th class="subtitle has-text-black-ter">No.</th>
+                  <th class="subtitle has-text-black-ter">Priority No.</th>
                   <th class="subtitle has-text-black-ter">First Name</th>
                   <th class="subtitle has-text-black-ter">Last Name</th>
-                  <th class="subtitle has-text-black-ter">Email Address</th>
                   <th class="subtitle has-text-black-ter">Contact Number</th>
                   <th class="subtitle has-text-black-ter">Birthday</th>
+                  <th class="subtitle has-text-black-ter">Comments</th>
                   <th class="subtitle has-text-black-ter">Schedule</th>
                 </tr>
               </thead>
               <tbody
-                v-for="(appointments, index) in appointmentSched"
+                v-for="appointments in appointmentSched"
                 :key="appointments._id"
               >
                 <tr>
@@ -54,7 +62,7 @@
                         appointments.emailAdd,
                         appointments.contactNum,
                         appointments.birthDay,
-                        appointments.sched,
+                        appointments.schedule,
                         appointments._id
                       )
                     "
@@ -94,16 +102,6 @@
                             required
                           />
                         </div>
-                        <label class="label">E-mail Address</label>
-                        <div class="control">
-                          <input
-                            class="input customWidth"
-                            type="text"
-                            v-model="emailAddress"
-                            placeholder="E-mail Address"
-                            required
-                          />
-                        </div>
                         <label class="label">Contact Number</label>
                         <div class="control">
                           <input
@@ -114,53 +112,23 @@
                             required
                           />
                         </div>
-                        <label class="label">Month</label>
+                        <label class="label">BirthDay</label>
                         <div class="control">
                           <input
                             class="input customWidth"
                             type="text"
-                            v-model="month"
-                            placeholder="Month"
+                            v-model="birthDay"
+                            placeholder="Birthday"
                             required
                           />
                         </div>
-                        <label class="label">Date</label>
-                        <div class="control">
-                          <input
-                            class="input customWidth"
-                            type="number"
-                            v-model="dateNum"
-                            placeholder="Date"
-                            required
-                          />
-                        </div>
-                        <label class="label">Day</label>
+                        <label class="label">Schedule</label>
                         <div class="control">
                           <input
                             class="input customWidth"
                             type="text"
-                            v-model="day"
-                            placeholder="Day"
-                            required
-                          />
-                        </div>
-                        <label class="label">Stated Hour</label>
-                        <div class="control">
-                          <input
-                            class="input customWidth"
-                            type="number"
-                            v-model="statedHr"
-                            placeholder="Stated Hour"
-                            required
-                          />
-                        </div>
-                        <label class="label">Expiry Hour</label>
-                        <div class="control">
-                          <input
-                            class="input customWidth"
-                            type="number"
-                            v-model="expireHr"
-                            placeholder="Expiry Hour"
+                            v-model="schedule"
+                            placeholder="schedule"
                             required
                           />
                         </div>
@@ -179,7 +147,7 @@
                       @click="toggleModal"
                     ></button>
                   </div>
-                  <th class="subtitle has-text-black-ter">{{ index + 1 }}</th>
+                  <th class="subtitle has-text-black-ter">{{ appointments.priorityNum }}</th>
                   <td class="subtitle has-text-black-ter">
                     {{ appointments.firstName }}
                   </td>
@@ -187,19 +155,20 @@
                     {{ appointments.lastName }}
                   </td>
                   <td class="subtitle has-text-black-ter">
-                    {{ appointments.emailAdd }}
-                  </td>
-                  <td class="subtitle has-text-black-ter">
                     {{ appointments.contactNum }}
                   </td>
                   <td class="subtitle has-text-black-ter">
                     {{ appointments.birthDay}}
                   </td>
-                  <td class="subtitle has-text-black-ter">
-                    {{ appointments.sched.date }}
+                  <td class="subtitle has-text-black-ter" style="width: 30%;">
+                    {{ appointments.comments}}
                   </td>
-                  <td class="subtitle has-text-black-ter">
-                    {{ appointments.sched.time }}
+                  <td class="subtitle has-text-black-ter" v-for="schedules in appointments.schedule" :key="schedules.id">
+                    {{schedules.date}}
+                    <br>
+                    {{schedules.timeStart}} -
+                    <br>
+                    {{schedules.timeEnd}}
                   </td>
                 </tr>
               </tbody>
@@ -226,11 +195,13 @@ export default {
       firstName: null,
       lastName: null,
       birthDay: null,
-      sched: null
+      contactNum: null,
+      searchBar: null,
+      schedule: null
     };
   },
   computed: mapState(["appointmentSched"]),
-  async mounted() {
+  mounted() {
     this.$store.dispatch("appointmentItems");
   },
   methods: {
@@ -250,7 +221,7 @@ export default {
         emailAdd: this.emailAddress,
         contactNum: this.contactNum,
         birthDay: this.birthDay,
-        sched: this.sched,
+        schedule: this.schedule,
       });
       await this.$store.dispatch("appointmentItems");
       this.isActiveModal = !this.isActiveModal;
@@ -261,7 +232,7 @@ export default {
       emailAdd,
       contactNum,
       birthDay,
-      sched,
+      schedule,
       _id
     ) {
       this.isActiveModal = !this.isActiveModal;
@@ -270,8 +241,11 @@ export default {
       this.emailAddress = emailAdd;
       this.contactNum = contactNum;
       this.birthDay = birthDay;
-      this.sched = sched;
+      this.schedule = schedule;
       this.id = _id;
+    },
+    async routeHome() {
+      await this.$router.push(`/admin/user/${this.alias}`)
     },
     async openSchedule(){
       await this.$router.push(`/admin/user/${this.alias}/schedule`)
