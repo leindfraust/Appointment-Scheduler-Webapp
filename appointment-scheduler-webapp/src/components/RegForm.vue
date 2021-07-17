@@ -1,7 +1,8 @@
 <template>
-  <section class="hero is-primary is-fullheight">
+  <section class="hero is-info is-fullheight">
     <div class="hero-body">
-      <div class="container has-text-centered">
+      <div class="container">
+        <h1 class="title">Registration Form</h1>
         <form class="field customField animate__animated animate__fadeInLeft">
           <label class="label">First Name</label>
           <div class="control">
@@ -23,49 +24,71 @@
               required
             />
           </div>
-          <label class="label">E-mail Address</label>
-          <div class="control">
-            <input
-              class="input"
-              type="text"
-              v-model="emailAddress"
-              placeholder="E-mail Address"
-              required
-            />
-          </div>
           <label class="label">Contact Number:</label>
           <div class="block control">
             <input
               class="input"
               type="number"
-              v-model="contsactNum"
+              v-model="contactNum"
               placeholder="Contact Number"
               required
             />
           </div>
+          <label class="label">Additional comments</label>
+          <textarea
+            class="textarea"
+            v-model="comments"
+            placeholder="Optional"
+          ></textarea>
           <label class="label">Birthday</label>
-          <div class="control" style="margin: auto; width: 50%">
-            <v-date-picker class="block" v-model="date" >
+          <div class="control">
+            <v-date-picker class="block" v-model="birthDay">
               <template v-slot="{ inputValue, togglePopover }">
-                <div class="is-block" style="margin: auto; width: 50%">
+                <div class="is-block">
                   <button
-                    class="
-                      button is-primary" style="margin: auto;"
+                    type="button"
+                    class="button is-primary"
+                    style="margin: auto"
                     @click="togglePopover()"
-                  >Select date
+                  >
+                    Select date
                   </button>
                   <input
                     :value="inputValue"
-                    class="
-                      input
-                    "
+                    class="input"
+                    style="width: 10%"
                     readonly
                   />
                 </div>
               </template>
             </v-date-picker>
           </div>
-          <button class="button is-primary" @click="appoint">Submit</button>
+          <br />
+          <h1 class="subtitle has-text-black has-text-weight-bold">
+            Pick your prefered schedule
+          </h1>
+          <div
+            class="block card"
+            v-for="schedules in doctorSched"
+            :key="schedules.id"
+          >
+            <div class="control">
+              <label class="radio">
+                <input
+                  type="radio"
+                  name="schedule"
+                  @click="pickSched(schedules)"
+                />
+                <div class="content">
+                  <p class="sbuttile">{{ schedules.date }}</p>
+                  <p class="subtitle has-text-black">
+                    {{ schedules.timeStart }} - {{ schedules.timeEnd }}
+                  </p>
+                </div></label
+              >
+            </div>
+          </div>
+          <button type="button" class="button is-primary" @click="appoint">Submit</button>
         </form>
       </div>
     </div>
@@ -80,38 +103,46 @@ export default {
   name: "RegForm",
   data() {
     return {
-      date: new Date(),
+      doctorSched: store.state.doctorSched,
+      doctor: store.state.userID,
       firstName: null,
       lastName: null,
-      emailAddress: null,
+      birthDay: new Date(),
+      comments: null,
       contactNum: null,
-      month: store.state.month,
-      dateNum: store.state.dateNum,
-      day: store.state.day,
-      statedHr: store.state.statedHr,
-      expireHr: store.state.expireHr,
+      schedule: null,
+      priorityNum: null,
     };
   },
   methods: {
     async appoint() {
+      await axios
+        .get("api/appointmentList")
+        .then(
+          (response) =>
+            (this.priorityNum =
+              response.data.filter((e) => e.doctor === this.doctor).length + 1)
+        );
       if (
         this.firstName != null &&
         this.lastName != null &&
-        this.emailAddress != null &&
         this.contactNum != null
       ) {
         await axios.post("api/appointmentList", {
+          doctor: this.doctor,
           firstName: this.firstName,
           lastName: this.lastName,
-          emailAdd: this.emailAddress,
           contactNum: this.contactNum,
-          month: this.month,
-          day: this.day,
-          dateNum: this.dateNum,
-          statedHr: this.statedHr,
-          expireHr: this.expireHr,
+          birthDay: this.birthDay.toLocaleDateString(),
+          comments: this.comments,
+          schedule: this.schedule,
+          priorityNum: this.priorityNum,
         });
+        await this.$router.push('/doctors')
       }
+    },
+    pickSched(sched) {
+      this.schedule = sched;
     },
   },
 };
@@ -119,14 +150,19 @@ export default {
 
 <style scoped>
 .customField {
-  width: 50%;
+  width: 100%;
   margin: auto;
-  padding: 50px;
+  padding: 100px;
   background-color: whitesmoke;
   border-radius: 15px;
 }
-input {
-  width: 75%;
+input,
+textarea,
+.card {
+  width: 35%;
+}
+.card {
+  padding: 50px;
 }
 button {
   margin-top: 15px;
@@ -135,8 +171,13 @@ button {
 @media (max-width: 991.98px) {
   .customField {
     width: 100% !important;
+    padding: 50px;
   }
-  input {
+  input,
+  textarea,
+  .card,
+  .is-block,
+  button {
     width: 100% !important;
   }
 }
