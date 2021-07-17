@@ -8,13 +8,9 @@ const store = createStore({
         userAuth: false,
         statusAvailability: false,
         alias: '',
+        doctorSched: [],
         userID: null,
         appointmentSched: [],
-        month: '',
-        dateNum: '',
-        day: '',
-        statedHr: '',
-        expireHr: ''
     },
     getters: {
         getStatusAvail: state => state.statusAvailability,
@@ -25,6 +21,9 @@ const store = createStore({
     mutations: {
         alias(state, alias) {
             state.alias = alias
+        },
+        doctorSched(state, doctorSched) {
+            state.doctorSched = doctorSched
         },
         userID(state, userID) {
             state.userID = userID
@@ -41,7 +40,7 @@ const store = createStore({
             commit
         }) {
             axios.get('/api/appointmentList')
-                .then(response => response.data)
+                .then(response => response.data.filter(x => x.doctor === store.state.userID))
                 .then(appointmentSched => {
                     commit('appointmentList', appointmentSched)
                 });
