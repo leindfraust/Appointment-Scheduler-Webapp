@@ -4,6 +4,10 @@ const {
 } = mongoose;
 
 const appointmentSchema = new Schema({
+    doctor: {
+        type: String,
+        required: true
+    },
     firstName: {
         type: String,
         required: true,
@@ -13,15 +17,19 @@ const appointmentSchema = new Schema({
         required: true,
     },
     birthDay: {
-        type: Number,
+        type: String,
         required: true,
     },
+    comments: String,
     contactNum: Number,
-    sched: {
+    schedule: {
         type: Array,
         required: true,
     },
-    priorityNum: String
+    priorityNum: {
+        type: Number,
+        required: true,
+    }
 });
 
 const appointmentList = mongoose.model('appointmentList', appointmentSchema);

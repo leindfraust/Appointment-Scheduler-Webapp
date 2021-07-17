@@ -13,8 +13,9 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async(req, res) => {
+    const newSpecialistList = new specializationList(req.body)
     try {
-        const specialList = await new specializationList.save()
+        const specialList = await newSpecialistList.save()
         if(!specialList) throw new Error('Cannot save')
         res.status(200).json(specialList)
     } catch (err) {
@@ -23,7 +24,7 @@ router.post('/', async(req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
-    const {id} = req.paramst
+    const {id} = req.params
     try {
         const specialList = await specializationList.findByIdAndUpdate(id, req.body)
         if(!specialList) throw new Error('cannot update')

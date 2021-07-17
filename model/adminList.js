@@ -26,7 +26,7 @@ const adminSchema = new Schema({
     },
     schedule: {
         type: Array,
-    }
+    },
 });
 
 const admin = mongoose.model('admin', adminSchema);

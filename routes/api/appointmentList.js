@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-    const newAppointment = new  AppointmentList(req.body)
+    const newAppointment = new AppointmentList(req.body)
     try {
         const appointmentList = await newAppointment.save()
         if (!appointmentList) throw new Error('Cannot save')
