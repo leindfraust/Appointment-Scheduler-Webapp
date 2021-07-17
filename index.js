@@ -53,8 +53,8 @@ app.use('/api/appointmentList', appointmentListRoute)
 app.use('/api/admin', adminRoute)
 app.use('/session/user', sess)
 
-//file upload
-app.post('/api/upload', function(req,res){
+//file image upload
+app.post('/api/imgUpload', function(req,res){
     let alias;
     let imgFile;
     let uploadDir;
@@ -81,6 +81,7 @@ app.post('/api/upload', function(req,res){
         if(err) throw err
     });
 });
+
 
 app.listen(PORT, () => {
     console.log(`listening to ${PORT}`);
