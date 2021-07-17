@@ -38,7 +38,7 @@
           <button type="button" class="button is-primary" @click="login">
             Login
           </button>
-          <router-link to="/register" class="signup button is-danger"
+          <router-link to="/admin/signup" class="signup button is-danger"
             >Sign Up</router-link
           >
         </form>
