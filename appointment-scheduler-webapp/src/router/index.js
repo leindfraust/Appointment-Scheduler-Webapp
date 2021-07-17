@@ -35,7 +35,7 @@ import Scheduler from '../components/Scheduler.vue'
         component: LoginAdmin,
     },
     {
-        path: '/register',
+        path: '/admin/signup',
         name: 'Sign Up',
         component: SignUpAdmin,
     },
@@ -51,6 +51,9 @@ import Scheduler from '../components/Scheduler.vue'
         path: '/admin/user/:user/schedule',
         name: 'Scheduler',
         component: Scheduler,
+        meta: {
+            requiresAuth: true
+        },
     }
 ]
 const router = createRouter({
@@ -58,16 +61,16 @@ const router = createRouter({
     routes
 });
 
-/* router.beforeEach((to, from, next) => {
+router.beforeEach((to, from, next) => {
     if (to.matched.some(route => route.meta.requireProcess)) {
         if (store.state.statusAvailability) {
             return next();
         } else {
-            return next('/');
+            return next('/doctors');
         }
     }
     next();
-}); */
+}); 
 
 router.beforeEach((to, from, next) => {
     if (to.matched.some(route => route.meta.requiresAuth)) {
