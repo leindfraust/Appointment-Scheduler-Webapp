@@ -4,7 +4,8 @@
       <div class="container">
         <!-- I know it sucks, having a form action for only image upload while separating a post with axios for the document, but shit works so I guess it's okay.-->
         <form 
-        action='/api/upload'
+        id="formUpload"
+        action='/api/imgUpload'
         method='post'
         enctype="multipart/form-data"
         class="field customField animate__animated animate__fadeInLeft">
@@ -16,7 +17,7 @@
               v-model="alias"
               placeholder="alias"
               name="alias"
-            />
+            required/>
           </div>
           <label class="label">Full Name</label>
           <div class="control">
@@ -25,10 +26,10 @@
               type="text"
               v-model="name"
               placeholder="Last name, First name, Extension name, Middle name"
-            />
+            required/>
           </div>
           <label class="label">Picture</label>
-          <input class="input" type="file" name="imgFile">
+          <input class="input" type="file" name="imgFile" required/>
           <label class="label">Specialization</label>
           <div class="control">
             <input
@@ -36,7 +37,7 @@
               type="text"
               v-model="specialist"
               placeholder="Allergist, Dermatologist, etc."
-            />
+            required/>
           </div>
           <label class="label">Username</label>
           <div class="control">
@@ -45,7 +46,7 @@
               type="text"
               v-model="username"
               placeholder="username"
-            />
+            required/>
           </div>
           <label class="label">Password</label>
           <div class="control">
@@ -54,8 +55,9 @@
               type="password"
               v-model="password"
               placeholder="password"
-            />
+            required/>
           </div>
+          <p class="subtitle has-text-danger"> {{ passwordMatch }} </p>
           <label class="label">Repeat Password</label>
           <div class="control">
             <input
@@ -63,8 +65,9 @@
               type="password"
               v-model="passwordRepeat"
               placeholder="repeat password"
-            />
+            required/>
           </div>
+          <p class="subtitle has-text-danger"> {{ passwordMatch }} </p>
           <button type="submit" class="button is-primary" @click="create">
             Create account
           </button>
@@ -86,6 +89,11 @@ export default {
     password: String,
     passwordRepeat: String,
   },
+  data() {
+    return {
+      passwordMatch: null
+    }
+  },
   methods: {
     async create() {
       if (this.password == this.passwordRepeat) {
@@ -98,7 +106,11 @@ export default {
         });
         this.$router.push("/login");
       } else {
-        console.log('repeat pass')
+        let formData = document.getElementById("formUpload");
+        formData.addEventListener('submit', event => {
+          event.preventDefault();
+        });
+        this. passwordMatch = 'password do not match'
       }
     },
   },
