@@ -3,12 +3,13 @@
     <div class="hero-body">
       <div class="container">
         <!-- I know it sucks, having a form action for only image upload while separating a post with axios for the document, but shit works so I guess it's okay.-->
-        <form 
-        id="formUpload"
-        action='/api/imgUpload'
-        method='post'
-        enctype="multipart/form-data"
-        class="field customField animate__animated animate__fadeInLeft">
+        <form
+          id="formUpload"
+          action="/api/imgUpload"
+          method="post"
+          enctype="multipart/form-data"
+          class="field customField animate__animated animate__fadeInLeft"
+        >
           <label class="label">Alias</label>
           <div class="control">
             <input
@@ -17,8 +18,10 @@
               v-model="alias"
               placeholder="alias"
               name="alias"
-            required/>
+              required
+            />
           </div>
+          <p class="subtitle has-text-danger">{{ aliasEvaluate }}</p>
           <label class="label">Full Name</label>
           <div class="control">
             <input
@@ -26,10 +29,11 @@
               type="text"
               v-model="name"
               placeholder="Last name, First name, Extension name, Middle name"
-            required/>
+              required
+            />
           </div>
           <label class="label">Picture</label>
-          <input class="input" type="file" name="imgFile" required/>
+          <input class="input" type="file" name="imgFile" required />
           <label class="label">Specialization</label>
           <div class="control">
             <input
@@ -37,7 +41,8 @@
               type="text"
               v-model="specialist"
               placeholder="Allergist, Dermatologist, etc."
-            required/>
+              required
+            />
           </div>
           <label class="label">Username</label>
           <div class="control">
@@ -46,8 +51,10 @@
               type="text"
               v-model="username"
               placeholder="username"
-            required/>
+              required
+            />
           </div>
+          <p class="subtitle has-text-danger">{{ usernameEvaluate }}</p>
           <label class="label">Password</label>
           <div class="control">
             <input
@@ -55,9 +62,10 @@
               type="password"
               v-model="password"
               placeholder="password"
-            required/>
+              required
+            />
           </div>
-          <p class="subtitle has-text-danger"> {{ passwordMatch }} </p>
+          <p class="subtitle has-text-danger">{{ passwordMatch }}</p>
           <label class="label">Repeat Password</label>
           <div class="control">
             <input
@@ -65,9 +73,10 @@
               type="password"
               v-model="passwordRepeat"
               placeholder="repeat password"
-            required/>
+              required
+            />
           </div>
-          <p class="subtitle has-text-danger"> {{ passwordMatch }} </p>
+          <p class="subtitle has-text-danger">{{ passwordMatch }}</p>
           <button type="submit" class="button is-primary" @click="create">
             Create account
           </button>
@@ -91,12 +100,30 @@ export default {
   },
   data() {
     return {
-      passwordMatch: null
-    }
+      passwordMatch: null,
+      aliasConfirm: null,
+      usernameConfirm: null,
+      aliasEvaluate: null,
+      usernameEvaluate: null,
+      evaluateData: null,
+    };
+  },
+  async mounted() {
+    await axios
+      .get("/api/admin")
+      .then((response) => (this.evaluateData = response.data));
   },
   methods: {
-    async create() {
-      if (this.password == this.passwordRepeat) {
+    async create(e) {
+      this.aliasConfirm = this.evaluateData.find((x) => x.alias === this.alias);
+      this.usernameConfirm = this.evaluateData.find(
+        (x) => x.username === this.username
+      );
+      if (
+        this.password === this.passwordRepeat &&
+        this.aliasEvaluate == null &&
+        this.usernameEvaluate == null
+      ) {
         await axios.post("/api/admin", {
           alias: this.alias,
           name: this.name,
@@ -104,13 +131,31 @@ export default {
           username: this.username,
           password: this.password,
         });
-        this.$router.push("/login");
+        await this.$router.push("/login");
+        window.stop();
       } else {
-        let formData = document.getElementById("formUpload");
-        formData.addEventListener('submit', event => {
-          event.preventDefault();
-        });
-        this. passwordMatch = 'password do not match'
+        if ((await this.password) !== this.passwordRepeat) {
+          this.passwordMatch = "password do not match";
+          await e.preventDefault();
+        } else {
+          this.passwordMatch = null;
+        }
+        if (await this.alias) {
+          if (typeof this.aliasConfirm == "undefined") {
+            this.aliasEvaluate = null;
+          } else if ((await this.aliasConfirm.alias) === this.alias) {
+            this.aliasEvaluate = "alias already taken";
+            await e.preventDefault();
+          }
+        }
+        if (await this.username) {
+          if (typeof this.usernameConfirm == "undefined") {
+            this.usernameEvaluate = null;
+          } else if ((await this.usernameConfirm.username) === this.username) {
+            this.usernameEvaluate = "username already taken";
+            await e.preventDefault();
+          }
+        }
       }
     },
   },
