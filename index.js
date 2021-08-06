@@ -54,7 +54,7 @@ app.use('/api/admin', adminRoute)
 app.use('/session/user', sess)
 
 //file image upload
-app.post('/api/imgUpload', function(req,res){
+app.post('/api/imgUpload', async function(req,res){
     let alias;
     let imgFile;
     let uploadDir;
@@ -63,7 +63,7 @@ app.post('/api/imgUpload', function(req,res){
         return res.status(400).send('No files were uploaded.');
       }
     
-      // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+      // The name of the input field is used to retrieve the uploaded file
       alias = req.body.alias
       imgFile = req.files.imgFile;
     
@@ -71,7 +71,7 @@ app.post('/api/imgUpload', function(req,res){
       completeDir = __dirname + '/appointment-scheduler-webapp/src/assets/doctors/' + alias + '.jpg'
 
       // Use the mv() method to place the file somewhere on your server
-      imgFile.mv(uploadDir, function(err) {
+      await imgFile.mv(uploadDir, function(err) {
         if (err)
           return res.status(500).send(err);
     
