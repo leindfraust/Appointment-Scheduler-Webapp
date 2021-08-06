@@ -4,13 +4,13 @@
       <aside class="menu">
         <p class="menu-label">Hello, {{ alias }}</p>
         <figure class="media block">
-            <p class="image is-64x64">
-              <img
-                :src="require(`../assets/doctors/${alias}` + '.jpg')"
-              />
-            </p>
-          </figure>
-        <button @click="logout" class="button is-danger" type="button">Logout</button>
+          <p class="image is-64x64">
+            <img :src="require(`../assets/doctors/${alias}` + '.jpg')" />
+          </p>
+        </figure>
+        <button @click="logout" class="button is-danger" type="button">
+          Logout
+        </button>
         <ul class="menu-list">
           <li>
             <div class="field">
@@ -31,148 +31,145 @@
       </aside>
     </div>
     <div class="column">
-      <section class="hero is-info is-fullheight" style="padding: 15">
+      <section class="hero is-info is-fullheight">
         <div class="hero-body">
-          <div class="container is-widescreen is-fullhd customField">
-            <table class="table is-striped is-narrow is-fullwidth">
-              <thead>
-                <tr>
-                  <th class="subtitle has-text-black-ter">Controls</th>
-                  <th class="subtitle has-text-black-ter">Priority No.</th>
-                  <th class="subtitle has-text-black-ter">First Name</th>
-                  <th class="subtitle has-text-black-ter">Last Name</th>
-                  <th class="subtitle has-text-black-ter">Contact Number</th>
-                  <th class="subtitle has-text-black-ter">Birthday</th>
-                  <th class="subtitle has-text-black-ter">Comments</th>
-                  <th class="subtitle has-text-black-ter">Schedule</th>
-                </tr>
-              </thead>
-              <tbody
-                v-for="appointments in appointmentSched"
-                :key="appointments._id"
+          <div class="container is-widescreen is-fullhd" style="padding: 15">
+            <div
+              class="block"
+              v-for="(appointmentList, index) in appointmentSchedules"
+              :key="index"
+            >
+              <h1 class="title">Schedule: {{ index }}</h1>
+              <table
+                class="table is-striped is-narrow is-fullwidth customField"
               >
-                <tr>
-                  <button
-                    class="dropdown-item button has-text-info"
-                    type="button"
-                    @click="
-                      toggleModal(
-                        appointments.firstName,
-                        appointments.lastName,
-                        appointments.emailAdd,
-                        appointments.contactNum,
-                        appointments.birthDay,
-                        appointments.schedule,
-                        appointments._id
-                      )
-                    "
-                  >
-                    Update
-                  </button>
-                  <button
-                    class="dropdown-item button has-text-danger"
-                    type="button"
-                    @click="deleteData(appointments._id)"
-                  >
-                    Delete</button
-                  ><br />
-                  <div class="modal" :class="{ 'is-active': isActiveModal }">
-                    <div class="modal-background"></div>
-                    <div class="modal-content">
-                      <form
-                        class="field customField animate__animated animate__fadeInLeft has-text-centered"
-                      >
-                        <label class="label">First Name</label>
-                        <div class="control">
-                          <input
-                            class="input customWidth"
-                            type="text"
-                            v-model="firstName"
-                            placeholder="First Name"
-                            required
-                          />
-                        </div>
-                        <label class="label">Last Name</label>
-                        <div class="control">
-                          <input
-                            class="input customWidth"
-                            type="text"
-                            v-model="lastName"
-                            placeholder="Last Name"
-                            required
-                          />
-                        </div>
-                        <label class="label">Contact Number</label>
-                        <div class="control">
-                          <input
-                            class="input customWidth"
-                            type="number"
-                            v-model="contactNum"
-                            placeholder="Contact Number"
-                            required
-                          />
-                        </div>
-                        <label class="label">BirthDay</label>
-                        <div class="control">
-                          <input
-                            class="input customWidth"
-                            type="text"
-                            v-model="birthDay"
-                            placeholder="Birthday"
-                            required
-                          />
-                        </div>
-                        <label class="label">Schedule</label>
-                        <div class="control">
-                          <input
-                            class="input customWidth"
-                            type="text"
-                            v-model="schedule"
-                            placeholder="schedule"
-                            required
-                          />
-                        </div>
-                        <button
-                          class="button is-primary"
-                          type="button"
-                          @click="updateData"
-                        >
-                          Submit
-                        </button>
-                      </form>
-                    </div>
+                <thead>
+                  <tr>
+                    <th class="subtitle has-text-black-ter">Controls</th>
+                    <th class="subtitle has-text-black-ter">Priority No.</th>
+                    <th class="subtitle has-text-black-ter">First Name</th>
+                    <th class="subtitle has-text-black-ter">Last Name</th>
+                    <th class="subtitle has-text-black-ter">Contact Number</th>
+                    <th class="subtitle has-text-black-ter">Birthday</th>
+                    <th class="subtitle has-text-black-ter">Comments</th>
+                  </tr>
+                </thead>
+                <tbody
+                  v-for="appointments in appointmentList"
+                  :key="appointments._id"
+                >
+                  <tr :href="appointments.link" target="_blank">
                     <button
-                      class="modal-close is-large"
-                      aria-label="close"
-                      @click="toggleModal"
-                    ></button>
-                  </div>
-                  <th class="subtitle has-text-black-ter">{{ appointments.priorityNum }}</th>
-                  <td class="subtitle has-text-black-ter">
-                    {{ appointments.firstName }}
-                  </td>
-                  <td class="subtitle has-text-black-ter">
-                    {{ appointments.lastName }}
-                  </td>
-                  <td class="subtitle has-text-black-ter">
-                    {{ appointments.contactNum }}
-                  </td>
-                  <td class="subtitle has-text-black-ter">
-                    {{ appointments.birthDay}}
-                  </td>
-                  <td class="subtitle has-text-black-ter" style="width: 30%;">
-                    {{ appointments.comments}}
-                  </td>
-                  <td class="subtitle has-text-black-ter" v-for="schedules in appointments.schedule" :key="schedules.id">
-                    {{schedules.date}}
-                    <br>
-                    {{schedules.timeStart}} -
-                    <br>
-                    {{schedules.timeEnd}}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                      class="dropdown-item button has-text-info"
+                      type="button"
+                      @click="
+                        toggleModal(
+                          appointments.firstName,
+                          appointments.lastName,
+                          appointments.emailAdd,
+                          appointments.contactNum,
+                          appointments.birthDay,
+                          appointments._id
+                        )
+                      "
+                    >
+                      Update
+                    </button>
+                    <button
+                      class="dropdown-item button has-text-danger"
+                      type="button"
+                      @click="deleteData(appointments._id)"
+                    >
+                      Delete</button
+                    ><br />
+                    <div class="modal" :class="{ 'is-active': isActiveModal }">
+                      <div class="modal-background"></div>
+                      <div class="modal-content">
+                        <form
+                          class="
+                            field
+                            customField
+                            animate__animated animate__fadeInLeft
+                            has-text-centered
+                          "
+                        >
+                          <label class="label">First Name</label>
+                          <div class="control">
+                            <input
+                              class="input"
+                              type="text"
+                              v-model="firstName"
+                              placeholder="First Name"
+                              required
+                            />
+                          </div>
+                          <label class="label">Last Name</label>
+                          <div class="control">
+                            <input
+                              class="input"
+                              type="text"
+                              v-model="lastName"
+                              placeholder="Last Name"
+                              required
+                            />
+                          </div>
+                          <label class="label">Contact Number</label>
+                          <div class="control">
+                            <input
+                              class="input"
+                              type="number"
+                              v-model="contactNum"
+                              placeholder="Contact Number"
+                              required
+                            />
+                          </div>
+                          <label class="label">Birthday</label>
+                          <div class="control">
+                            <input
+                              class="input"
+                              type="text"
+                              v-model="birthDay"
+                              placeholder="Birthday"
+                              required
+                            />
+                          </div>
+                          <button
+                            class="button is-primary"
+                            type="button"
+                            @click="updateData"
+                          >
+                            Submit
+                          </button>
+                        </form>
+                      </div>
+                      <button
+                        class="modal-close is-large"
+                        aria-label="close"
+                        @click="toggleModal"
+                      ></button>
+                    </div>
+                    <th class="subtitle has-text-black-ter">
+                      {{ appointments.priorityNum }}
+                    </th>
+                    <td class="subtitle has-text-black-ter">
+                      {{ appointments.firstName }}
+                    </td>
+                    <td class="subtitle has-text-black-ter">
+                      {{ appointments.lastName }}
+                    </td>
+                    <td class="subtitle has-text-black-ter">
+                      {{ appointments.contactNum }}
+                    </td>
+                    <td class="subtitle has-text-black-ter">
+                      {{ appointments.birthDay }}
+                    </td>
+                    <td class="subtitle has-text-black-ter" style="width: 30%">
+                      {{ appointments.comments }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
@@ -183,7 +180,7 @@
 <script>
 import axios from "axios";
 import store from "../store";
-import { mapState } from "vuex";
+import lodash from "lodash";
 
 export default {
   name: "Admin",
@@ -196,23 +193,43 @@ export default {
       lastName: null,
       birthDay: null,
       contactNum: null,
-      searchBar: null,
-      schedule: null
+      searchBar: "",
+      schedule: null,
+      appointmentSched: [],
     };
   },
-  computed: mapState(["appointmentSched"]),
-  mounted() {
-    this.$store.dispatch("appointmentItems");
+  computed: {
+    appointmentSchedules() {
+      return _.groupBy(
+        this.appointmentSched.filter((x) => {
+          return (
+            x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
+            x.lastName.toLowerCase().includes(this.searchBar.toLowerCase())
+          );
+        }),
+        "schedule[0].date"
+      );
+    },
+  },
+  async mounted() {
+    await axios
+      .get("/api/appointmentList")
+      .then(
+        (response) =>
+          (this.appointmentSched = response.data.filter(
+            (x) => x.doctor === store.state.userID
+          ))
+      );
   },
   methods: {
-    async logout(){
-      store.commit("alias", null)
-      await axios.delete('/session/user')
-      await this.$router.push('/login')
+    async logout() {
+      store.commit("alias", null);
+      await axios.delete("/session/user");
+      await this.$router.push("/login");
     },
     async deleteData(_id) {
       await axios.delete(`/api/appointmentList/${_id}`);
-      await this.$store.dispatch("appointmentItems");
+      location.reload();
     },
     async updateData() {
       await axios.put(`/api/appointmentList/${this.id}`, {
@@ -223,7 +240,7 @@ export default {
         birthDay: this.birthDay,
         schedule: this.schedule,
       });
-      await this.$store.dispatch("appointmentItems");
+      location.reload();
       this.isActiveModal = !this.isActiveModal;
     },
     async toggleModal(
@@ -232,7 +249,6 @@ export default {
       emailAdd,
       contactNum,
       birthDay,
-      schedule,
       _id
     ) {
       this.isActiveModal = !this.isActiveModal;
@@ -241,14 +257,23 @@ export default {
       this.emailAddress = emailAdd;
       this.contactNum = contactNum;
       this.birthDay = birthDay;
-      this.schedule = schedule;
       this.id = _id;
     },
     async routeHome() {
-      await this.$router.push(`/admin/user/${this.alias}`)
+      await this.$router.push(`/admin/user/${this.alias}`);
     },
-    async openSchedule(){
-      await this.$router.push(`/admin/user/${this.alias}/schedule`)
+    async openSchedule() {
+      await this.$router.push(`/admin/user/${this.alias}/schedule`);
+    },
+    groupby(array, key) {
+      const result = {};
+      array.forEach((item) => {
+        if (!result[item[key]]) {
+          result[item[key]] = [];
+        }
+        result[item[key]].push(item);
+      });
+      return result;
     },
   },
 };
@@ -257,12 +282,7 @@ export default {
 <style scoped>
 .customField {
   padding: 1%;
-  margin: auto;
   border-radius: 15px;
-  width: 100%;
-}
-.customWidth {
-  width: 50%;
 }
 .customField,
 .table {
@@ -270,14 +290,17 @@ export default {
 }
 th {
   font-weight: bold;
-  font-size: 18px !important;
-  max-width: 1000px !important;
+}
+.modal input {
+  width: 300px !important;
 }
 @media (max-width: 991.98px) {
-  .customField,
-  table {
-    width: 600% !important;
-    overflow: auto;
+  section {
+    width: 991.98px;
+    overflow: scroll;
+  }
+  .modal input {
+    width: 300px !important;
   }
 }
 </style>
