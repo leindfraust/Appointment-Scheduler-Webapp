@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Admin = require('../../model/adminList');
+const fs = require('fs')
 
 router.get('/', async (req, res) => {
     try {
@@ -52,6 +53,7 @@ router.delete('/:id', async (req, res) => {
     } = req.params
     try {
         const removed = await Admin.findByIdAndDelete(id)
+
         if (!removed) throw new Error('something went wrong, try again later')
         res.status(200).json(removed)
     } catch (err) {
