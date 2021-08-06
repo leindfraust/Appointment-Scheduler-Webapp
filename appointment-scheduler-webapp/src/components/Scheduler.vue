@@ -83,9 +83,9 @@
             >
               <div class="card-content">
                 <div class="content">
-                  <p class="subtitle has-text-black">{{ index + 1 }}</p>
-                  <p class="sbuttile">{{ schedules.date }}</p>
-                  <p class="subtitle has-text-black">{{ schedules.timeStart }} - {{ schedules.timeEnd }}</p>
+                  <p class="subtitle has-text-black has-text-left">Schedule No. {{ index + 1 }}</p>
+                  <p class="is-size-3 has-text-black">{{ schedules.date }}</p>
+                  <p class="title is-size-3 has-text-black">{{ schedules.timeStart }} - {{ schedules.timeEnd }}</p>
                 </div>
               </div>
             </div>
