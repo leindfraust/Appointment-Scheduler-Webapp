@@ -10,13 +10,9 @@ const store = createStore({
         alias: '',
         doctorSched: [],
         userID: null,
-        appointmentSched: [],
     },
     getters: {
         getStatusAvail: state => state.statusAvailability,
-        appointmentSched: state => {
-            return state.appointmentSched
-        },
     },
     mutations: {
         alias(state, alias) {
@@ -31,21 +27,7 @@ const store = createStore({
         statusTrue(state) {
             state.statusAvailability = true;
         },
-        appointmentList(state, appointmentSched) {
-            state.appointmentSched = appointmentSched
-        },
     },
-    actions: {
-        appointmentItems({
-            commit
-        }) {
-            axios.get('/api/appointmentList')
-                .then(response => response.data.filter(x => x.doctor === store.state.userID))
-                .then(appointmentSched => {
-                    commit('appointmentList', appointmentSched)
-                });
-        },
-    }
 });
 
 export default store
