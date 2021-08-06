@@ -121,9 +121,9 @@ export default {
         .then(
           (response) =>
             (this.priorityNum =
-              response.data.filter((e) => e.doctor === this.doctor).length + 1)
-        );
-      if (
+              response.data.filter((e) => e.schedule[0].date === this.schedule.date && e.doctor === this.doctor).length + 1)
+        )
+       if (
         this.firstName != null &&
         this.lastName != null &&
         this.contactNum != null
@@ -139,7 +139,7 @@ export default {
           priorityNum: this.priorityNum,
         });
         await this.$router.push('/doctors')
-      }
+      } 
     },
     pickSched(sched) {
       this.schedule = sched;
