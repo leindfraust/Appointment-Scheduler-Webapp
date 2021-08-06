@@ -265,16 +265,6 @@ export default {
     async openSchedule() {
       await this.$router.push(`/admin/user/${this.alias}/schedule`);
     },
-    groupby(array, key) {
-      const result = {};
-      array.forEach((item) => {
-        if (!result[item[key]]) {
-          result[item[key]] = [];
-        }
-        result[item[key]].push(item);
-      });
-      return result;
-    },
   },
 };
 </script>
