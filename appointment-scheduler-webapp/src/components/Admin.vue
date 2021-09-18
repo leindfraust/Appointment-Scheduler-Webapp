@@ -25,7 +25,7 @@
             </div>
           </li>
           <li><a @click="routeHome">Home</a></li>
-          <li><a>Profile</a></li>
+          <li><a @click="profile">Profile</a></li>
           <li><a @click="openSchedule">Schedule</a></li>
         </ul>
       </aside>
@@ -73,7 +73,7 @@
                         )
                       "
                     >
-                      Update
+                      Edit
                     </button>
                     <button
                       class="dropdown-item button has-text-danger"
@@ -180,7 +180,7 @@
 <script>
 import axios from "axios";
 import store from "../store";
-import lodash from "lodash";
+import lodash from 'lodash'
 
 export default {
   name: "Admin",
@@ -238,7 +238,6 @@ export default {
         emailAdd: this.emailAddress,
         contactNum: this.contactNum,
         birthDay: this.birthDay,
-        schedule: this.schedule,
       });
       location.reload();
       this.isActiveModal = !this.isActiveModal;
@@ -261,6 +260,9 @@ export default {
     },
     async routeHome() {
       await this.$router.push(`/admin/user/${this.alias}`);
+    },
+    async profile() {
+      await this.$router.push(`/admin/user/${this.alias}/profile`)
     },
     async openSchedule() {
       await this.$router.push(`/admin/user/${this.alias}/schedule`);
