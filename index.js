@@ -62,6 +62,7 @@ app.post('/api/imgUpload',function(req,res){
     let alias;
     let imgFile;
     let uploadDir;
+    let completeDir;
 
     if (!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send('No files were uploaded.');
