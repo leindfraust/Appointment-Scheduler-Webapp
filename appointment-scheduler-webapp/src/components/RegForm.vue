@@ -88,7 +88,9 @@
               >
             </div>
           </div>
-          <button type="button" class="button is-primary" @click="appoint">Submit</button>
+          <button type="button" class="button is-primary" @click="appoint">
+            Submit
+          </button>
         </form>
       </div>
     </div>
@@ -112,7 +114,18 @@ export default {
       contactNum: null,
       schedule: null,
       priorityNum: null,
+      doctorDetails: null,
     };
+  },
+  mounted() {
+    axios
+      .get("/api/admin")
+      .then(
+        (response) =>
+          (this.doctorDetails = response.data.find(
+            (x) => x._id === this.doctor
+          ))
+      );
   },
   methods: {
     async appoint() {
@@ -121,9 +134,13 @@ export default {
         .then(
           (response) =>
             (this.priorityNum =
-              response.data.filter((e) => e.schedule[0].date === this.schedule.date && e.doctor === this.doctor).length + 1)
-        )
-       if (
+              response.data.filter(
+                (e) =>
+                  e.schedule[0].date === this.schedule.date &&
+                  e.doctor === this.doctor
+              ).length + 1)
+        );
+      if (
         this.firstName != null &&
         this.lastName != null &&
         this.contactNum != null
@@ -138,8 +155,19 @@ export default {
           schedule: this.schedule,
           priorityNum: this.priorityNum,
         });
-        await this.$router.push('/doctors')
-      } 
+        let patientDetails = {
+          doctor: this.doctorDetails.name,
+          firstName: this.firstName,
+          lastName: this.lastName,
+          contactNum: this.contactNum,
+          birthDay: this.birthDay.toLocaleDateString(),
+          comments: this.comments,
+          schedule: this.schedule,
+          priorityNum: this.priorityNum,
+        };
+        store.commit("patientDetails", patientDetails);
+        await this.$router.push("/success");
+      }
     },
     pickSched(sched) {
       this.schedule = sched;
