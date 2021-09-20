@@ -78,7 +78,7 @@ export default {
   methods: {
     async onSubmit(e) {
       if(e )
-      setTimeout(() => location.reload(), 1000)
+      await setTimeout(() => location.reload(), 1000)
     },
     async updateFullName() {
       await axios.put(`/api/admin/${this.id}`, {
