@@ -3,7 +3,9 @@ const session = require('express-session');
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
 const MongoStore = require('connect-mongo');
+const history = require('connect-history-api-fallback');
 const app = express();
+const path = require('path');
 const mongoose = require('mongoose');
 const {
     PORT,
@@ -23,7 +25,10 @@ app.use(cors());
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(fileUpload());
+app.use(history())
+app.use(express.static(path.join(__dirname, 'appointment-scheduler-webapp/dist')))
 
+//connect to mongoDB
 const dbConnect = async () => {
     await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
@@ -33,6 +38,7 @@ const dbConnect = async () => {
 
 dbConnect().then(() => console.log('MongoDB online')).catch((err) => console.log(err))
 
+//use sessions
 app.use(session({
     secret: 'leindfraust',
     resave: false,
@@ -83,6 +89,11 @@ app.post('/api/imgUpload',function(req,res){
     });
 });
 
+app.get('/' , (req , res)=>{
+
+   res.sendFile(path.join(__dirname, 'appointment-scheduler-webapp/dist/index.html'))
+
+})
 
 app.listen(PORT, () => {
     console.log(`listening to ${PORT}`);

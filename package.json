@@ -11,12 +11,13 @@
   "author": "Leindfraust",
   "license": "ISC",
   "dependencies": {
-    "connect-mongo": "^4.5.0",
+    "connect-history-api-fallback": "^1.6.0",
+    "connect-mongo": "^4.6.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.1",
     "express-session": "^1.17.2",
-    "mongoose": "^6.0.3",
+    "mongoose": "^6.0.6",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
