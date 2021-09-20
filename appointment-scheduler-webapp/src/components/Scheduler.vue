@@ -14,20 +14,8 @@
           Logout
         </button>
         <ul class="menu-list">
-          <li>
-            <div class="field">
-              <div class="control">
-                <input
-                  class="input"
-                  type="text"
-                  v-model="searchBar"
-                  placeholder="Search..."
-                />
-              </div>
-            </div>
-          </li>
           <li><a @click="routeHome">Home</a></li>
-          <li><a>Profile</a></li>
+          <li><a @click="profile">Profile</a></li>
           <li><a @click="openSchedule">Schedule</a></li>
         </ul>
       </aside>
@@ -167,7 +155,7 @@ export default {
       await axios.put("/session/user", {
         schedule: this.days,
       });
-      location.reload();
+      await this.$router.push(`/admin/user/${this.alias}`)
     },
     async logout() {
       store.commit("alias", null);
@@ -176,6 +164,9 @@ export default {
     },
     async routeHome() {
       await this.$router.push(`/admin/user/${this.alias}`)
+    },
+    async profile() {
+      await this.$router.push(`/admin/user/${this.alias}/profile`)
     },
     async openSchedule(){
       await this.$router.push(`/admin/user/${this.alias}/schedule`)
