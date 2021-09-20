@@ -4,7 +4,6 @@
       <div class="container">
         <!-- I know it sucks, having a form action for only image upload while separating a post with axios for the document, but shit works so I guess it's okay.-->
         <form
-          id="formUpload"
           action="/api/imgUpload"
           method="post"
           enctype="multipart/form-data"
@@ -33,17 +32,24 @@
             />
           </div>
           <label class="label">Picture</label>
-          <input class="input" type="file" name="imgFile" required />
-          <label class="label">Specialization</label>
-          <div class="control">
-            <input
-              class="input"
-              type="text"
-              v-model="specialist"
-              placeholder="Allergist, Dermatologist, etc."
-              required
-            />
-          </div>
+          <input
+            class="input"
+            type="file"
+            name="imgFile"
+            required
+          /><br /><br />
+          <label class="label">Specialization</label><br>
+            <div class="control">
+              <label class="radio has-text-black" v-for="special in specializations" :key="special._id">
+                <input
+                  type="radio"
+                  required
+                  name="specialist"
+                  @click="pickSpecial(special.specialization)"
+                />{{ special.specialization }}
+              </label>
+            </div>
+          <br />
           <label class="label">Username</label>
           <div class="control">
             <input
@@ -88,12 +94,12 @@
 
 <script>
 import axios from "axios";
+import store from "../store";
 export default {
   name: "SignUp",
   props: {
     alias: String,
     name: String,
-    specialist: String,
     username: String,
     password: String,
     passwordRepeat: String,
@@ -106,6 +112,8 @@ export default {
       aliasEvaluate: null,
       usernameEvaluate: null,
       evaluateData: null,
+      specialist: null,
+      specializations: store.state.specialistList,
     };
   },
   async mounted() {
@@ -114,6 +122,9 @@ export default {
       .then((response) => (this.evaluateData = response.data));
   },
   methods: {
+    pickSpecial(special) {
+      this.specialist = special;
+    },
     async create(e) {
       this.aliasConfirm = this.evaluateData.find((x) => x.alias === this.alias);
       this.usernameConfirm = this.evaluateData.find(
@@ -132,7 +143,6 @@ export default {
           password: this.password,
         });
         await this.$router.push("/login");
-        window.stop();
       } else {
         if ((await this.password) !== this.passwordRepeat) {
           this.passwordMatch = "password do not match";
