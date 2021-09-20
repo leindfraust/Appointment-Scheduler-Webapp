@@ -1,4 +1,3 @@
-import axios from 'axios';
 import {
     createStore
 } from 'vuex'
@@ -10,6 +9,8 @@ const store = createStore({
         alias: '',
         doctorSched: [],
         userID: null,
+        specialistList: [],
+        patientDetails: [],
     },
     getters: {
         getStatusAvail: state => state.statusAvailability,
@@ -27,6 +28,12 @@ const store = createStore({
         statusTrue(state) {
             state.statusAvailability = true;
         },
+        specialistList(state, specialistList) {
+            state.specialistList = specialistList
+        },
+        patientDetails(state, patientDetails) {
+            state.patientDetails = patientDetails
+        }
     },
 });
 
