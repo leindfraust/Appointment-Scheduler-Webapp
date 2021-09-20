@@ -102,6 +102,17 @@ router.beforeEach((to, from, next) => {
 });
 
 router.beforeEach((to, from, next) => {
+    if (to.matched.some(route => route.meta.requiresAuth)) {
+        if (store.state.alias) {
+            return next();
+        } else {
+            return next('/login');
+        }
+    }
+    next();
+});
+
+router.beforeEach((to, from, next) => {
     if (to.matched.some(route => route.meta.requireProcess)) {
         if (store.state.statusAvailability) {
             return next();
