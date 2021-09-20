@@ -10,6 +10,8 @@ import LoginAdmin from '../views/LoginAdmin.vue'
 import Admin from '../components/Admin.vue'
 import SignUpAdmin from '../views/SignUpAdmin.vue'
 import Scheduler from '../components/Scheduler.vue'
+import userProfile from '../components/Profile.vue'
+import DoctorPickSuccess from '../components/DoctorPickSuccess.vue'
 
     const routes = [{
         path: '/',
@@ -20,6 +22,14 @@ import Scheduler from '../components/Scheduler.vue'
         path: '/doctors',
         name: 'DoctorList',
         component: DoctorList,
+    },
+    {
+        path: '/success',
+        name: 'pickDoctorSuccess',
+        component: DoctorPickSuccess,
+        meta: {
+            requireSuccessPickDoctor: true
+        },
     },
     {
         path: '/registration',
@@ -54,6 +64,14 @@ import Scheduler from '../components/Scheduler.vue'
         meta: {
             requiresAuth: true
         },
+    },
+    {
+        path: '/admin/user/:user/profile',
+        name: 'userProfile',
+        component: userProfile,
+        meta: {
+            requiresAuth: true
+        },
     }
 ]
 const router = createRouter({
@@ -73,14 +91,25 @@ router.beforeEach((to, from, next) => {
 }); 
 
 router.beforeEach((to, from, next) => {
-    if (to.matched.some(route => route.meta.requiresAuth)) {
-        if (store.state.alias) {
+    if (to.matched.some(route => route.meta.requireSuccessPickDoctor)) {
+        if (store.state.userID) {
             return next();
         } else {
-            return next('/login');
+            return next('/registration');
         }
     }
     next();
 });
+
+router.beforeEach((to, from, next) => {
+    if (to.matched.some(route => route.meta.requireProcess)) {
+        if (store.state.statusAvailability) {
+            return next();
+        } else {
+            return next('/doctors');
+        }
+    }
+    next();
+}); 
 
 export default router
