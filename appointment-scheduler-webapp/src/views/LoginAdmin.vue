@@ -38,8 +38,8 @@
           <button type="button" class="button is-primary" @click="login">
             Login
           </button>
-          <router-link to="/admin/signup" class="signup button is-danger"
-            >Sign Up</router-link
+          <a @click="signup" class="signup button is-danger"
+            >Sign Up</a
           >
         </form>
       </div>
@@ -60,6 +60,7 @@ export default {
       userAdmin: null,
       incorrectUserPass: Boolean,
       validateMessage: "",
+      specializations: null
     };
   },
   async mounted() {
@@ -99,6 +100,7 @@ export default {
           await axios.post("/session/user", {
             _id: this.userAdmin._id,
             alias: this.userAdmin.alias,
+            fullname: this.userAdmin.name,
             username: this.username,
             password: this.password,
             schedule: this.userAdmin.schedule
@@ -110,6 +112,12 @@ export default {
           this.password = null;
         }
       }
+    },
+    async signup(){
+      await axios.get("/api/specialistList")
+      .then(response => this.specializations = response.data)
+      store.commit("specialistList", this.specializations)
+      await this.$router.push("/admin/signup")
     },
   },
 };
