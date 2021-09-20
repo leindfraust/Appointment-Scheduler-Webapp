@@ -25,11 +25,9 @@ app.use(express.json());
 app.use(fileUpload());
 
 const dbConnect = async () => {
-    await mongoose.connect(encodeURI(mongoUri), {
+    await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
-        useCreateIndex: true,
         useUnifiedTopology: true,
-        useFindAndModify: false
     })
 };
 
@@ -54,7 +52,7 @@ app.use('/api/admin', adminRoute)
 app.use('/session/user', sess)
 
 //file image upload
-app.post('/api/imgUpload', async function(req,res){
+app.post('/api/imgUpload',function(req,res){
     let alias;
     let imgFile;
     let uploadDir;
@@ -71,14 +69,17 @@ app.post('/api/imgUpload', async function(req,res){
       completeDir = __dirname + '/appointment-scheduler-webapp/src/assets/doctors/' + alias + '.jpg'
 
       // Use the mv() method to place the file somewhere on your server
-      await imgFile.mv(uploadDir, function(err) {
+      imgFile.mv(uploadDir, function(err) {
         if (err)
           return res.status(500).send(err);
     
         res.status(200);
       });
+
+      //rename uploaded image file to assigned alias
       fs.rename(uploadDir, completeDir, (err) => {
         if(err) throw err
+        res.status(200);
     });
 });
 
