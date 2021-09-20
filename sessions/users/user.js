@@ -8,6 +8,7 @@ router.get('/',(req, res) => {
 router.post('/', (req, res) => {
     req.session._id = req.body._id
     req.session.alias = req.body.alias
+    req.session.fullname = req.body.fullname
     req.session.username = req.body.username
     req.session.password = req.body.password
     req.session.schedule = req.body.schedule
@@ -15,6 +16,7 @@ router.post('/', (req, res) => {
 });
 
 router.put('/', (req, res) => {
+    req.session.fullname = req.body.fullname
     req.session.schedule = req.body.schedule
     res.end()
 })
