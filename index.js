@@ -82,9 +82,10 @@ app.post('/api/imgUpload', function (req, res, next) {
             format: "jpg"
         }, function (error, result){console.log(result,error); });
     });
-    res.status(200).send(
+    res.status(200)
+    /* .send(
         '<h1 style="margin: 0 auto; margin-top:20%; display: table;">Profile image changed successfully, changes may take few minutes up to hours to take effect.</h1><h1 style="margin: 0 auto; display:table"> Redirecting browser in 15 seconds.</h1><h1 style="margin: 0 auto; display: table;">If the page does not load automatically after 15 seconds, click <a href="/login">here</a>.</h1><script>setTimeout(() => {window.location.href="/login"}, 15000)</script>'
-        );
+        ); */
 });
 app.get('/', (req, res) => {
 
