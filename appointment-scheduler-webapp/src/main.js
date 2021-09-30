@@ -15,4 +15,4 @@ createApp(App)
     .use(router)
     .use(store)
     .use(VueAxios, axios)
-    .mount('#app')
+    .mount('#app');
