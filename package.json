@@ -12,14 +12,18 @@
   "author": "Leindfraust",
   "license": "ISC",
   "dependencies": {
+    "cloudinary": "^1.27.0",
     "connect-history-api-fallback": "^1.6.0",
     "connect-mongo": "^4.6.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.1",
+    "express-formidable": "^1.2.0",
     "express-session": "^1.17.2",
+    "formidable": "^1.2.2",
     "mongoose": "^6.0.6",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "util": "^0.12.4"
   },
   "devDependencies": {
     "concurrently": "^6.2.1",
