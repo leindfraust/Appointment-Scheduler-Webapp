@@ -66,9 +66,9 @@ app.use('/api/admin', adminRoute)
 app.use('/session/user', sess)
 
 //doctor image upload
-app.post('/api/imgUpload', function (req, res, next) {
+app.post('/api/imgUpload',async function(req, res, next) {
 
-    const form = new formidable()
+    const form = await new formidable()
     form.parse(req, (err, fields, files) => {
         if (err) {
             next(err);
