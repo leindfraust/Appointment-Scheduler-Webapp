@@ -4,11 +4,7 @@
       <aside class="menu">
         <p class="menu-label">Hello, {{ alias }}</p>
         <figure class="media block">
-            <p class="image is-64x64">
-              <img
-                :src="require(`../assets/doctors/${alias}` + '.jpg')"
-              />
-            </p>
+            <span class="image is-128x128" v-html="profileImg"></span>
           </figure>
         <button @click="logout" class="button is-danger" type="button">
           Logout
@@ -87,12 +83,14 @@
 <script>
 import axios from "axios";
 import store from "../store";
+import cld from "../cloudinary"
 
 export default {
   name: "Scheduler",
   data() {
     return {
       alias: store.state.alias,
+      profileImg: store.state.profileImg,
       userID: "",
       date: new Date(),
       timeStart: new Date(),
