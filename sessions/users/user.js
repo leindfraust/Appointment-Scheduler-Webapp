@@ -12,13 +12,26 @@ router.post('/', (req, res) => {
     req.session.username = req.body.username
     req.session.password = req.body.password
     req.session.schedule = req.body.schedule
-    res.end()
+    req.session.save((err) => {
+        if (err) {
+            return next(err);
+        }
+    });
+    res.status(200).send('OK');
 });
 
 router.put('/', (req, res) => {
-    req.session.fullname = req.body.fullname
-    req.session.schedule = req.body.schedule
-    res.end()
+    req.session.alias = req.body.alias || req.session.alias
+    req.session.fullname = req.body.fullname || req.session.fullname
+    req.session.username = req.body.username || req.session.username
+    req.session.password = req.body.password || req.session.password
+    req.session.schedule = req.body.schedule || req.session.schedule
+    req.session.save((err) => {
+        if (err) {
+            return next(err);
+        }
+    });
+    res.status(200).send('OK');
 })
 router.delete('/', (req, res) => {
     req.session.destroy()
