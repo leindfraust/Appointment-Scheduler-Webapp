@@ -82,7 +82,7 @@ app.post('/api/imgUpload',async function(req, res, next) {
             format: "jpg"
         }, function (error, result){console.log(result,error); });
     });
-    res.status(200).redirect('/imgUploadSuccess')
+    setTimeout(() => {res.status(200).redirect('/imgUploadSuccess')}, 5000)
 });
 app.get('/', (req, res) => {
 
