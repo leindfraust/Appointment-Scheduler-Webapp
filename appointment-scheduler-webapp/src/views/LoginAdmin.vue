@@ -50,7 +50,7 @@
 <script>
 import store from "../store";
 import axios from "axios";
-
+import cld from "../cloudinary"
 export default {
   name: "Login",
   data() {
@@ -60,7 +60,8 @@ export default {
       userAdmin: null,
       incorrectUserPass: Boolean,
       validateMessage: "",
-      specializations: null
+      specializations: null,
+      profileImg: null
     };
   },
   async mounted() {
@@ -73,6 +74,7 @@ export default {
       if(await this.userAdmin.alias){
         store.commit("alias", this.userAdmin.alias)
         store.commit("userID", this.userAdmin._id)
+        store.commit("profileImg", cld.imageTag(`assets/doctors/${this.userAdmin.alias}.jpg`).toHtml())
         await this.$router.push(`/admin/user/${this.userAdmin.alias}`);
       }
   },
@@ -96,6 +98,7 @@ export default {
         if (await this.userAdmin) {
           store.commit("alias", this.userAdmin.alias)
           store.commit("userID", this.userAdmin._id)
+          store.commit("profileImg", cld.imageTag(`assets/doctors/${this.userAdmin.alias}.jpg`).toHtml())
           await this.$router.push(`/admin/user/${this.userAdmin.alias}`);
           await axios.post("/session/user", {
             _id: this.userAdmin._id,
