@@ -11,6 +11,7 @@ const store = createStore({
         userID: null,
         specialistList: [],
         patientDetails: [],
+        profileImg: null,
     },
     getters: {
         getStatusAvail: state => state.statusAvailability,
@@ -33,6 +34,9 @@ const store = createStore({
         },
         patientDetails(state, patientDetails) {
             state.patientDetails = patientDetails
+        },
+        profileImg(state, profileImg) {
+            state.profileImg = profileImg
         }
     },
 });
