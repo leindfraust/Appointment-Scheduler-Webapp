@@ -28,9 +28,7 @@
         <div class="media">
           <figure class="media-left">
             <p class="image is-64x64">
-              <img
-                :src="require(`../assets/doctors/${doctors.alias}` + '.jpg')"
-              />
+              <img :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${doctors.alias}.jpg`">
             </p>
           </figure>
           <div class="media-content">
@@ -68,8 +66,8 @@ export default {
       .then((response) => (this.specialistList = response.data));
   },
   methods: {
-    getDoctors(specialization) {
-      axios
+    async getDoctors(specialization) {
+      await axios
         .get("/api/admin")
         .then(
           (response) =>
