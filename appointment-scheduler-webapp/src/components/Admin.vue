@@ -4,29 +4,26 @@
       <aside class="menu">
         <p class="menu-label">Hello, {{ alias }}</p>
         <figure class="media block">
-          <p class="image is-64x64">
-            <img :src="require(`../assets/doctors/${alias}` + '.jpg')" />
-          </p>
+          <span class="image is-128x128" v-html="profileImg"></span>
         </figure>
-        <button @click="logout" class="button is-danger" type="button">
-          Logout
-        </button>
+        <button @click="logout" class="button is-danger" type="button">Logout</button>
         <ul class="menu-list">
           <li>
             <div class="field">
               <div class="control">
-                <input
-                  class="input"
-                  type="text"
-                  v-model="searchBar"
-                  placeholder="Search..."
-                />
+                <input class="input" type="text" v-model="searchBar" placeholder="Search..." />
               </div>
             </div>
           </li>
-          <li><a @click="routeHome">Home</a></li>
-          <li><a @click="profile">Profile</a></li>
-          <li><a @click="openSchedule">Schedule</a></li>
+          <li>
+            <a @click="routeHome">Home</a>
+          </li>
+          <li>
+            <a @click="profile">Profile</a>
+          </li>
+          <li>
+            <a @click="openSchedule">Schedule</a>
+          </li>
         </ul>
       </aside>
     </div>
@@ -40,9 +37,7 @@
               :key="index"
             >
               <h1 class="title">Schedule: {{ index }}</h1>
-              <table
-                class="table is-striped is-narrow is-fullwidth customField"
-              >
+              <table class="table is-striped is-narrow is-fullwidth customField">
                 <thead>
                   <tr>
                     <th class="subtitle has-text-black-ter">Controls</th>
@@ -54,44 +49,33 @@
                     <th class="subtitle has-text-black-ter">Comments</th>
                   </tr>
                 </thead>
-                <tbody
-                  v-for="appointments in appointmentList"
-                  :key="appointments._id"
-                >
+                <tbody v-for="appointments in appointmentList" :key="appointments._id">
                   <tr :href="appointments.link" target="_blank">
                     <button
                       class="dropdown-item button has-text-info"
                       type="button"
                       @click="
-                        toggleModal(
-                          appointments.firstName,
-                          appointments.lastName,
-                          appointments.emailAdd,
-                          appointments.contactNum,
-                          appointments.birthDay,
-                          appointments._id
-                        )
+                      toggleModal(
+                        appointments.firstName,
+                        appointments.lastName,
+                        appointments.emailAdd,
+                        appointments.contactNum,
+                        appointments.birthDay,
+                        appointments._id
+                      )
                       "
-                    >
-                      Edit
-                    </button>
+                    >Edit</button>
                     <button
                       class="dropdown-item button has-text-danger"
                       type="button"
                       @click="deleteData(appointments._id)"
-                    >
-                      Delete</button
-                    ><br />
+                    >Delete</button>
+                    <br />
                     <div class="modal" :class="{ 'is-active': isActiveModal }">
                       <div class="modal-background"></div>
                       <div class="modal-content">
                         <form
-                          class="
-                            field
-                            customField
-                            animate__animated animate__fadeInLeft
-                            has-text-centered
-                          "
+                          class="field customField animate__animated animate__fadeInLeft has-text-centered"
                         >
                           <label class="label">First Name</label>
                           <div class="control">
@@ -133,39 +117,20 @@
                               required
                             />
                           </div>
-                          <button
-                            class="button is-primary"
-                            type="button"
-                            @click="updateData"
-                          >
-                            Submit
-                          </button>
+                          <button class="button is-primary" type="button" @click="updateData">Submit</button>
                         </form>
                       </div>
-                      <button
-                        class="modal-close is-large"
-                        aria-label="close"
-                        @click="toggleModal"
-                      ></button>
+                      <button class="modal-close is-large" aria-label="close" @click="toggleModal"></button>
                     </div>
-                    <th class="subtitle has-text-black-ter">
-                      {{ appointments.priorityNum }}
-                    </th>
-                    <td class="subtitle has-text-black-ter">
-                      {{ appointments.firstName }}
-                    </td>
-                    <td class="subtitle has-text-black-ter">
-                      {{ appointments.lastName }}
-                    </td>
-                    <td class="subtitle has-text-black-ter">
-                      {{ appointments.contactNum }}
-                    </td>
-                    <td class="subtitle has-text-black-ter">
-                      {{ appointments.birthDay }}
-                    </td>
-                    <td class="subtitle has-text-black-ter" style="width: 30%">
-                      {{ appointments.comments }}
-                    </td>
+                    <th class="subtitle has-text-black-ter">{{ appointments.priorityNum }}</th>
+                    <td class="subtitle has-text-black-ter">{{ appointments.firstName }}</td>
+                    <td class="subtitle has-text-black-ter">{{ appointments.lastName }}</td>
+                    <td class="subtitle has-text-black-ter">{{ appointments.contactNum }}</td>
+                    <td class="subtitle has-text-black-ter">{{ appointments.birthDay }}</td>
+                    <td
+                      class="subtitle has-text-black-ter"
+                      style="width: 30%"
+                    >{{ appointments.comments }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -181,12 +146,14 @@
 import axios from "axios";
 import store from "../store";
 import lodash from 'lodash'
+import cld from '../cloudinary'
 
 export default {
   name: "Admin",
   data() {
     return {
       alias: store.state.alias,
+      profileImg: store.state.profileImg,
       isActiveModal: false,
       id: null,
       firstName: null,
@@ -216,9 +183,9 @@ export default {
       .get("/api/appointmentList")
       .then(
         (response) =>
-          (this.appointmentSched = response.data.filter(
-            (x) => x.doctor === store.state.userID
-          ))
+        (this.appointmentSched = response.data.filter(
+          (x) => x.doctor === store.state.userID
+        ))
       );
   },
   methods: {
@@ -229,7 +196,14 @@ export default {
     },
     async deleteData(_id) {
       await axios.delete(`/api/appointmentList/${_id}`);
-      location.reload();
+      await axios
+        .get("/api/appointmentList")
+        .then(
+          (response) =>
+          (this.appointmentSched = response.data.filter(
+            (x) => x.doctor === store.state.userID
+          ))
+        );
     },
     async updateData() {
       await axios.put(`/api/appointmentList/${this.id}`, {
@@ -239,7 +213,14 @@ export default {
         contactNum: this.contactNum,
         birthDay: this.birthDay,
       });
-      location.reload();
+      await axios
+        .get("/api/appointmentList")
+        .then(
+          (response) =>
+          (this.appointmentSched = response.data.filter(
+            (x) => x.doctor === store.state.userID
+          ))
+        );
       this.isActiveModal = !this.isActiveModal;
     },
     async toggleModal(
