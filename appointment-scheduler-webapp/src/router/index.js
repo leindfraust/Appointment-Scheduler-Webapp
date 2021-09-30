@@ -12,6 +12,7 @@ import SignUpAdmin from '../views/SignUpAdmin.vue'
 import Scheduler from '../components/Scheduler.vue'
 import userProfile from '../components/Profile.vue'
 import DoctorPickSuccess from '../components/DoctorPickSuccess.vue'
+import ImageUploadSuccess from '../views/ImageUploadSuccess'
 
     const routes = [{
         path: '/',
@@ -72,6 +73,14 @@ import DoctorPickSuccess from '../components/DoctorPickSuccess.vue'
         meta: {
             requiresAuth: true
         },
+    },
+    {
+        path: '/imgUploadSuccess',
+        name :'imgUploadSuccess',
+        component: ImageUploadSuccess,
+        meta: {
+            requireImgUploadSuccess: true
+        }
     }
 ]
 const router = createRouter({
@@ -89,6 +98,17 @@ router.beforeEach((to, from, next) => {
     }
     next();
 }); 
+
+router.beforeEach((to, from, next) => {
+    if (to.matched.some(route => route.meta.requireImgUploadSucess)) {
+        if (store.state.imgSuccess) {
+            return next();
+        } else {
+            return next('/login');
+        }
+    }
+    next();
+});
 
 router.beforeEach((to, from, next) => {
     if (to.matched.some(route => route.meta.requireSuccessPickDoctor)) {
