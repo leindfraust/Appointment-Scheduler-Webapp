@@ -35,7 +35,7 @@
               <input type="hidden" name="alias" :value="(alias)" />
               <div class="columns">
                 <div class="column is-8">
-                  <input class="input" type="file" name="imgFile" required />
+                  <input class="input" type="file" name="imgFile" @click="imgSuccess" required />
                 </div>
                 <div class="column is-1">
                   <button
@@ -199,6 +199,9 @@ export default {
           this.passwordRepeat = null
         }
       }
+    },
+    imgSuccess(){
+      store.state.imgSuccess = true
     },
     showPassOne() {
       let passwordToggle = document.getElementById("passwordOne");
