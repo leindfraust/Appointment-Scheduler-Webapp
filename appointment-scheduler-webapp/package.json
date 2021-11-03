@@ -9,10 +9,10 @@
   "dependencies": {
     "@popperjs/core": "^2.10.2",
     "animate.css": "^4.1.1",
-    "axios": "^0.23.0",
+    "axios": "^0.24.0",
     "bulma": "^0.9.3",
     "cloudinary-core": "^2.12.0",
-    "core-js": "^3.18.3",
+    "core-js": "^3.19.1",
     "express": "^4.17.1",
     "glob-parent": "^6.0.2",
     "socket.io-client": "^4.3.2",
@@ -24,9 +24,9 @@
     "vuex": "^4.0.0"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.14",
-    "@vue/cli-service": "^4.5.14",
-    "@vue/compiler-sfc": "^3.2.20",
+    "@vue/cli-plugin-babel": "~4.5.15",
+    "@vue/cli-service": "^4.5.15",
+    "@vue/compiler-sfc": "^3.2.21",
     "postcss": "^8.3.11"
   }
 }

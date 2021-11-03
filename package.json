@@ -20,7 +20,7 @@
     "express-fileupload": "^1.2.1",
     "express-formidable": "^1.2.0",
     "express-session": "^1.17.2",
-    "formidable": "^1.2.2",
+    "formidable": "^2.0.1",
     "http-server": "^14.0.0",
     "mongoose": "^6.0.12",
     "morgan": "^1.10.0",
