@@ -88,8 +88,8 @@ export default {
       if (this.input === null) {
         e.preventDefault();
       } else {
+        let date = new Date()
         if(this.userType == "patient") {
-          let date = new Date()
           socket.emit('message', msg, this.currentUser.username, date.toLocaleString())
           this.input = null
         } else if(this.userType == "doctor") {
