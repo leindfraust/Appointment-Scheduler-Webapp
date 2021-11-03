@@ -27,10 +27,12 @@ const io = require("socket.io")(server, {
 const specializationRoute = require('./routes/api/specializationList')
 const appointmentListRoute = require('./routes/api/appointmentList')
 const adminRoute = require('./routes/api/adminList')
-const sess = require('./sessions/models/admin')
+const sessAdmin = require('./sessions/models/admin')
+const sessPatient = require('./sessions/models/user')
 const user = require('./routes/api/user')
+const rooms = require('./routes/api/rooms')
 
-//app usages
+//express usages
 app.use(cors());
 app.use(morgan('tiny'));
 app.use(express.json());
@@ -55,37 +57,52 @@ cloudinary.config({
 });
 
 //io middlewares
-io.use((socket, next) => {
+/*io.use((socket, next) => {
     const username = socket.handshake.auth.username;
-    if (!username) {
-        return next(new Error("invalid username"));
+    if (!this.username) {
+        return next(new Error("cannot connect, please try again"));
     }
-    socket.username = username;
+    socket.username = username
     next();
-});
+}); */
 
-
+//io connect/usages
 io.on('connection', (socket) => {
-    console.log('Client connected');
-    socket.on('disconnect', () => console.log('Client disconnected'));
-    socket.on('message', (msg, user) => {
-        io.emit('chat message', msg, user);
+    let roomNo = null
+    const Rooms = require('./model/rooms')
+    socket.on('join room', (roomID, user) => {
+        socket.join(roomID)
+        roomNo = roomID
+        Rooms.find({
+            roomID: roomNo
+        }).then(response => {
+            io.to(roomNo).emit('messages', response)
+        })
     });
-
-    const users = [];
-    for (let [id, socket] of io.of("/").sockets) {
-        users.push({
-            userID: id,
-            username: socket.username,
-            connected: socket.connected
-        });
-    }
-    socket.emit("users", users);
-
-    socket.broadcast.emit("user connected", {
-        userID: socket.id,
-        username: socket.username,
-        connected: socket.connected
+    console.log('Client connected');
+    socket.on('connect', () => console.log('Client connected'))
+    socket.on('disconnect', () => console.log('Client disconnected'));
+    socket.on('message', (msg, user, date) => {
+        Rooms.findOneAndUpdate({
+            roomID: roomNo
+        }, {
+            $push: {
+                messages: {
+                    user: user,
+                    message: msg,
+                    date: date
+                },
+            },
+        }, {
+            returnOriginal: false
+        }, function (error, success) {
+            if (error) {
+                console.log(error)
+            } else {
+                console.log(success)
+            }
+        })
+        io.to(roomNo).emit('chat message', msg, user, date);
     });
 });
 
@@ -107,7 +124,9 @@ app.use('/api/specialistList', specializationRoute)
 app.use('/api/appointmentList', appointmentListRoute)
 app.use('/api/admin', adminRoute)
 app.use('/api/user', user)
-app.use('/session/admin', sess)
+app.use('/session/admin', sessAdmin)
+app.use('/session/patient', sessPatient)
+app.use('/api/chatrooms', rooms)
 
 //doctor image change profile picture upload
 app.post('/api/imgUpload', async function (req, res, next) {
