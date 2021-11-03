@@ -1,6 +1,7 @@
 'use strict';
 
 const styles = require('./styles');
+const lastModifiedToString = require('./last-modified-to-string');
 const permsToString = require('./perms-to-string');
 const sizeToString = require('./size-to-string');
 const sortFiles = require('./sort-files');
@@ -95,7 +96,7 @@ module.exports = (opts) => {
           const writeRow = (file) => {
             // render a row given a [name, stat] tuple
             const isDir = file[1].isDirectory && file[1].isDirectory();
-            let href = `${parsed.pathname.replace(/\/$/, '')}/${encodeURIComponent(file[0])}`;
+            let href = `./${encodeURIComponent(file[0])}`;
 
             // append trailing slash and query for dir entry
             if (isDir) {
@@ -114,6 +115,7 @@ module.exports = (opts) => {
               html += `<td class="perms"><code>(${permsToString(file[1])})</code></td>`;
             }
             html +=
+              `<td class="last-modified">${lastModifiedToString(file[1])}</td>` +
               `<td class="file-size"><code>${sizeToString(file[1], humanReadable, si)}</code></td>` +
               `<td class="display-name"><a href="${href}">${displayName}</a></td>` +
               '</tr>\n';

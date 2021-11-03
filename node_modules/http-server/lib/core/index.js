@@ -5,6 +5,8 @@
 const path = require('path');
 const fs = require('fs');
 const url = require('url');
+const { Readable } = require('stream');
+const buffer = require('buffer');
 const mime = require('mime');
 const urlJoin = require('url-join');
 const showDir = require('./show-dir');
@@ -12,6 +14,7 @@ const version = require('../../package.json').version;
 const status = require('./status-handlers');
 const generateEtag = require('./etag');
 const optsParser = require('./opts');
+const htmlEncodingSniffer = require('html-encoding-sniffer');
 
 let httpServerCore = null;
 
@@ -28,9 +31,14 @@ function decodePathname(pathname) {
     return piece;
   }).join('/'));
   return process.platform === 'win32'
-      ? normalized.replace(/\\/g, '/') : normalized;
+    ? normalized.replace(/\\/g, '/') : normalized;
 }
 
+const nonUrlSafeCharsRgx = /[\x00-\x1F\x20\x7F-\uFFFF]+/g;
+function ensureUriEncoded(text) {
+  return text
+  return String(text).replace(nonUrlSafeCharsRgx, encodeURIComponent);
+}
 
 // Check to see if we should try to compress a file with gzip.
 function shouldCompressGzip(req) {
@@ -38,9 +46,9 @@ function shouldCompressGzip(req) {
 
   return headers && headers['accept-encoding'] &&
     headers['accept-encoding']
-      .split(',')
-      .some(el => ['*', 'compress', 'gzip', 'deflate'].indexOf(el.trim()) !== -1)
-    ;
+    .split(',')
+    .some(el => ['*', 'compress', 'gzip', 'deflate'].indexOf(el.trim()) !== -1)
+  ;
 }
 
 function shouldCompressBrotli(req) {
@@ -55,7 +63,7 @@ function shouldCompressBrotli(req) {
 
 function hasGzipId12(gzipped, cb) {
   const stream = fs.createReadStream(gzipped, { start: 0, end: 1 });
-  let buffer = Buffer('');
+  let buffer = Buffer.from('');
   let hasBeenCalled = false;
 
   stream.on('data', (chunk) => {
@@ -159,9 +167,10 @@ module.exports = function createMiddleware(_dir, _options) {
       // Do a strong or weak etag comparison based on setting
       // https://www.ietf.org/rfc/rfc2616.txt Section 13.3.3
       if (opts.weakCompare && clientEtag !== serverEtag
-        && clientEtag !== `W/${serverEtag}` && `W/${clientEtag}` !== serverEtag) {
+          && clientEtag !== `W/${serverEtag}` && `W/${clientEtag}` !== serverEtag) {
         return false;
-      } else if (!opts.weakCompare && (clientEtag !== serverEtag || clientEtag.indexOf('W/') === 0)) {
+      }
+      if (!opts.weakCompare && (clientEtag !== serverEtag || clientEtag.indexOf('W/') === 0)) {
         return false;
       }
     }
@@ -222,15 +231,23 @@ module.exports = function createMiddleware(_dir, _options) {
       // and brotli special case.
       const defaultType = opts.contentType || 'application/octet-stream';
       let contentType = mime.lookup(file, defaultType);
-      let charSet;
       const range = (req.headers && req.headers.range);
       const lastModified = (new Date(stat.mtime)).toUTCString();
       const etag = generateEtag(stat, weakEtags);
       let cacheControl = cache;
       let stream = null;
       if (contentType && isTextFile(contentType)) {
-        // Assume text types are utf8
-        contentType += '; charset=UTF-8';
+        if (stat.size < buffer.constants.MAX_LENGTH) {
+          const bytes = fs.readFileSync(file);
+          const sniffedEncoding = htmlEncodingSniffer(bytes, {
+            defaultEncoding: 'UTF-8'
+          });
+          contentType += `; charset=${sniffedEncoding}`;
+          stream = Readable.from(bytes)
+        } else {
+          // Assume text types are utf8
+          contentType += '; charset=UTF-8';
+        }
       }
 
       if (file === gzippedFile) { // is .gz picked up
@@ -312,84 +329,99 @@ module.exports = function createMiddleware(_dir, _options) {
         return;
       }
 
-      stream = fs.createReadStream(file);
+      // stream may already have been assigned during encoding sniffing.
+      if (stream === null) {
+        stream = fs.createReadStream(file);
+      }
 
       stream.pipe(res);
       stream.on('error', (err) => {
         status['500'](res, next, { error: err });
       });
+      stream.on('close', () => {
+        stream.destroy();
+      })
     }
 
 
     function statFile() {
-      fs.stat(file, (err, stat) => {
-        if (err && (err.code === 'ENOENT' || err.code === 'ENOTDIR')) {
-          if (req.statusCode === 404) {
-            // This means we're already trying ./404.html and can not find it.
-            // So send plain text response with 404 status code
-            status[404](res, next);
-          } else if (!path.extname(parsed.pathname).length && defaultExt) {
-            // If there is no file extension in the path and we have a default
-            // extension try filename and default extension combination before rendering 404.html.
-            middleware({
-              url: `${parsed.pathname}.${defaultExt}${(parsed.search) ? parsed.search : ''}`,
-              headers: req.headers,
-            }, res, next);
+      try {
+        fs.stat(file, (err, stat) => {
+          if (err && (err.code === 'ENOENT' || err.code === 'ENOTDIR')) {
+            if (req.statusCode === 404) {
+              // This means we're already trying ./404.html and can not find it.
+              // So send plain text response with 404 status code
+              status[404](res, next);
+            } else if (!path.extname(parsed.pathname).length && defaultExt) {
+              // If there is no file extension in the path and we have a default
+              // extension try filename and default extension combination before rendering 404.html.
+              middleware({
+                url: `${parsed.pathname}.${defaultExt}${(parsed.search) ? parsed.search : ''}`,
+                headers: req.headers,
+              }, res, next);
+            } else {
+              // Try to serve default ./404.html
+              const rawUrl = (handleError ? `/${path.join(baseDir, `404.${defaultExt}`)}` : req.url);
+              const encodedUrl = ensureUriEncoded(rawUrl);
+              middleware({
+                url: encodedUrl,
+                headers: req.headers,
+                statusCode: 404,
+              }, res, next);
+            }
+          } else if (err) {
+            status[500](res, next, { error: err });
+          } else if (stat.isDirectory()) {
+            if (!autoIndex && !opts.showDir) {
+              status[404](res, next);
+              return;
+            }
+
+
+            // 302 to / if necessary
+            if (!pathname.match(/\/$/)) {
+              res.statusCode = 302;
+              const q = parsed.query ? `?${parsed.query}` : '';
+              res.setHeader(
+                'location',
+                ensureUriEncoded(`${parsed.pathname}/${q}`)
+              );
+              res.end();
+              return;
+            }
+
+            if (autoIndex) {
+              middleware({
+                url: urlJoin(
+                  encodeURIComponent(pathname),
+                  `/index.${defaultExt}`
+                ),
+                headers: req.headers,
+              }, res, (autoIndexError) => {
+                if (autoIndexError) {
+                  status[500](res, next, { error: autoIndexError });
+                  return;
+                }
+                if (opts.showDir) {
+                  showDir(opts, stat)(req, res);
+                  return;
+                }
+
+                status[403](res, next);
+              });
+              return;
+            }
+
+            if (opts.showDir) {
+              showDir(opts, stat)(req, res);
+            }
           } else {
-            // Try to serve default ./404.html
-            middleware({
-              url: (handleError ? `/${path.join(baseDir, `404.${defaultExt}`)}` : req.url),
-              headers: req.headers,
-              statusCode: 404,
-            }, res, next);
+            serve(stat);
           }
-        } else if (err) {
-          status[500](res, next, { error: err });
-        } else if (stat.isDirectory()) {
-          if (!autoIndex && !opts.showDir) {
-            status[404](res, next);
-            return;
-          }
-
-
-          // 302 to / if necessary
-          if (!pathname.match(/\/$/)) {
-            res.statusCode = 302;
-            const q = parsed.query ? `?${parsed.query}` : '';
-            res.setHeader('location', `${parsed.pathname}/${q}`);
-            res.end();
-            return;
-          }
-
-          if (autoIndex) {
-            middleware({
-              url: urlJoin(
-                encodeURIComponent(pathname),
-                `/index.${defaultExt}`
-              ),
-              headers: req.headers,
-            }, res, (autoIndexError) => {
-              if (autoIndexError) {
-                status[500](res, next, { error: autoIndexError });
-                return;
-              }
-              if (opts.showDir) {
-                showDir(opts, stat)(req, res);
-                return;
-              }
-
-              status[403](res, next);
-            });
-            return;
-          }
-
-          if (opts.showDir) {
-            showDir(opts, stat)(req, res);
-          }
-        } else {
-          serve(stat);
-        }
-      });
+        });
+      } catch (err) {
+        status[500](res, next, { error: err.message });
+      }
     }
 
     function isTextFile(mimeType) {
@@ -398,34 +430,42 @@ module.exports = function createMiddleware(_dir, _options) {
 
     // serve gzip file if exists and is valid
     function tryServeWithGzip() {
-      fs.stat(gzippedFile, (err, stat) => {
-        if (!err && stat.isFile()) {
-          hasGzipId12(gzippedFile, (gzipErr, isGzip) => {
-            if (!gzipErr && isGzip) {
-              file = gzippedFile;
-              serve(stat);
-            } else {
-              statFile();
-            }
-          });
-        } else {
-          statFile();
-        }
-      });
+      try {
+        fs.stat(gzippedFile, (err, stat) => {
+          if (!err && stat.isFile()) {
+            hasGzipId12(gzippedFile, (gzipErr, isGzip) => {
+              if (!gzipErr && isGzip) {
+                file = gzippedFile;
+                serve(stat);
+              } else {
+                statFile();
+              }
+            });
+          } else {
+            statFile();
+          }
+        });
+      } catch (err) {
+        status[500](res, next, { error: err.message });
+      }
     }
 
     // serve brotli file if exists, otherwise try gzip
     function tryServeWithBrotli(shouldTryGzip) {
-      fs.stat(brotliFile, (err, stat) => {
-        if (!err && stat.isFile()) {
-          file = brotliFile;
-          serve(stat);
-        } else if (shouldTryGzip) {
-          tryServeWithGzip();
-        } else {
-          statFile();
-        }
-      });
+      try {
+        fs.stat(brotliFile, (err, stat) => {
+          if (!err && stat.isFile()) {
+            file = brotliFile;
+            serve(stat);
+          } else if (shouldTryGzip) {
+            tryServeWithGzip();
+          } else {
+            statFile();
+          }
+        });
+      } catch (err) {
+        status[500](res, next, { error: err.message });
+      }
     }
 
     const shouldTryBrotli = opts.brotli && shouldCompressBrotli(req);
