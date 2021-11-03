@@ -8,11 +8,14 @@ const store = createStore({
         statusAvailability: false,
         alias: '',
         doctorSched: [],
-        userID: null,
+        userID: null, //doctor's ID
+        patientUsername: '',
+        patientID: null,
         specialistList: [],
         patientDetails: [],
         profileImg: null,
-        imgSuccess: false
+        imgSuccess: false,
+        userType: null
     },
     getters: {
         getStatusAvail: state => state.statusAvailability,
@@ -26,6 +29,12 @@ const store = createStore({
         },
         userID(state, userID) {
             state.userID = userID
+        },
+        patientUsername(state, patientUsername) {
+            state.patientUsername = patientUsername
+        },
+        patientID(state, patientID) {
+            state.patientID = patientID
         },
         statusTrue(state) {
             state.statusAvailability = true;
@@ -41,6 +50,9 @@ const store = createStore({
         },
         imgSucess(state, imgSuccess) {
             state.imgSuccess = imgSuccess
+        },
+        userType(state, userType) {
+            state.userType = userType
         }
     },
 });
