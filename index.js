@@ -131,20 +131,20 @@ app.use('/api/chatrooms', rooms)
 //doctor image change profile picture upload
 app.post('/api/imgUpload', async function (req, res, next) {
 
-    const form = await new formidable()
+    const form = formidable({multiples: true})
     form.parse(req, (err, fields, files) => {
         if (err) {
             next(err);
             return;
         }
-        cloudinary.v2.uploader.upload(files.imgFile.path, {
+        cloudinary.v2.uploader.upload(files.imgFile.filepath, {
             public_id: fields.alias,
             folder: "assets/doctors/",
             overwrite: true,
             invalidate: true,
             format: "jpg"
         }, function (error, result) {
-            console.log(result, error);
+            console.log("cloudinary report: " + result, error);
         });
     });
     setTimeout(() => {
@@ -154,13 +154,13 @@ app.post('/api/imgUpload', async function (req, res, next) {
 //doctor signup image upload
 app.post('/api/imgUploadAdmin', async function (req, res, next) {
 
-    const form = await new formidable()
+    const form = formidable({multiples: true})
     form.parse(req, (err, fields, files) => {
         if (err) {
             next(err);
             return;
         }
-        cloudinary.v2.uploader.upload(files.imgFile.path, {
+        cloudinary.v2.uploader.upload(files.imgFile.filepath, {
             public_id: fields.alias,
             folder: "assets/doctors/",
             overwrite: true,
