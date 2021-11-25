@@ -2,7 +2,7 @@
   <section class="section is-large">
     <h1 class="subtitle has-text-centered">
       You have been successfuly appointed to <b>{{ patient.doctor }}</b> at
-      <b>{{ patient.schedule.date }}</b>, <b>{{patient.schedule.timeStart}}</b> - <b>{{patient.schedule.timeEnd}}</b>.
+      <b>{{ new Date(patient.schedule.date).toDateString() }}</b>, <b>{{patient.schedule.timeStart}}</b> - <b>{{patient.schedule.timeEnd}}</b>.
     </h1>
     <h1 class="subtitle has-text-centered">Your <b>priority number</b> is
       <b>{{ patient.priorityNum }}</b></h1>
@@ -12,7 +12,7 @@
     <h1 class="subtitle"><b>Last Name:</b> {{ patient.lastName }}</h1>
     <h1 class="subtitle"><b>Contact Number:</b> {{ patient.contactNum }}</h1>
     <h1 class="subtitle"><b>Birthday:</b> {{ patient.birthDay }}</h1>
-    <h1 class="subtitle"><b>Additional comments:</b> {{ patient.comments }}</h1>
+    <h1 class="subtitle"><b>Symptoms/Comments:</b> {{ patient.comments }}</h1>
   </section>
 </template>
 
