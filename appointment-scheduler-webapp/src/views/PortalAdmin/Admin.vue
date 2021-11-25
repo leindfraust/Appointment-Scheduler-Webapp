@@ -1,56 +1,53 @@
 <template>
   <div class="columns">
     <div class="column is-1">
-      <AdminMenu/>
+      <AdminMenu />
     </div>
     <div class="column">
-      <section class="hero is-info is-fullheight">
-        <div class="hero-body">
-          <div class="container is-widescreen is-fullhd" style="padding: 15">
+      <section class="section" style="background-color: whitesmoke;">
+        <div class="container is-widescreen is-fullhd" style="padding: 15">
           <div class="field">
-              <div class="control">
-                <input class="input" type="text" style="width: 50% !important" v-model="searchBar" placeholder="Search..." />
-              </div>
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                style="width: 50% !important"
+                v-model="searchBar"
+                placeholder="Search..."
+              />
             </div>
-            <div
-              class="block"
-              v-for="(appointmentList, index) in appointmentSchedules"
-              :key="index"
-            >
-              <h1 class="title">Schedule: {{ index }}</h1>
-              <table class="table is-striped is-narrow is-fullwidth customField">
+          </div>
+          <div class="box" v-for="(appointmentList, index) in appointmentSchedules" :key="index">
+            <h1 class="subtitle has-text-black">Schedule: {{ new Date(index).toDateString() }} </h1>
+            <div class="table-container">
+              <table class="table is-striped is-narrow is-fullwidth is-bordered">
                 <thead>
                   <tr>
-                    <th class="subtitle has-text-black-ter">Controls</th>
-                    <th class="subtitle has-text-black-ter">Priority No.</th>
-                    <th class="subtitle has-text-black-ter">First Name</th>
-                    <th class="subtitle has-text-black-ter">Last Name</th>
-                    <th class="subtitle has-text-black-ter">Contact Number</th>
-                    <th class="subtitle has-text-black-ter">Birthday</th>
-                    <th class="subtitle has-text-black-ter">Comments</th>
+                    <th class="has-text-black-ter">Controls</th>
+                    <th class="has-text-black-ter">Priority No.</th>
+                    <th class="has-text-black-ter">First Name</th>
+                    <th class="has-text-black-ter">Last Name</th>
+                    <th class="has-text-black-ter">Contact Number</th>
+                    <th class="has-text-black-ter">Birthday</th>
+                    <th class="has-text-black-ter">Symptoms/Comments</th>
                   </tr>
                 </thead>
                 <tbody v-for="appointments in appointmentList" :key="appointments._id">
-                  <tr :href="appointments.link" target="_blank">
+                  <tr>
                     <button
                       class="dropdown-item button has-text-info"
                       type="button"
                       @click="
-                      toggleModal(
-                        appointments.firstName,
-                        appointments.lastName,
-                        appointments.emailAdd,
-                        appointments.contactNum,
-                        appointments.birthDay,
-                        appointments._id
-                      )
+                        toggleModal(
+                          appointments.firstName,
+                          appointments.lastName,
+                          appointments.emailAdd,
+                          appointments.contactNum,
+                          appointments.birthDay,
+                          appointments._id
+                        )
                       "
                     >Edit</button>
-                    <button
-                      class="dropdown-item button has-text-danger"
-                      type="button"
-                      @click="deleteData(appointments._id)"
-                    >Delete</button>
                     <br />
                     <div class="modal" :class="{ 'is-active': isActiveModal }">
                       <div class="modal-background"></div>
@@ -103,15 +100,12 @@
                       </div>
                       <button class="modal-close is-large" aria-label="close" @click="toggleModal"></button>
                     </div>
-                    <th class="subtitle has-text-black-ter">{{ appointments.priorityNum }}</th>
-                    <td class="subtitle has-text-black-ter">{{ appointments.firstName }}</td>
-                    <td class="subtitle has-text-black-ter">{{ appointments.lastName }}</td>
-                    <td class="subtitle has-text-black-ter">{{ appointments.contactNum }}</td>
-                    <td class="subtitle has-text-black-ter">{{ appointments.birthDay }}</td>
-                    <td
-                      class="subtitle has-text-black-ter"
-                      style="width: 30%"
-                    >{{ appointments.comments }}</td>
+                    <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
+                    <td class="has-text-black-ter">{{ appointments.firstName }}</td>
+                    <td class="has-text-black-ter">{{ appointments.lastName }}</td>
+                    <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
+                    <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
+                    <td class="has-text-black-ter">{{ appointments.comments }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -126,7 +120,7 @@
 <script>
 import axios from "axios";
 import store from "../../store";
-import lodash from 'lodash'
+import _ from 'lodash'
 import AdminMenu from "../../components/AdminMenu.vue";
 
 export default {
@@ -157,7 +151,10 @@ export default {
             x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
             x.lastName.toLowerCase().includes(this.searchBar.toLowerCase())
           );
-        }),
+        }).sort((a, b) => {
+          return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
+        }).filter(x => { return new Date(x.schedule[0].date).getTime() > new Date().getTime() })
+        ,
         "schedule[0].date"
       );
     },
@@ -173,22 +170,6 @@ export default {
       );
   },
   methods: {
-    async logout() {
-      store.commit("alias", null);
-      await axios.delete("/session/admin");
-      await this.$router.push("/login");
-    },
-    async deleteData(_id) {
-      await axios.delete(`/api/appointmentList/${_id}`);
-      await axios
-        .get("/api/appointmentList")
-        .then(
-          (response) =>
-          (this.appointmentSched = response.data.filter(
-            (x) => x.doctor === store.state.userID
-          ))
-        );
-    },
     async updateData() {
       await axios.put(`/api/appointmentList/${this.id}`, {
         firstName: this.firstName,
@@ -232,21 +213,18 @@ export default {
   padding: 1%;
   border-radius: 15px;
 }
-.customField,
-.table {
-  background-color: whitesmoke;
-}
 th {
   font-weight: bold;
 }
 .modal input {
   width: 300px !important;
 }
+.modal-content {
+  background-color: whitesmoke;
+  padding: 15px;
+  border-radius: 10px;
+}
 @media (max-width: 991.98px) {
-  section {
-    width: 991.98px;
-    overflow: scroll;
-  }
   .modal input {
     width: 300px !important;
   }
