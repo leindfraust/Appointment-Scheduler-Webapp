@@ -5,6 +5,7 @@ import {
 const store = createStore({
     state: {
         userAuth: false,
+        superUserAuth: false,
         statusAvailability: false,
         alias: '',
         doctorSched: [],
@@ -15,7 +16,7 @@ const store = createStore({
         patientDetails: [],
         profileImg: null,
         imgSuccess: false,
-        userType: null
+        managerHospital: ''
     },
     getters: {
         getStatusAvail: state => state.statusAvailability,
@@ -53,6 +54,15 @@ const store = createStore({
         },
         userType(state, userType) {
             state.userType = userType
+        },
+        superUserAuth(state, superUserAuth) {
+            state.superUserAuth = superUserAuth
+        },
+        managerHospital(state, managerHospital) {
+            state.managerHospital = managerHospital
+        },
+        statusAvailability(state, statusAvailability) {
+            state.statusAvailability = statusAvailability
         }
     },
 });
