@@ -104,7 +104,7 @@
               <br />
               <label class="label">
                 <h1 class="subtitle">
-                  <b>Repeat Password:</b>
+                  <b>Repeat new password:</b>
                 </h1>
               </label>
               <input
@@ -152,6 +152,7 @@ export default {
   name: "AdminProfile",
   data() {
     return {
+      alias: store.state.alias,
       fullname: null,
       password: null,
       passwordRepeat: null,
