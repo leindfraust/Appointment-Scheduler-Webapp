@@ -11,6 +11,7 @@ const app = express();
 const path = require('path');
 const mongoose = require('mongoose');
 const cloudinary = require('cloudinary');
+const nodemailer = require('nodemailer')
 const {
     PORT,
     mongoUri
@@ -23,14 +24,20 @@ const io = require("socket.io")(server, {
         origin: "http://localhost:8080" || "http://192.168.1.11:8080"
     }
 });
+
 //schemas
-const specializationRoute = require('./routes/api/specializationList')
+const managerRoute = require('./routes/api/manager')
 const appointmentListRoute = require('./routes/api/appointmentList')
+const superUserRoute = require('./routes/api/superuser')
+const authenticationCodeRoute = require('./routes/api/authenticationCodes')
 const adminRoute = require('./routes/api/adminList')
 const sessAdmin = require('./sessions/models/admin')
 const sessPatient = require('./sessions/models/user')
+const sessManager = require('./sessions/models/manager')
+const sessSuperuser = require('./sessions/models/superuser')
 const user = require('./routes/api/user')
 const rooms = require('./routes/api/rooms')
+const geolocation = require('./routes/api/geolocation')
 
 //express usages
 app.use(cors());
@@ -65,6 +72,92 @@ cloudinary.config({
     socket.username = username
     next();
 }); */
+
+
+//add patient records to the doctor of a new patient
+app.post('/api/patientUpdate', async (req, res) => {
+    let doctorID = req.body.doctorID
+    let patientID = req.body.patientID
+    let patientFullName = req.body.patientFullName
+    const Doctor = require('./model/adminList')
+    
+    Doctor.findOneAndUpdate({
+        _id: doctorID
+    }, {
+        $push: {
+            patients: {
+                patient: patientID,
+                patientName: patientFullName
+            }
+        }
+    }, {
+        returnOriginal: false
+    }, function (error, success) {
+        if (error) {
+            console.log(error)
+        } else {
+            console.log(success)
+            res.end()
+        }
+    });
+});
+
+//pull doctor from a hospital
+app.post('/api/doctorPullHospital', async (req, res) => {
+    let doctorID = req.body.doctorID
+    let hospital = req.body.hospital
+    const Doctor = require('./model/adminList')
+    
+    Doctor.findOneAndUpdate({
+        _id: doctorID
+    }, {
+        $pull: {
+            hospitalOrigin: {
+                hospital: hospital
+            }
+        }
+    }, {
+        returnOriginal: false
+    }, function (error, success) {
+        if (error) {
+            console.log(error)
+        } else {
+            console.log(success)
+            res.end()
+        }
+    });
+});
+
+
+//update Province 
+app.post('/api/provinceUpdate', async (req, res) => {
+    let provinceID = req.body.provinceID
+    let cityOrMunicipality = req.body.cityOrMunicipality
+    let latitude = req.body.latitude
+    let longtitude = req.body.longtitude
+    const Province = require('./model/geolocation')
+    
+    Province.findOneAndUpdate({
+        _id: provinceID
+    }, {
+        $push: {
+            citiesOrMunicipalities: {
+                cityOrMunicipality: cityOrMunicipality,
+                latitude: latitude,
+                longtitude: longtitude
+            }
+        }
+    }, {
+        returnOriginal: false
+    }, function (error, success) {
+        if (error) {
+            console.log(error)
+        } else {
+            console.log(success)
+            res.end()
+        }
+    });
+});
 
 //io connect/usages
 io.on('connection', (socket) => {
@@ -120,18 +213,25 @@ app.use(session({
 }));
 
 // routes
-app.use('/api/specialistList', specializationRoute)
+app.use('/api/manager', managerRoute)
 app.use('/api/appointmentList', appointmentListRoute)
 app.use('/api/admin', adminRoute)
 app.use('/api/user', user)
 app.use('/session/admin', sessAdmin)
 app.use('/session/patient', sessPatient)
+app.use('/session/manager', sessManager)
+app.use('/session/superuser', sessSuperuser)
 app.use('/api/chatrooms', rooms)
+app.use('/api/superuser', superUserRoute)
+app.use('/api/code', authenticationCodeRoute)
+app.use('/api/geolocation', geolocation)
 
 //doctor image change profile picture upload
 app.post('/api/imgUpload', async function (req, res, next) {
 
-    const form = formidable({multiples: true})
+    const form = formidable({
+        multiples: true
+    })
     form.parse(req, (err, fields, files) => {
         if (err) {
             next(err);
@@ -154,7 +254,9 @@ app.post('/api/imgUpload', async function (req, res, next) {
 //doctor signup image upload
 app.post('/api/imgUploadAdmin', async function (req, res, next) {
 
-    const form = formidable({multiples: true})
+    const form = formidable({
+        multiples: true
+    })
     form.parse(req, (err, fields, files) => {
         if (err) {
             next(err);
@@ -173,6 +275,35 @@ app.post('/api/imgUploadAdmin', async function (req, res, next) {
     setTimeout(() => {
         res.status(200).redirect('/imgUploadSuccessAdmin')
     }, 5000)
+});
+
+//nodemailer config
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'rozer223@gmail.com',
+        pass: 'FortheGoldofNetherland'
+    }
+});
+
+//nodemailer smtp@gmail
+app.post('/api/sendMail', async (req, res) => {
+    let email = req.body.email
+    let code = req.body.code
+    var mailOptions = {
+        from: 'rozer223@gmail.com',
+        to: email,
+        subject: 'Login request code',
+        text: `Your login request code is: ${code}. \nIf you did not request this, please reply to this email. \n\nBest Regards,\nRonan`
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Email sent: ' + info.response);
+        }
+    });
 });
 
 //serve dist in node local server
