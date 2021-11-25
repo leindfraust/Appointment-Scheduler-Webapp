@@ -1,10 +1,16 @@
 <template>
-  <section class="hero is-fullheight">
-    <div class="hero-body">
-      <div class="field">
+<NavigationTabVue/>
+  <section class="section">
+    <div class="container" style="width: 33%; margin: auto">
+      <div class="field box">
         <p class="control">
-          <label class="label">Full Name:</label>
-          <input class="input" type="text" placeholder="fullname" v-model="fullname" required />
+          <label class="label">First name:</label>
+          <input class="input" type="text" placeholder="First name" v-model="firstName" required />
+        </p>
+
+        <p class="control">
+          <label class="label">Last name:</label>
+          <input class="input" type="text" placeholder="Last name" v-model="lastName" required />
         </p>
 
         <p class="control">
@@ -79,16 +85,21 @@
       <div class="control">
         <button class="button is-primary" @click="signup">SignUp</button>
       </div>
-    </div>
+      </div>
   </section>
 </template>
 <script>
 import axios from 'axios'
+import NavigationTabVue from '../../components/NavigationTab.vue';
 
 export default {
   username: "UserSignUp",
+  components: {
+    NavigationTabVue
+  },
   props: {
-    fullname: String,
+    firstName: String,
+    lastName: String,
     age: Number,
     contactNum: Number,
     gmail: String,
@@ -129,7 +140,8 @@ export default {
         await axios.post("/api/user", {
           username: this.username,
           password: this.password,
-          name: this.fullname,
+          firstName: this.firstName,
+          lastName: this.lastName,
           age: this.age,
           sex: this.sex,
           contactNum: this.contactNum,
@@ -158,3 +170,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+.section {
+  background-color: whitesmoke;
+}
+</style>
