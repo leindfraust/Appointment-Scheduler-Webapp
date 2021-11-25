@@ -4,11 +4,11 @@
       <div class="card-image">
         <div class="columns is-mobile">
           <div class="column" v-for="specialist in specialistList" :key="specialist._id">
-            <a @click="getDoctors(specialist.specialization)">
+            <a @click="getDoctors(specialist.specialist)">
               <figure class="image is-4by3">
                 <img
                   :src="
-                    require(`../../assets/specialization/${specialist.specialization}.jpg`)
+                    require(`../../assets/specialization/${specialist.specialist}.jpg`)
                   "
                 />
               </figure>
@@ -17,7 +17,10 @@
         </div>
       </div>
       <hr />
-      <div class="card-content" v-for="doctors in doctorList" :key="doctors._id">
+      <div v-if="doctorList == ''">
+        <p class="subtitle has-text-centered">No doctors are currently available in this specialization.</p>
+      </div>
+      <div  v-else class="card-content" v-for="doctors in doctorList" :key="doctors._id">
         <div class="media">
           <figure class="media-left">
             <p class="image is-64x64">
@@ -30,7 +33,6 @@
             <p class="title is-4">{{ doctors.name }}</p>
             <p class="subtitle is-6">{{ doctors.specialist }}</p>
             <button class="button" @click="pickDoctor(doctors._id, doctors.schedule)">Appoint</button>
-            <button class="button" @click="messageDoctor(doctors._id, doctors.alias)">Message</button>
           </div>
         </div>
       </div>
@@ -55,9 +57,11 @@ export default {
     };
   },
   async mounted() {
+    //temporary 
+    //needs to edit data GET to find hospital name, will be implemented in the future once main feature is ready
     await axios
-      .get("/api/specialistList")
-      .then((response) => (this.specialistList = response.data));
+      .get("/api/manager")
+      .then((response) => this.specialistList = response.data[0].specializations);
     await axios
       .get("/session/patient")
       .then(response => this.patientDetails = response.data)
@@ -69,33 +73,16 @@ export default {
         .then(
           (response) =>
           (this.doctorList = response.data.filter(
-            (x) => x.specialist === specialization && x.schedule != ""
+            (x) => x.specialist === specialization && x.schedule != '' && x.schedule.find(x => new Date(x.date).getTime() > new Date().getTime())
           ))
         );
     },
     async pickDoctor(id, schedule) {
       store.commit("userID", id);
       store.commit("doctorSched", schedule);
-      store.state.statusAvailability = true;
+      store.commit("statusAvailability", true)
       await this.$router.push(`/user/${this.patientDetails.username}/registration`);
     },
-    async messageDoctor(id, alias) {
-      let roomID = this.patientDetails._id + "-room-" + id
-      await axios.get("/api/chatrooms").then(response => this.checkRooms = response.data.find(x => x.roomID === roomID))
-      if (await this.checkRooms) {
-        await this.$router.push(`/user/${this.patientDetails.username}/chatnow`)
-      } else {
-        await axios.post("/api/chatrooms", {
-          roomID: this.patientDetails._id + "-room-" + id,
-          patient: this.patientDetails._id,
-          doctor: id,
-          patientName: this.patientDetails.username,
-          doctorName: alias
-        }); 
-      } 
-      store.commit("userType", "patient")
-      await this.$router.push('/chatnow')
-    }
   },
 };
 </script>
