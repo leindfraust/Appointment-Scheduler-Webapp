@@ -16,6 +16,10 @@ const adminSchema = new Schema({
         type: String,
         required: true
     },
+    gmail: {
+        type: String,
+        required: true
+    },
     username: {
         type: String,
         required: true,
@@ -27,6 +31,8 @@ const adminSchema = new Schema({
     schedule: {
         type: Array,
     },
+    patients: Array,
+    hospitalOrigin: Array
 });
 
 const admin = mongoose.model('admin', adminSchema);
