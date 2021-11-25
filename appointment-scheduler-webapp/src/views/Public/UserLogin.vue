@@ -1,46 +1,29 @@
 <template>
-  <section class="hero is-fullheight">
-    <div class="hero-body">
-      <div class="container has-text-centered">
-        <form class="field customField animate__animated animate__fadeInLeft">
+  <NavigationTabVue />
+  <section class="section is-medium">
+    <div class="container is-fluid has-text-centered" style="width: 40%">
+      <div class="box">
+         <p class="notification is-info">Doctor users, click <a href="/admin/login">here</a></p>
+        <br/>
+        <form class="field animate__animated animate__fadeInLeft">
           <div class="control">
-            <input
-              class="input"
-              type="text"
-              v-model="username"
-              placeholder="username"
-              required
-            />
+            <input class="input" type="text" v-model="username" placeholder="username" required />
           </div>
           <div class="control" style="margin-top: 2%">
-            <input
-              class="input"
-              type="password"
-              v-model="password"
-              placeholder="password"
-              required
-            />
+            <input class="input" type="password" v-model="password" placeholder="password" required />
           </div>
           <h1
             v-if="incorrectUserPass"
             class="subtitle has-text-danger"
-            style="margin-top: 5%"
-          >
-            {{ validateMessage }}
-          </h1>
+          >{{ validateMessage }}</h1>
           <h1
             v-else-if="incorrectUserPass == false"
             class="subtitle has-text-danger"
-            style="margin-top: 5%"
-          >
-            {{ validateMessage }}
-          </h1>
-          <button type="button" class="button is-primary" @click="login">
-            Login
-          </button>
-          <a class="signup button is-danger"
-            >Sign Up</a
-          >
+          >{{ validateMessage }}</h1>
+          <button type="button" class="button is-primary" @click="login">Login</button>
+          <br/><br/>
+          <h1 class="subtitle">OR</h1>
+          <a href="/user/signup">Create an account</a>
         </form>
       </div>
     </div>
@@ -49,9 +32,13 @@
 <script>
 import axios from 'axios'
 import store from '../../store'
+import NavigationTabVue from '../../components/NavigationTab.vue'
 
 export default {
   username: "UserLogin",
+  components: {
+    NavigationTabVue
+  },
   data() {
     return {
       username: null,
@@ -68,14 +55,14 @@ export default {
         (response) =>
           (this.userPatient = response.data)
       );
-      if(await this.userPatient.username){
-        this.$store.commit("patientUsername", this.userPatient.username)
-        this.$store.commit("patientID", this.userPatient._id)
-        await this.$router.push(`/user/${this.userPatient.username}`);
-      }
+    if (await this.userPatient.username) {
+      this.$store.commit("patientUsername", this.userPatient.username)
+      this.$store.commit("patientID", this.userPatient._id)
+      await this.$router.push(`/user/${this.userPatient.username}`);
+    }
   },
   methods: {
-     async login() {
+    async login() {
       if (this.username == null && this.password == null) {
         this.incorrectUserPass = false;
         this.validateMessage = "empty username or password";
@@ -84,11 +71,11 @@ export default {
           .get("/api/user")
           .then(
             (response) =>
-              (this.userPatient = response.data.find(
-                (item) =>
-                  item.username == this.username &&
-                  item.password == this.password
-              ))
+            (this.userPatient = response.data.find(
+              (item) =>
+                item.username == this.username &&
+                item.password == this.password
+            ))
           );
         // if username and password matched to a user
         if (await this.userPatient) {
@@ -97,7 +84,8 @@ export default {
           await this.$router.push(`/user/${this.userPatient.username}`);
           await axios.post("/session/patient", {
             _id: this.userPatient._id,
-            fullname: this.userPatient.name,
+            firstName: this.userPatient.firstName,
+            lastName: this.userPatient.lastName,
             username: this.username,
             password: this.password,
             province: this.userPatient.province,
@@ -114,3 +102,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+.section {
+  background-color: whitesmoke;
+}
+</style>
