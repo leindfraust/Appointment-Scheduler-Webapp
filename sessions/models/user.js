@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/',(req, res) => {
+router.get('/', (req, res) => {
     res.send(req.session)
 });
 
 router.post('/', (req, res) => {
     req.session._id = req.body._id
-    req.session.fullname = req.body.fullname
+    req.session.firstName = req.body.firstName
+    req.session.lastName = req.body.lastName
     req.session.username = req.body.username
     req.session.password = req.body.password
     req.session.province = req.body.province
@@ -22,11 +23,12 @@ router.post('/', (req, res) => {
 
 router.put('/', (req, res) => {
     req.session.alias = req.body.alias || req.session.alias
-    req.session.fullname = req.body.fullname || req.session.fullname
+    req.session.firstName = req.body.fullname || req.session.lastName
+    req.session.lastName = req.body.lastName || req.session.lastName
     req.session.username = req.body.username || req.session.username
     req.session.password = req.body.password || req.session.password
     req.session.province = req.body.province || req.session.province
-    req.session.city = req.body.city         || req.session.city
+    req.session.city = req.body.city || req.session.city
     req.session.save((err) => {
         if (err) {
             return next(err);
