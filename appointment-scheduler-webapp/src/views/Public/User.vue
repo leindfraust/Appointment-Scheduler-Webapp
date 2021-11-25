@@ -1,27 +1,24 @@
 <template>
-<aside class="menu">
-        <p class="menu-label">Hello, {{ patient }}</p>
+<NavigationTabVue/>
+<section class="section" >
+        <div class="box" style="margin: auto; width:100%;"><p class="subtitle">{{patient}}</p>
         <figure class="media block">
            <img id="imgAvatar" :src="imgPreUrl + patient + svgExtUrl">
         </figure>
-        <button @click="logout" class="button is-danger" type="button">Logout</button>
-        <ul class="menu-list">
-            <li>
-                <a @click="profile">Profile</a>
-            </li>
-            <li>
-                <a @click="inbox">Inbox</a>
-            </li>
-        </ul>
-    </aside>
-    <button class="button is-info" @click="doctors">Get started</button>
+        <button class="button is-info" @click="doctors">Get started</button>
+        </div>
+    </section>
+
 </template>
 <script>
 import axios from 'axios'
-import socket from '../../socket'
+import NavigationTabVue from '../../components/NavigationTab.vue'
 
 export default {
     name: 'User',
+    components: {
+        NavigationTabVue
+    },
     data(){
         return {
             patient: this.$store.state.patientUsername,
