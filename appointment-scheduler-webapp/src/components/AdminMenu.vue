@@ -10,7 +10,7 @@
                 <a @click="routeHome">Home</a>
             </li>
             <li>
-                <a @click="inbox">Inbox</a>
+                <a @click="patientLogs">Patient logs</a>
             </li>
             <li>
                 <a @click="profile">Profile</a>
@@ -38,7 +38,7 @@ export default {
         async logout() {
             store.commit("alias", null);
             await axios.delete("/session/admin");
-            await this.$router.push("/login");
+            await this.$router.push("/admin/login");
         },
         async routeHome() {
             await this.$router.push(`/admin/user/${this.alias}`);
@@ -46,13 +46,12 @@ export default {
         async profile() {
             await this.$router.push(`/admin/user/${this.alias}/profile`);
         },
+        async patientLogs() {
+            await this.$router.push(`/admin/user/${this.alias}/patients`)
+        },
         async openSchedule() {
             await this.$router.push(`/admin/user/${this.alias}/schedule`);
         },
-        inbox() {
-            this.$router.push('/chatnow')
-            this.$store.commit("userType", "doctor")
-        }
     }
 }
 </script>
