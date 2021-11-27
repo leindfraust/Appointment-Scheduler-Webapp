@@ -190,7 +190,8 @@
                     <tr>
                         <th class="has-text-black-ter">Controls</th>
                         <th class="has-text-black-ter">No.</th>
-                        <th class="has-text-black-ter">Full Name</th>
+                        <th class="has-text-black-ter">First Name</th>
+                        <th class="has-text-black-ter">Last Name</th>
                         <th class="has-text-black-ter">Age</th>
                         <th class="has-text-black-ter">Sex</th>
                         <th class="has-text-black-ter">Contact No.</th>
@@ -212,7 +213,8 @@
                             @click="patientDelete(patient._id)"
                         >Delete</button>
                         <td class="has-text-black-ter">{{ index + 1 }}</td>
-                        <td class="has-text-black-ter">{{ patient.name }}</td>
+                        <td class="has-text-black-ter">{{ patient.firstName }}</td>
+                        <td class="has-text-black-ter">{{ patient.lastName }}</td>
                         <td class="has-text-black-ter">{{ patient.age }}</td>
                         <td class="has-text-black-ter">{{ patient.sex }}</td>
                         <td class="has-text-black-ter">{{ patient.contactNum }}</td>
@@ -310,7 +312,7 @@ export default {
             return this.doctorAccounts.filter(x => {return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) || x.specialist.toLowerCase().includes(this.searchBar.toLowerCase())})
         },
         patientAccountsIndexed(){
-            return this.patientAccounts.filter(x => {return x.name.toLowerCase().includes(this.searchBar.toLowerCase())})
+            return this.patientAccounts.filter(x => {return x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) || x.lastName.toLowerCase().includes(this.searchBar.toLowerCase())})
         }
     },
     async mounted() {
@@ -368,6 +370,7 @@ export default {
             this.isActivePatient = true
 
             await axios.get("/api/user").then(response => this.patientAccounts = response.data)
+            console.log(this.patientAccounts)
         },
         async managerEdit(id, email) {
             this.isActiveModal = !this.isActiveModal
