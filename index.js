@@ -1,3 +1,4 @@
+require("dotenv").config()
 const express = require('express');
 const session = require('express-session');
 const formidable = require('formidable');
@@ -11,7 +12,7 @@ const app = express();
 const path = require('path');
 const mongoose = require('mongoose');
 const cloudinary = require('cloudinary');
-const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer');
 const {
     PORT,
     mongoUri
@@ -58,9 +59,9 @@ dbConnect().then(() => console.log('MongoDB online')).catch((err) => console.log
 
 //cloudinary config
 cloudinary.config({
-    cloud_name: 'leindfraust',
-    api_key: '578841911666182',
-    api_secret: 'y397TRyKmeYukzShGtUysWR4MFo'
+    cloud_name: process.env.cloudinary_cloud_name,
+    api_key: process.env.cloudinary_api_key,
+    api_secret: process.env.cloudinary_api_secret
 });
 
 //io middlewares
@@ -281,8 +282,8 @@ app.post('/api/imgUploadAdmin', async function (req, res, next) {
 var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'rozer223@gmail.com',
-        pass: 'FortheGoldofNetherland'
+        user: process.env.nodemaileruser,
+        pass: process.env.nodemailerpass
     }
 });
 
@@ -291,7 +292,7 @@ app.post('/api/sendMail', async (req, res) => {
     let email = req.body.email
     let code = req.body.code
     var mailOptions = {
-        from: 'rozer223@gmail.com',
+        from: process.env.nodemaileruser,
         to: email,
         subject: 'Login request code',
         text: `Your login request code is: ${code}. \nIf you did not request this, please reply to this email. \n\nBest Regards,\nRonan`
