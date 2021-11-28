@@ -118,7 +118,8 @@ app.post('/api/doctorPullHospital', async (req, res) => {
             }
         }
     }, {
-        returnOriginal: false
+        returnOriginal: false,
+        multi: true
     }, function (error, success) {
         if (error) {
             console.log(error)
@@ -150,6 +151,37 @@ app.post('/api/provinceUpdate', async (req, res) => {
         }
     }, {
         returnOriginal: false
+    }, function (error, success) {
+        if (error) {
+            console.log(error)
+        } else {
+            console.log(success)
+            res.end()
+        }
+    });
+});
+
+//pull city or municipality from a province
+app.post('/api/provinceCityPull', async (req, res) => {
+    let provinceID = req.body.provinceID
+    let cityOrMunicipality = req.body.cityOrMunicipality
+    let latitude = req.body.latitude
+    let longtitude = req.body.longtitude
+    const Province = require('./model/geolocation')
+    
+    Province.findOneAndUpdate({
+        _id: provinceID
+    }, {
+        $pull: {
+            citiesOrMunicipalities: {
+                cityOrMunicipality: cityOrMunicipality,
+                latitude: latitude,
+                longtitude: longtitude
+            }
+        }
+    }, {
+        returnOriginal: false,
+        multi: true
     }, function (error, success) {
         if (error) {
             console.log(error)
