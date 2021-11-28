@@ -16,12 +16,15 @@
                     <li :class="{ 'is-active': isActivePatient }">
                         <a @click="patient">Patient accounts</a>
                     </li>
+                    <li :class="{ 'is-active': isActiveGeolocation }">
+                        <a @click="geolocation">Geolocation</a>
+                    </li>
                 </ul>
             </nav>
         </div>
         <div class="controls">
-            <label class="label">Search: </label>
-            <input class="input" type="text" placeholder="Search..." v-model="searchBar">
+            <label class="label">Search:</label>
+            <input class="input" type="text" placeholder="Search..." v-model="searchBar" />
         </div>
         <br />
         <div class="table-container">
@@ -181,7 +184,6 @@
                     </tr>
                 </tbody>
             </table>
-
             <table
                 v-if="isActivePatient"
                 class="table is-striped is-fullwidth is-narrow is-bordered"
@@ -224,8 +226,47 @@
                     </tr>
                 </tbody>
             </table>
+            <div
+                class="box"
+                v-if="isActiveGeolocation"
+                v-for="(geolocation, index) in provinceAndCitiesIndexed"
+                :key="index"
+            >
+                <a class="has-text-danger" @click="deleteProvince(geolocation[0]._id)">Delete Province</a>
+                <p class="subtitle has-text-black">Province: {{ index }}</p>
+
+                <table class="table is-striped is-fullwidth is-narrow is-bordered">
+                    <thead>
+                        <tr>
+                            <th class="has-text-black-ter">Controls</th>
+                            <th class="has-text-black-ter">No.</th>
+                            <th class="has-text-black-ter">City/Municipality</th>
+                            <th class="has-text-black-ter">Latitude</th>
+                            <th class="has-text-black-ter">Longtitude</th>
+                        </tr>
+                    </thead>
+                    <tbody
+                        v-for="(cityOrMunicipality, index) in geolocation[0].citiesOrMunicipalities"
+                        :key="index"
+                    >
+                        <tr>
+                            <button
+                                class="button dropdown-item has-text-danger"
+                                type="button"
+                                @click="cityDelete(geolocation[0]._id, cityOrMunicipality.cityOrMunicipality, cityOrMunicipality.latitude, cityOrMunicipality.longtitude)"
+                            >Delete</button>
+                            <td class="has-text-black-ter">{{ index + 1 }}</td>
+                            <td
+                                class="has-text-black-ter"
+                            >{{ cityOrMunicipality.cityOrMunicipality }}</td>
+                            <td class="has-text-black-ter">{{ cityOrMunicipality.latitude }}</td>
+                            <td class="has-text-black-ter">{{ cityOrMunicipality.longtitude }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <section class="section" style="width: 50%; margin: auto">
+        <section v-if="isActiveGeolocation" class="section" style="width: 50%;">
             <div class="field">
                 <h1 class="title">Create a new Province</h1>
                 <div class="control">
@@ -293,7 +334,10 @@
                         @click="cityOrMunicipalityPost"
                         :disabled="selectedProvince == '' || cityOrMunicipality == '' || latitude == '' || longtitude == ''"
                     >Confirm</button>
-                    <div v-if="cityOrMunicipalityPostSuccess" class="has-text-success">City or Municipality added</div>
+                    <div
+                        v-if="cityOrMunicipalityPostSuccess"
+                        class="has-text-success"
+                    >City or Municipality added</div>
                 </div>
             </div>
         </section>
@@ -301,23 +345,33 @@
 </template>
 <script>
 import axios from 'axios'
+import _ from 'lodash'
 
 export default {
     name: "SuperUser",
     computed: {
         managerAccountsIndexed() {
-            return this.managerAccounts.filter(x => {return x.hospital.toLowerCase().includes(this.searchBar.toLowerCase())})
+            return this.managerAccounts.filter(x => { return x.hospital.toLowerCase().includes(this.searchBar.toLowerCase()) })
         },
         doctorAccountsIndexed() {
-            return this.doctorAccounts.filter(x => {return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) || x.specialist.toLowerCase().includes(this.searchBar.toLowerCase())})
+            return this.doctorAccounts.filter(x => { return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) || x.specialist.toLowerCase().includes(this.searchBar.toLowerCase()) })
         },
-        patientAccountsIndexed(){
-            return this.patientAccounts.filter(x => {return x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) || x.lastName.toLowerCase().includes(this.searchBar.toLowerCase())})
+        patientAccountsIndexed() {
+            return this.patientAccounts.filter(x => { return x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) || x.lastName.toLowerCase().includes(this.searchBar.toLowerCase()) })
+        },
+        provinceAndCitiesIndexed() {
+            return _.groupBy(
+                this.provinceList.filter(x => {
+                    return (x.citiesOrMunicipalities.find(x => { return x.cityOrMunicipality.toLowerCase().includes(this.searchBar.toLowerCase()) }));
+                }),
+                "province"
+            )
         }
     },
     async mounted() {
         await axios.get("/session/superuser").then(response => this.superUser = response.data.superuser)
         await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
+        console.log(this.provinceAndCitiesIndexed)
     },
     data() {
         return {
@@ -329,6 +383,7 @@ export default {
             isActiveManager: false,
             isActiveDoctor: false,
             isActivePatient: false,
+            isActiveGeolocation: false,
             isActiveModal: false,
             isActiveDropdown: false,
             isActiveDropdownItemOne: false,
@@ -354,6 +409,7 @@ export default {
             this.isActiveManager = true
             this.isActiveDoctor = false
             this.isActivePatient = false
+            this.isActiveGeolocation = false
 
             await axios.get("/api/manager").then(response => this.managerAccounts = response.data)
         },
@@ -361,6 +417,7 @@ export default {
             this.isActiveManager = false
             this.isActiveDoctor = true
             this.isActivePatient = false
+            this.isActiveGeolocation = false
 
             await axios.get("/api/admin").then(response => this.doctorAccounts = response.data)
         },
@@ -368,9 +425,17 @@ export default {
             this.isActiveManager = false
             this.isActiveDoctor = false
             this.isActivePatient = true
+            this.isActiveGeolocation = false
 
             await axios.get("/api/user").then(response => this.patientAccounts = response.data)
-            console.log(this.patientAccounts)
+        },
+        async geolocation() {
+            this.isActiveManager = false
+            this.isActiveDoctor = false
+            this.isActivePatient = false
+            this.isActiveGeolocation = true
+
+            await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
         },
         async managerEdit(id, email) {
             this.isActiveModal = !this.isActiveModal
@@ -425,6 +490,19 @@ export default {
             await axios.get('/api/user').then(response => this.patientAccounts = response.data)
 
         },
+        async cityDelete(id, city, latitude, longtitude) {
+            await axios.post("/api/provinceCityPull", {
+                provinceID: id,
+                cityOrMunicipality: city,
+                latitude: latitude,
+                longtitude: longtitude
+            });
+            await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
+        },
+        async deleteProvince(id){
+            await axios.delete(`/api/geolocation/${id}`)
+            await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
+        },
         closeModal() {
             this.isActiveModal = false
         },
@@ -446,7 +524,7 @@ export default {
                 province: this.province
             });
             await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
-            this.provincePostSuccess = await true
+            this.provincePostSuccess = true
         },
         async cityOrMunicipalityPost() {
             await axios.post('/api/provinceUpdate', {
@@ -461,6 +539,8 @@ export default {
             this.cityOrMunicipality = ''
             this.latitude = ''
             this.longtitude = ''
+
+            await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
         },
         provinceDropdownActive() {
             this.isActiveDropdownProvince = !this.isActiveDropdownProvince
@@ -468,6 +548,7 @@ export default {
         chooseProvince(id, provinceName) {
             this.selectedProvinceID = id
             this.selectedProvince = provinceName
+            this.isActiveDropdownProvince = false
         },
         async logout() {
             await axios.delete("/session/superuser");
@@ -478,4 +559,9 @@ export default {
 }
 </script>
 <style scoped>
+@media (max-width: 991.98px) {
+    .section {
+        width: 100% !important;
+    }
+}
 </style>
