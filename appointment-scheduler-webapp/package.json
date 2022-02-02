@@ -7,17 +7,17 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
-    "@popperjs/core": "^2.10.2",
+    "@popperjs/core": "^2.11.2",
     "animate.css": "^4.1.1",
     "axios": "^0.24.0",
     "bulma": "^0.9.3",
-    "cloudinary-core": "^2.12.0",
-    "core-js": "^3.19.1",
+    "cloudinary-core": "^2.12.2",
+    "core-js": "^3.20.2",
     "emailjs-com": "^3.2.0",
-    "express": "^4.17.1",
+    "express": "^4.17.2",
     "glob-parent": "^6.0.2",
-    "socket.io-client": "^4.3.2",
-    "typescript": "^4.4.4",
+    "socket.io-client": "^4.4.0",
+    "typescript": "^4.5.4",
     "v-calendar": "^3.0.0-alpha.4",
     "vue": "^3.2.0",
     "vue-axios": "^3.4.0",
@@ -27,7 +27,7 @@
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.15",
     "@vue/cli-service": "^4.5.15",
-    "@vue/compiler-sfc": "^3.2.21",
-    "postcss": "^8.3.11"
+    "@vue/compiler-sfc": "^3.2.26",
+    "postcss": "^8.4.5"
   }
 }
