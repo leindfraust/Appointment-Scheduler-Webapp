@@ -1,86 +1,142 @@
 <template>
-  <div class="card container doctorContainer">
-    <div class="block">
-      <div class="card-image">
-        <div class="columns is-mobile">
-          <div class="column" v-for="specialist in specialistList" :key="specialist._id">
-            <a @click="getDoctors(specialist.specialist)">
-              <figure class="image is-4by3">
-                <img
-                  :src="
-                    require(`../../assets/specialization/${specialist.specialist}.jpg`)
-                  "
-                />
-              </figure>
-            </a>
-          </div>
+  <NavigationTab />
+  <section class="section">
+    <div class="columns">
+      <div class="column">
+        <div class="container box" v-if="hospitalDetails">
+          <h1 class="title">{{ hospitalDetails.hospital }}</h1>
+          <p
+            class="subtitle"
+          >📌 {{ hospitalDetails.barangayORStreet }}, {{ hospitalDetails.city }}, {{ hospitalDetails.province }}</p>
+          <figure class="image is-16by9">
+            <img
+              :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/managers/${hospitalDetails.hospital}.jpg`"
+            />
+          </figure>
+          <br />
+          <iframe
+            :src="`https://maps.google.com/maps?q=${hospitalDetails.location.coordinates[1]},${hospitalDetails.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"
+          ></iframe>
+          <p class="subtitle">Contacts:</p>
+          <ul class="block" v-if="typeof hospitalDetails.details[0].contacts !== 'undefined'">
+            <li v-for="contacts in hospitalDetails.details[0].contacts">{{ contacts.contact }}</li>
+          </ul>
         </div>
       </div>
-      <hr />
-      <div v-if="doctorList == ''">
-        <p class="subtitle has-text-centered">No doctors are currently available in this specialization.</p>
-      </div>
-      <div  v-else class="card-content" v-for="doctors in doctorList" :key="doctors._id">
-        <div class="media">
-          <figure class="media-left">
-            <p class="image is-64x64">
-              <img
-                :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${doctors.alias}.jpg`"
-              />
+      <div class="column">
+        <div class="box container">
+          <div class="block">
+            <h1 class="title">Pick a specialist.</h1>
+            <p class="subtitle" v-if="!specializationClicked">
+              Having trouble picking a specialist? Get appointed to a
+              <a
+                class="has-text-link"
+                @click="getDoctors('General Practitioner')"
+              >General Practitioner</a>.
             </p>
-          </figure>
-          <div class="media-content">
-            <p class="title is-4">{{ doctors.name }}</p>
-            <p class="subtitle is-6">{{ doctors.specialist }}</p>
-            <button class="button" @click="pickDoctor(doctors._id, doctors.schedule)">Appoint</button>
+            <div class="columns is-multiline is-mobile" v-if="!specializationClicked">
+              <div class="column is-4" v-for="(specialist, index) in specialistList" :key="index">
+                <a @click="getDoctors(specialist.specialist)">
+                  <figure
+                    class="image is-4by3"
+                    v-if="specialist.specialist !== 'General Practitioner'"
+                  >
+                    <img
+                      :src="`https://ui-avatars.com/api/?name=${specialist.specialist}`
+                      "
+                    />
+                  </figure>
+                  <p
+                    class="subtitle has-text-centered"
+                    v-if="specialist.specialist !== 'General Practitioner'"
+                  >{{ specialist.specialist }}</p>
+                </a>
+              </div>
+            </div>
+            <div class="container" v-else>
+              <button class="button" @click="viewSpecializations">⬅️ Specializations</button>
+              <div v-if="doctorList == ''">
+              <br/>
+                <p
+                  class="subtitle has-text-centered"
+                >No doctors are currently available in this specialization.</p>
+              </div>
+              <div v-else class="card-content" v-for="doctors in doctorList" :key="doctors._id">
+              <h1 class="title is-3">Choose a doctor:</h1>
+                <div class="media">
+                  <figure class="media-left">
+                    <p class="image is-64x64">
+                      <img
+                        :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${doctors.alias}.jpg`"
+                      />
+                    </p>
+                  </figure>
+                  <div class="media-content">
+                    <p class="title is-4">{{ doctors.name }}</p>
+                    <p class="subtitle is-6">{{ pickedSpecialist }}</p>
+                    <button
+                      class="button"
+                      @click="pickDoctor(doctors._id, doctors.schedule)"
+                    >Appoint</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
 import axios from "axios";
-import socket from "../../socket";
 import store from "../../store";
+import NavigationTab from "../../components/NavigationTab.vue";
 
 export default {
   name: "DoctorList",
-
+  components: {
+    NavigationTab
+  },
   data() {
     return {
+      hospitalID: this.$store.state.hospitalID,
+      hospitalDetails: null,
       patientDetails: null,
       doctorList: null,
       specialistList: null,
-      checkRooms: []
+      pickedSpecialist: null,
+      specializationClicked: false
     };
   },
   async mounted() {
     //temporary 
     //needs to edit data GET to find hospital name, will be implemented in the future once main feature is ready
     await axios
-      .get("/api/manager")
-      .then((response) => this.specialistList = response.data[0].specializations);
-    await axios
       .get("/session/patient")
-      .then(response => this.patientDetails = response.data)
+      .then(response => this.patientDetails = response.data);
+  },
+  async created() {
+    await axios.get("/api/manager").then(response => this.hospitalDetails = response.data.find(x => x._id == this.hospitalID));
+    this.specialistList = await this.hospitalDetails.specializations;
   },
   methods: {
     async getDoctors(specialization) {
+      this.specializationClicked = true
+      this.pickedSpecialist = specialization;
       await axios
         .get("/api/admin")
-        .then(
-          (response) =>
-          (this.doctorList = response.data.filter(
-            (x) => x.specialist === specialization && x.schedule != '' && x.schedule.find(x => new Date(x.date).getTime() > new Date().getTime())
-          ))
-        );
+        .then((response) => (this.doctorList = response.data.filter((x) => x.specialist.find(x => x === specialization) && x.schedule != "" && x.schedule.find(x => new Date(x.date).getTime() > new Date().getTime()))));
+    },
+    viewSpecializations(){
+      this.specializationClicked = false
     },
     async pickDoctor(id, schedule) {
       store.commit("userID", id);
       store.commit("doctorSched", schedule);
-      store.commit("statusAvailability", true)
+      store.commit("statusAvailability", true);
+      store.commit("hospitalName", this.hospitalDetails.hospital);
       await this.$router.push(`/user/${this.patientDetails.username}/registration`);
     },
   },
