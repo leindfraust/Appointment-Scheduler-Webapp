@@ -3,7 +3,7 @@
     <h1 class="title has-text-centered">Profile image changed successfully, changes may take a few minutes to hours to take effect.</h1>
     <br/>
     <h1 class="subtitle has-text-centered">Redirecting browser in 15 seconds.</h1>
-    <h1 class="subtitle has-text-centered">If the browser does not reload automatically, please click <a href="/login">here</a></h1>
+    <h1 class="subtitle has-text-centered">If the browser does not reload automatically, please click <a href="/admin/login">here</a></h1>
   </div>
 </template>
 
@@ -11,7 +11,7 @@
 export default {
     name: 'imgUploadSuccess',
     created(){
-      setTimeout(() => {window.location.href="/login"}, 15000)
+      setTimeout(() => {window.location.href="/admin/login"}, 15000)
     }
 }
 </script>
