@@ -40,6 +40,9 @@ const user = require('./routes/api/user')
 const rooms = require('./routes/api/rooms')
 const geolocation = require('./routes/api/geolocation')
 
+//geoHospital queries global variable
+let userLocationQuery = ''
+
 //express usages
 app.use(cors());
 app.use(morgan('tiny'));
@@ -81,7 +84,7 @@ app.post('/api/patientUpdate', async (req, res) => {
     let patientID = req.body.patientID
     let patientFullName = req.body.patientFullName
     const Doctor = require('./model/adminList')
-    
+
     Doctor.findOneAndUpdate({
         _id: doctorID
     }, {
@@ -108,7 +111,7 @@ app.post('/api/doctorPullHospital', async (req, res) => {
     let doctorID = req.body.doctorID
     let hospital = req.body.hospital
     const Doctor = require('./model/adminList')
-    
+
     Doctor.findOneAndUpdate({
         _id: doctorID
     }, {
@@ -130,24 +133,28 @@ app.post('/api/doctorPullHospital', async (req, res) => {
     });
 });
 
-
-//update Province 
+//push city/municipality in a Province 
 app.post('/api/provinceUpdate', async (req, res) => {
     let provinceID = req.body.provinceID
+    let postalCode = req.body.postalCode
     let cityOrMunicipality = req.body.cityOrMunicipality
     let latitude = req.body.latitude
-    let longtitude = req.body.longtitude
+    let longitude = req.body.longitude
     const Province = require('./model/geolocation')
-    
+
     Province.findOneAndUpdate({
         _id: provinceID
     }, {
         $push: {
             citiesOrMunicipalities: {
-                cityOrMunicipality: cityOrMunicipality,
-                latitude: latitude,
-                longtitude: longtitude
+                name: cityOrMunicipality,
+                //postalCode: postalCode,
+                location: {
+                    type: "Point",
+                    coordinates: [longitude, latitude]
+                }
             }
+
         }
     }, {
         returnOriginal: false
@@ -164,19 +171,23 @@ app.post('/api/provinceUpdate', async (req, res) => {
 //pull city or municipality from a province
 app.post('/api/provinceCityPull', async (req, res) => {
     let provinceID = req.body.provinceID
+    let postalCode = req.body.postalCode
     let cityOrMunicipality = req.body.cityOrMunicipality
     let latitude = req.body.latitude
-    let longtitude = req.body.longtitude
+    let longitude = req.body.longitude
     const Province = require('./model/geolocation')
-    
+
     Province.findOneAndUpdate({
         _id: provinceID
     }, {
         $pull: {
             citiesOrMunicipalities: {
-                cityOrMunicipality: cityOrMunicipality,
-                latitude: latitude,
-                longtitude: longtitude
+                name: cityOrMunicipality,
+                postalCode: postalCode,
+                location: {
+                    type: "Point",
+                    coordinates: [longitude, latitude]
+                }
             }
         }
     }, {
@@ -192,31 +203,72 @@ app.post('/api/provinceCityPull', async (req, res) => {
     });
 });
 
+//geospatial query find near hospital in user's current location
+app.post('/api/geoFindHospitalNearestUser', async (req, res, next) => {
+    let province = req.body.province
+    let latitude = req.body.latitude
+    let longitude = req.body.longitude
+
+    const userLocation = {
+        type: 'Point',
+        coordinates: [longitude, latitude]
+    }
+
+    const Hospital = require('./model/manager')
+
+    Hospital.aggregate([{
+        $geoNear: {
+            near: {
+                type: 'Point',
+                coordinates: [longitude, latitude]
+            },
+            key: "location",
+            distanceField: 'distance',
+            spherical: true
+        }
+    }], (error, success) => {
+        if (error) {
+            console.log(error)
+            res.end()
+        } else {
+            console.log(success)
+            userLocationQuery = success.filter(x => x.province === province && x.status === 'Active')
+            res.status(200).end()
+        }
+    })
+
+})
+app.get('/api/geoHospitalNearestUser', (req, res, next) => {
+    res.send(userLocationQuery).status(200)
+})
 //io connect/usages
 io.on('connection', (socket) => {
     let roomNo = null
-    const Rooms = require('./model/rooms')
-    socket.on('join room', (roomID, user) => {
-        socket.join(roomID)
-        roomNo = roomID
-        Rooms.find({
-            roomID: roomNo
+    const Patient = require('./model/user')
+    socket.on('join room', (id) => {
+        socket.join(id)
+        roomNo = id
+        Patient.find({
+            _id: id
         }).then(response => {
-            io.to(roomNo).emit('messages', response)
+            io.to(roomNo).emit('messages', response[0].messages)
+        }).catch(error => {
+            //do nothing
         })
     });
     console.log('Client connected');
     socket.on('connect', () => console.log('Client connected'))
     socket.on('disconnect', () => console.log('Client disconnected'));
     socket.on('message', (msg, user, date) => {
-        Rooms.findOneAndUpdate({
-            roomID: roomNo
+        Patient.findOneAndUpdate({
+            _id: roomNo
         }, {
             $push: {
                 messages: {
-                    user: user,
+                    from: user,
                     message: msg,
-                    date: date
+                    date: date,
+                    new: true
                 },
             },
         }, {
@@ -226,9 +278,50 @@ io.on('connection', (socket) => {
                 console.log(error)
             } else {
                 console.log(success)
+                io.to(roomNo).emit('send messages', success.messages)
             }
-        })
-        io.to(roomNo).emit('chat message', msg, user, date);
+        });
+    });
+    socket.on('update message', (notifications) => {
+        Patient.findOneAndUpdate({
+            _id: roomNo
+        }, {
+            messages: notifications
+        }, {
+            returnOriginal: false
+        }, function (error, success) {
+            if (error) {
+                console.log(error)
+            } else {
+                console.log(success)
+            }
+        });
+    });
+    socket.on('delete message', (id, notif) => {
+        Patient.findOneAndUpdate({
+            _id: id
+        }, {
+            $pull: {
+                messages: {
+                    from: notif.user,
+                    message: notif.message,
+                    date: notif.date,
+                    new: notif.new
+                }
+            }
+        }, {
+            returnOriginal: false
+        }, function (error, success) {
+            if (error) {
+                console.log(error)
+            } else {
+                console.log(success)
+            }
+        }).clone().catch((err) => {
+            console.log(err)
+        }).then(response => {
+            io.to(roomNo).emit('delete messages', response.messages)
+        });
     });
 });
 
@@ -310,6 +403,32 @@ app.post('/api/imgUploadAdmin', async function (req, res, next) {
     }, 5000)
 });
 
+//manager upload photo 
+app.post('/api/imgUploadManager', async function (req, res, next) {
+
+    const form = formidable({
+        multiples: true
+    })
+    form.parse(req, (err, fields, files) => {
+        if (err) {
+            next(err);
+            return;
+        }
+        cloudinary.v2.uploader.upload(files.imgFile.filepath, {
+            public_id: fields.hospital,
+            folder: "assets/managers/",
+            overwrite: true,
+            invalidate: true,
+            format: "jpg"
+        }, function (error, result) {
+            console.log(result, error);
+        });
+    });
+    setTimeout(() => {
+        res.status(200).redirect('/imgUploadSuccessManager')
+    }, 5000)
+});
+
 //nodemailer config
 var transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -333,8 +452,32 @@ app.post('/api/sendMail', async (req, res) => {
     transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
             console.log(error);
+            res.status(400).end();
         } else {
             console.log('Email sent: ' + info.response);
+            res.status(200).end();
+        }
+    });
+});
+
+//OTP
+app.post('/api/OTPMail', async (req, res) => {
+    let email = req.body.email
+    let code = req.body.code
+    var mailOptions = {
+        from: process.env.nodemaileruser,
+        to: email,
+        subject: 'Verification',
+        text: `Your verification code is: ${code}. \nIf you did not request this, please reply to this email. \n\nBest Regards,\nRonan`
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error);
+            res.status(400).end();
+        } else {
+            console.log('Email sent: ' + info.response);
+            res.status(200).end();
         }
     });
 });
