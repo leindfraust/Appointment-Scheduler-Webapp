@@ -4,7 +4,7 @@ const {
 } = mongoose;
 
 const geolocationSchema = new Schema({
-    province: Array,
+    province: String,
     citiesOrMunicipalities: Array
 });
 

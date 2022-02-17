@@ -36,7 +36,12 @@ const userSchema = new Schema({
     city: {
         type: String,
         required: true
-    }
+    },
+    currentAddress: {
+        type: String,
+        required: true
+    },
+    messages: Array
 });
 
 const user = mongoose.model('user', userSchema);

@@ -4,6 +4,10 @@ const {
 } = mongoose;
 
 const appointmentSchema = new Schema({
+    hospital: {
+        type: String,
+        required: true
+    },
     doctor: {
         type: String,
         required: true
@@ -27,7 +31,7 @@ const appointmentSchema = new Schema({
         required: true,
     },
     priorityNum: {
-        type: Number,
+        type: String,
         required: true,
     }
 });

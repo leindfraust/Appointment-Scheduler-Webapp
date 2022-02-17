@@ -16,6 +16,10 @@ const managerSchema = new Schema({
         type: String,
         required: true
     },
+    type: {
+        type: String,
+        required: true
+    },
     email: {
         type: String,
         required: true
@@ -32,13 +36,15 @@ const managerSchema = new Schema({
         type: String,
         required: true
     },
-    latitude: {
+    postalCode: {
         type: Number,
         required: true
     },
-    longtitude: {
-        type: Number,
-        required: true
+    location: {
+        type: {
+            type: String,
+        },
+        coordinates: [Number]
     },
     specializations: {
         type: Array,
@@ -51,9 +57,11 @@ const managerSchema = new Schema({
     password: {
         type: String,
         required: true
-    }
+    },
+    details: Array
 });
 
+managerSchema.index({location: '2dsphere'})
 const manager = mongoose.model('manager', managerSchema);
 
 module.exports = manager

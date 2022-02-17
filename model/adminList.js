@@ -4,17 +4,21 @@ const {
 } = mongoose;
 
 const adminSchema = new Schema({
+    verified: {
+        type: Boolean,
+        default: false
+    },
     alias: {
+        type: String,
+        required: true,
+    },
+    licenseNo: {
         type: String,
         required: true,
     },
     name: {
         type: String,
         required: true,
-    },
-    specialist: {
-        type: String,
-        required: true
     },
     gmail: {
         type: String,
@@ -28,9 +32,8 @@ const adminSchema = new Schema({
         type: String,
         required: true,
     },
-    schedule: {
-        type: Array,
-    },
+    specialist: Array,
+    schedule: Array,
     patients: Array,
     hospitalOrigin: Array
 });
