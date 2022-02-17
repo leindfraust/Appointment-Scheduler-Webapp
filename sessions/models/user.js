@@ -10,9 +10,9 @@ router.post('/', (req, res) => {
     req.session.firstName = req.body.firstName
     req.session.lastName = req.body.lastName
     req.session.username = req.body.username
-    req.session.password = req.body.password
     req.session.province = req.body.province
     req.session.city = req.body.city
+    req.session.currentAddress = req.body.currentAddress
     req.session.save((err) => {
         if (err) {
             return next(err);
@@ -26,9 +26,9 @@ router.put('/', (req, res) => {
     req.session.firstName = req.body.fullname || req.session.lastName
     req.session.lastName = req.body.lastName || req.session.lastName
     req.session.username = req.body.username || req.session.username
-    req.session.password = req.body.password || req.session.password
     req.session.province = req.body.province || req.session.province
     req.session.city = req.body.city || req.session.city
+    req.session.currentAddress = req.body.currentAddress || req.session.currentAddress
     req.session.save((err) => {
         if (err) {
             return next(err);

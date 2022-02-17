@@ -9,7 +9,6 @@ router.post('/', (req, res) => {
     req.session._id = req.body._id
     req.session.hospital = req.body.hospital
     req.session.username = req.body.username
-    req.session.password = req.body.password
     req.session.save((err) => {
         if (err) {
             return next(err);
