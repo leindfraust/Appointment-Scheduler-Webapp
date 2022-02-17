@@ -8,19 +8,26 @@
           <p
             class="subtitle"
           >📌 {{ hospitalDetails.barangayORStreet }}, {{ hospitalDetails.city }}, {{ hospitalDetails.province }}</p>
+          <p class="subtitle is-6">{{ hospitalDetails.details[0].description }}</p>
           <figure class="image is-16by9">
             <img
               :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/managers/${hospitalDetails.hospital}.jpg`"
             />
           </figure>
           <br />
-          <iframe
-            :src="`https://maps.google.com/maps?q=${hospitalDetails.location.coordinates[1]},${hospitalDetails.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"
-          ></iframe>
-          <p class="subtitle">Contacts:</p>
-          <ul class="block" v-if="typeof hospitalDetails.details[0].contacts !== 'undefined'">
-            <li v-for="contacts in hospitalDetails.details[0].contacts">{{ contacts.contact }}</li>
-          </ul>
+          <div class="columns">
+            <div class="column">
+              <iframe
+                :src="`https://maps.google.com/maps?q=${hospitalDetails.location.coordinates[1]},${hospitalDetails.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"
+              ></iframe>
+            </div>
+            <div class="column">
+              <p class="subtitle">Contacts:</p>
+              <ul class="block" v-if="typeof hospitalDetails.details[0].contacts !== 'undefined'">
+                <li v-for="contacts in hospitalDetails.details[0].contacts">{{ contacts.contact }}</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
       <div class="column">
@@ -56,13 +63,13 @@
             <div class="container" v-else>
               <button class="button" @click="viewSpecializations">⬅️ Specializations</button>
               <div v-if="doctorList == ''">
-              <br/>
+                <br />
                 <p
                   class="subtitle has-text-centered"
                 >No doctors are currently available in this specialization.</p>
               </div>
               <div v-else class="card-content" v-for="doctors in doctorList" :key="doctors._id">
-              <h1 class="title is-3">Choose a doctor:</h1>
+                <h1 class="title is-3">Choose a doctor:</h1>
                 <div class="media">
                   <figure class="media-left">
                     <p class="image is-64x64">
@@ -129,7 +136,7 @@ export default {
         .get("/api/admin")
         .then((response) => (this.doctorList = response.data.filter((x) => x.specialist.find(x => x === specialization) && x.schedule != "" && x.schedule.find(x => new Date(x.date).getTime() > new Date().getTime()))));
     },
-    viewSpecializations(){
+    viewSpecializations() {
       this.specializationClicked = false
     },
     async pickDoctor(id, schedule) {
