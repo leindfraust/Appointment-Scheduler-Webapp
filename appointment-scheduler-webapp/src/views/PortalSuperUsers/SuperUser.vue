@@ -105,7 +105,7 @@
                         <th class="has-text-black-ter">City</th>
                         <th class="has-text-black-ter">Barangay or Street</th>
                         <th class="has-text-black-ter">Latitude</th>
-                        <th class="has-text-black-ter">Longtitude</th>
+                        <th class="has-text-black-ter">longitude</th>
                         <th class="has-text-black-ter">Specializations</th>
                     </tr>
                 </thead>
@@ -135,8 +135,8 @@
                         <td class="has-text-black-ter">{{ manager.province }}</td>
                         <td class="has-text-black-ter">{{ manager.city }}</td>
                         <td class="has-text-black-ter">{{ manager.barangayORStreet }}</td>
-                        <td class="has-text-black-ter">{{ manager.latitude }}</td>
-                        <td class="has-text-black-ter">{{ manager.longtitude }}</td>
+                        <td class="has-text-black-ter">{{ manager.location.coordinates[1]}}</td>
+                        <td class="has-text-black-ter">{{ manager.location.coordinates[0] }}</td>
                         <td
                             class="has-text-black-ter"
                             v-for="specialist in manager.specializations"
@@ -175,7 +175,7 @@
                         <td class="has-text-black-ter">{{ index + 1 }}</td>
                         <td class="has-text-black-ter">{{ doctor.alias }}</td>
                         <td class="has-text-black-ter">{{ doctor.name }}</td>
-                        <td class="has-text-black-ter">{{ doctor.specialist }}</td>
+                        <td class="has-text-black-ter">{{ doctor.specialist.toString() }}</td>
                         <td class="has-text-black-ter">{{ doctor.gmail }}</td>
                         <td
                             class="has-text-black-ter"
@@ -232,7 +232,10 @@
                 v-for="(geolocation, index) in provinceAndCitiesIndexed"
                 :key="index"
             >
-                <a class="has-text-danger" @click="deleteProvince(geolocation[0]._id)">Delete Province</a>
+                <a
+                    class="has-text-danger"
+                    @click="deleteProvince(geolocation[0]._id)"
+                >Delete Province</a>
                 <p class="subtitle has-text-black">Province: {{ index }}</p>
 
                 <table class="table is-striped is-fullwidth is-narrow is-bordered">
@@ -242,25 +245,25 @@
                             <th class="has-text-black-ter">No.</th>
                             <th class="has-text-black-ter">City/Municipality</th>
                             <th class="has-text-black-ter">Latitude</th>
-                            <th class="has-text-black-ter">Longtitude</th>
+                            <th class="has-text-black-ter">Longitude</th>
                         </tr>
                     </thead>
                     <tbody
-                        v-for="(cityOrMunicipality, index) in geolocation[0].citiesOrMunicipalities"
+                        v-for="(cityOrMunicipality, index) in geolocation[0].citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
                         :key="index"
                     >
                         <tr>
                             <button
                                 class="button dropdown-item has-text-danger"
                                 type="button"
-                                @click="cityDelete(geolocation[0]._id, cityOrMunicipality.cityOrMunicipality, cityOrMunicipality.latitude, cityOrMunicipality.longtitude)"
+                                @click="cityDelete(geolocation[0]._id, cityOrMunicipality.name, cityOrMunicipality.location.coordinates[1], cityOrMunicipality.location.coordinates[0])"
                             >Delete</button>
                             <td class="has-text-black-ter">{{ index + 1 }}</td>
                             <td
                                 class="has-text-black-ter"
-                            >{{ cityOrMunicipality.cityOrMunicipality }}</td>
-                            <td class="has-text-black-ter">{{ cityOrMunicipality.latitude }}</td>
-                            <td class="has-text-black-ter">{{ cityOrMunicipality.longtitude }}</td>
+                            >{{ cityOrMunicipality.name }}</td>
+                            <td class="has-text-black-ter">{{ cityOrMunicipality.location.coordinates[1] }}</td>
+                            <td class="has-text-black-ter">{{ cityOrMunicipality.location.coordinates[0] }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -301,9 +304,9 @@
                                 :key="province._id"
                             >
                                 <a
-                                    @click="chooseProvince(province._id, province.province[0])"
+                                    @click="chooseProvince(province._id, province.province)"
                                     class="dropdown-item"
-                                >{{ province.province[0] }}</a>
+                                >{{ province.province }}</a>
                             </div>
                         </div>
                     </div>
@@ -321,18 +324,25 @@
                     <br />
                     <label class="label">Latitude N</label>
                     <input class="input" type="number" v-model="latitude" placeholder="Latitude" />
-                    <label class="label">Longtitude E</label>
+                    <label class="label">longitude E</label>
                     <input
                         class="input"
                         type="number"
-                        v-model="longtitude"
-                        placeholder="Longtitude"
+                        v-model="longitude"
+                        placeholder="longitude"
+                    />
+                    <label class="label">Postal Code</label>
+                    <input
+                        class="input"
+                        type="number"
+                        v-model="postalCode"
+                        placeholder="Postal Code"
                     />
                     <button
                         class="button"
                         type="button"
                         @click="cityOrMunicipalityPost"
-                        :disabled="selectedProvince == '' || cityOrMunicipality == '' || latitude == '' || longtitude == ''"
+                        :disabled="selectedProvince == '' || cityOrMunicipality == '' || latitude == '' || longitude == ''"
                     >Confirm</button>
                     <div
                         v-if="cityOrMunicipalityPostSuccess"
@@ -362,7 +372,8 @@ export default {
         provinceAndCitiesIndexed() {
             return _.groupBy(
                 this.provinceList.filter(x => {
-                    return (x.citiesOrMunicipalities.find(x => { return x.cityOrMunicipality.toLowerCase().includes(this.searchBar.toLowerCase()) }));
+                    return (x.citiesOrMunicipalities.find(x => { return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) }));
+                    
                 }),
                 "province"
             )
@@ -371,7 +382,6 @@ export default {
     async mounted() {
         await axios.get("/session/superuser").then(response => this.superUser = response.data.superuser)
         await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
-        console.log(this.provinceAndCitiesIndexed)
     },
     data() {
         return {
@@ -396,7 +406,8 @@ export default {
             province: '',
             cityOrMunicipality: '',
             latitude: '',
-            longtitude: '',
+            longitude: '',
+            postalCode: '',
             provinceList: [],
             selectedProvince: '',
             selectedProvinceID: '',
@@ -490,16 +501,17 @@ export default {
             await axios.get('/api/user').then(response => this.patientAccounts = response.data)
 
         },
-        async cityDelete(id, city, latitude, longtitude) {
+        async cityDelete(id, city, latitude, longitude) {
             await axios.post("/api/provinceCityPull", {
                 provinceID: id,
                 cityOrMunicipality: city,
                 latitude: latitude,
-                longtitude: longtitude
+                longitude: longitude,
+                //postalCode: postalCode
             });
             await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
         },
-        async deleteProvince(id){
+        async deleteProvince(id) {
             await axios.delete(`/api/geolocation/${id}`)
             await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
         },
@@ -531,14 +543,15 @@ export default {
                 provinceID: this.selectedProvinceID,
                 cityOrMunicipality: this.cityOrMunicipality,
                 latitude: this.latitude,
-                longtitude: this.longtitude
+                longitude: this.longitude,
+                postalCode: this.postalCode
             });
             this.cityOrMunicipalityPostSuccess = true
             this.selectedProvince = ''
             this.selectedProvinceID = ''
             this.cityOrMunicipality = ''
             this.latitude = ''
-            this.longtitude = ''
+            this.longitude = ''
 
             await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
         },
