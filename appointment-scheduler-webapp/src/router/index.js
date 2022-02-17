@@ -12,8 +12,11 @@ import SignUpAdmin from '../views/PortalAdmin/SignUpAdmin.vue'
 import Scheduler from '../views/PortalAdmin/Scheduler.vue'
 import AdminProfile from '../views/PortalAdmin/Profile.vue'
 import PatientLogs from '../views/PortalAdmin/PatientLogs.vue'
+import AdminSecurity from '../views/PortalAdmin/Security.vue'
 import DoctorPickSuccess from '../views/PortalSuccessConfirmations/DoctorPickSuccess.vue'
 import ImageUploadSuccess from '../views/PortalSuccessConfirmations/ImageUploadSuccess'
+import ImageUploadSuccessAdmin from '../views/PortalSuccessConfirmations/ImageUploadSuccessAdmin.vue'
+import ImageUploadSuccessManager from '../views/PortalSuccessConfirmations/imageUploadSuccessManager.vue'
 import UserSignUp from '../views/Public/UserSignUp.vue'
 import UserLogin from '../views/Public/UserLogin.vue'
 import User from '../views/Public/User.vue'
@@ -22,6 +25,8 @@ import SuperUser from '../views/PortalSuperUsers/SuperUser.vue'
 import SuperUserLogin from '../views/PortalSuperUsers/SuperUserLogin.vue'
 import Manager from '../views/PortalSuperUsers/Manager.vue'
 import ManagerLogin from '../views/PortalSuperUsers/ManagerLogin.vue'
+import ManagerSignup from '../views/PortalSuperUsers/ManagerSignup.vue'
+import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
 
     const routes = [{
         path: '/',
@@ -37,9 +42,22 @@ import ManagerLogin from '../views/PortalSuperUsers/ManagerLogin.vue'
         }
     },
     {
+        path: '/user/manager/signup',
+        name: 'ManagerSingup',
+        component: ManagerSignup
+    },
+    {
         path: '/user/manager/login',
         name: 'ManagerLogin',
         component: ManagerLogin,
+    },
+    {
+        path: '/user/manager/:user/profile',
+        name: 'ManagerProfile',
+        component: ManagerProfile,
+        meta: {
+            requiresManagerAuth: true
+        }
     },
     {
         path: '/user/superuser',
@@ -89,6 +107,14 @@ import ManagerLogin from '../views/PortalSuperUsers/ManagerLogin.vue'
         },
     },
     {
+        path: '/admin/user/:user/security',
+        name: 'AdminSecurity',
+        component: AdminSecurity,
+        meta: {
+            requiresAuth: true
+        },
+    },
+    {
         path: '/admin/user/:user/patients',
         name: 'PatientLogs',
         component: PatientLogs,
@@ -102,6 +128,22 @@ import ManagerLogin from '../views/PortalSuperUsers/ManagerLogin.vue'
         component: ImageUploadSuccess,
         meta: {
             requireImgUploadSuccess: true
+        }
+    },
+    {
+        path: '/imgUploadSuccessAdmin',
+        name :'imgUploadSuccessAdmin',
+        component: ImageUploadSuccessAdmin,
+        meta: {
+            requireImgUploadSuccess: true
+        }
+    },
+    {
+        path: '/imgUploadSuccessManager',
+        name: 'imgUploadSuccessManager',
+        component: ImageUploadSuccessManager,
+        meta: {
+            requireImgUploadSuccessManager: true
         }
     },
     {
@@ -173,11 +215,22 @@ router.beforeEach((to, from, next) => {
 }); 
 
 router.beforeEach((to, from, next) => {
-    if (to.matched.some(route => route.meta.requireImgUploadSucess)) {
+    if (to.matched.some(route => route.meta.requireImgUploadSuccess)) {
         if (store.state.imgSuccess) {
             return next();
         } else {
             return next('/admin/login');
+        }
+    }
+    next();
+});
+
+router.beforeEach((to, from, next) => {
+    if (to.matched.some(route => route.meta.requireImgUploadSuccessManager)) {
+        if (store.state.imgSuccessManager) {
+            return next();
+        } else {
+            return next('/user/manager/login');
         }
     }
     next();
