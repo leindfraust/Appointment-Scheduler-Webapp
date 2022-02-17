@@ -50,7 +50,6 @@ export default {
     name: "SuperUserLogin",
     async mounted() {
         await axios.get('/api/superuser').then(response => this.gmails = response.data)
-        await axios.get('/api/code').then(response => this.codes = response.data)
         await axios.get('/session/superuser').then(response => this.superUserConfirmEmail = response.data)
 
         if (this.superUserConfirmEmail.superuser) {
@@ -73,7 +72,8 @@ export default {
     },
     methods: {
         async authenticateMail() {
-            this.superUserConfirmEmail = this.gmails[0].gmail.find(x => x === this.superUserEmail)
+            await axios.get('/api/code').then(response => this.codes = response.data)
+            this.superUserConfirmEmail = await this.gmails[0].gmail.find(x => x === this.superUserEmail)
             if (await this.superUserConfirmEmail) {
                 let randomCode = Math.floor(1000 + Math.random() * 9000);
                 if (this.codes.length === 0) {
