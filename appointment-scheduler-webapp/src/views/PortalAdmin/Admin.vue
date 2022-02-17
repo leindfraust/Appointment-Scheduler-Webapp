@@ -1,11 +1,12 @@
 <template>
-  <div class="columns">
-    <div class="column is-1">
+  <div class="columns" style="height: 100vh; background-color: whitesmoke">
+    <div class="column is-2" style="background-color: whitesmoke;" >
       <AdminMenu />
     </div>
-    <div class="column">
+    <div class="column" style="background-color: whitesmoke;">
       <section class="section" style="background-color: whitesmoke;">
-        <div class="container is-widescreen is-fullhd" style="padding: 15">
+      <h1 class="title" >UPCOMING APPOINTMENTS</h1>
+        <div class="container is-widescreen is-fullhd">
           <div class="field">
             <div class="control">
               <input
@@ -18,13 +19,14 @@
             </div>
           </div>
           <div class="box" v-for="(appointmentList, index) in appointmentSchedules" :key="index">
-            <h1 class="subtitle has-text-black">Schedule: {{ new Date(index).toDateString() }} </h1>
+            <h1 class="subtitle has-text-black">Schedule: {{ new Date(index).toDateString() }}</h1>
             <div class="table-container">
               <table class="table is-striped is-narrow is-fullwidth is-bordered">
                 <thead>
                   <tr>
                     <th class="has-text-black-ter">Controls</th>
                     <th class="has-text-black-ter">Priority No.</th>
+                    <th class="has-text-black-ter">Hospital Appointed</th>
                     <th class="has-text-black-ter">First Name</th>
                     <th class="has-text-black-ter">Last Name</th>
                     <th class="has-text-black-ter">Contact Number</th>
@@ -101,6 +103,7 @@
                       <button class="modal-close is-large" aria-label="close" @click="toggleModal"></button>
                     </div>
                     <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
+                    <th class="has-text-black-ter">{{ appointments.hospital }}</th>
                     <td class="has-text-black-ter">{{ appointments.firstName }}</td>
                     <td class="has-text-black-ter">{{ appointments.lastName }}</td>
                     <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
@@ -227,6 +230,9 @@ th {
 @media (max-width: 991.98px) {
   .modal input {
     width: 300px !important;
+  }
+  #titleBox {
+    width: 100% !important
   }
 }
 </style>
