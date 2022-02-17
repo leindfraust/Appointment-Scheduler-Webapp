@@ -1,11 +1,13 @@
 <template>
-    <section class="hero is-fullheight">
+    <section class="hero is-fullheight" style="background-color: whitesmoke;">
         <div class="hero-body">
             <div class="container has-text-centered">
                 <div
                     class="card animate__animated animate__fadeInLeft"
+                    id="container-mobile"
                     style="width: 33%; margin: auto"
                 >
+                <p class="notification is-success" v-if="$store.state.accountCreated">The account has been successfully created, login to activate the account now.</p>
                     <div class="card-content">
                         <div class="content">
                             <form class="field" style="margin-top: 5%">
@@ -109,8 +111,16 @@ export default {
                 }
             }
         },
+        async signup() {
+            await this.$router.push('/user/manager/signup')
+        }
     }
 }
 </script>
 <style scoped>
+@media (max-width: 991.98px) {
+    #container-mobile {
+        width: 100% !important;
+    }
+}
 </style>
