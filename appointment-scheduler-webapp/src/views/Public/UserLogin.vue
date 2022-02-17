@@ -1,11 +1,12 @@
 <template>
   <NavigationTabVue />
   <section class="section is-medium">
-    <div class="container is-fluid has-text-centered" style="width: 40%">
+    <div class="container has-text-centered animate__animated animate__fadeInLeft" style="width: 40%">
       <div class="box">
-         <p class="notification is-info">Doctor users, click <a href="/admin/login">here</a></p>
+         <p class="notification is-success" v-if="$store.state.accountCreated">Your account has been successfully created.</p>
         <br/>
-        <form class="field animate__animated animate__fadeInLeft">
+        <p class="subtitle has-text-info has-text-left">Login to make an appointment.</p>
+        <div class="field">
           <div class="control">
             <input class="input" type="text" v-model="username" placeholder="username" required />
           </div>
@@ -24,7 +25,8 @@
           <br/><br/>
           <h1 class="subtitle">OR</h1>
           <a href="/user/signup">Create an account</a>
-        </form>
+        </div>
+        <p class="notification is-info">Doctor users, click <a href="/admin/login">here</a></p>
       </div>
     </div>
   </section>
@@ -33,6 +35,7 @@
 import axios from 'axios'
 import store from '../../store'
 import NavigationTabVue from '../../components/NavigationTab.vue'
+import socket from '../../socket'
 
 export default {
   username: "UserLogin",
@@ -56,6 +59,7 @@ export default {
           (this.userPatient = response.data)
       );
     if (await this.userPatient.username) {
+      socket.connect()
       this.$store.commit("patientUsername", this.userPatient.username)
       this.$store.commit("patientID", this.userPatient._id)
       await this.$router.push(`/user/${this.userPatient.username}`);
@@ -79,6 +83,7 @@ export default {
           );
         // if username and password matched to a user
         if (await this.userPatient) {
+          socket.connect();
           store.commit("patientUsername", this.userPatient.username)
           store.commit("patientID", this.userPatient._id)
           await this.$router.push(`/user/${this.userPatient.username}`);
@@ -87,9 +92,9 @@ export default {
             firstName: this.userPatient.firstName,
             lastName: this.userPatient.lastName,
             username: this.username,
-            password: this.password,
             province: this.userPatient.province,
-            city: this.userPatient.city
+            city: this.userPatient.city,
+            currentAddress: this.userPatient.currentAddress
           });
         } else {
           this.validateMessage = "Incorrect username or password";
@@ -105,5 +110,10 @@ export default {
 <style scoped>
 .section {
   background-color: whitesmoke;
+}
+@media (max-width: 991.98px){
+  .container {
+    width: 100% !important
+  }
 }
 </style>
