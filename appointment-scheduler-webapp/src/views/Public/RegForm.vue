@@ -1,4 +1,5 @@
 <template>
+<NavigationTab/>
   <section class="section" style="background-color: whitesmoke;">
     <div class="modal" :class="{ 'is-active': isSchedLoading }">
       <div class="modal-background"></div>
@@ -23,7 +24,7 @@
       >
         <form class="field">
           <div v-if="!basicDetailsDone">
-            <span class="has-text-danger">All fields are required.*</span>
+            <div class="has-text-danger">All fields are required.*</div>
             <label class="label">First name</label>
             <div class="control">
               <input
@@ -37,7 +38,14 @@
             </div>
             <label class="label">Last Name</label>
             <div class="control">
-              <input class="input" type="text" v-model="lastName" placeholder="Last Name" required disabled/>
+              <input
+                class="input"
+                type="text"
+                v-model="lastName"
+                placeholder="Last Name"
+                required
+                disabled
+              />
             </div>
             <label class="label">Contact Number:</label>
             <div class="block control">
@@ -68,12 +76,16 @@
                 </template>
               </v-date-picker>
             </div>
+            <div class="block control">
+              <label class="label">Current Address</label>
+              <input class="input" type="text" :value="currentAddress" disabled />
+            </div>
             <br />
             <div class="block has-text-centered">
               <button
                 type="button"
                 class="button is-success"
-                :disabled="firstName == '' || lastName == '' || birthDay == null || contactNum == '' || comments == ''"
+                :disabled="firstName == '' || lastName == '' || birthDay == null || contactNum == '' || comments == '' || currentAddress == ''"
                 @click="proceedSched"
               >Proceed</button>
             </div>
@@ -95,7 +107,7 @@
                     type="radio"
                     class="radioSched"
                     name="schedule"
-                    @click="pickSched(index, schedules)"
+                    @click="pickSched(index, schedules, schedules.prefix)"
                   />
                   <span
                     class="subtitle has-text-black"
@@ -138,9 +150,15 @@
 <script>
 import axios from "axios";
 import store from "../../store";
+import NavigationTab from "../../components/NavigationTab.vue";
+import NavigationTab1 from "../../components/NavigationTab.vue";
 
 export default {
   name: "RegForm",
+  components: {
+    NavigationTab,
+    NavigationTab1
+},
   data() {
     return {
       checkPatientRecord: null,
@@ -153,6 +171,7 @@ export default {
       comments: null,
       contactNum: null,
       schedule: null,
+      currentAddress: null,
       priorityNum: null,
       patientsAppointed: null,
       doctorDetails: null,
@@ -160,7 +179,10 @@ export default {
       isActiveTabOne: true,
       isActiveTabTwo: false,
       isSchedLoading: false,
-      schedAvailability: false
+      schedAvailability: false,
+      radioIndex: null,
+      prefix: null,
+      hospital: store.state.hospitalName
     };
   },
   async mounted() {
@@ -175,74 +197,105 @@ export default {
     await axios.get('/session/patient').then(response => this.patient = response.data)
     this.firstName = await this.patient.firstName
     this.lastName = await this.patient.lastName
-    console.log(await this.patient)
     this.checkPatientRecord = await this.doctorDetails.patients.find(x => x.patient === this.patient._id)
+    this.currentAddress = await this.patient.currentAddress
+    console.log(await this.doctorDetails)
   },
   methods: {
     async appoint() {
+      let radio = document.getElementsByClassName('radioSched');
+      let statusSched = document.getElementsByClassName('statusSched')
+      //check appointed patients in the selected date
       await axios
         .get("/api/appointmentList")
         .then(
           (response) =>
-          (this.priorityNum =
+          (this.patientsAppointed =
             response.data.filter(
               (e) =>
                 e.schedule[0].date === this.schedule.date &&
                 e.doctor === this.doctor
-            ).length + 1)
-        );
-      if (typeof this.checkPatientRecord === 'undefined' || !this.checkPatientRecord) {
-        await axios.post('/api/patientUpdate', {
-          doctorID: this.doctor,
-          patientID: this.patient._id,
-          patientFullName: this.firstName + " " + this.lastName
-        });
-        await axios.post("/api/appointmentList", {
-          doctor: this.doctor,
-          firstName: this.firstName,
-          lastName: this.lastName,
-          contactNum: this.contactNum,
-          birthDay: this.birthDay.toDateString(),
-          comments: this.comments,
-          schedule: this.schedule,
-          priorityNum: this.priorityNum,
-        });
-        let patientDetails = {
-          doctor: this.doctorDetails.name,
-          firstName: this.firstName,
-          lastName: this.lastName,
-          contactNum: this.contactNum,
-          birthDay: this.birthDay.toDateString(),
-          comments: this.comments,
-          schedule: this.schedule,
-          priorityNum: this.priorityNum,
-        };
-        store.commit("patientDetails", patientDetails);
-        await this.$router.push("/success");
+            ).length));
+      //check how many appointed patients in regards to the appointment limit set by the doctor
+      if (await this.patientsAppointed < this.schedule.appointmentLimit) {
+        //if success
+        await axios
+          .get("/api/appointmentList")
+          .then(
+            (response) =>
+            (this.priorityNum =
+              response.data.filter(
+                (e) =>
+                  e.schedule[0].date === this.schedule.date &&
+                  e.doctor === this.doctor
+              ).length + 1)
+          );
+        //if patient is new to the doctor, patient will be recorded as list of patients in doctor's profile
+        if (typeof this.checkPatientRecord === 'undefined' || !this.checkPatientRecord) {
+          await axios.post('/api/patientUpdate', {
+            doctorID: this.doctor,
+            patientID: this.patient._id,
+            patientFullName: this.firstName + " " + this.lastName
+          });
+          await axios.post("/api/appointmentList", {
+            hospital: this.hospital,
+            doctor: this.doctor,
+            firstName: this.firstName,
+            lastName: this.lastName,
+            contactNum: this.contactNum,
+            birthDay: this.birthDay.toDateString(),
+            comments: this.comments,
+            schedule: this.schedule,
+            priorityNum: this.prefix + "-" + this.priorityNum,
+          });
+          let patientDetails = {
+            hospital: this.hospital,
+            doctor: this.doctorDetails.name,
+            firstName: this.firstName,
+            lastName: this.lastName,
+            contactNum: this.contactNum,
+            birthDay: this.birthDay.toDateString(),
+            comments: this.comments,
+            schedule: this.schedule,
+            priorityNum: this.prefix + "-" + this.priorityNum,
+          };
+          store.commit("patientDetails", patientDetails);
+          await this.$router.push("/success");
+        } else {
+          await axios.post("/api/appointmentList", {
+            hospital: this.hospital,
+            doctor: this.doctor,
+            firstName: this.firstName,
+            lastName: this.lastName,
+            contactNum: this.contactNum,
+            birthDay: this.birthDay.toDateString(),
+            comments: this.comments,
+            schedule: this.schedule,
+            priorityNum: this.prefix + "-" + this.priorityNum,
+          });
+          let patientDetails = {
+            hospital: this.hospital,
+            doctor: this.doctorDetails.name,
+            firstName: this.firstName,
+            lastName: this.lastName,
+            contactNum: this.contactNum,
+            birthDay: this.birthDay.toDateString(),
+            comments: this.comments,
+            schedule: this.schedule,
+            priorityNum: this.prefix + "-" + this.priorityNum,
+          };
+          store.commit("statusAvailability", false)
+          store.commit("patientDetails", patientDetails);
+          await this.$router.push("/success");
+        }
+        //if not
       } else {
-        await axios.post("/api/appointmentList", {
-          doctor: this.doctor,
-          firstName: this.firstName,
-          lastName: this.lastName,
-          contactNum: this.contactNum,
-          birthDay: this.birthDay.toDateString(),
-          comments: this.comments,
-          schedule: this.schedule,
-          priorityNum: this.priorityNum,
-        });
-        let patientDetails = {
-          doctor: this.doctorDetails.name,
-          firstName: this.firstName,
-          lastName: this.lastName,
-          contactNum: this.contactNum,
-          birthDay: this.birthDay.toDateString(),
-          comments: this.comments,
-          schedule: this.schedule,
-          priorityNum: this.priorityNum,
-        };
-        store.commit("statusAvailability", false)
-        store.commit("patientDetails", patientDetails);
-        await this.$router.push("/success");
+        this.isSchedLoading = false
+        this.schedAvailability = false
+        this.schedule = null
+        radio[this.radioIndex].checked = false
+        radio[this.radioIndex].disabled = true
+        statusSched[this.radioIndex].style.display = 'block'
       }
     },
     proceedSched() {
@@ -255,7 +308,8 @@ export default {
       this.isActiveTabTwo = false
       this.basicDetailsDone = false
     },
-    async pickSched(e, sched) {
+    async pickSched(e, sched, prefix) {
+      this.radioIndex = e
       this.isSchedLoading = true
       let radio = document.getElementsByClassName('radioSched');
       let statusSched = document.getElementsByClassName('statusSched')
@@ -274,10 +328,13 @@ export default {
                 e.doctor === this.doctor
             ).length));
       //check how many appointed patients in regards to the appointment limit set by the doctor
+      //if avaiable
       if (await this.patientsAppointed < this.schedule.appointmentLimit) {
         this.isSchedLoading = false
         this.schedAvailability = true
+        this.prefix = prefix
         statusSched[e].style.display = 'block'
+      // if not available
       } else {
         this.isSchedLoading = false
         this.schedAvailability = false
