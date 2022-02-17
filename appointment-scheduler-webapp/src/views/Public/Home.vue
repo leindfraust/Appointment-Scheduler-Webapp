@@ -1,20 +1,43 @@
 <template>
   <NavigationTabVue />
-  <section class="hero is-fullheight">
-    <div class="hero-body">
-      <div class="container">
-        <div class="columns">
-          <div class="column is-8">
-            <h1 class="title">Healing takes time, and asking for help is a courageous step.</h1>
-            <figure class="image is-16by9">
-              <img src="../../assets/images/istockphoto_1213515925_612x612_removebg_preview_1.png" />
-            </figure>
+  <section class="section has-text-centered" :class="{ 'css-vh': this.$store.state.disableCSSVH }">
+    <HospitalFinderVue />
+    <div class="container box" id="covidAPI" style="width: 70%;">
+      <h1 class="title has-text-left">Latest COVID-19 Data</h1>
+      <hr>
+      <div class="columns">
+        <div class="column">
+          <h4 class="title is-2">Worldwide 🌎</h4>
+          <div class="container is-fluid has-text-left">
+            <p class="subtitle">
+              <b>Total Active Cases:</b>
+              {{ covidAPIWorldWide.active }}+
+            </p>
+            <p class="subtitle">
+              <b>Total Deaths:</b>
+              {{ covidAPIWorldWide.deaths }}+
+            </p>
+            <p class="subtitle">
+              <b>Total Recoveries:</b>
+              {{ covidAPIWorldWide.recovered }}+
+            </p>
           </div>
-          <div class="column has-text-centered" style="margin-top: 20%">
-            <button
-              class="button"
-              style="font-size: 24px; border-radius: 25px; color: #126782"
-            >GET STARTED</button>
+        </div>
+        <div class="column">
+          <h4 class="title is-2">Philippines 🇵🇭</h4>
+          <div class="container is-fluid has-text-left">
+            <p class="subtitle">
+              <b>Total Active Cases:</b>
+              {{ covidAPIPh.active }}+
+            </p>
+            <p class="subtitle">
+              <b>Total Deaths:</b>
+              {{ covidAPIPh.deaths }}+
+            </p>
+            <p class="subtitle">
+              <b>Total Recoveries:</b>
+              {{ covidAPIPh.recovered }}+
+            </p>
           </div>
         </div>
       </div>
@@ -23,16 +46,20 @@
 </template>
 
 <script>
+import HospitalFinderVue from "../../components/HospitalFinder.vue";
 import NavigationTabVue from "../../components/NavigationTab.vue";
 import axios from 'axios'
 export default {
   name: "Home",
   components: {
-    NavigationTabVue
+    NavigationTabVue,
+    HospitalFinderVue
   },
   data() {
     return {
-      userPatient: null
+      userPatient: null,
+      covidAPIPh: [],
+      covidAPIWorldWide: []
     }
   },
   async mounted() {
@@ -47,17 +74,22 @@ export default {
       this.$store.commit("patientID", this.userPatient._id)
       await this.$router.push(`/user/${this.userPatient.username}`);
     }
-  }
+    await axios.get('https://disease.sh/v3/covid-19/countries/philippines').then(response => this.covidAPIPh = response.data)
+    await axios.get('https://disease.sh/v3/covid-19/all').then(response => this.covidAPIWorldWide = response.data)
+  },
 };
 </script>
 
 <style scoped>
-.hero {
-  background: linear-gradient(
-    180deg,
-    rgba(171, 196, 255, 0) 11.59%,
-    rgba(142, 179, 227, 0.331896) 35.73%,
-    rgba(102, 155, 188, 0.79) 65.94%
-  ) !important;
+.css-vh {
+  height: 100vh;
+}
+.section {
+  background-color: whitesmoke !important;
+}
+@media (max-width: 991.98px) {
+  #covidAPI {
+    width: 100% !important;
+  }
 }
 </style>
