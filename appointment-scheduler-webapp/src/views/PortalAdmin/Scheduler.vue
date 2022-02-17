@@ -1,12 +1,13 @@
 <template>
-  <div class="columns">
-    <div class="column is-1">
+  <div class="columns" style="height: 100vh; background-color: whitesmoke">
+    <div class="column is-2" style="background-color: whitesmoke;">
       <AdminMenu />
     </div>
-    <div class="column">
+    <div class="column" style="background-color: whitesmoke;">
       <section class="hero is-fullheight">
         <div class="hero-body">
-          <div class="container has-text-centered">
+          <div class="container">
+            <h1 class="title">SETUP SCHEDULES</h1>
             <v-calendar
               is-expanded
               v-model="date"
@@ -20,18 +21,49 @@
               <div class="modal-content">
                 <div class="card">
                   <div class="card-content">
-                    <div class="content">
+                    <div class="content has-text-centered">
+                      <div class="control block">
+                        <label class="label">Prefix:</label>
+                        <input
+                          class="input"
+                          type="text"
+                          maxlength="10"
+                          v-model="prefix"
+                          style="width: 33%;"
+                          placeholder="e.g. ROOM305"
+                        />
+                      </div>
                       <label class="label">Time start:</label>
-                      <v-date-picker v-model="timeStart" mode="time" :timezone="timezone" />
+                      <v-date-picker
+                        v-model="timeStart"
+                        mode="time"
+                        :timezone="timezone"
+                        class="block"
+                      />
                       <br />
                       <label class="label">Time end:</label>
-                      <v-date-picker v-model="timeEnd" mode="time" :timezone="timezone" />
-                      <div class="controls">
-                        <label class="label">Appointment limit</label>
-                        <input class="input" type="number" v-model="appointmentLimits" style="width: 33%;" />
+                      <v-date-picker
+                        v-model="timeEnd"
+                        mode="time"
+                        :timezone="timezone"
+                        class="block"
+                      />
+                      <div class="control block">
+                        <label class="label">Appointment limit:</label>
+                        <input
+                          class="input"
+                          type="number"
+                          v-model="appointmentLimits"
+                          style="width: 33%;"
+                        />
                       </div>
                       <div class="block">
-                        <button class="button is-primary" type="button" @click="addSched">Confirm</button>
+                        <button
+                          class="button is-primary"
+                          type="button"
+                          @click="addSched"
+                          :disabled="prefix == ''"
+                        >Confirm</button>
                       </div>
                     </div>
                   </div>
@@ -40,29 +72,32 @@
               <button class="modal-close is-large" aria-label="close" @click="modalClose"></button>
             </div>
             <br />
-            <div class="block">
-              <button class="button" @click="uploadSched" type="button">Update schedules</button>
-              <br />
-              <br />
-              <p v-if="uploadSchedSuccess" class="title has-text-warning">Schedules Updated!</p>
+            <div class="block has-text-centered">
+              <p v-if="uploadSchedSuccess" class="has-text-warning">
+                <b>Schedules Updated!</b>
+              </p>
             </div>
 
-            <h1 class="title">Schedule List</h1>
+            <h1 class="subtitle">Upcoming Schedules:</h1>
             <div class="columns is-gapless is-multiline">
-              <div class="column" v-for="(schedules, index) in days" :key="schedules.id">
+              <div
+                class="column"
+                v-for="(schedules, index) in days.sort((a, b) => {
+                  return new Date(a.date).getTime() - new Date(b.date).getTime()
+                }).filter(x => { return new Date(x.date).getTime() > new Date().getTime() })"
+                :key="schedules.id"
+              >
                 <div class="block card">
-              <div class="card-content">
-                <div class="content">
-                  <p class="subtitle has-text-black has-text-left">Schedule No. {{ index + 1 }}</p>
-                  <p class="is-size-3 has-text-black">{{schedules.id }}</p>
-                  <p class="is-size-3 has-text-black">{{ new Date(schedules.date).toDateString() }}</p>
-                  <p
-                    class="title is-size-3 has-text-black"
-                  >{{ schedules.timeStart }} - {{ schedules.timeEnd }}</p>
-                  <p class="subtitle has-text-black">Appointment limit: {{schedules.appointmentLimit}}</p>
+                  <div class="card-content">
+                    <div class="content">
+                      <p class="subtitle has-text-black has-text-left">Schedule No. {{ index + 1 }}</p>
+                      <p class="has-text-black">{{ new Date(schedules.date).toDateString() }}</p>
+                      <p class="has-text-black">Prefix: {{ schedules.prefix }}</p>
+                      <p class="has-text-black">{{ schedules.timeStart }} - {{ schedules.timeEnd }}</p>
+                      <p class="has-text-black">Appointment limit: {{ schedules.appointmentLimit }}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
               </div>
             </div>
           </div>
@@ -88,9 +123,10 @@ export default {
       profileImg: store.state.profileImg,
       userID: "",
       date: new Date(),
-      timeStart: new Date(),
-      timeEnd: new Date(),
+      timeStart: '',
+      timeEnd: '',
       timezone: "",
+      prefix: '',
       days: [],
       appointmentLimits: 10,
       checkServer: null,
@@ -118,33 +154,16 @@ export default {
     },
   },
   methods: {
-    onDayClick(day) {
-      this.days.push({
+    async onDayClick(day) {
+      await this.days.push({
         id: day.id,
         date: day.date,
         timeStart: this.timeStart.toLocaleTimeString(),
         timeEnd: this.timeEnd.toLocaleTimeString(),
         appointmentLimit: this.appointmentLimits,
+        prefix: this.prefix
       });
-    },
-    modalUp(day) {
-      this.isActive = true;
-      const idx = this.days.findIndex((d) => d.id === day.id);
-      if (idx >= 0) {
-        this.days.splice(idx, 1);
-        this.isActive = false;
-      }
-      this.day = day;
-    },
-    addSched(day) {
-      day = this.day;
-      this.onDayClick(day);
-      this.isActive = !this.isActive;
-    },
-    modalClose() {
-      this.isActive = !this.isActive;
-    },
-    async uploadSched() {
+
       await axios.put(`/api/admin/${this.userID}`, {
         schedule: this.days,
       });
@@ -156,6 +175,36 @@ export default {
         .then((response) => (this.days = response.data.schedule));
 
       this.uploadSchedSuccess = true
+    },
+    async modalUp(day) {
+      this.isActive = true;
+      const idx = this.days.findIndex((d) => d.id === day.id);
+      if (await idx >= 0) {
+        this.days.splice(idx, 1);
+        this.isActive = false;
+        await axios.put(`/api/admin/${this.userID}`, {
+          schedule: this.days,
+        });
+        await axios.put("/session/admin", {
+          schedule: this.days,
+        });
+        await axios
+          .get("/session/admin")
+          .then((response) => (this.days = response.data.schedule));
+
+        this.uploadSchedSuccess = true
+      }
+      this.day = day;
+      this.timeStart = day.date;
+      this.timeEnd = day.date;
+    },
+    addSched(day) {
+      day = this.day;
+      this.onDayClick(day);
+      this.isActive = !this.isActive;
+    },
+    modalClose() {
+      this.isActive = !this.isActive;
     },
   },
 };
