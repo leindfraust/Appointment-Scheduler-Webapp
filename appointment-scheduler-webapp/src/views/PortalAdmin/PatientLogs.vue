@@ -1,26 +1,72 @@
 <template>
-  <div class="columns" >
-    <div class="column is-1">
+  <div class="columns" style="height: 100vh; background-color: whitesmoke">
+    <div class="column is-2" style="background-color: whitesmoke;">
       <AdminMenu />
     </div>
-    <div class="column has-text-centered is-2" style="margin: auto; ">
-      <div class="select is-multiple box">
-        <p class="subtitle">
-          <b>Patients</b>
-        </p>
-        <select multiple size="8">
-          <option
-            v-for="(patient, index) in patients.patients"
-            :key="patient._id"
-            :value="patient"
-          >{{ patient.patientName }}</option>
-        </select>
+    <div class="column" style="background-color: whitesmoke;">
+      <div class="modal" :class="{ 'is-active': isActiveModal }">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+          <div class="section box">
+            <div class="field is-horizontal">
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <label class="label">From:</label>
+                    <input class="input" type="text" :value="'Dr. ' + doctorName" disabled />
+                  </div>
+                </div>
+                <div class="field">
+                  <div class="control">
+                    <div class="label">To(Patient):</div>
+                    <div class="dropdown" :class="{ 'is-active': isActiveDropdown }">
+                      <div class="dropdown-trigger">
+                        <button class="button" @click="openPatients">
+                          <span v-if="selectedPatient == ''">Select</span>
+                          <span v-else>{{ selectedPatient }}</span>
+                        </button>
+                      </div>
+                      <div class="dropdown-menu">
+                        <div
+                          class="dropdown-content"
+                          v-for="(patient, index) in patients.patients"
+                          :key="patient._id"
+                        >
+                          <a
+                            class="dropdown-item"
+                            @click="selectPatient(patient.patient, patient.patientName)"
+                          >{{ patient.patientName }}</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <div class="control">
+                <label class="label">Message:</label>
+                <textarea class="textarea" placeholder="Message" v-model="noticeMsg"></textarea>
+              </div>
+            </div>
+            <div class="field">
+              <div class="control has-text-right">
+                <button
+                  class="button is-primary"
+                  @click="sendNotif"
+                  :disabled="selectedPatient == '' || noticeMsg == ''"
+                >Send</button>
+              </div>
+            </div>
+            <p v-if="notificationSent" class="has-text-success">A message has been sent to <b>{{messageSuccessSelectedPatient}}</b>.</p>
+          </div>
+        </div>
+        <button class="modal-close is-large" aria-label="close" @click="modalInactive"></button>
       </div>
-    </div>
-    <div class="column" >
       <section class="section" style="background-color: whitesmoke;">
         <div class="container is-widescreen is-fullhd" style="padding: 15">
-          <h1 class="title has-text-centered">APPOINTMENT HISTORY</h1>
+          <h1 class="title">APPOINTMENT HISTORY</h1>
+          <button class="button is-info" @click="modalActive">Send a notice</button>
           <div class="field">
             <div class="control">
               <input
@@ -70,23 +116,20 @@
       </section>
     </div>
   </div>
-  <footer class="footer">
-  <div class="content has-text-centered">
-    <p>
-      <strong>Designed and Developed</strong> by <strong>Ronan and Timay</strong>.
-    </p>
-  </div>
-</footer>
+  <FooterVue />
 </template>
 <script>
 import axios from 'axios'
 import _ from 'lodash'
 import AdminMenu from "../../components/AdminMenu.vue"
+import FooterVue from '../../components/Footer.vue'
+import socket from '../../socket'
 
 export default {
   name: "PatientLogs",
   components: {
-    AdminMenu
+    AdminMenu,
+    FooterVue
   },
   async mounted() {
     await axios
@@ -98,14 +141,21 @@ export default {
         ))
       );
     await axios.get('/api/admin').then(response => this.patients = response.data.find(x => x.alias == this.alias))
-    console.log(await this.patients.patients)
+    await axios.get('/session/admin').then(response => this.doctorName = response.data.fullname)
   },
   data() {
     return {
       searchBar: "",
       appointmentSched: [],
       alias: this.$store.state.alias,
-      patients: []
+      patients: [],
+      isActiveDropdown: false,
+      isActiveModal: false,
+      selectedPatient: '',
+      messageSuccessSelectedPatient: '',
+      doctorName: '',
+      noticeMsg: '',
+      notificationSent: false
     }
   },
   computed: {
@@ -117,7 +167,7 @@ export default {
             x.lastName.toLowerCase().includes(this.searchBar.toLowerCase())
           );
         }).sort((a, b) => {
-          return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
+          return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
         }).filter(x => { return new Date(x.schedule[0].date).getTime() < new Date().getTime() })
         ,
         "schedule[0].date"
@@ -136,6 +186,31 @@ export default {
           ))
         );
     },
+    selectPatient(id, name) {
+      this.selectedPatient = name
+      this.isActiveDropdown = false
+      socket.emit('join room', id)
+    },
+    openPatients() {
+      this.isActiveDropdown = !this.isActiveDropdown
+      this.notificationSent = false
+    },
+    modalActive() {
+      this.isActiveModal = true
+      socket.connect()
+    },
+    modalInactive() {
+      this.isActiveModal = false
+      this.selectedPatient = ''
+      socket.disconnect()
+    },
+    async sendNotif() {
+      this.messageSuccessSelectedPatient = this.selectedPatient
+      socket.emit('message', this.noticeMsg, this.doctorName, new Date())
+      this.noticeMsg = ''
+      this.selectedPatient = ''
+      this.notificationSent = true
+    }
   }
 }
 </script>
