@@ -1,108 +1,233 @@
 <template>
-  <section class="hero is-primary is-fullheight">
-    <div class="hero-body">
-      <div class="container">
-        <!-- I know it sucks, having a form action for only image upload while separating a post with axios for the document, but shit works so I guess it's okay.-->
-        <form
-          action="/api/imgUploadAdmin"
-          method="post"
-          enctype="multipart/form-data"
-          class="field customField animate__animated animate__fadeInLeft"
-        >
-          <label class="label">Alias</label>
-          <div class="control">
-            <input
-              class="input"
-              type="text"
-              v-model="alias"
-              placeholder="alias"
-              name="alias"
-              required
-            />
-          </div>
-          <p class="subtitle has-text-danger">{{ aliasEvaluate }}</p>
-          <label class="label">Full Name</label>
-          <div class="control">
-            <input
-              class="input"
-              type="text"
-              v-model="name"
-              placeholder="Last name, First name, Extension name, Middle name"
-              required
-            />
-          </div>
-          <label class="label">Picture</label>
-          <input
-            class="input"
-            type="file"
-            name="imgFile"
-            required
-          /><br /><br />
-          <label class="label">Specialization</label><br>
-            <div class="control">
-              <label class="radio has-text-black" v-for="special in specializations" :key="special._id">
+  <section class="section" style="background-color: whitesmoke;">
+    <div class="container box animate__animated animate__fadeInLeft" style="margin: auto; width: 50%">
+      <!-- I know it sucks, having a form action for only image upload while separating a post with axios for the document, but shit works so I guess it's okay.-->
+      <form
+        action="/api/imgUploadAdmin"
+        method="post"
+        enctype="multipart/form-data"
+      >
+        <div class="field is-horizontal">
+          <div class="field-body">
+            <div class="field">
+              <label class="label">License code:</label>
+              <div class="control">
                 <input
-                  type="radio"
+                  class="input"
+                  type="text"
+                  v-model="licenseCode"
+                  placeholder="license code"
                   required
-                  name="specialist"
-                  @click="pickSpecial(special.specialization)"
-                />{{ special.specialization }}
-              </label>
+                />
+              </div>
             </div>
-          <br />
-          <label class="label">Username</label>
-          <div class="control">
-            <input
-              class="input"
-              type="text"
-              v-model="username"
-              placeholder="username"
-              required
-            />
+            <div class="field">
+              <label class="label">Alias</label>
+              <div class="control">
+                <input
+                  class="input"
+                  type="text"
+                  v-model="alias"
+                  placeholder="alias"
+                  name="alias"
+                  required
+                />
+              </div>
+              <p class="subtitle has-text-danger">{{ aliasEvaluate }}</p>
+            </div>
           </div>
-          <p class="subtitle has-text-danger">{{ usernameEvaluate }}</p>
-          <label class="label">Password</label>
-          <div class="control">
-            <input
-              class="input"
-              type="password"
-              v-model="password"
-              placeholder="password"
-              required
-            />
+        </div>
+        <div class="field">
+          <div class="field-body">
+            <div class="field">
+              <label class="label">Full Name</label>
+              <div class="control">
+                <input
+                  class="input"
+                  type="text"
+                  v-model="name"
+                  placeholder="Last name, First name, Extension name, Middle name"
+                  required
+                />
+              </div>
+            </div>
+            <div class="field">
+              <label class="label">Profile Picture</label>
+              <div class="control">
+                <input class="input" type="file" name="imgFile" required />
+              </div>
+            </div>
           </div>
-          <p class="subtitle has-text-danger">{{ passwordMatch }}</p>
-          <label class="label">Repeat Password</label>
-          <div class="control">
-            <input
-              class="input"
-              type="password"
-              v-model="passwordRepeat"
-              placeholder="repeat password"
-              required
-            />
+        </div>
+        <div class="field is-horizontal">
+          <div class="field-body">
+            <div class="field">
+              <label class="label">Username</label>
+              <div class="control">
+                <input class="input" type="text" v-model="username" placeholder="username" required />
+              </div>
+              <p class="subtitle has-text-danger">{{ usernameEvaluate }}</p>
+            </div>
+            <div class="field">
+              <label class="label">Gmail</label>
+              <div class="control">
+                <input class="input" type="email" v-model="gmail" placeholder="gmail" required />
+              </div>
+              <p class="subtitle has-text-danger">{{ usernameEvaluate }}</p>
+            </div>
           </div>
-          <p class="subtitle has-text-danger">{{ passwordMatch }}</p>
-          <button type="submit" class="button is-primary" @click="create">
-            Create account
-          </button>
-        </form>
-      </div>
+        </div>
+        <div class="field is-horizontal">
+          <div class="field-body">
+            <div class="field">
+              <label class="label">Password</label>
+              <div class="control">
+                <input
+                  class="input"
+                  type="password"
+                  v-model="password"
+                  placeholder="password"
+                  required
+                />
+              </div>
+              <p class="subtitle has-text-danger">{{ passwordMatch }}</p>
+            </div>
+            <div class="field">
+              <label class="label">Repeat Password</label>
+              <div class="control">
+                <input
+                  class="input"
+                  type="password"
+                  v-model="passwordRepeat"
+                  placeholder="repeat password"
+                  required
+                />
+              </div>
+              <p class="subtitle has-text-danger">{{ passwordMatch }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <label class="label">Hospitals you are assigned(Select all that applies)</label>
+            <nav class="panel">
+              <div class="panel-block">
+                <input class="input" type="text" v-model="searchBarHospital" placeholder="Search" />
+              </div>
+              <div style="max-height: 20em; overflow: auto">
+                <div
+                  class="panel-block"
+                  v-for="hospitalList in hospitalsIndexed"
+                  :key="hospitalList._id"
+                >
+                  <a @click="selectHospital(hospitalList.hospital)">{{ hospitalList.hospital }}</a>
+                </div>
+              </div>
+            </nav>
+          </div>
+          <div class="column">
+            <label class="label">Selected</label>
+            <div class="columns is-multiline">
+              <div
+                class="column"
+                id="selectedSpecializations"
+                style="max-height: 26em; overflow: auto"
+              >
+                <button
+                  v-for="(hospital, index) in hospitalsSelected"
+                  type="button"
+                  :key="index"
+                  class="button is-light"
+                  style="margin: 5px;"
+                >
+                  {{ hospital.hospital }}&nbsp;
+                  <span
+                    class="has-text-danger"
+                    @click="undoHospital(hospital.hospital)"
+                  >X</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <label class="label">Specializations you possess(Select all that applies)</label>
+            <nav class="panel">
+              <div class="panel-block">
+                <input
+                  class="input"
+                  type="text"
+                  v-model="searchBarSpecialization"
+                  placeholder="Search"
+                />
+              </div>
+              <div style="max-height: 20em; overflow: auto">
+                <div
+                  class="panel-block"
+                  v-for="(specializations, index) in specializationListIndexed"
+                  :key="index"
+                  :value="specializations"
+                >
+                  <a @click="selectSpecialization(specializations)">{{ specializations }}</a>
+                </div>
+              </div>
+            </nav>
+          </div>
+          <div class="column">
+            <label class="label">Selected</label>
+            <div class="columns is-multiline">
+              <div
+                class="column"
+                id="selectedSpecializations"
+                style="max-height: 26em; overflow: auto"
+              >
+                <button
+                  v-for="(specialist, index) in specializationsSelected"
+                  type="button"
+                  :key="index"
+                  class="button is-light"
+                  style="margin: 5px;"
+                >
+                  {{ specialist }}&nbsp;
+                  <span
+                    class="has-text-danger"
+                    @click="undoSpecialization(specialist)"
+                  >X</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="has-text-right">
+          <button type="submit" class="button is-primary" @click="create" :disabled="hospitalsSelected == '' || specializationsSelected == ''">Create account</button>
+        </div>
+      </form>
     </div>
   </section>
 </template>
 
 <script>
 import axios from "axios";
-import store from "../../store";
+
 export default {
   name: "SignUp",
   props: {
+    licenseCode: String,
     alias: String,
     name: String,
     username: String,
     password: String,
     passwordRepeat: String,
+    gmail: String
+  },
+  computed: {
+    specializationListIndexed() {
+      return this.specializationList.filter(x => x.toLowerCase().includes(this.searchBarSpecialization.toLowerCase()))
+    },
+    hospitalsIndexed() {
+      return this.hospitals.filter(x => x.hospital.toLowerCase().includes(this.searchBarHospital.toLowerCase()))
+    }
   },
   data() {
     return {
@@ -112,19 +237,21 @@ export default {
       aliasEvaluate: null,
       usernameEvaluate: null,
       evaluateData: null,
-      specialist: null,
-      specializations: store.state.specialistList,
+      hospitals: [],
+      hospitalsSelected: [],
+      specializationsSelected: [],
+      specializationList: this.$store.getters.getSpecializationList,
+      searchBarSpecialization: '',
+      searchBarHospital: ''
     };
   },
   async mounted() {
     await axios
       .get("/api/admin")
       .then((response) => (this.evaluateData = response.data));
+    await axios.get("/api/manager").then(response => this.hospitals = response.data)
   },
   methods: {
-    pickSpecial(special) {
-      this.specialist = special;
-    },
     async create(e) {
       this.aliasConfirm = this.evaluateData.find((x) => x.alias === this.alias);
       this.usernameConfirm = this.evaluateData.find(
@@ -137,12 +264,15 @@ export default {
       ) {
         await axios.post("/api/admin", {
           alias: this.alias,
+          licenseNo: this.licenseCode,
           name: this.name,
-          specialist: this.specialist,
+          gmail: this.gmail,
+          hospitalOrigin: this.hospitalsSelected,
+          specialist: this.specializationsSelected,
           username: this.username,
           password: this.password,
         });
-        await this.$router.push("/login");
+        await this.$store.commit("imgSuccess", true)
       } else {
         if ((await this.password) !== this.passwordRepeat) {
           this.passwordMatch = "password do not match";
@@ -168,30 +298,31 @@ export default {
         }
       }
     },
+    selectSpecialization(specialization) {
+      if (!this.specializationsSelected.find(x => x.specialist === specialization)) {
+        this.specializationsSelected.push(specialization);
+      }
+    },
+    undoSpecialization(specialization) {
+      this.specializationsSelected = this.specializationsSelected.filter(x => x !== specialization)
+    },
+    selectHospital(hospital) {
+      if (!this.hospitalsSelected.find(x => x.hospital === hospital)) {
+        this.hospitalsSelected.push({
+          hospital: hospital
+        });
+      }
+    },
+    undoHospital(hospital) {
+      this.hospitalsSelected = this.hospitalsSelected.filter(x => x.hospital !== hospital)
+    }
   },
 };
 </script>
 
 <style scoped>
-.customField {
-  width: 50%;
-  margin: auto;
-  padding: 50px;
-  background-color: whitesmoke;
-  border-radius: 15px;
-}
-input {
-  width: 75%;
-}
-button {
-  margin-top: 15px;
-  margin-right: 50.5%;
-}
 @media (max-width: 991.98px) {
-  .customField {
-    width: 100% !important;
-  }
-  input {
+  .container {
     width: 100% !important;
   }
 }
