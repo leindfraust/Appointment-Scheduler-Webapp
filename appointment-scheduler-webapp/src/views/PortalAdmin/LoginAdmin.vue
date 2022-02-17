@@ -99,11 +99,14 @@ export default {
           store.commit("alias", this.userAdmin.alias)
           store.commit("userID", this.userAdmin._id)
           await axios.post("/session/admin", {
+            verified: this.userAdmin.verified,
             _id: this.userAdmin._id,
+            licenseNo: this.userAdmin.licenseNo,
             alias: this.userAdmin.alias,
             fullname: this.userAdmin.name,
-            username: this.username,
-            password: this.password,
+            specialist: this.userAdmin.specialist,
+            gmail: this.userAdmin.gmail,
+            hospitalOrigin: this.userAdmin.hospitalOrigin,
             schedule: this.userAdmin.schedule
           });
           store.commit("profileImg", cld.imageTag(`assets/doctors/${this.userAdmin.alias}.jpg`).toHtml())
@@ -117,9 +120,6 @@ export default {
       }
     },
     async signup() {
-      await axios.get("/api/specialistList")
-        .then(response => this.specializations = response.data)
-      store.commit("specialistList", this.specializations)
       await this.$router.push("/admin/signup")
     },
   },
