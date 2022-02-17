@@ -1,91 +1,197 @@
 <template>
-<NavigationTabVue/>
+  <NavigationTabVue />
   <section class="section">
-    <div class="container" style="width: 33%; margin: auto">
-      <div class="field box">
-        <p class="control">
-          <label class="label">First name:</label>
-          <input class="input" type="text" placeholder="First name" v-model="firstName" required />
-        </p>
+    <div class="container box" style="width: 50%; margin: auto">
+      <div class="field is-horizontal">
+        <div class="field-body">
+          <div class="field">
+            <p class="control">
+              <label class="label">First name:</label>
+              <input
+                class="input"
+                type="text"
+                placeholder="First name"
+                v-model="firstName"
+                required
+              />
+            </p>
+          </div>
+          <div class="field">
+            <p class="control">
+              <label class="label">Last name:</label>
+              <input class="input" type="text" placeholder="Last name" v-model="lastName" required />
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="field is-horizontal">
+        <div class="field-body">
+          <div class="field">
+            <p class="control">
+              <label class="label">Age:</label>
+              <input class="input" type="number" placeholder="age" v-model="age" required />
+            </p>
+          </div>
 
-        <p class="control">
-          <label class="label">Last name:</label>
-          <input class="input" type="text" placeholder="Last name" v-model="lastName" required />
-        </p>
+          <br />
+          <div class="field">
+            <p class="control">
+              <label class="label">Gender:</label>
+              <label class="radio">
+                <input type="radio" name="sex" @click="sexMale" />
+                Male
+              </label>
+              <label class="radio">
+                <input type="radio" name="sex" @click="sexFemale" />
+                Female
+              </label>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="field is-horizontal">
+        <br />
+        <div class="field-body">
+          <div class="field">
+            <p class="control">
+              <label class="label">Contact Number:</label>
+              <input
+                class="input"
+                type="number"
+                placeholder="contact number"
+                v-model="contactNum"
+                required
+              />
+            </p>
+          </div>
 
-        <p class="control">
-          <label class="label">Age:</label>
-          <input class="input" type="number" placeholder="age" v-model="age" required />
-        </p>
+          <div class="field">
+            <p class="control">
+              <label class="label">Gmail(Optional):</label>
+              <input class="input" type="email" placeholder="gmail" v-model="gmail" required />
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="field is-horizontal">
+        <div class="field-body">
+          <div class="field">
+            <div class="control">
+              <label class="label">Province:</label>
+              <div class="dropdown" :class="{ 'is-active': isActiveDropdownProvince }">
+                <div class="dropdown-trigger">
+                  <button class="button" aria-haspopup="true" @click="provinceDropdown">
+                    <span v-if="province == ''">Select</span>
+                    <span v-else>{{ province }}</span>
+                  </button>
+                </div>
+                <div class="dropdown-menu">
+                  <div
+                    class="dropdown-content"
+                    v-for="provinces in geolocationData"
+                    :key="provinces._id"
+                  >
+                    <a
+                      class="dropdown-item"
+                      @click="selectProvince(provinces.province)"
+                    >{{ provinces.province }}</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <br>
-        <p class="control">
-          <label class="radio">
-            <input type="radio" name="sex" @click="sexMale"/>
-            Male
-          </label>
-          <label class="radio">
-            <input type="radio" name="sex" @click="sexFemale"/>
-            Female
-          </label>
-        </p>
-        <br>
+          <div class="field">
+            <div class="control">
+              <div class="label">City/Municipality:</div>
+              <div class="dropdown" :class="{ 'is-active': isActiveDropdownCity }">
+                <div class="dropdown-trigger">
+                  <button
+                    class="button"
+                    aria-haspopup="true"
+                    @click="cityDropdown"
+                    :disabled="province == ''"
+                  >
+                    <span v-if="city == ''">Select</span>
+                    <span v-else>{{ city }}</span>
+                  </button>
+                </div>
+                <div class="dropdown-menu">
+                  <div
+                    class="dropdown-content"
+                    v-if="province"
+                    v-for="cities in citiesData"
+                    :key="cities.name"
+                  >
+                    <a
+                      class="dropdown-item"
+                      @click="selectCity(cities.name)"
+                    >{{ cities.name }}</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      <div class="field">
         <p class="control">
-          <label class="label">ContactNumber:</label>
-          <input
-            class="input"
-            type="number"
-            placeholder="contact number"
-            v-model="contactNum"
-            required
-          />
+          <label class="label">Current Address</label>
+          <input class="input" type="text" placeholder="your current address" v-model="currentAddress" required />
         </p>
-
-        <p class="control">
-          <label class="label">Gmail(Optional):</label>
-          <input class="input" type="email" placeholder="gmail" v-model="gmail" required />
-        </p>
-
-        <p class="control">
-          <label class="label">Province:</label>
-          <input class="input" type="text" placeholder="province" v-model="province" required />
-        </p>
-
-        <p class="control">
-          <label class="label">City or Municipality:</label>
-          <input class="input" type="text" placeholder="City/Municipality" v-model="city" required />
-        </p>
-
+      </div>
+      <div class="field">
         <p class="control">
           <label class="label">Username:</label>
           <input class="input" type="text" placeholder="username" v-model="username" required />
         </p>
         <p class="subtitle has-text-danger">{{ usernameEvaluate }}</p>
-
-        <p class="control">
-          <label class="label">Password:</label>
-          <input class="input" type="password" placeholder="password" v-model="password" required />
-        </p>
-        <p class="subtitle has-text-danger">{{ passwordMatch }}</p>
-
-        <p class="control">
-          <label class="label">Repeat Password:</label>
-          <input
-            class="input"
-            type="password"
-            placeholder="repeat password"
-            v-model="passwordRepeat"
-            required
-          />
-        </p>
-        <p class="subtitle has-text-danger">{{ passwordMatch }}</p>
       </div>
-
-      <div class="control">
-        <button class="button is-primary" @click="signup">SignUp</button>
+      <div class="field is-horizontal">
+        <div class="field-body">
+          <div class="field">
+            <p class="control">
+              <label class="label">Password:</label>
+              <input
+                class="input"
+                type="password"
+                placeholder="password"
+                v-model="password"
+                required
+              />
+            </p>
+            <p class="subtitle has-text-danger">{{ passwordMatch }}</p>
+          </div>
+          <div class="field">
+            <p class="control">
+              <label class="label">Repeat Password:</label>
+              <input
+                class="input"
+                type="password"
+                placeholder="repeat password"
+                v-model="passwordRepeat"
+                required
+              />
+            </p>
+            <p class="subtitle has-text-danger">{{ passwordMatch }}</p>
+          </div>
+        </div>
       </div>
-      </div>
+          <label class="checkbox">
+            <input type="checkbox" />
+            I agree to the
+            <a href="#">terms and conditions</a>
+          </label>
+          <br/>
+          <div class="has-text-right">
+          <button
+            class="button is-primary"
+            @click="signup"
+            :disabled="firstName == null || lastName == null || age == null || contactNum == null || province == null || city == null || currentAddress == null || username == null || password == null || termsAndConditionsAgreed == false"
+          >Confirm</button>
+          </div>
+    </div>
   </section>
 </template>
 <script>
@@ -103,8 +209,7 @@ export default {
     age: Number,
     contactNum: Number,
     gmail: String,
-    province: String,
-    city: String,
+    currentAddress: String,
     username: String,
     password: String,
     passwordRepeat: String
@@ -115,13 +220,21 @@ export default {
       evaluateData: null,
       usernameConfirm: null,
       usernameEvaluate: null,
-      passwordMatch: null
+      passwordMatch: null,
+      geolocationData: [],
+      isActiveDropdownProvince: false,
+      isActiveDropdownCity: false,
+      city: '',
+      province: '',
+      citiesData: [],
+      termsAndConditionsAgreed: false
     }
   },
   async mounted() {
     await axios
       .get("/api/user")
       .then((response) => (this.evaluateData = response.data));
+    await axios.get('/api/geolocation').then(response => this.geolocationData = response.data)
   },
   methods: {
     sexMale() {
@@ -129,6 +242,23 @@ export default {
     },
     sexFemale() {
       this.sex = "Female"
+    },
+    async selectProvince(province) {
+      this.city = ''
+      this.province = province
+      this.isActiveDropdownProvince = false
+      await axios.get('/api/geolocation').then(response => this.citiesData = response.data.find(x => x.province === province))
+      this.citiesData = await this.citiesData.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })
+    },
+    selectCity(city) {
+      this.city = city
+      this.isActiveDropdownCity = false
+    },
+    provinceDropdown() {
+      this.isActiveDropdownProvince = !this.isActiveDropdownProvince
+    },
+    cityDropdown() {
+      this.isActiveDropdownCity = !this.isActiveDropdownCity
     },
     async signup() {
       this.usernameConfirm = this.evaluateData.find(x => x.username === this.username)
@@ -148,7 +278,9 @@ export default {
           gmail: this.gmail,
           province: this.province,
           city: this.city,
+          currentAddress: this.currentAddress
         });
+        await this.$store.commit('accountCreated', true)
         await this.$router.push("/user/login");
       } else {
         if ((await this.password) !== this.passwordRepeat) {
@@ -173,5 +305,14 @@ export default {
 <style scoped>
 .section {
   background-color: whitesmoke;
+}
+.dropdown-menu {
+  max-height: 13em;
+  overflow: auto;
+}
+@media (max-width: 991.98px) {
+  .container {
+    width: 100% !important;
+  }
 }
 </style>
