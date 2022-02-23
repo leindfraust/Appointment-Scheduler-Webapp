@@ -148,7 +148,7 @@ app.post('/api/provinceUpdate', async (req, res) => {
         $push: {
             citiesOrMunicipalities: {
                 name: cityOrMunicipality,
-                //postalCode: postalCode,
+                postalCode: postalCode,
                 location: {
                     type: "Point",
                     coordinates: [longitude, latitude]
