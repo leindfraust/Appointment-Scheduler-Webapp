@@ -37,22 +37,17 @@
                                 <div
                                     v-if="type == 'manager'"
                                     class="dropdown"
-                                    :class="{ 'is-active': isActiveDropdown }"
+                                    :class="{ 'is-active': isActiveDropdownEditStatus }"
                                 >
                                     <div class="dropdown-trigger">
                                         <button
-                                            class="button has-text-danger"
-                                            aria-haspopup="true"
-                                            aria-controls="dropdown-menu"
+                                            class="button is-danger"
                                             @click="dropdown"
                                         >
-                                            <span>Edit Status</span>
-                                            <span class="icon is-small">
-                                                <i class="fas fa-angle-down" aria-hidden="true"></i>
-                                            </span>
+                                            Edit Status
                                         </button>
                                     </div>
-                                    <div class="dropdown-menu block" id="dropdown-menu" role="menu">
+                                    <div class="dropdown-menu block">
                                         <div class="dropdown-content">
                                             <a
                                                 class="dropdown-item"
@@ -64,6 +59,35 @@
                                                 :class="{ 'is-active': isActiveDropdownItemTwo }"
                                                 @click="statusInactive"
                                             >Inactive</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="block"></div>
+                                <div
+                                    v-if="type == 'manager'"
+                                    class="dropdown"
+                                    :class="{ 'is-active': isActiveDropdownEditPricing }"
+                                >
+                                    <div class="dropdown-trigger">
+                                        <button
+                                            class="button is-link"
+                                            @click="dropdownPricing"
+                                        >
+                                            Edit Pricing
+                                        </button>
+                                    </div>
+                                    <div class="dropdown-menu block">
+                                        <div class="dropdown-content">
+                                            <a
+                                                class="dropdown-item"
+                                                :class="{ 'is-active': isActiveDropdownPricingItemOne }"
+                                                @click="pricingStandard"
+                                            >Standard</a>
+                                            <a
+                                                class="dropdown-item"
+                                                :class="{ 'is-active': isActiveDropdownPricingItemTwo }"
+                                                @click="pricingPremium"
+                                            >Premium</a>
                                         </div>
                                     </div>
                                 </div>
@@ -99,6 +123,7 @@
                         <th class="has-text-black-ter">Controls</th>
                         <th class="has-text-black-ter">Status</th>
                         <th class="has-text-black-ter">No.</th>
+                        <th class="has-text-black-ter">Pricing</th>
                         <th class="has-text-black-ter">Hospital</th>
                         <th class="has-text-black-ter">Email</th>
                         <th class="has-text-black-ter">Province</th>
@@ -130,12 +155,13 @@
                             v-if="manager.status == 'Inactive'"
                         >{{ manager.status }}</td>
                         <td class="has-text-black-ter">{{ index + 1 }}</td>
+                        <td class="has-text-black-ter">{{ manager.pricing }}</td>
                         <td class="has-text-black-ter">{{ manager.hospital }}</td>
                         <td class="has-text-black-ter">{{ manager.email }}</td>
                         <td class="has-text-black-ter">{{ manager.province }}</td>
                         <td class="has-text-black-ter">{{ manager.city }}</td>
                         <td class="has-text-black-ter">{{ manager.barangayORStreet }}</td>
-                        <td class="has-text-black-ter">{{ manager.location.coordinates[1]}}</td>
+                        <td class="has-text-black-ter">{{ manager.location.coordinates[1] }}</td>
                         <td class="has-text-black-ter">{{ manager.location.coordinates[0] }}</td>
                         <td
                             class="has-text-black-ter"
@@ -244,6 +270,7 @@
                             <th class="has-text-black-ter">Controls</th>
                             <th class="has-text-black-ter">No.</th>
                             <th class="has-text-black-ter">City/Municipality</th>
+                            <th class="has-text-black-ter">Postal Code</th>
                             <th class="has-text-black-ter">Latitude</th>
                             <th class="has-text-black-ter">Longitude</th>
                         </tr>
@@ -256,14 +283,17 @@
                             <button
                                 class="button dropdown-item has-text-danger"
                                 type="button"
-                                @click="cityDelete(geolocation[0]._id, cityOrMunicipality.name, cityOrMunicipality.location.coordinates[1], cityOrMunicipality.location.coordinates[0])"
+                                @click="cityDelete(geolocation[0]._id, cityOrMunicipality.name, cityOrMunicipality.location.coordinates[1], cityOrMunicipality.location.coordinates[0], cityOrMunicipality.postalCode)"
                             >Delete</button>
                             <td class="has-text-black-ter">{{ index + 1 }}</td>
+                            <td class="has-text-black-ter">{{ cityOrMunicipality.name }}</td>
+                            <td class="has-text-black-ter">{{ cityOrMunicipality.postalCode }}</td>
                             <td
                                 class="has-text-black-ter"
-                            >{{ cityOrMunicipality.name }}</td>
-                            <td class="has-text-black-ter">{{ cityOrMunicipality.location.coordinates[1] }}</td>
-                            <td class="has-text-black-ter">{{ cityOrMunicipality.location.coordinates[0] }}</td>
+                            >{{ cityOrMunicipality.location.coordinates[1] }}</td>
+                            <td
+                                class="has-text-black-ter"
+                            >{{ cityOrMunicipality.location.coordinates[0] }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -320,17 +350,6 @@
                         placeholder="City or Municipality"
                     />
                     <span>e.g Bais City or Bindoy Municipality</span>
-                    <br />
-                    <br />
-                    <label class="label">Latitude N</label>
-                    <input class="input" type="number" v-model="latitude" placeholder="Latitude" />
-                    <label class="label">longitude E</label>
-                    <input
-                        class="input"
-                        type="number"
-                        v-model="longitude"
-                        placeholder="longitude"
-                    />
                     <label class="label">Postal Code</label>
                     <input
                         class="input"
@@ -338,6 +357,10 @@
                         v-model="postalCode"
                         placeholder="Postal Code"
                     />
+                    <label class="label">Latitude N</label>
+                    <input class="input" type="number" v-model="latitude" placeholder="Latitude" />
+                    <label class="label">longitude E</label>
+                    <input class="input" type="number" v-model="longitude" placeholder="longitude" />
                     <button
                         class="button"
                         type="button"
@@ -373,7 +396,7 @@ export default {
             return _.groupBy(
                 this.provinceList.filter(x => {
                     return (x.citiesOrMunicipalities.find(x => { return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) }));
-                    
+
                 }),
                 "province"
             )
@@ -395,9 +418,12 @@ export default {
             isActivePatient: false,
             isActiveGeolocation: false,
             isActiveModal: false,
-            isActiveDropdown: false,
+            isActiveDropdownEditStatus: false,
+            isActiveDropdownEditPricing: false,
             isActiveDropdownItemOne: false,
             isActiveDropdownItemTwo: false,
+            isActiveDropdownPricingItemOne: false,
+            isActiveDropdownPricingItemTwo: false,
             isActiveDropdownProvince: false,
             id: '',
             email: '',
@@ -470,6 +496,7 @@ export default {
             if (this.type == 'manager') {
                 await axios.put(`/api/manager/${this.id}`, {
                     status: this.status,
+                    pricing: this.pricing,
                     email: this.email
                 });
                 await axios.get('/api/manager').then(response => this.managerAccounts = response.data)
@@ -501,13 +528,13 @@ export default {
             await axios.get('/api/user').then(response => this.patientAccounts = response.data)
 
         },
-        async cityDelete(id, city, latitude, longitude) {
+        async cityDelete(id, city, latitude, longitude, postalCode) {
             await axios.post("/api/provinceCityPull", {
                 provinceID: id,
                 cityOrMunicipality: city,
                 latitude: latitude,
                 longitude: longitude,
-                //postalCode: postalCode
+                postalCode: postalCode
             });
             await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
         },
@@ -519,7 +546,10 @@ export default {
             this.isActiveModal = false
         },
         dropdown() {
-            this.isActiveDropdown = !this.isActiveDropdown
+            this.isActiveDropdownEditStatus = !this.isActiveDropdownEditStatus
+        },
+        dropdownPricing() {
+            this.isActiveDropdownEditPricing = !this.isActiveDropdownEditPricing
         },
         statusActive() {
             this.status = 'Active'
@@ -530,6 +560,16 @@ export default {
             this.status = 'Inactive'
             this.isActiveDropdownItemOne = false
             this.isActiveDropdownItemTwo = true
+        },
+        pricingStandard(){
+            this.pricing = 'Standard'
+            this.isActiveDropdownPricingItemOne = true
+            this.isActiveDropdownPricingItemTwo = false
+        },
+        pricingPremium(){
+            this.pricing = 'Premium'
+            this.isActiveDropdownPricingItemOne = false
+            this.isActiveDropdownPricingItemTwo = true
         },
         async provincePost() {
             await axios.post('/api/geolocation', {
