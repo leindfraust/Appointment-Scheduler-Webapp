@@ -22,7 +22,8 @@
                         />
                     </div>
                     <div class="notification is-light is-danger" v-if="locationPermissionDenied">
-                        <a class="has-text-success" @click="getUserLocation">Enable</a> location to start booking an <b>appointment</b>.
+                        <a class="has-text-success" @click="getUserLocation">Enable</a> location to start booking an
+                        <b>appointment</b>.
                     </div>
                 </div>
                 <div class="dropdown-menu">
@@ -38,29 +39,7 @@
             </div>
         </div>
     </div>
-    <hr />
     <div class="container block" v-if="citiesOrMunicipalities != ''">
-        <nav class="breadcrumb box" style="overflow: auto;" aria-label="breadcrumbs">
-            <ul>
-                <li
-                    v-for="(cityorMunicipality, index) in citiesOrMunicipalities.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
-                    :key="index"
-                >
-                    <a @click="filterByCity(cityorMunicipality.name)">{{ cityorMunicipality.name }}</a>
-                </li>
-            </ul>
-        </nav>
-        <div class="field has-text-left">
-            <div class="control">
-                <input
-                    class="input"
-                    type="text"
-                    v-model="hospital"
-                    style="width: 300px;"
-                    placeholder="Search Hospital..."
-                />
-            </div>
-        </div>
         <br />
         <div class="block" v-if="this.checkUser == false">
             <div
@@ -76,8 +55,34 @@
         <div class="columns">
             <div class="column is-2 has-text-left">
                 <ul class="box">
-                    <p class="subtitle">Filter</p>
+                    <p class="title is-5">Filter</p>
+                    <div class="field has-text-left">
+                        <div class="control">
+                            <input
+                                class="input"
+                                type="text"
+                                v-model="hospital"
+                                style="width: 300px;"
+                                placeholder="Search Hospital..."
+                            />
+                        </div>
+                    </div>
                     <hr />
+                    <nav
+                        class="breadcrumb has-dot-separator" aria-label="breadcrumbs"
+                    >
+                        <ul>
+                            <span style="color: #b5b5b5">&#183;</span><li 
+                                v-for="(cityorMunicipality, index) in citiesOrMunicipalities.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
+                                :key="index"
+                            >
+                                <a 
+                                    @click="filterByCity(cityorMunicipality.name)"
+                                >{{ cityorMunicipality.name }}</a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <hr>
                     <li>
                         <a @click="filterAll">All</a>
                     </li>
@@ -94,7 +99,7 @@
                     class="columns has-text-left box"
                     id="hospital"
                     style="margin-bottom: 5%"
-                    v-for="geoHospital in geoHospitalNearestUserIndexed.filter(x => x.type == this.filter1 || x.type == this.filter2 && x.city.includes(this.city))"
+                    v-for="geoHospital in geoHospitalNearestUserIndexed.filter(x => x.type == this.filter1 || x.type == this.filter2).filter(x => x.city.includes(this.city))"
                     :key="geoHospital._id"
                 >
                     <div class="column is-5">
@@ -127,7 +132,8 @@
                             class="subtitle"
                         >{{ parseInt(geoHospital.distance) / 1000 }} km away from you.</p>
                         <button
-                            class="button is-link" @click="bookAppointment(geoHospital._id)"
+                            class="button is-link"
+                            @click="bookAppointment(geoHospital._id)"
                             v-if="checkUser"
                         >Book an Appointment</button>
                     </div>
@@ -190,24 +196,23 @@ export default {
         },
         filterByCity(city) {
             this.city = city
+            this.filter1 = 'Private'
+            this.filter2 = 'Public'
         },
         filterAll() {
-            this.isHospitalLoading = true
+            this.city = ''
             this.filter1 = 'Private'
             this.filter2 = 'Public'
-            this.isHospitalLoading = false
         },
         filterPrivate() {
-            this.isHospitalLoading = true
+            this.city = ''
             this.filter1 = 'Private'
             this.filter2 = 'Private'
-            this.isHospitalLoading = false
         },
         filterPublic() {
-            this.isHospitalLoading = true
+            this.city = ''
             this.filter1 = 'Public'
             this.filter2 = 'Public'
-            this.isHospitalLoading = false
         },
         regionSelect() {
             if (!this.locationPermissionDenied) {
