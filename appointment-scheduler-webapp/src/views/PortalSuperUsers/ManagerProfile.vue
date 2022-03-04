@@ -5,6 +5,7 @@
         </div>
         <div class="column">
             <section class="section is-medium">
+                <h1 class="title">PROFILE</h1>
                 <div
                     class="notification is-light is-info"
                     v-if="hospitalStatus == 'Inactive'"
@@ -43,6 +44,12 @@
                                 </div>
                             </div>
                         </form>
+                        <br/>
+                        <div class="container has-text-centered">
+                        <iframe v-if="hospitalData !== ''" width="300" height="300"
+                            :src="`https://maps.google.com/maps?q=${hospitalData.location.coordinates[1]},${hospitalData.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"
+                        ></iframe>
+                        </div>
                     </div>
                     <div class="column">
                         <a class="has-text-info" v-if="!editingMode" @click="editMode">[Edit]</a>
@@ -129,7 +136,7 @@ export default {
     components: {
         ManagerMenuVue
     },
-    async mounted() {
+    async created() {
         await axios.get('/session/manager').then(response => this.managerHospital = response.data.hospital)
         await axios.get('/session/manager').then(response => this.managerHospitalID = response.data._id)
         await axios.get('/api/manager').then(response => this.hospitalData = response.data.find(x => x._id == this.managerHospitalID))
