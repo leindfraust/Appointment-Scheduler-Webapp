@@ -72,21 +72,17 @@
               <button class="modal-close is-large" aria-label="close" @click="modalClose"></button>
             </div>
             <br />
-            <div class="block has-text-centered">
-              <p v-if="uploadSchedSuccess" class="has-text-warning">
-                <b>Schedules Updated!</b>
-              </p>
-            </div>
+            <div
+              class="notification is-success has-text-centered"
+              v-if="uploadSchedSuccess"
+            >Schedules Added/Updated!</div>
 
-            <h1 class="subtitle">Upcoming Schedules:</h1>
-            <div class="columns is-gapless is-multiline">
-              <div
-                class="column"
-                v-for="(schedules, index) in days.sort((a, b) => {
-                  return new Date(a.date).getTime() - new Date(b.date).getTime()
-                }).filter(x => { return new Date(x.date).getTime() > new Date().getTime() })"
-                :key="schedules.id"
-              >
+            <h1 class="subtitle">Ongoing Schedules:</h1>
+            <div
+              class="columns is-gapless is-multiline"
+              v-if="Object.keys(daysIndexed).length !== 0"
+            >
+              <div class="column" v-for="(schedules, index) in daysIndexed" :key="schedules.id">
                 <div class="block card">
                   <div class="card-content">
                     <div class="content">
@@ -99,6 +95,9 @@
                   </div>
                 </div>
               </div>
+            </div>
+            <div class="notification is-warning" v-else>
+              <h1 class="title is-5">No ongoing schedules.</h1>
             </div>
           </div>
         </div>
@@ -152,6 +151,14 @@ export default {
         dates: date,
       }));
     },
+    daysIndexed() {
+      if (this.days !== '') {
+        return this.days.sort((a, b) => {
+          return new Date(a.date).getTime() - new Date(b.date).getTime()
+        }).filter(x => { return new Date(x.date).getTime() > new Date().getTime() })
+      }
+
+    }
   },
   methods: {
     async onDayClick(day) {
