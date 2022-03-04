@@ -128,7 +128,7 @@ app.post('/api/doctorPullHospital', async (req, res) => {
             console.log(error)
         } else {
             console.log(success)
-            res.end()
+            res.status(200).end()
         }
     });
 });
@@ -370,7 +370,11 @@ app.post('/api/imgUpload', async function (req, res, next) {
             invalidate: true,
             format: "jpg"
         }, function (error, result) {
-            console.log("cloudinary report: " + result, error);
+            if (error) {
+                console.log(error)
+            } else {
+                console.log(result)
+            }
         });
     });
     setTimeout(() => {
