@@ -118,8 +118,8 @@
                                     >We have sent you a verification code on your email.</div>
                                     <div
                                         v-else
-                                        class="notification is-danger is-light"
-                                    >We have already sent you a code. If you did not received it, try again in 10 minutes.</div>
+                                        class="notification is-danger"
+                                    >You can only request a verification code once, please try again in 10 minutes.</div>
                                     <div class="field" v-if="!codeError">
                                         <div class="control has-text-centered">
                                             <input
@@ -139,6 +139,10 @@
                                             :disabled="OTP === ''"
                                             @click="confirmOTPEditInfo"
                                         >Confirm</button>
+                                        <div
+                                            class="notification is-danger"
+                                            v-if="incorrectCode"
+                                        >Incorrect code, please check your email thoroughly.</div>
                                     </div>
                                     <button
                                         class="modal-close is-large"
@@ -176,7 +180,7 @@
                                             <span v-if="emailTaken">Email address is already taken.</span>
                                             <span
                                                 v-else
-                                            >We have already sent you a code. If you did not received it, try again in 10 minutes.</span>
+                                            >You can only request a verification code once, please try again in 10 minutes.</span>
                                         </div>
                                         <div class="control has-text-centered">
                                             <input
@@ -187,7 +191,7 @@
                                                 id="OTP"
                                                 v-model="OTP"
                                                 oninput="this.value=this.value.slice(0,this.maxLength)"
-                                                :disabled="codeError"
+                                                :disabled="codeError || OTP == ''"
                                             />
                                         </div>
                                         <div class="has-text-centered" v-if="!codeError">
@@ -196,6 +200,10 @@
                                                 :disabled="OTP === ''"
                                                 @click="verifyEmail"
                                             >Confirm</button>
+                                            <div
+                                                class="notification is-danger"
+                                                v-if="incorrectCode"
+                                            >Incorrect code, please check your email thoroughly.</div>
                                         </div>
                                     </div>
                                     <button
@@ -216,7 +224,7 @@
                                         v-model="licenseNo"
                                         style="width: 33%"
                                         :disabled="!authorized"
-                                        :class="{'is-success': authorized}"
+                                        :class="{ 'is-success': authorized }"
                                     />
                                 </div>
                             </div>
@@ -233,7 +241,7 @@
                                                 type="text"
                                                 v-model="fullname"
                                                 :disabled="!authorized"
-                                                :class="{'is-success': authorized}"
+                                                :class="{ 'is-success': authorized }"
                                             />
                                         </div>
                                     </div>
@@ -317,7 +325,8 @@ export default {
             verifyEmailSent: false,
             emailTaken: false,
             codeError: false,
-            updateInfoSuccess: false
+            updateInfoSuccess: false,
+            incorrectCode: false
         }
     },
     methods: {
@@ -433,7 +442,7 @@ export default {
                         code: randomCode
                     });
                 }
-            } else if (typeof confirmCode === undefined || !confirmEmail) {
+            } else if (typeof confirmCode === 'undefined' && Object.keys(confirmEmail).length === 0) {
                 if (typeof existingEmail !== 'undefined') {
                     if (await existingEmail._id !== this.id) {
                         this.verifyEmailSent = true
@@ -473,11 +482,14 @@ export default {
                 if (await confirmCode) {
                     this.authorized = true
                     this.isActiveModal = false
+                } else {
+                    this.incorrectCode = true
                 }
+            } else {
+                this.incorrectCode = true
             }
         },
         async verifyEmail() {
-            console.log(this.gmail)
             await axios.get("/api/code").then(response => this.codes = response.data)
             let confirmCode = await this.codes.find(x => x.code === this.OTP && x.email === this.gmail)
             if (!this.codeError) {
@@ -495,7 +507,11 @@ export default {
                     if (await !this.isActiveModal) {
                         await axios.get('/session/admin').then(response => this.doctorDetails = response.data)
                     }
+                } else {
+                    this.incorrectCode = true
                 }
+            } else {
+                this.incorrectCode = true
             }
         },
         async updateInfo() {
