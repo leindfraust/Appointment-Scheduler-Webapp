@@ -6,7 +6,7 @@
     <div class="column" style="background-color: whitesmoke;">
       <section class="section" style="background-color: whitesmoke;">
       <h1 class="title" >UPCOMING APPOINTMENTS</h1>
-        <div class="container is-widescreen is-fullhd">
+        <div class="container is-widescreen is-fullhd" v-if="Object.keys(appointmentSchedules).length !== 0">
           <div class="field">
             <div class="control">
               <input
@@ -115,6 +115,9 @@
             </div>
           </div>
         </div>
+        <section class="section" v-else>
+          <div class="notification is-info"><h1 class="title is-5">No upcoming appointments.</h1></div>
+        </section>
       </section>
     </div>
   </div>
