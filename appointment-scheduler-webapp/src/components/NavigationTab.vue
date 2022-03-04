@@ -125,6 +125,7 @@ export default {
             this.isActive = !this.isActive
         },
         async logout() {
+            await this.$store.commit("patientID", null);
             await this.$store.commit("patientUsername", '');
             await axios.delete("/session/patient");
             await this.$router.push("/user/login");
