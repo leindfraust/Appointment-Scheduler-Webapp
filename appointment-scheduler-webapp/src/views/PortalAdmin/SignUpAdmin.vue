@@ -1,12 +1,11 @@
 <template>
   <section class="section" style="background-color: whitesmoke;">
-    <div class="container box animate__animated animate__fadeInLeft" style="margin: auto; width: 50%">
+    <div
+      class="container box animate__animated animate__fadeInLeft"
+      style="margin: auto; width: 50%"
+    >
       <!-- I know it sucks, having a form action for only image upload while separating a post with axios for the document, but shit works so I guess it's okay.-->
-      <form
-        action="/api/imgUploadAdmin"
-        method="post"
-        enctype="multipart/form-data"
-      >
+      <form action="/api/imgUploadAdmin" method="post" enctype="multipart/form-data">
         <div class="field is-horizontal">
           <div class="field-body">
             <div class="field">
@@ -109,49 +108,6 @@
         </div>
         <div class="columns">
           <div class="column">
-            <label class="label">Hospitals you are assigned(Select all that applies)</label>
-            <nav class="panel">
-              <div class="panel-block">
-                <input class="input" type="text" v-model="searchBarHospital" placeholder="Search" />
-              </div>
-              <div style="max-height: 20em; overflow: auto">
-                <div
-                  class="panel-block"
-                  v-for="hospitalList in hospitalsIndexed"
-                  :key="hospitalList._id"
-                >
-                  <a @click="selectHospital(hospitalList.hospital)">{{ hospitalList.hospital }}</a>
-                </div>
-              </div>
-            </nav>
-          </div>
-          <div class="column">
-            <label class="label">Selected</label>
-            <div class="columns is-multiline">
-              <div
-                class="column"
-                id="selectedSpecializations"
-                style="max-height: 26em; overflow: auto"
-              >
-                <button
-                  v-for="(hospital, index) in hospitalsSelected"
-                  type="button"
-                  :key="index"
-                  class="button is-light"
-                  style="margin: 5px;"
-                >
-                  {{ hospital.hospital }}&nbsp;
-                  <span
-                    class="has-text-danger"
-                    @click="undoHospital(hospital.hospital)"
-                  >X</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="columns">
-          <div class="column">
             <label class="label">Specializations you possess(Select all that applies)</label>
             <nav class="panel">
               <div class="panel-block">
@@ -200,7 +156,12 @@
           </div>
         </div>
         <div class="has-text-right">
-          <button type="submit" class="button is-primary" @click="create" :disabled="hospitalsSelected == '' || specializationsSelected == ''">Create account</button>
+          <button
+            type="submit"
+            class="button is-primary"
+            @click="create"
+            :disabled="hospitalsSelected == '' || specializationsSelected == ''"
+          >Create account</button>
         </div>
       </form>
     </div>
@@ -224,9 +185,6 @@ export default {
   computed: {
     specializationListIndexed() {
       return this.specializationList.filter(x => x.toLowerCase().includes(this.searchBarSpecialization.toLowerCase()))
-    },
-    hospitalsIndexed() {
-      return this.hospitals.filter(x => x.hospital.toLowerCase().includes(this.searchBarHospital.toLowerCase()))
     }
   },
   data() {
@@ -237,12 +195,9 @@ export default {
       aliasEvaluate: null,
       usernameEvaluate: null,
       evaluateData: null,
-      hospitals: [],
-      hospitalsSelected: [],
       specializationsSelected: [],
       specializationList: this.$store.getters.getSpecializationList,
       searchBarSpecialization: '',
-      searchBarHospital: ''
     };
   },
   async mounted() {
@@ -267,7 +222,6 @@ export default {
           licenseNo: this.licenseCode,
           name: this.name,
           gmail: this.gmail,
-          hospitalOrigin: this.hospitalsSelected,
           specialist: this.specializationsSelected,
           username: this.username,
           password: this.password,
@@ -305,16 +259,6 @@ export default {
     },
     undoSpecialization(specialization) {
       this.specializationsSelected = this.specializationsSelected.filter(x => x !== specialization)
-    },
-    selectHospital(hospital) {
-      if (!this.hospitalsSelected.find(x => x.hospital === hospital)) {
-        this.hospitalsSelected.push({
-          hospital: hospital
-        });
-      }
-    },
-    undoHospital(hospital) {
-      this.hospitalsSelected = this.hospitalsSelected.filter(x => x.hospital !== hospital)
     }
   },
 };
