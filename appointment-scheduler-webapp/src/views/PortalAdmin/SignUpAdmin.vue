@@ -160,7 +160,7 @@
             type="submit"
             class="button is-primary"
             @click="create"
-            :disabled="hospitalsSelected == '' || specializationsSelected == ''"
+            :disabled="specializationsSelected == ''"
           >Create account</button>
         </div>
       </form>
@@ -253,7 +253,7 @@ export default {
       }
     },
     selectSpecialization(specialization) {
-      if (!this.specializationsSelected.find(x => x.specialist === specialization)) {
+      if (!this.specializationsSelected.find(x => x === specialization)) {
         this.specializationsSelected.push(specialization);
       }
     },
