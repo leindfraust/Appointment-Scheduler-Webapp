@@ -16,7 +16,10 @@
 export default {
     name: "imageUploadSuccessAdmin",
     created() {
-        setTimeout(() => { window.location.href = "/admin/login" }, 15000)
+        setTimeout(() => {
+            window.location.href = "/admin/login"
+            this.$store.commit('imgSuccess', false)
+        }, 15000)
     }
 }
 </script>
