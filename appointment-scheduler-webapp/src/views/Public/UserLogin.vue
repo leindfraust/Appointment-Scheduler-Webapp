@@ -26,7 +26,7 @@
           <h1 class="subtitle">OR</h1>
           <a href="/user/signup">Create an account</a>
         </div>
-        <p class="notification is-info">Doctor users, click <a href="/admin/login">here</a></p>
+        <p class="notification is-info">Are you one of our doctors? Click <a href="/admin/login">here</a></p>
       </div>
     </div>
   </section>
