@@ -24,7 +24,7 @@
         <p class="menu-label">General</p>
         <ul class="menu-list">
             <li>
-                <a @click="navDoctors">Doctors</a>
+                <a @click="navDoctors">Home</a>
             </li>
             <li>
                 <a @click="navProfile">Profile</a>
@@ -36,7 +36,7 @@
                 <a>Change Password</a>
             </li>
             <li>
-                <a>Applicants</a>
+                <a>Doctor Registration</a>
             </li>
         </ul>
         <p class="menu-label">Support</p>
