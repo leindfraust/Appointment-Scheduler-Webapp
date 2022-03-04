@@ -68,30 +68,35 @@
                         </div>
                     </div>
                     <hr />
-                    <nav
-                        class="breadcrumb has-dot-separator" aria-label="breadcrumbs"
-                    >
+                    <li>
+                        <a @click="filterAll">
+                            <span style="color: #b5b5b5">&#183;</span>&nbsp;&nbsp;&nbsp;All
+                        </a>
+                    </li>
+                    <li>
+                        <a @click="filterPublic">
+                            <span style="color: #b5b5b5">&#183;</span>&nbsp;&nbsp;&nbsp;Public
+                        </a>
+                    </li>
+                    <li>
+                        <a @click="filterPrivate">
+                            <span style="color: #b5b5b5">&#183;</span>&nbsp;&nbsp;&nbsp;Private
+                        </a>
+                    </li>
+                    <hr />
+                    <nav class="breadcrumb has-dot-separator" aria-label="breadcrumbs">
                         <ul>
-                            <span style="color: #b5b5b5">&#183;</span><li 
+                            <span style="color: #b5b5b5">&#183;</span>
+                            <li
                                 v-for="(cityorMunicipality, index) in citiesOrMunicipalities.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
                                 :key="index"
                             >
-                                <a 
+                                <a
                                     @click="filterByCity(cityorMunicipality.name)"
                                 >{{ cityorMunicipality.name }}</a>
                             </li>
                         </ul>
                     </nav>
-                    <hr>
-                    <li>
-                        <a @click="filterAll">All</a>
-                    </li>
-                    <li>
-                        <a @click="filterPublic">Public</a>
-                    </li>
-                    <li>
-                        <a @click="filterPrivate">Private</a>
-                    </li>
                 </ul>
             </div>
             <div class="column" v-if="geoHospitalNearestUser.length !== 0">
@@ -114,7 +119,7 @@
                         <p
                             class="subtitle"
                         >📌 {{ geoHospital.barangayORStreet }}, {{ geoHospital.city }}, {{ geoHospital.province }}</p>
-                        <iframe
+                        <iframe width="500" height="300" id="geoIframe"
                             :src="`https://maps.google.com/maps?q=${geoHospital.location.coordinates[1]},${geoHospital.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"
                         ></iframe>
                         <br />
@@ -139,8 +144,8 @@
                     </div>
                 </div>
             </div>
-            <div class="container has-text-centered" v-else>
-                <h1 class="title">Hospitals not found. Coming soon...</h1>
+            <div class="container box notification is-danger has-text-centered" v-else>
+                <h1 class="title" style="margin-top: 12.5%">Hospitals unavailable. Coming soon...</h1>
             </div>
         </div>
     </div>
@@ -264,6 +269,12 @@ export default {
 }
 </script>
 <style scoped>
+@media (max-width: 991.98px){
+    #geoIframe {
+        width: 75vw;
+        height: 200px;
+    }
+}
 .loader {
     border: 7px solid #f3f3f3;
     border-radius: 50%;
