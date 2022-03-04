@@ -284,7 +284,6 @@ export default {
             schedule: this.schedule,
             priorityNum: this.prefix + "-" + this.priorityNum,
           };
-          store.commit("statusAvailability", false)
           store.commit("patientDetails", patientDetails);
           await this.$router.push("/success");
         }
