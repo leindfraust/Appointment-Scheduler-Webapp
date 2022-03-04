@@ -1,5 +1,11 @@
 <template>
   <NavigationTab />
+  <div class="modal" :class="{ 'is-active': isDoctorLoading }">
+    <div class="modal-background"></div>
+    <div class="modal-content" style="overflow: hidden">
+      <div class="loader" style="margin: auto;"></div>
+    </div>
+  </div>
   <section class="section">
     <div class="columns">
       <div class="column">
@@ -68,8 +74,16 @@
                   class="subtitle has-text-centered"
                 >No doctors are currently available in this specialization.</p>
               </div>
-              <div v-else class="card-content" v-for="doctors in doctorList" :key="doctors._id">
+              <div v-else>
+                <br/>
                 <h1 class="title is-3">Choose a doctor:</h1>
+              </div>
+              <div
+                v-if="specializationClicked"
+                class="card-content"
+                v-for="doctors in doctorList"
+                :key="doctors._id"
+              >
                 <div class="media">
                   <figure class="media-left">
                     <p class="image is-64x64">
@@ -114,27 +128,28 @@ export default {
       doctorList: null,
       specialistList: null,
       pickedSpecialist: null,
-      specializationClicked: false
+      specializationClicked: false,
+      isDoctorLoading: false
     };
   },
   async mounted() {
-    //temporary 
-    //needs to edit data GET to find hospital name, will be implemented in the future once main feature is ready
     await axios
       .get("/session/patient")
       .then(response => this.patientDetails = response.data);
   },
   async created() {
     await axios.get("/api/manager").then(response => this.hospitalDetails = response.data.find(x => x._id == this.hospitalID));
-    this.specialistList = await this.hospitalDetails.specializations;
+    this.specialistList = await this.hospitalDetails.specializations.sort();
   },
   methods: {
     async getDoctors(specialization) {
+      this.isDoctorLoading = true
       this.specializationClicked = true
       this.pickedSpecialist = specialization;
       await axios
         .get("/api/admin")
-        .then((response) => (this.doctorList = response.data.filter((x) => x.specialist.find(x => x === specialization) && x.schedule != "" && x.schedule.find(x => new Date(x.date).getTime() > new Date().getTime()))));
+        .then((response) => (this.doctorList = response.data.filter((x) => x.verified === true && x.hospitalOrigin.find(x => x.hospital === this.hospitalDetails.hospital) && x.specialist.find(x => x === specialization) && x.schedule != "" && x.schedule.find(x => new Date(x.date).getTime() > new Date().getTime()))));
+      this.isDoctorLoading = false
     },
     viewSpecializations() {
       this.specializationClicked = false
@@ -150,7 +165,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .centered {
   position: absolute;
   top: 50%;
@@ -163,6 +178,42 @@ export default {
 @media (max-width: 991.98px) {
   .doctorContainer {
     width: 97% !important;
+  }
+}
+.loader {
+  border: 7px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 7px solid gray;
+  border-bottom: 7px solid gray;
+  width: 60px;
+  height: 60px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 991.98px) {
+  #notification {
+    width: 100% !important;
+  }
+  #hospital {
+    margin-bottom: 15% !important;
   }
 }
 </style>
