@@ -27,6 +27,9 @@ export default {
             patient: store.state.patientDetails,
         };
     },
+    mounted(){
+      store.commit("statusAvailability", false)
+    },
     components: { NavigationTab }
 };
 </script>
