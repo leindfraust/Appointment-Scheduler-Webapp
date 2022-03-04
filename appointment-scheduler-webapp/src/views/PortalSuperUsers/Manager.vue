@@ -18,7 +18,7 @@
                         />
                     </div>
                 </div>
-                <div class="table-container">
+                <div class="table-container" v-if="Object.keys(doctorAccountsIndexed).length !== 0">
                     <table class="table">
                         <thead>
                             <tr>
@@ -56,6 +56,7 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="notification is-warning" v-else><h1 class="title is-4">No doctors as of yet, generate a security code for your doctors to use in linking to this hospital.</h1></div>
                 <div class="modal" :class="{ 'is-active': isActiveModal }">
                     <div class="modal-background"></div>
                     <div class="modal-content">
