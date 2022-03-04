@@ -58,15 +58,20 @@
                 >Send</button>
               </div>
             </div>
-            <p v-if="notificationSent" class="has-text-success">A message has been sent to <b>{{messageSuccessSelectedPatient}}</b>.</p>
+            <p v-if="notificationSent" class="has-text-success">
+              A message has been sent to
+              <b>{{ messageSuccessSelectedPatient }}</b>.
+            </p>
           </div>
         </div>
         <button class="modal-close is-large" aria-label="close" @click="modalInactive"></button>
       </div>
       <section class="section" style="background-color: whitesmoke;">
         <div class="container is-widescreen is-fullhd" style="padding: 15">
-          <h1 class="title">APPOINTMENT HISTORY</h1>
-          <button class="button is-info" @click="modalActive">Send a notice</button>
+          <h1 class="title">
+            APPOINTMENT HISTORY
+            <button class="button is-info" @click="modalActive">Send a message to a patient</button>
+          </h1>
           <div class="field">
             <div class="control">
               <input
@@ -78,40 +83,43 @@
               />
             </div>
           </div>
-          <div class="box" v-for="(appointmentList, index) in appointmentSchedules" :key="index">
-            <h1 class="subtitle has-text-black">Schedule: {{ new Date(index).toDateString() }}</h1>
-            <div class="table-container">
-              <table class="table is-striped is-narrow is-fullwidth is-bordered">
-                <thead>
-                  <tr>
-                    <th class="has-text-black-ter">Controls</th>
-                    <th class="has-text-black-ter">Priority No.</th>
-                    <th class="has-text-black-ter">First Name</th>
-                    <th class="has-text-black-ter">Last Name</th>
-                    <th class="has-text-black-ter">Contact Number</th>
-                    <th class="has-text-black-ter">Birthday</th>
-                    <th class="has-text-black-ter">Symptoms/Comments</th>
-                  </tr>
-                </thead>
-                <tbody v-for="appointments in appointmentList" :key="appointments._id">
-                  <tr>
-                    <button
-                      class="dropdown-item button has-text-danger"
-                      type="button"
-                      @click="deleteData(appointments._id)"
-                    >Delete</button>
-                    <br />
-                    <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
-                    <td class="has-text-black-ter">{{ appointments.firstName }}</td>
-                    <td class="has-text-black-ter">{{ appointments.lastName }}</td>
-                    <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
-                    <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
-                    <td class="has-text-black-ter">{{ appointments.comments }}</td>
-                  </tr>
-                </tbody>
-              </table>
+          <div class="container" v-if="Object.keys(appointmentSchedules).length !== 0">
+            <div class="box" v-for="(appointmentList, index) in appointmentSchedules" :key="index">
+              <h1 class="subtitle has-text-black">Schedule: {{ new Date(index).toDateString() }}</h1>
+              <div class="table-container">
+                <table class="table is-striped is-narrow is-fullwidth is-bordered">
+                  <thead>
+                    <tr>
+                      <th class="has-text-black-ter">Controls</th>
+                      <th class="has-text-black-ter">Priority No.</th>
+                      <th class="has-text-black-ter">First Name</th>
+                      <th class="has-text-black-ter">Last Name</th>
+                      <th class="has-text-black-ter">Contact Number</th>
+                      <th class="has-text-black-ter">Birthday</th>
+                      <th class="has-text-black-ter">Symptoms/Comments</th>
+                    </tr>
+                  </thead>
+                  <tbody v-for="appointments in appointmentList" :key="appointments._id">
+                    <tr>
+                      <button
+                        class="dropdown-item button has-text-danger"
+                        type="button"
+                        @click="deleteData(appointments._id)"
+                      >Delete</button>
+                      <br />
+                      <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
+                      <td class="has-text-black-ter">{{ appointments.firstName }}</td>
+                      <td class="has-text-black-ter">{{ appointments.lastName }}</td>
+                      <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
+                      <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
+                      <td class="has-text-black-ter">{{ appointments.comments }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
+          <div class="notification is-info" v-else>No previous appointments.</div>
         </div>
       </section>
     </div>
