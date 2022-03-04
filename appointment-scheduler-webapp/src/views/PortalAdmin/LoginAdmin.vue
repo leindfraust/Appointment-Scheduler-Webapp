@@ -6,7 +6,7 @@
           <div class="card-content">
             <div class="content">
               <form class="field" style="margin-top: 5%">
-              <h1 class="title">Login</h1>
+              <h1 class="title has-text-link has-text-left">Nice to see you Doc.</h1>
                 <div class="control">
                   <input
                     class="input"
