@@ -24,12 +24,12 @@
         :class="{ 'is-hidden-mobile': isActive, 'fixedMenu': isActive }"
         style="background-color: white; padding: 20px; box-shadow: 5px 10px rgba(240, 240, 240, 0.966);"
     >
-        <div class="has-text-centered">
+        <div class="has-text-centered block">
             <label class="label" v-if="isActive">{{ alias }}</label>
-            <span class="image is-128x128" style="margin: auto;" v-html="profileImg"></span>
+            <div class="image is-128x128" style="margin: auto;" v-html="profileImg"></div>
         </div>
         <br />
-        <ul class="menu-list">
+        <ul class="menu-list block">
             <p class="menu-label">General</p>
             <li>
                 <a @click="routeHome">Appointments</a>
@@ -102,6 +102,6 @@ export default {
 </script>
 <style scoped>
 .fixedMenu {
-    position: fixed
+    position: fixed;
 }
 </style>
