@@ -216,7 +216,7 @@ router.beforeEach((to, from, next) => {
 
 router.beforeEach((to, from, next) => {
     if (to.matched.some(route => route.meta.requireImgUploadSuccess)) {
-        if (store.state.imgSuccess) {
+        if (store.state.imgSuccess === true) {
             return next();
         } else {
             return next('/admin/login');
