@@ -78,7 +78,7 @@
                 <div class="control">
                     <label class="label">Postal Code:</label>
                 </div>
-                <input type="text" class="input" v-model="postalCode" placeholder="Postal Code" />
+                <input type="number" class="input" v-model="postalCode" placeholder="Postal Code" />
             </div>
             <div class="field">
                 <div class="control">
@@ -388,10 +388,10 @@ export default {
 
             if (await this.checkUsername.find(x => x.username == this.username)) {
                 this.usernameAlreadyTaken = true
-                if(this.password !== this.confirmPassword){
+                if (await this.password !== this.confirmPassword) {
                     this.passwordNotMatch = true
                 }
-            } else if (this.password !== this.confirmPassword) {
+            } else if (await this.password !== this.confirmPassword) {
                 this.passwordNotMatch = true
             } else {
                 await axios.post('/api/manager', {
@@ -412,8 +412,8 @@ export default {
                     username: this.username,
                     password: this.password
                 });
-                await this.$store.state.accountCreated('accountCreated', true)
-                await this.$store.push('/user/manager/login')
+                await this.$store.commit('accountCreated', true)
+                await this.$router.push('/user/manager/login')
             }
         }
     }
