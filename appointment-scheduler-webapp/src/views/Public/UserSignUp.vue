@@ -179,7 +179,7 @@
         </div>
       </div>
           <label class="checkbox">
-            <input type="checkbox" />
+            <input type="checkbox" @click="agreeTermsAndConditions" />
             I agree to the
             <a href="#">terms and conditions</a>
           </label>
@@ -237,6 +237,9 @@ export default {
     await axios.get('/api/geolocation').then(response => this.geolocationData = response.data)
   },
   methods: {
+    agreeTermsAndConditions(){
+      this.termsAndConditionsAgreed = true
+    },
     sexMale() {
       this.sex = "Male"
     },
@@ -270,8 +273,7 @@ export default {
         await axios.post("/api/user", {
           username: this.username,
           password: this.password,
-          firstName: this.firstName,
-          lastName: this.lastName,
+          name: this.firstname + " " + this.lastName,
           age: this.age,
           sex: this.sex,
           contactNum: this.contactNum,
