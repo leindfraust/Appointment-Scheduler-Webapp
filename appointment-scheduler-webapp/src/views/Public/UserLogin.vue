@@ -1,10 +1,16 @@
 <template>
   <NavigationTabVue />
   <section class="section is-medium">
-    <div class="container has-text-centered animate__animated animate__fadeInLeft" style="width: 40%">
+    <div
+      class="container has-text-centered animate__animated animate__fadeInLeft"
+      style="width: 40%"
+    >
       <div class="box">
-         <p class="notification is-success" v-if="$store.state.accountCreated">Your account has been successfully created.</p>
-        <br/>
+        <p
+          class="notification is-success"
+          v-if="newAccount"
+        >Your account has been successfully created.</p>
+        <br />
         <p class="subtitle has-text-info has-text-left">Login to make an appointment.</p>
         <div class="field">
           <div class="control">
@@ -13,20 +19,21 @@
           <div class="control" style="margin-top: 2%">
             <input class="input" type="password" v-model="password" placeholder="password" required />
           </div>
-          <h1
-            v-if="incorrectUserPass"
-            class="subtitle has-text-danger"
-          >{{ validateMessage }}</h1>
+          <h1 v-if="incorrectUserPass" class="subtitle has-text-danger">{{ validateMessage }}</h1>
           <h1
             v-else-if="incorrectUserPass == false"
             class="subtitle has-text-danger"
           >{{ validateMessage }}</h1>
           <button type="button" class="button is-primary" @click="login">Login</button>
-          <br/><br/>
+          <br />
+          <br />
           <h1 class="subtitle">OR</h1>
           <a href="/user/signup">Create an account</a>
         </div>
-        <p class="notification is-info">Are you one of our doctors? Click <a href="/admin/login">here</a></p>
+        <p class="notification is-info">
+          Are you one of our doctors? Click
+          <a href="/admin/login">here</a>
+        </p>
       </div>
     </div>
   </section>
@@ -48,10 +55,15 @@ export default {
       password: null,
       userPatient: null,
       validateMessage: null,
-      incorrectUserPass: Boolean
+      incorrectUserPass: Boolean,
+      newAccount: false
     }
   },
   async mounted() {
+    if (this.$store.state.accountCreated == true) {
+      this.newAccount = true
+      await this.$store.commit('accountCreated', false)
+    }
     await axios
       .get("/session/patient")
       .then(
@@ -111,9 +123,9 @@ export default {
 .section {
   background-color: whitesmoke;
 }
-@media (max-width: 991.98px){
+@media (max-width: 991.98px) {
   .container {
-    width: 100% !important
+    width: 100% !important;
   }
 }
 </style>

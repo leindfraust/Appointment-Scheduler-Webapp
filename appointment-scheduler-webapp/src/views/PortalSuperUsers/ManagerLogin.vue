@@ -7,7 +7,7 @@
                     id="container-mobile"
                     style="width: 33%; margin: auto"
                 >
-                <p class="notification is-success" v-if="$store.state.accountCreated">The account has been successfully created, login to activate the account now.</p>
+                <p class="notification is-success" v-if="newAccount">The account has been successfully created, login to activate the account now.</p>
                     <div class="card-content">
                         <div class="content">
                             <form class="field" style="margin-top: 5%">
@@ -65,9 +65,14 @@ export default {
             userManager: null,
             incorrectUserPass: '',
             validateMessage: '',
+            newAccount: false
         }
     },
     async mounted() {
+        if(this.$store.state.accountCreated == true){
+            this.newAccount = true
+            await this.$store.commit('accountCreated', false)
+        }
         await axios
             .get("/session/manager")
             .then(
