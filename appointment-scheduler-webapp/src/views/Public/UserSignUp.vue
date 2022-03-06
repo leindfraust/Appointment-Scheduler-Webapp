@@ -123,10 +123,7 @@
                     v-for="cities in citiesData"
                     :key="cities.name"
                   >
-                    <a
-                      class="dropdown-item"
-                      @click="selectCity(cities.name)"
-                    >{{ cities.name }}</a>
+                    <a class="dropdown-item" @click="selectCity(cities.name)">{{ cities.name }}</a>
                   </div>
                 </div>
               </div>
@@ -138,7 +135,13 @@
       <div class="field">
         <p class="control">
           <label class="label">Current Address</label>
-          <input class="input" type="text" placeholder="your current address" v-model="currentAddress" required />
+          <input
+            class="input"
+            type="text"
+            placeholder="your current address"
+            v-model="currentAddress"
+            required
+          />
         </p>
       </div>
       <div class="field">
@@ -178,19 +181,19 @@
           </div>
         </div>
       </div>
-          <label class="checkbox">
-            <input type="checkbox" @click="agreeTermsAndConditions" />
-            I agree to the
-            <a href="#">terms and conditions</a>
-          </label>
-          <br/>
-          <div class="has-text-right">
-          <button
-            class="button is-primary"
-            @click="signup"
-            :disabled="firstName == null || lastName == null || age == null || contactNum == null || province == null || city == null || currentAddress == null || username == null || password == null || termsAndConditionsAgreed == false"
-          >Confirm</button>
-          </div>
+      <label class="checkbox">
+        <input type="checkbox" @click="agreeTermsAndConditions" />
+        I agree to the
+        <a href="#">terms and conditions</a>
+      </label>
+      <br />
+      <div class="has-text-right">
+        <button
+          class="button is-primary"
+          @click="signup($event)"
+          :disabled="firstName == null || lastName == null || age == null || sex == null || contactNum == null || province == null || city == null || currentAddress == null || username == null || password == null || termsAndConditionsAgreed == false"
+        >Confirm</button>
+      </div>
     </div>
   </section>
 </template>
@@ -237,7 +240,7 @@ export default {
     await axios.get('/api/geolocation').then(response => this.geolocationData = response.data)
   },
   methods: {
-    agreeTermsAndConditions(){
+    agreeTermsAndConditions() {
       this.termsAndConditionsAgreed = true
     },
     sexMale() {
@@ -263,10 +266,33 @@ export default {
     cityDropdown() {
       this.isActiveDropdownCity = !this.isActiveDropdownCity
     },
-    async signup() {
+    async signup(e) {
       this.usernameConfirm = this.evaluateData.find(x => x.username === this.username)
 
-      if (
+      if ((await this.password) !== this.passwordRepeat) {
+        this.passwordMatch = "password do not match";
+        if (await this.username) {
+          if (typeof this.usernameConfirm == "undefined") {
+            this.usernameEvaluate = null;
+          } else if ((await this.usernameConfirm.username) === this.username) {
+            this.usernameEvaluate = "username already taken";
+          }
+        }
+        await e.preventDefault();
+      } else {
+        this.passwordMatch = null;
+
+        if (await this.username) {
+          if (typeof this.usernameConfirm == "undefined") {
+            this.usernameEvaluate = null;
+          } else if ((await this.usernameConfirm.username) === this.username) {
+            this.usernameEvaluate = "username already taken";
+            await e.preventDefault();
+          }
+        }
+      }
+
+      if (await
         this.password === this.passwordRepeat &&
         this.usernameEvaluate == null
       ) {
@@ -284,21 +310,6 @@ export default {
         });
         await this.$store.commit('accountCreated', true)
         await this.$router.push("/user/login");
-      } else {
-        if ((await this.password) !== this.passwordRepeat) {
-          this.passwordMatch = "password do not match";
-          await e.preventDefault();
-        } else {
-          this.passwordMatch = null;
-        }
-        if (await this.username) {
-          if (typeof this.usernameConfirm == "undefined") {
-            this.usernameEvaluate = null;
-          } else if ((await this.usernameConfirm.username) === this.username) {
-            this.usernameEvaluate = "username already taken";
-            await e.preventDefault();
-          }
-        }
       }
     }
   }

@@ -72,7 +72,6 @@
               <div class="control">
                 <input class="input" type="email" v-model="gmail" placeholder="gmail" required />
               </div>
-              <p class="subtitle has-text-danger">{{ usernameEvaluate }}</p>
             </div>
           </div>
         </div>
@@ -215,44 +214,60 @@ export default {
       //password, alias and username checks
       if ((await this.password) !== this.passwordRepeat) {
         this.passwordMatch = "password do not match";
+        if (await this.alias) {
+          if (typeof this.aliasConfirm == "undefined") {
+            this.aliasEvaluate = null;
+          } else if ((await this.aliasConfirm.alias) === this.alias) {
+            this.aliasEvaluate = "alias already taken";
+            await e.preventDefault();
+          }
+        }
+        if (await this.username) {
+          if (typeof this.usernameConfirm == "undefined") {
+            this.usernameEvaluate = null;
+          } else if ((await this.usernameConfirm.username) === this.username) {
+            this.usernameEvaluate = "username already taken";
+            await e.preventDefault();
+          }
+        }
         await e.preventDefault();
       } else {
         this.passwordMatch = null;
-      }
-      if (await this.alias) {
-        if (typeof this.aliasConfirm == "undefined") {
-          this.aliasEvaluate = null;
-        } else if ((await this.aliasConfirm.alias) === this.alias) {
-          this.aliasEvaluate = "alias already taken";
-          await e.preventDefault();
-        }
-      }
-      if (await this.username) {
-        if (typeof this.usernameConfirm == "undefined") {
-          this.usernameEvaluate = null;
-        } else if ((await this.usernameConfirm.username) === this.username) {
-          this.usernameEvaluate = "username already taken";
-          await e.preventDefault();
-        }
 
-        //if no errors, proceed to POST
-        if (await
-          this.password === this.passwordRepeat &&
-          this.aliasEvaluate == null &&
-          this.usernameEvaluate == null
-        ) {
-          await axios.post("/api/admin", {
-            alias: this.alias,
-            licenseNo: this.licenseCode,
-            name: this.name,
-            gmail: this.gmail,
-            specialist: this.specializationsSelected,
-            username: this.username,
-            password: this.password,
-          });
-
-          await this.$store.commit("imgSuccess", true)
+        if (await this.alias) {
+          if (typeof this.aliasConfirm == "undefined") {
+            this.aliasEvaluate = null;
+          } else if ((await this.aliasConfirm.alias) === this.alias) {
+            this.aliasEvaluate = "alias already taken";
+            await e.preventDefault();
+          }
         }
+        if (await this.username) {
+          if (typeof this.usernameConfirm == "undefined") {
+            this.usernameEvaluate = null;
+          } else if ((await this.usernameConfirm.username) === this.username) {
+            this.usernameEvaluate = "username already taken";
+            await e.preventDefault();
+          }
+        }
+      }
+      //if no errors, proceed to POST
+      if (await
+        this.password === this.passwordRepeat &&
+        this.aliasEvaluate == null &&
+        this.usernameEvaluate == null
+      ) {
+        await axios.post("/api/admin", {
+          alias: this.alias,
+          licenseNo: this.licenseCode,
+          name: this.name,
+          gmail: this.gmail,
+          specialist: this.specializationsSelected,
+          username: this.username,
+          password: this.password,
+        });
+
+        await this.$store.commit("imgSuccess", true)
       }
     },
     selectSpecialization(specialization) {
