@@ -7,8 +7,7 @@ router.get('/', (req, res) => {
 
 router.post('/', (req, res) => {
     req.session._id = req.body._id
-    req.session.firstName = req.body.firstName
-    req.session.lastName = req.body.lastName
+    req.session.name = req.body.name
     req.session.username = req.body.username
     req.session.province = req.body.province
     req.session.city = req.body.city
@@ -23,8 +22,7 @@ router.post('/', (req, res) => {
 
 router.put('/', (req, res) => {
     req.session.alias = req.body.alias || req.session.alias
-    req.session.firstName = req.body.fullname || req.session.lastName
-    req.session.lastName = req.body.lastName || req.session.lastName
+    req.session.name = req.body.name || req.session.name
     req.session.username = req.body.username || req.session.username
     req.session.province = req.body.province || req.session.province
     req.session.city = req.body.city || req.session.city
