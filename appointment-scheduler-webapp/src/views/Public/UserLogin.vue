@@ -101,8 +101,7 @@ export default {
           await this.$router.push(`/user/${this.userPatient.username}`);
           await axios.post("/session/patient", {
             _id: this.userPatient._id,
-            firstName: this.userPatient.firstName,
-            lastName: this.userPatient.lastName,
+            name: this.userPatient.name,
             username: this.username,
             province: this.userPatient.province,
             city: this.userPatient.city,

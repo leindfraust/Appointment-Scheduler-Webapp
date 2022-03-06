@@ -7,7 +7,7 @@
         <div class="loader" style="margin: auto;"></div>
       </div>
     </div>
-    <div class="container is-fluid">
+    <div class="container">
       <div class="tabs is-centered">
         <ul>
           <li :class="{ 'is-active': isActiveTabOne }">
@@ -195,11 +195,10 @@ export default {
         ))
       );
     await axios.get('/session/patient').then(response => this.patient = response.data)
-    this.firstName = await this.patient.firstName
-    this.lastName = await this.patient.lastName
+    this.firstName = await this.patient.name[0]
+    this.lastName = await this.patient.name[1]
     this.checkPatientRecord = await this.doctorDetails.patients.find(x => x.patient === this.patient._id)
     this.currentAddress = await this.patient.currentAddress
-    console.log(await this.doctorDetails)
   },
   methods: {
     async appoint() {

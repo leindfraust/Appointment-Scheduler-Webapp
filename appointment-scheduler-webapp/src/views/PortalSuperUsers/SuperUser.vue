@@ -241,8 +241,8 @@
                             @click="patientDelete(patient._id)"
                         >Delete</button>
                         <td class="has-text-black-ter">{{ index + 1 }}</td>
-                        <td class="has-text-black-ter">{{ patient.firstName }}</td>
-                        <td class="has-text-black-ter">{{ patient.lastName }}</td>
+                        <td class="has-text-black-ter">{{ patient.name[0] }}</td>
+                        <td class="has-text-black-ter">{{ patient.name[1] }}</td>
                         <td class="has-text-black-ter">{{ patient.age }}</td>
                         <td class="has-text-black-ter">{{ patient.sex }}</td>
                         <td class="has-text-black-ter">{{ patient.contactNum }}</td>
@@ -390,7 +390,7 @@ export default {
             return this.doctorAccounts.filter(x => { return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) || x.specialist.toLowerCase().includes(this.searchBar.toLowerCase()) })
         },
         patientAccountsIndexed() {
-            return this.patientAccounts.filter(x => { return x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) || x.lastName.toLowerCase().includes(this.searchBar.toLowerCase()) })
+            return this.patientAccounts.filter(x => { return x.name[0].toLowerCase().includes(this.searchBar.toLowerCase()) || x.name[1].toLowerCase().includes(this.searchBar.toLowerCase())})
         },
         provinceAndCitiesIndexed() {
             return _.groupBy(
@@ -465,6 +465,7 @@ export default {
             this.isActiveGeolocation = false
 
             await axios.get("/api/user").then(response => this.patientAccounts = response.data)
+            console.log(await this.patientAccounts)
         },
         async geolocation() {
             this.isActiveManager = false

@@ -273,7 +273,7 @@ export default {
         await axios.post("/api/user", {
           username: this.username,
           password: this.password,
-          name: this.firstname + " " + this.lastName,
+          name: [this.firstName, this.lastName],
           age: this.age,
           sex: this.sex,
           contactNum: this.contactNum,
