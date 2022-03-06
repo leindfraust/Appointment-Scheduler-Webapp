@@ -159,7 +159,7 @@
           <button
             type="submit"
             class="button is-primary"
-            @click="create"
+            @click="create($event)"
             :disabled="specializationsSelected == ''"
           >Create account</button>
         </div>
@@ -212,43 +212,46 @@ export default {
       this.usernameConfirm = this.evaluateData.find(
         (x) => x.username === this.username
       );
-      if (
-        this.password === this.passwordRepeat &&
-        this.aliasEvaluate == null &&
-        this.usernameEvaluate == null
-      ) {
-        await axios.post("/api/admin", {
-          alias: this.alias,
-          licenseNo: this.licenseCode,
-          name: this.name,
-          gmail: this.gmail,
-          specialist: this.specializationsSelected,
-          username: this.username,
-          password: this.password,
-        });
-        await this.$store.commit("imgSuccess", true)
+      //password, alias and username checks
+      if ((await this.password) !== this.passwordRepeat) {
+        this.passwordMatch = "password do not match";
+        await e.preventDefault();
       } else {
-        if ((await this.password) !== this.passwordRepeat) {
-          this.passwordMatch = "password do not match";
+        this.passwordMatch = null;
+      }
+      if (await this.alias) {
+        if (typeof this.aliasConfirm == "undefined") {
+          this.aliasEvaluate = null;
+        } else if ((await this.aliasConfirm.alias) === this.alias) {
+          this.aliasEvaluate = "alias already taken";
           await e.preventDefault();
-        } else {
-          this.passwordMatch = null;
         }
-        if (await this.alias) {
-          if (typeof this.aliasConfirm == "undefined") {
-            this.aliasEvaluate = null;
-          } else if ((await this.aliasConfirm.alias) === this.alias) {
-            this.aliasEvaluate = "alias already taken";
-            await e.preventDefault();
-          }
+      }
+      if (await this.username) {
+        if (typeof this.usernameConfirm == "undefined") {
+          this.usernameEvaluate = null;
+        } else if ((await this.usernameConfirm.username) === this.username) {
+          this.usernameEvaluate = "username already taken";
+          await e.preventDefault();
         }
-        if (await this.username) {
-          if (typeof this.usernameConfirm == "undefined") {
-            this.usernameEvaluate = null;
-          } else if ((await this.usernameConfirm.username) === this.username) {
-            this.usernameEvaluate = "username already taken";
-            await e.preventDefault();
-          }
+
+        //if no errors, proceed to POST
+        if (await
+          this.password === this.passwordRepeat &&
+          this.aliasEvaluate == null &&
+          this.usernameEvaluate == null
+        ) {
+          await axios.post("/api/admin", {
+            alias: this.alias,
+            licenseNo: this.licenseCode,
+            name: this.name,
+            gmail: this.gmail,
+            specialist: this.specializationsSelected,
+            username: this.username,
+            password: this.password,
+          });
+
+          await this.$store.commit("imgSuccess", true)
         }
       }
     },
