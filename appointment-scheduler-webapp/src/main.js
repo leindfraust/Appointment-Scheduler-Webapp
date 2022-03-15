@@ -9,6 +9,7 @@ import axios from 'axios'
 import VueAxios from 'vue-axios'
 import '../node_modules/bulma/css/bulma.min.css'
 import '../node_modules/animate.css/animate.min.css'
+import '../src/assets/loader.css'
 
 createApp(App)
     .use(VCalendar, {})
