@@ -33,7 +33,6 @@
                 :value="firstName"
                 placeholder="First Name"
                 required
-                disabled
               />
             </div>
             <label class="label">Last Name</label>
@@ -44,7 +43,6 @@
                 v-model="lastName"
                 placeholder="Last Name"
                 required
-                disabled
               />
             </div>
             <label class="label">Contact Number:</label>
@@ -78,7 +76,7 @@
             </div>
             <div class="block control">
               <label class="label">Current Address</label>
-              <input class="input" type="text" :value="currentAddress" disabled />
+              <input class="input" type="text" :value="currentAddress"/>
             </div>
             <br />
             <div class="block has-text-centered">
@@ -94,7 +92,7 @@
         <br />
         <div v-if="basicDetailsDone">
           <form class="field">
-            <h1 class="subtitle has-text-black has-text-weight-bold">Pick your prefered schedule:</h1>
+            <h1 class="subtitle has-text-black has-text-weight-bold">Pick your preferred schedule:</h1>
             <div
               v-for="(schedules, index) in doctorSched.filter(x => new Date(x.date).getTime() > new Date().getTime()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())"
               :key="schedules.id"
@@ -137,7 +135,7 @@
                   class="button is-primary"
                   :disabled="schedule == null"
                   @click="appoint"
-                >Submit appoitnment</button>
+                >Submit appointment</button>
               </span>
             </div>
           </form>
@@ -151,13 +149,11 @@
 import axios from "axios";
 import store from "../../store";
 import NavigationTab from "../../components/NavigationTab.vue";
-import NavigationTab1 from "../../components/NavigationTab.vue";
 
 export default {
   name: "RegForm",
   components: {
-    NavigationTab,
-    NavigationTab1
+    NavigationTab
 },
   data() {
     return {
@@ -326,7 +322,7 @@ export default {
                 e.doctor === this.doctor
             ).length));
       //check how many appointed patients in regards to the appointment limit set by the doctor
-      //if avaiable
+      //if available
       if (await this.patientsAppointed < this.schedule.appointmentLimit) {
         this.isSchedLoading = false
         this.schedAvailability = true
@@ -349,38 +345,5 @@ export default {
 <style scoped>
 .statusSched {
   display: none;
-}
-.loader {
-  border: 7px solid #f3f3f3;
-  border-radius: 50%;
-  border-top: 7px solid gray;
-  border-bottom: 7px solid gray;
-  width: 60px;
-  height: 60px;
-  -webkit-animation: spin 2s linear infinite;
-  animation: spin 2s linear infinite;
-}
-
-@-webkit-keyframes spin {
-  0% {
-    -webkit-transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(360deg);
-  }
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-@media (max-width: 991.98px) {
-  .section {
-    width: 100% !important;
-  }
 }
 </style>
