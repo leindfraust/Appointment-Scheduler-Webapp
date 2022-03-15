@@ -387,7 +387,7 @@ export default {
             return this.managerAccounts.filter(x => { return x.hospital.toLowerCase().includes(this.searchBar.toLowerCase()) })
         },
         doctorAccountsIndexed() {
-            return this.doctorAccounts.filter(x => { return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) || x.specialist.toLowerCase().includes(this.searchBar.toLowerCase()) })
+            return this.doctorAccounts.filter(x => { return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) || x.specialist.find(x => x.toLowerCase().includes(this.searchBar.toLowerCase())) })
         },
         patientAccountsIndexed() {
             return this.patientAccounts.filter(x => { return x.name[0].toLowerCase().includes(this.searchBar.toLowerCase()) || x.name[1].toLowerCase().includes(this.searchBar.toLowerCase())})
@@ -465,7 +465,6 @@ export default {
             this.isActiveGeolocation = false
 
             await axios.get("/api/user").then(response => this.patientAccounts = response.data)
-            console.log(await this.patientAccounts)
         },
         async geolocation() {
             this.isActiveManager = false
