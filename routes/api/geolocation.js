@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const geolocation = require('../../model/geolocation');
+const geolocation = require('../../models/geolocation');
 
 router.get('/', async (req, res) => {
     try {
