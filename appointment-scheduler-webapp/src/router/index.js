@@ -20,7 +20,8 @@ import ImageUploadSuccessManager from '../views/PortalSuccessConfirmations/image
 import UserSignUp from '../views/Public/UserSignUp.vue'
 import UserLogin from '../views/Public/UserLogin.vue'
 import User from '../views/Public/User.vue'
-import DoctorChat from '../views/Public/DoctorChat.vue'
+import UserProfile from '../views/Public/UserProfile.vue'
+import UserSecurity from '../views/Public/UserSecurity.vue'
 import SuperUser from '../views/PortalSuperUsers/SuperUser.vue'
 import SuperUserLogin from '../views/PortalSuperUsers/SuperUserLogin.vue'
 import Manager from '../views/PortalSuperUsers/Manager.vue'
@@ -33,6 +34,7 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
         name: 'Home',
         component: Home,
     },
+    //Manager/Hospital account routes
     {
         path: '/user/manager/:user',
         name: 'Manager',
@@ -59,6 +61,7 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
             requiresManagerAuth: true
         }
     },
+    //Superuser account routes
     {
         path: '/user/superuser',
         name: 'SuperUser',
@@ -72,6 +75,7 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
         name: 'SuperUserLogin',
         component: SuperUserLogin,
     },
+    //Doctor account routes
     {
         path: '/admin/login',
         name: 'Login',
@@ -122,6 +126,7 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
             requiresAuth: true
         }
     },
+    //Confirmation routes
     {
         path: '/imgUploadSuccess',
         name :'imgUploadSuccess',
@@ -146,6 +151,7 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
             requireImgUploadSuccessManager: true
         }
     },
+    //User routes
     {
         path: '/user/signup',
         name: 'UserSignup',
@@ -164,19 +170,24 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
             requiresAuthPatient: true
         }
     },
-    //should be deleted
-    {
-        path: '/chatnow',
-        name: 'DoctorChat',
-        component: DoctorChat,
-        meta: {
-            requiresAuthUsers: true
-        }
-    },
     {
         path: '/user/:user/doctors',
         name: 'DoctorList',
         component: DoctorList,
+         meta: {
+            requiresAuthPatient: true
+        } 
+    },
+    {
+        path: '/user/:user/profile',
+        component: UserProfile,
+         meta: {
+            requiresAuthPatient: true
+        } 
+    },
+    {
+        path: '/user/:user/security',
+        component: UserSecurity,
          meta: {
             requiresAuthPatient: true
         } 
