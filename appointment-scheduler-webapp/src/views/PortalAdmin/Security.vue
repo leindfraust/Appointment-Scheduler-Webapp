@@ -18,7 +18,9 @@
                     </article>
                     <div class="columns">
                         <div class="column">
-                            <p class="title">Change password:</p>
+                            <h1 class="title">Change password:</h1>
+                            <ForgotPassword :userType="'doctor'" :username="doctorDetails.username" :email="gmail"/>
+                            <div class="block"></div>
                             <div class="field">
                                 <div class="control">
                                     <label class="label">Current password</label>
@@ -76,8 +78,10 @@
                                         <input type="checkbox" @click="showPass" />
                                         Show password
                                     </label>
-                                    <br />
-                                    <br />
+                                </div>
+                            </div>
+                            <div class="field">
+                                <div class="control">
                                     <button
                                         class="button is-danger"
                                         type="submit"
@@ -286,11 +290,13 @@
 <script>
 import axios from 'axios'
 import AdminMenu from '../../components/AdminMenu.vue'
+import ForgotPassword from '../../components/ForgotPassword.vue'
 
 export default {
     name: 'AdminSecurity',
     components: {
-        AdminMenu
+        AdminMenu,
+        ForgotPassword
     },
     async mounted() {
         await axios.get("/session/admin").then(response => this.doctorDetails = response.data)
