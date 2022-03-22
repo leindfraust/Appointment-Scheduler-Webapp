@@ -29,6 +29,6 @@
     "@vue/cli-plugin-babel": "~5.0.3",
     "@vue/cli-service": "^5.0.3",
     "@vue/compiler-sfc": "^3.2.31",
-    "postcss": "^8.4.8"
+    "postcss": "^8.4.12"
   }
 }
