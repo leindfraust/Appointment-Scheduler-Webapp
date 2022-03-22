@@ -15,6 +15,7 @@ router.post('/', (req, res) => {
     req.session.specialist = req.body.specialist
     req.session.gmail = req.body.gmail
     req.session.hospitalOrigin = req.body.hospitalOrigin
+    req.session.username = req.body.username
     req.session.save((err) => {
         if (err) {
             return next(err);
@@ -32,6 +33,7 @@ router.put('/', (req, res) => {
     req.session.specialist = req.body.specialist || req.session.specialist
     req.session.gmail = req.body.gmail || req.session.gmail
     req.session.hospitalOrigin = req.body.hospitalOrigin || req.session.hospitalOrigin
+    req.session.username = req.body.username || req.session.username
     req.session.save((err) => {
         if (err) {
             return next(err);
