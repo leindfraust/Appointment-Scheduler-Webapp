@@ -21,16 +21,15 @@
         </div>
 
         <div id="navbar" class="navbar-menu" :class="{ 'is-active': isActive }">
-            <div class="navbar-end">
+            <div class="navbar-start">
                 <a class="navbar-item">About</a>
-
                 <a class="navbar-item">Support</a>
+            </div>
+            <div class="navbar-end" v-if="patient != ''">
+                <router-link :to="`/user/${patient}/profile`" class="navbar-item">Profile</router-link>
+                <router-link :to="`/user/${patient}/security`" class="navbar-item">Security</router-link>
                 <div class="navbar-item">
-                    <div
-                        class="dropdown"
-                        v-if="patient != ''"
-                        :class="{ 'is-active': isActiveNotifications }"
-                    >
+                    <div class="dropdown" :class="{ 'is-active': isActiveNotifications }">
                         <div class="dropdown-trigger">
                             <a class="button" @click="notification">🔔</a>
                         </div>
@@ -44,7 +43,8 @@
                             >
                                 <a @click="openNotif(notifs, index)">
                                     <div
-                                        class="dropdown-item notification is-info" :class="{'is-light': !notifs.new}"
+                                        class="dropdown-item notification is-info"
+                                        :class="{ 'is-light': !notifs.new }"
                                         style="margin: 5%"
                                     >
                                         <button class="delete" @click="deleteNotif(notifs)"></button>
@@ -60,18 +60,23 @@
                         </div>
                     </div>
                     <div class="buttons">
-                        <a v-if="patient != ''" class="button is-light" href="#">
+                        <a class="button is-light" href="#">
                             <img :src="imgPreUrl + patient + svgExtUrl" />
                             {{ patient }}
                         </a>
-                        <div class="container" v-if="patient != ''"></div>
-                        <a v-else class="button is-light" href="/user/login">Log in</a>
-                        <a v-if="patient != ''" class="button is-danger" @click="logout">
+                        <a class="button is-danger" @click="logout">
                             <strong>Logout</strong>
                         </a>
-                        <a v-else class="button is-primary" href="/user/signup">
+                    </div>
+                </div>
+            </div>
+            <div class="navbar-end" v-else>
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <router-link :to="'/user/login'" class="button is-light">Log in</router-link>
+                        <router-link :to="'/user/signup'" class="button is-primary">
                             <strong>Sign up</strong>
-                        </a>
+                        </router-link>
                     </div>
                 </div>
             </div>
@@ -140,7 +145,7 @@ export default {
         openNotif(notif, index) {
             this.viewNotif = notif
             this.isActiveModal = true
-            if(this.viewNotif.new){
+            if (this.viewNotif.new) {
                 this.notifications[index].new = false
                 socket.emit('update message', this.notifications)
             }
@@ -154,7 +159,7 @@ export default {
 </script>
 <style scoped>
 .dropdown-menu {
-  max-height: 20em;
-  overflow: auto;
+    max-height: 20em;
+    overflow: auto;
 }
 </style>
