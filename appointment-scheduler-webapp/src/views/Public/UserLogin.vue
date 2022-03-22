@@ -3,9 +3,8 @@
   <section class="section is-medium">
     <div
       class="container has-text-centered animate__animated animate__fadeInLeft"
-      style="width: 40%"
     >
-      <div class="box">
+      <div class="box" style="width: 40%; margin: auto">
         <p
           class="notification is-success"
           v-if="newAccount"
@@ -34,6 +33,7 @@
           Are you one of our doctors? Click
           <a href="/admin/login">here</a>
         </p>
+        <ForgotPassword :userType="'user'"/>
       </div>
     </div>
   </section>
@@ -42,12 +42,14 @@
 import axios from 'axios'
 import store from '../../store'
 import NavigationTabVue from '../../components/NavigationTab.vue'
+import ForgotPassword from '../../components/ForgotPassword.vue'
 import socket from '../../socket'
 
 export default {
   username: "UserLogin",
   components: {
-    NavigationTabVue
+    NavigationTabVue,
+    ForgotPassword
   },
   data() {
     return {
@@ -102,6 +104,7 @@ export default {
           await axios.post("/session/patient", {
             _id: this.userPatient._id,
             name: this.userPatient.name,
+            email: this.userPatient.gmail,
             username: this.username,
             province: this.userPatient.province,
             city: this.userPatient.city,
@@ -123,7 +126,7 @@ export default {
   background-color: whitesmoke;
 }
 @media (max-width: 991.98px) {
-  .container {
+  .box {
     width: 100% !important;
   }
 }
