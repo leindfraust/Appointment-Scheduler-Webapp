@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const authenticationCode = require('../../model/authenticationCodes');
+const authenticationCode = require('../../models/authenticationCodes');
 
 router.get('/', async (req, res) => {
     try {

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const manager = require('../../model/manager')
+const manager = require('../../models/manager')
 
 router.get('/', async (req, res) => {
     try {

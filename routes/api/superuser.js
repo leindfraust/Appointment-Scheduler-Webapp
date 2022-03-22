@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Superuser = require('../../model/superuser');
+const Superuser = require('../../models/superuser');
 
 router.get('/', async (req, res) => {
     try {
