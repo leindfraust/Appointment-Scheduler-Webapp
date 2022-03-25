@@ -190,7 +190,7 @@ export default {
         .then(
           (response) =>
           (this.appointmentSched = response.data.filter(
-            (x) => x.doctor === store.state.userID
+            (x) => x.doctor === this.$store.state.userID
           ))
         );
     },
