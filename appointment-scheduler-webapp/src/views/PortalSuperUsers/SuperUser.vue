@@ -1,5 +1,5 @@
 <template>
-    <section class="section is-medium">
+    <section class="section">
         <h3 class="subtitle has-text-centered">Welcome Superuser/Developer, {{ superUser }}</h3>
         <p class="subtitle has-text-centered">
             <a @click="logout" class="has-text-danger">Logout</a>
@@ -18,6 +18,9 @@
                     </li>
                     <li :class="{ 'is-active': isActiveGeolocation }">
                         <a @click="geolocation">Geolocation</a>
+                    </li>
+                    <li :class="{ 'is-active': isActiveTickets }">
+                        <a @click="tickets">Tickets</a>
                     </li>
                 </ul>
             </nav>
@@ -43,9 +46,7 @@
                                         <button
                                             class="button is-danger"
                                             @click="dropdown"
-                                        >
-                                            Edit Status
-                                        </button>
+                                        >Edit Status</button>
                                     </div>
                                     <div class="dropdown-menu block">
                                         <div class="dropdown-content">
@@ -72,9 +73,7 @@
                                         <button
                                             class="button is-link"
                                             @click="dropdownPricing"
-                                        >
-                                            Edit Pricing
-                                        </button>
+                                        >Edit Pricing</button>
                                     </div>
                                     <div class="dropdown-menu block">
                                         <div class="dropdown-content">
@@ -252,6 +251,52 @@
                     </tr>
                 </tbody>
             </table>
+            <table
+                v-if="isActiveTickets"
+                class="table is-striped is-fullwidth is-narrow is-bordered"
+            >
+                <thead>
+                    <tr>
+                        <th class="has-text-black-ter">Controls</th>
+                        <th class="has-text-black-ter">Status</th>
+                        <th class="has-text-black-ter">No.</th>
+                        <th class="has-text-black-ter">ID</th>
+                        <th class="has-text-black-ter">Type</th>
+                        <th class="has-text-black-ter">Email</th>
+                        <th class="has-text-black-ter">Subject</th>
+                        <th class="has-text-black-ter">Message</th>
+                    </tr>
+                </thead>
+                <tbody v-for="(ticket, index) in ticketsIndexed" :key="ticket.id">
+                    <tr>
+                        <button
+                            v-if="ticket.active"
+                            class="dropdown-item button has-text-info"
+                            type="button"
+                            @click="closeTicket(ticket.id, ticket.type, ticket.email, ticket.title, ticket.message, ticket.active)"
+                        >Close Ticket</button>
+                        <button
+                            v-if="!ticket.active"
+                            class="dropdown-item button has-text-info"
+                            type="button"
+                            @click="reopenTicket(ticket.id, ticket.type, ticket.email, ticket.title, ticket.message, ticket.active)"
+                        >Reopen Ticket</button>
+                        <button
+                            class="dropdown-item button has-text-danger"
+                            type="button"
+                            @click="deleteTicket(ticket.id, ticket.type, ticket.email, ticket.title, ticket.message, ticket.active)"
+                        >Delete ticket</button>
+                        <td class="has-text-success" v-if="ticket.active">Active</td>
+                        <td class="has-text-danger" v-if="!ticket.active">Inactive</td>
+                        <td class="has-text-black-ter">{{ index + 1 }}</td>
+                        <td class="has-text-black-ter">{{ ticket.id }}</td>
+                        <td class="has-text-black-ter">{{ ticket.type }}</td>
+                        <td class="has-text-black-ter">{{ ticket.email }}</td>
+                        <td class="has-text-black-ter">{{ ticket.title }}</td>
+                        <td class="has-text-black-ter">{{ ticket.message }}</td>
+                    </tr>
+                </tbody>
+            </table>
             <div
                 class="box"
                 v-if="isActiveGeolocation"
@@ -390,7 +435,10 @@ export default {
             return this.doctorAccounts.filter(x => { return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) || x.specialist.find(x => x.toLowerCase().includes(this.searchBar.toLowerCase())) })
         },
         patientAccountsIndexed() {
-            return this.patientAccounts.filter(x => { return x.name[0].toLowerCase().includes(this.searchBar.toLowerCase()) || x.name[1].toLowerCase().includes(this.searchBar.toLowerCase())})
+            return this.patientAccounts.filter(x => { return x.name[0].toLowerCase().includes(this.searchBar.toLowerCase()) || x.name[1].toLowerCase().includes(this.searchBar.toLowerCase()) })
+        },
+        ticketsIndexed() {
+            return this.ticketList.filter(x => { return x.id.toLowerCase().includes(this.searchBar.toLowerCase()) || x.type.toLowerCase().includes(this.searchBar.toLowerCase()) || x.email.toLowerCase().includes(this.searchBar.toLowerCase()) })
         },
         provinceAndCitiesIndexed() {
             return _.groupBy(
@@ -413,10 +461,12 @@ export default {
             managerAccounts: [],
             doctorAccounts: [],
             patientAccounts: [],
+            ticketList: [],
             isActiveManager: false,
             isActiveDoctor: false,
             isActivePatient: false,
             isActiveGeolocation: false,
+            isActiveTickets: false,
             isActiveModal: false,
             isActiveDropdownEditStatus: false,
             isActiveDropdownEditPricing: false,
@@ -447,6 +497,7 @@ export default {
             this.isActiveDoctor = false
             this.isActivePatient = false
             this.isActiveGeolocation = false
+            this.isActiveTickets = false
 
             await axios.get("/api/manager").then(response => this.managerAccounts = response.data)
         },
@@ -455,6 +506,7 @@ export default {
             this.isActiveDoctor = true
             this.isActivePatient = false
             this.isActiveGeolocation = false
+            this.isActiveTickets = false
 
             await axios.get("/api/admin").then(response => this.doctorAccounts = response.data)
         },
@@ -463,14 +515,25 @@ export default {
             this.isActiveDoctor = false
             this.isActivePatient = true
             this.isActiveGeolocation = false
+            this.isActiveTickets = false
 
             await axios.get("/api/user").then(response => this.patientAccounts = response.data)
+        },
+        async tickets() {
+            this.isActiveManager = false
+            this.isActiveDoctor = false
+            this.isActivePatient = false
+            this.isActiveGeolocation = false
+            this.isActiveTickets = true
+
+            await axios.get("/api/superuser").then(response => this.ticketList = response.data[0].tickets)
         },
         async geolocation() {
             this.isActiveManager = false
             this.isActiveDoctor = false
             this.isActivePatient = false
             this.isActiveGeolocation = true
+            this.isActiveTickets = false
 
             await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
         },
@@ -561,12 +624,12 @@ export default {
             this.isActiveDropdownItemOne = false
             this.isActiveDropdownItemTwo = true
         },
-        pricingStandard(){
+        pricingStandard() {
             this.pricing = 'Standard'
             this.isActiveDropdownPricingItemOne = true
             this.isActiveDropdownPricingItemTwo = false
         },
-        pricingPremium(){
+        pricingPremium() {
             this.pricing = 'Premium'
             this.isActiveDropdownPricingItemOne = false
             this.isActiveDropdownPricingItemTwo = true
