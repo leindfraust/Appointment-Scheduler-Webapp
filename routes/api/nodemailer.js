@@ -15,11 +15,11 @@ let transporter = nodemailer.createTransport({
 router.post('/sendMail', (req, res) => {
     let email = req.body.email
     let code = req.body.code
-    var mailOptions = {
+    let mailOptions = {
         from: process.env.nodemaileruser,
         to: email,
         subject: 'Login request code',
-        text: `Your login request code is: ${code}. \nIf you did not request this, please reply to this email. \n\nBest Regards,\nRonan`
+        text: `Your login request code is: ${code}. \nIf you did not request this, please reply to this email. \n\nBest Regards,\nMed Search`
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
@@ -37,11 +37,35 @@ router.post('/sendMail', (req, res) => {
 router.post('/OTPMail', (req, res) => {
     let email = req.body.email
     let code = req.body.code
-    var mailOptions = {
+    let mailOptions = {
         from: process.env.nodemaileruser,
         to: email,
         subject: 'Verification',
-        text: `Your verification code is: ${code}. \nIf you did not request this, please reply to this email. \n\nBest Regards,\nRonan`
+        text: `Your verification code is: ${code}. \nIf you did not request this, please reply to this email. \n\nBest Regards,\nMed Search`
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error);
+            res.status(400).end();
+        } else {
+            console.log('Email sent: ' + info.response);
+            res.status(200).end();
+        }
+    });
+});
+
+//Contact Support
+router.post('/SupportMail', (req, res) => {
+    let ticketTitle = req.body.ticketTitle
+    let ticketType = req.body.ticketType
+    let email = req.body.email
+    let ticketID = req.body.ticketID
+    let mailOptions = {
+        from: process.env.nodemaileruser,
+        to: email,
+        subject: `Customer Support: ${ticketType}`,
+        text: `Greetings! We have received your complaint about "${ticketTitle}", your ticket ID is ${ticketID}. Expect a follow up after 1-2 working days.   \n\nBest Regards,\nMed Search`
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
