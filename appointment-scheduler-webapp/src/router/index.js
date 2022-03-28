@@ -28,16 +28,15 @@ import Manager from '../views/PortalSuperUsers/Manager.vue'
 import ManagerLogin from '../views/PortalSuperUsers/ManagerLogin.vue'
 import ManagerSignup from '../views/PortalSuperUsers/ManagerSignup.vue'
 import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
+import ContactSupport from '../views/Public/ContactSupport.vue'
 
-    const routes = [{
+const routes = [{
         path: '/',
-        name: 'Home',
         component: Home,
     },
     //Manager/Hospital account routes
     {
         path: '/user/manager/:user',
-        name: 'Manager',
         component: Manager,
         meta: {
             requiresManagerAuth: true
@@ -45,17 +44,14 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
     },
     {
         path: '/user/manager/signup',
-        name: 'ManagerSingup',
         component: ManagerSignup
     },
     {
         path: '/user/manager/login',
-        name: 'ManagerLogin',
         component: ManagerLogin,
     },
     {
         path: '/user/manager/:user/profile',
-        name: 'ManagerProfile',
         component: ManagerProfile,
         meta: {
             requiresManagerAuth: true
@@ -64,7 +60,6 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
     //Superuser account routes
     {
         path: '/user/superuser',
-        name: 'SuperUser',
         component: SuperUser,
         meta: {
             requiresSuperUserAuth: true
@@ -72,23 +67,19 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
     },
     {
         path: '/user/superuser/login',
-        name: 'SuperUserLogin',
         component: SuperUserLogin,
     },
     //Doctor account routes
     {
         path: '/admin/login',
-        name: 'Login',
         component: LoginAdmin,
     },
     {
         path: '/admin/signup',
-        name: 'Sign Up',
         component: SignUpAdmin,
     },
     {
         path: '/admin/user/:user',
-        name: 'Admin',
         component: Admin,
         meta: {
             requiresAuth: true
@@ -96,7 +87,6 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
     },
     {
         path: '/admin/user/:user/schedule',
-        name: 'Scheduler',
         component: Scheduler,
         meta: {
             requiresAuth: true
@@ -104,7 +94,6 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
     },
     {
         path: '/admin/user/:user/profile',
-        name: 'AdminProfile',
         component: AdminProfile,
         meta: {
             requiresAuth: true
@@ -112,7 +101,6 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
     },
     {
         path: '/admin/user/:user/security',
-        name: 'AdminSecurity',
         component: AdminSecurity,
         meta: {
             requiresAuth: true
@@ -120,7 +108,6 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
     },
     {
         path: '/admin/user/:user/patients',
-        name: 'PatientLogs',
         component: PatientLogs,
         meta: {
             requiresAuth: true
@@ -129,7 +116,6 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
     //Confirmation routes
     {
         path: '/imgUploadSuccess',
-        name :'imgUploadSuccess',
         component: ImageUploadSuccess,
         meta: {
             requireImgUploadSuccess: true
@@ -137,7 +123,6 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
     },
     {
         path: '/imgUploadSuccessAdmin',
-        name :'imgUploadSuccessAdmin',
         component: ImageUploadSuccessAdmin,
         meta: {
             requireImgUploadSuccess: true
@@ -145,7 +130,6 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
     },
     {
         path: '/imgUploadSuccessManager',
-        name: 'imgUploadSuccessManager',
         component: ImageUploadSuccessManager,
         meta: {
             requireImgUploadSuccessManager: true
@@ -154,17 +138,14 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
     //User routes
     {
         path: '/user/signup',
-        name: 'UserSignup',
         component: UserSignUp
     },
     {
         path: '/user/login',
-        name: 'UserLogin',
         component: UserLogin
     },
     {
         path: '/user/:user/',
-        name: 'User',
         component: User,
         meta: {
             requiresAuthPatient: true
@@ -172,29 +153,27 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
     },
     {
         path: '/user/:user/doctors',
-        name: 'DoctorList',
         component: DoctorList,
-         meta: {
+        meta: {
             requiresAuthPatient: true
-        } 
+        }
     },
     {
         path: '/user/:user/profile',
         component: UserProfile,
-         meta: {
+        meta: {
             requiresAuthPatient: true
-        } 
+        }
     },
     {
         path: '/user/:user/security',
         component: UserSecurity,
-         meta: {
+        meta: {
             requiresAuthPatient: true
-        } 
+        }
     },
     {
         path: '/success',
-        name: 'pickDoctorSuccess',
         component: DoctorPickSuccess,
         meta: {
             requireSuccessPickDoctor: true
@@ -202,12 +181,15 @@ import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
     },
     {
         path: '/user/:user/registration',
-        name: 'RegForm',
         component: RegForm,
         meta: {
             requireProcess: true
         },
     },
+    {
+        path: '/contactus',
+        component: ContactSupport
+    }
 ]
 const router = createRouter({
     history: createWebHistory(process.env.BASE_URL),
@@ -223,7 +205,7 @@ router.beforeEach((to, from, next) => {
         }
     }
     next();
-}); 
+});
 
 router.beforeEach((to, from, next) => {
     if (to.matched.some(route => route.meta.requireImgUploadSuccess)) {
@@ -311,7 +293,7 @@ router.beforeEach((to, from, next) => {
         }
     }
     next();
-}); 
+});
 
 router.beforeEach((to, from, next) => {
     if (to.matched.some(route => route.meta.requiresAuthUsers)) {
@@ -322,6 +304,6 @@ router.beforeEach((to, from, next) => {
         }
     }
     next();
-}); 
+});
 
 export default router
