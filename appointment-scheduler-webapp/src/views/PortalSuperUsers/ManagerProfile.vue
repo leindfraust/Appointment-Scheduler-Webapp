@@ -1,4 +1,8 @@
 <template>
+    <div class="modal" :class="{ 'is-active': loading }">
+        <div class="modal-background"></div>
+        <div class="modal-content loader"></div>
+    </div>
     <div class="columns">
         <div class="column is-2">
             <ManagerMenuVue />
@@ -44,11 +48,14 @@
                                 </div>
                             </div>
                         </form>
-                        <br/>
+                        <br />
                         <div class="container has-text-centered">
-                        <iframe v-if="hospitalData !== ''" width="300" height="300"
-                            :src="`https://maps.google.com/maps?q=${hospitalData.location.coordinates[1]},${hospitalData.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"
-                        ></iframe>
+                            <iframe
+                                v-if="hospitalData !== ''"
+                                width="300"
+                                height="300"
+                                :src="`https://maps.google.com/maps?q=${hospitalData.location.coordinates[1]},${hospitalData.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"
+                            ></iframe>
                         </div>
                     </div>
                     <div class="column">
@@ -137,15 +144,18 @@ export default {
         ManagerMenuVue
     },
     async created() {
+        this.loading = true
         await axios.get('/session/manager').then(response => this.managerHospital = response.data.hospital)
         await axios.get('/session/manager').then(response => this.managerHospitalID = response.data._id)
         await axios.get('/api/manager').then(response => this.hospitalData = response.data.find(x => x._id == this.managerHospitalID))
         this.description = await this.hospitalData.details[0].description
         this.contacts = await this.hospitalData.details[0].contacts
         this.hospitalStatus = await this.hospitalData.status
+        this.loading = false
     },
     data() {
         return {
+            loading: false,
             hospitalStatus: '',
             activate: false,
             managerHospital: '',

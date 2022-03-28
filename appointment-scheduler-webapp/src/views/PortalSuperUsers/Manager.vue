@@ -1,4 +1,8 @@
 <template>
+<div class="modal" :class="{ 'is-active': loading }">
+            <div class="modal-background"></div>
+            <div class="modal-content loader"></div>
+        </div>
     <div class="columns">
         <div class="column is-2">
             <ManagerMenuVue/>
@@ -94,12 +98,15 @@ export default {
         },
     },
     async mounted() {
+        this.loading = true
         await axios.get('/session/manager').then(response => this.managerHospital = response.data)
         await axios.get('/api/manager').then(response => this.hospitalStatus = response.data.find(x => x._id == this.managerHospital._id))
         await axios.get('/api/admin').then(response => this.doctorAccounts = response.data.filter(x => x.hospitalOrigin.find(x => x.hospital === this.managerHospital.hospital)))
+        this.loading = false
     },
     data() {
         return {
+            loading: false,
             hospitalStatus: '',
             managerHospital: '',
             searchBar: '',
