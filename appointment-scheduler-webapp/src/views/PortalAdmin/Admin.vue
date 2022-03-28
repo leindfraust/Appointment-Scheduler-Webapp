@@ -171,7 +171,7 @@ export default {
       .then(
         (response) =>
         (this.appointmentSched = response.data.filter(
-          (x) => x.doctor === store.state.userID
+          (x) => x.doctorID === store.state.userID
         ))
       );
   },
@@ -189,7 +189,7 @@ export default {
         .then(
           (response) =>
           (this.appointmentSched = response.data.filter(
-            (x) => x.doctor === store.state.userID
+            (x) => x.doctorID === store.state.userID
           ))
         );
       this.isActiveModal = !this.isActiveModal;

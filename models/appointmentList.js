@@ -8,11 +8,15 @@ const appointmentSchema = new Schema({
         type: String,
         required: true
     },
-    doctor: {
+    doctorID: {
         type: String,
         required: true
     },
-    patient: {
+    doctorName: {
+        type: String,
+        required: true
+    },
+    patientID: {
         type: String,
         required: true
     },

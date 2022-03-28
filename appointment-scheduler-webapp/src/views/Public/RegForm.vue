@@ -234,8 +234,9 @@ export default {
           });
           await axios.post("/api/appointmentList", {
             hospital: this.hospital,
-            doctor: this.doctor,
-            patient: this.patient._id,
+            doctorID: this.doctor,
+            doctorName: this.doctorDetails.name,
+            patientID: this.patient._id,
             firstName: this.firstName,
             lastName: this.lastName,
             contactNum: this.contactNum,
@@ -260,8 +261,9 @@ export default {
         } else {
           await axios.post("/api/appointmentList", {
             hospital: this.hospital,
-            doctor: this.doctor,
-            patient: this.patient._id,
+            doctorID: this.doctor,
+            doctorName: this.doctorDetails.name,
+            patientID: this.patient._id,
             firstName: this.firstName,
             lastName: this.lastName,
             contactNum: this.contactNum,
