@@ -4,8 +4,7 @@ const {
 } = mongoose;
 
 const superUserSchema = new Schema({
-    pricingList: Array,
-    specializationList: Array,
+    tickets: Array,
     gmail: Array
 });
 

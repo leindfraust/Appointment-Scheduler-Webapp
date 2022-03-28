@@ -23,7 +23,7 @@
         <div id="navbar" class="navbar-menu" :class="{ 'is-active': isActive }">
             <div class="navbar-start">
                 <a class="navbar-item">About</a>
-                <a class="navbar-item">Support</a>
+                <a class="navbar-item" @click="this.$router.push('/contactus')">Contact Us</a>
             </div>
             <div class="navbar-end" v-if="patient != ''">
                 <router-link :to="`/user/${patient}/profile`" class="navbar-item">Profile</router-link>
@@ -98,7 +98,6 @@
 <script>
 import axios from 'axios'
 import socket from '../socket'
-
 export default {
     name: 'NavigationTab',
     mounted() {
@@ -153,7 +152,7 @@ export default {
         },
         closeNotificationModal() {
             this.isActiveModal = false
-        }
+        },
     }
 }
 </script>

@@ -22,7 +22,7 @@
     <aside
         class="menu"
         :class="{ 'is-hidden-mobile': isActive, 'fixedMenu': isActive }"
-        style="background-color: white; padding: 20px; box-shadow: 5px 10px rgba(240, 240, 240, 0.966);"
+        style="background-color: white; padding: 20px; box-shadow: 5px 10px rgba(240, 240, 240, 0.966); height: 100vh"
     >
         <div class="has-text-centered block">
             <label class="label" v-if="isActive">{{ alias }}</label>
@@ -52,7 +52,7 @@
                 <a @click="openFAQs">FAQ</a>
             </li>
             <li>
-                <a @click="openContact">Contact</a>
+                <a @click="this.$router.push('/contactus')">Contact Us</a>
             </li>
         </ul>
         <hr />
@@ -63,7 +63,6 @@
 import store from '../store'
 import axios from 'axios'
 import cld from '../cloudinary'
-
 export default {
     name: "AdminMenu",
     data() {

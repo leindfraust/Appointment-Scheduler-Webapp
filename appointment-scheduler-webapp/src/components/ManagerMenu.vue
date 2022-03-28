@@ -19,7 +19,7 @@
     <aside
         class="menu box"
         :class="{ 'is-hidden-mobile': isActive, 'fixedMenu': isActive }"
-        style="background-color: white; padding: 20px;"
+        style="background-color: white; padding: 20px; height: 100vh"
     >
         <p class="menu-label">General</p>
         <ul class="menu-list">
@@ -45,7 +45,7 @@
                 <a>FAQ</a>
             </li>
             <li>
-                <a>Talk to a dev</a>
+                <a @click="this.$router.push('/contactus')">Contact Us</a>
             </li>
         </ul>
         <hr />
