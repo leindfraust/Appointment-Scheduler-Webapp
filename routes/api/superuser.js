@@ -59,6 +59,59 @@ router.post('/submitTicket', async (req, res) => {
     });
 });
 
+router.post('/deleteTicket', async (req, res) => {
+    let ticketTitle = req.body.ticketTitle
+    let ticketType = req.body.ticketType
+    let email = req.body.email
+    let ticketID = req.body.ticketID
+    let ticketMessage = req.body.ticketMessage
+    let ticketActive = req.body.ticketActive
+    Superuser.findOneAndUpdate({
+        _id: '6187884b847ca9434716e7ba'
+    }, {
+        $pull: {
+            tickets: {
+                id: ticketID,
+                type: ticketType,
+                email: email,
+                title: ticketTitle,
+                message: ticketMessage,
+                active: ticketActive
+            }
+
+        }
+    }, {
+        returnOriginal: false
+    }, function (error, success) {
+        if (error) {
+            console.log(error)
+        } else {
+            console.log(success)
+            res.end()
+        }
+    });
+});
+
+router.post('/updateTicket', async (req, res) => {
+    let ticketID = req.body.ticketID
+    let ticketActive = req.body.ticketActive
+    Superuser.findOneAndUpdate({
+        _id: '6187884b847ca9434716e7ba',
+        'tickets.id': ticketID
+    }, {
+        'tickets.$.active': ticketActive
+    }, {
+        returnOriginal: false
+    }, function (error, success) {
+        if (error) {
+            console.log(error)
+        } else {
+            console.log(success)
+            res.end()
+        }
+    });
+});
+
 router.put('/:id', async (req, res) => {
     const {
         id

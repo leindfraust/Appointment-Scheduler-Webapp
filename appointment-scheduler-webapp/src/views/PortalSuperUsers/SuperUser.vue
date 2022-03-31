@@ -62,7 +62,7 @@
                 <button class="button is-danger" @click="logout">Logout</button>
             </aside>
         </div>
-        <div class="column">
+        <div class="column" style="overflow: auto">
             <section class="section">
                 <div class="columns is-multiline" v-if="isActiveDashboard">
                     <div class="column">
@@ -366,7 +366,7 @@
                                 <th class="has-text-black-ter">Type</th>
                                 <th class="has-text-black-ter">Email</th>
                                 <th class="has-text-black-ter">Subject</th>
-                                <th class="has-text-black-ter">Message</th>
+                                <th class="has-text-black-ter">Problem</th>
                             </tr>
                         </thead>
                         <tbody v-for="(ticket, index) in ticketsIndexed" :key="ticket.id">
@@ -375,13 +375,13 @@
                                     v-if="ticket.active"
                                     class="dropdown-item button has-text-info"
                                     type="button"
-                                    @click="closeTicket(ticket.id, ticket.type, ticket.email, ticket.title, ticket.message, ticket.active)"
+                                    @click="closeTicket(ticket.id)"
                                 >Close Ticket</button>
                                 <button
                                     v-if="!ticket.active"
                                     class="dropdown-item button has-text-info"
                                     type="button"
-                                    @click="reopenTicket(ticket.id, ticket.type, ticket.email, ticket.title, ticket.message, ticket.active)"
+                                    @click="reopenTicket(ticket.id)"
                                 >Reopen Ticket</button>
                                 <button
                                     class="dropdown-item button has-text-danger"
@@ -810,6 +810,32 @@ export default {
             this.selectedProvinceID = id
             this.selectedProvince = provinceName
             this.isActiveDropdownProvince = false
+        },
+        async closeTicket(id) {
+            await axios.post('/api/superuser/updateTicket', {
+                ticketID: id,
+                ticketActive: false
+            });
+            await axios.get("/api/superuser").then(response => this.ticketList = response.data[0].tickets)
+            console.log(await this.ticketList)
+        },
+        async reopenTicket(id) {
+            await axios.post('/api/superuser/updateTicket', {
+                ticketID: id,
+                ticketActive: true
+            });
+            await axios.get("/api/superuser").then(response => this.ticketList = response.data[0].tickets)
+        },
+        async deleteTicket(id, type, email, title, message, active) {
+            await axios.post('/api/superuser/deleteTicket', {
+                ticketID: id,
+                email: email,
+                ticketType: type,
+                ticketTitle: title,
+                ticketMessage: message,
+                ticketActive: active
+            });
+            await axios.get("/api/superuser").then(response => this.ticketList = response.data[0].tickets)
         },
         async logout() {
             await axios.delete("/session/superuser");
