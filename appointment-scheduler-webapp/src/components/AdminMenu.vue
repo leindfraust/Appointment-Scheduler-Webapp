@@ -24,11 +24,12 @@
         :class="{ 'is-hidden-mobile': isActive, 'fixedMenu': isActive }"
         style="background-color: white; padding: 20px; box-shadow: 5px 10px rgba(240, 240, 240, 0.966); height: 100vh"
     >
-        <div class="has-text-centered block">
-            <label class="label" v-if="isActive">{{ alias }}</label>
-            <div class="image is-128x128" style="margin: auto;" v-html="profileImg"></div>
+        <div class="has-text-centered block" style="padding: 5px;">
+            <figure class="image is-square" style="margin: auto; ">
+                <span  v-html="profileImg"></span>
+            </figure>
+            <h5 class="title is-5" v-if="isActive">{{ alias }}</h5>
         </div>
-        <br />
         <ul class="menu-list block">
             <p class="menu-label">General</p>
             <li>
