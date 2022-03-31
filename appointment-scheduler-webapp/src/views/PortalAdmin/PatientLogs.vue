@@ -145,7 +145,7 @@ export default {
       .then(
         (response) =>
         (this.appointmentSched = response.data.filter(
-          (x) => x.doctor === this.$store.state.userID
+          (x) => x.doctorID === this.$store.state.userID
         ))
       );
     await axios.get('/api/admin').then(response => this.patients = response.data.find(x => x.alias == this.alias))
@@ -176,7 +176,7 @@ export default {
           );
         }).sort((a, b) => {
           return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
-        }).filter(x => { return new Date(x.schedule[0].date).getTime() < new Date().getTime() })
+        }).filter(x => { return new Date(x.schedule[0].id).toDateString() > new Date().toDateString() })
         ,
         "schedule[0].date"
       );

@@ -5,7 +5,7 @@
     </div>
     <div class="column" style="background-color: whitesmoke;">
       <section class="section" style="background-color: whitesmoke;">
-      <h1 class="title" >UPCOMING APPOINTMENTS</h1>
+      <h1 class="title" >APPOINTMENTS</h1>
         <div class="container is-widescreen is-fullhd" v-if="Object.keys(appointmentSchedules).length !== 0">
           <div class="field">
             <div class="control">
@@ -18,7 +18,8 @@
               />
             </div>
           </div>
-          <div class="box" v-for="(appointmentList, index) in appointmentSchedules" :key="index">
+          <div class="box" v-for="(appointmentList, index) in appointmentSchedules" :key="index" :style="new Date(index).toDateString() == new Date().toDateString() ? 'box-shadow: rgb(10 10 10 / 10%) 0px 0.5em 1em -0.125em, #485fc7 0px 0px 0px 1px !important;' : ''">
+          <h1 class="subtitle" v-if="new Date(index).toDateString() == new Date().toDateString()"><b>TODAY</b></h1>
             <h1 class="subtitle has-text-black">Schedule: {{ new Date(index).toDateString() }}</h1>
             <div class="table-container">
               <table class="table is-striped is-narrow is-fullwidth is-bordered">
@@ -159,7 +160,7 @@ export default {
           );
         }).sort((a, b) => {
           return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
-        }).filter(x => { return new Date(x.schedule[0].date).getTime() > new Date().getTime() })
+        }).filter(x => { return new Date(x.schedule[0].date).toDateString() <= new Date().toDateString() })
         ,
         "schedule[0].date"
       );
