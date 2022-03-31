@@ -11,11 +11,6 @@ router.post('/geoFindHospitalNearestUser', parser, (req, res, next) => {
     let latitude = req.body.latitude
     let longitude = req.body.longitude
 
-    const userLocation = {
-        type: 'Point',
-        coordinates: [longitude, latitude]
-    }
-
     Hospital.aggregate([{
         $geoNear: {
             near: {

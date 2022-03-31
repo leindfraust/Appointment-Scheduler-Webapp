@@ -1,6 +1,4 @@
 require("dotenv").config()
-const util = require('util')
-const fs = require('fs');
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
