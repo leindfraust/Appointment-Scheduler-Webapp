@@ -353,7 +353,7 @@ export default {
                 this.passwordRepeat = null
             } else if (await this.currentPassword !== this.currentPasswordValidate) {
                 this.incorrectPasswordValidate = true;
-                this.currentPasswordValidateMessage = "Password does not match within database"
+                this.currentPasswordValidateMessage = "Password does not match in the database"
                 this.currentPassword = null
                 this.passwordValidate = null;
                 this.password = null
