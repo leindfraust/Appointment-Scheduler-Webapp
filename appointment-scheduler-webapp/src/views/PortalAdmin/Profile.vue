@@ -1,220 +1,219 @@
 <template>
-  <div class="columns" style="height: 100vh; background-color: whitesmoke">
-    <div class="column is-2" style="background-color: whitesmoke;">
-      <AdminMenu />
-    </div>
-    <div class="column" style="background-color: whitesmoke;">
-      <section class="section" style="background-color: whitesmoke;">
-        <h1 class="title">PROFILE</h1>
-        <div class="container box is-fluid">
-          <article class="message is-danger" v-if="!verified">
-            <div class="message-header">
-              <p>YOU ARE NOT VERIFIED ❌</p>
-            </div>
-            <div class="message-body">
-              To get started, please visit
-              <b>Security</b> tab under
-              <b>VERIFICATION AND INFORMATION.</b>
-            </div>
-          </article>
-          <article class="message is-success" v-if="verified">
-            <div class="message-header">
-              <p>YOU ARE VERIFIED ✓</p>
-            </div>
-            <div class="message-body">
-              Your basic information is
-              <b>locked</b>. To edit, please go to the
-              <b>Security</b> tab.
-            </div>
-          </article>
-          <div class="columns is-gapless">
-            <div class="column is-6">
-              <span id="profile-img" v-html="profileImg"></span>
-              <form
-                id="formUpload"
-                action="/api/imgUpload"
-                method="post"
-                enctype="multipart/form-data"
-                style="margin: auto; width: 50%"
-                class="field"
-              >
-                <div class="control">
-                  <input type="hidden" name="alias" :value="(alias)" />
-                  <input class="input" type="file" name="imgFile" @click="imgSuccess" required />
-                  <div class="has-text-centered">
-                    <button
-                      type="submit"
-                      value="Upload"
-                      class="button is-primary"
-                    >Change profile picture</button>
-                  </div>
-                </div>
-              </form>
-            </div>
-            <br />
-            <div class="column">
-              <div class="field">
-                <div class="control">
-                  <label class="label">
-                    <b>License No.</b>
-                  </label>
-                  <input
-                    class="input"
-                    type="text"
-                    v-model="licenseNo"
-                    style="width: 33%"
-                    :disabled="verified == true"
-                  />
-                </div>
+  <div style="overflow-x: hidden; height: 100vh; background-color: whitesmoke;">
+    <div class="columns">
+      <div class="column is-2">
+        <AdminMenu />
+      </div>
+      <div class="column" style="background-color: whitesmoke;">
+        <section class="section" style="background-color: whitesmoke;">
+          <h1 class="title">PROFILE</h1>
+          <div class="container box is-fluid">
+            <article class="message is-danger" v-if="!verified">
+              <div class="message-header">
+                <p>YOU ARE NOT VERIFIED ❌</p>
               </div>
-              <div class="field is-horizontal">
-                <div class="field-body">
-                  <div class="field">
-                    <div class="control">
-                      <label class="label">
-                        <b>Full Name:</b>
-                      </label>
-                      <input
-                        class="input"
-                        size="5"
-                        type="text"
-                        v-model="fullname"
-                        :disabled="verified == true"
-                      />
+              <div class="message-body">
+                To get started, please visit
+                <b>Security</b> tab under
+                <b>VERIFICATION AND INFORMATION.</b>
+              </div>
+            </article>
+            <article class="message is-success" v-if="verified">
+              <div class="message-header">
+                <p>YOU ARE VERIFIED ✓</p>
+              </div>
+              <div class="message-body">
+                Your basic information is
+                <b>locked</b>. To edit, please go to the
+                <b>Security</b> tab.
+              </div>
+            </article>
+            <div class="columns is-gapless">
+              <div class="column is-6">
+                <span id="profile-img" v-html="profileImg"></span>
+                <form
+                  id="formUpload"
+                  action="/api/imgUpload"
+                  method="post"
+                  enctype="multipart/form-data"
+                  style="margin: auto; width: 50%"
+                  class="field"
+                >
+                  <div class="control">
+                    <input type="hidden" name="alias" :value="(alias)" />
+                    <input class="input" type="file" name="imgFile" @click="imgSuccess" required />
+                    <div class="has-text-centered">
+                      <button
+                        type="submit"
+                        value="Upload"
+                        class="button is-primary"
+                      >Change profile picture</button>
                     </div>
                   </div>
-                  <div class="field">
-                    <div class="control">
-                      <label class="label">
-                        <b>Gmail:</b>
-                      </label>
-                      <input
-                        class="input"
-                        size="5"
-                        type="text"
-                        v-model="gmail"
-                        :disabled="verified == true"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="field">
-                <div class="control">
-                  <button
-                    v-if="!verified"
-                    class="button is-link"
-                    type="button"
-                    @click="updateInfo"
-                  >Save changes</button>
-                  <div
-                    v-if="infoValidate"
-                    class="notification is-success is-light"
-                  >{{ infoValidateMessage }}</div>
-                </div>
-              </div>
-              <div class="field">
-                <div class="control">
-                  <label class="label">
-                    <b>Managed Hospitals:</b>
-                  </label>
-                  <button
-                    class="button"
-                    v-for="hospitals in hospitalOrigin"
-                  >
-                    {{ hospitals.hospital }}&nbsp;
-                    <span
-                      class="has-text-danger"
-                      @click="pullHospital(hospitals.hospital)"
-                    >x</span>
-                  </button>&nbsp;
-                  <div class="dropdown" :class="{ 'is-active': isActiveDropdownHospital }">
-                    <div class="dropdown-trigger">
-                      <button @click="dropdownHospital" class="button">+</button>
-                    </div>
-                    <div class="dropdown-menu">
-                      <div
-                        class="dropdown-content"
-                        v-for="(hospitals, index) in hospitalList"
-                        :key="index"
-                      >
-                        <a
-                          class="dropdown-item"
-                          @click="promptVerificationHospital(hospitals.hospital)"
-                        >{{ hospitals.hospital }}</a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="field">
-                <div class="control">
-                  <label class="label">
-                    <b>Specializations:</b>
-                  </label>
-                  <button
-                    class="button"
-                    style="margin: 5px"
-                    v-for="(specializations, index) in specialist"
-                    :key="index"
-                  >
-                    {{ specializations }}&nbsp;
-                    <span
-                      class="has-text-danger"
-                      @click="pullSpecialization(specializations)"
-                    >x</span>
-                  </button>&nbsp;
-                  <div class="dropdown" :class="{ 'is-active': isActiveDropdownSpecialist }">
-                    <div class="dropdown-trigger">
-                      <button @click="dropdownSpecialist" class="button">+</button>
-                    </div>
-                    <div class="dropdown-menu">
-                      <div
-                        class="dropdown-content"
-                        v-for="(specialist, index) in specializationList"
-                        :key="index"
-                      >
-                        <a
-                          class="dropdown-item"
-                          @click="addSpecialization(specialist)"
-                        >{{ specialist }}</a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal" :class="{ 'is-active': modalActive }">
-          <div class="modal-background"></div>
-          <div class="modal-content">
-            <div class="field box" v-if="!codeSent">
-              <label class="label">Please check your email for the verification code.</label>
-              <div class="control">
-                <input class="input" v-model="verificationCode" type="text" placeholder="code" />
+                </form>
               </div>
               <br />
-              <div class="has-text-centered">
-                <button
-                  class="button is-primary"
-                  @click="addHospital"
-                  :disabled="verificationCode == ''"
-                >Confirm</button>
+              <div class="column">
+                <div class="field">
+                  <div class="control">
+                    <label class="label">
+                      <b>License No.</b>
+                    </label>
+                    <input
+                      class="input"
+                      type="text"
+                      v-model="licenseNo"
+                      style="width: 33%"
+                      :disabled="verified == true"
+                    />
+                  </div>
+                </div>
+                <div class="field is-horizontal">
+                  <div class="field-body">
+                    <div class="field">
+                      <div class="control">
+                        <label class="label">
+                          <b>Full Name:</b>
+                        </label>
+                        <input
+                          class="input"
+                          size="5"
+                          type="text"
+                          v-model="fullname"
+                          :disabled="verified == true"
+                        />
+                      </div>
+                    </div>
+                    <div class="field">
+                      <div class="control">
+                        <label class="label">
+                          <b>Gmail:</b>
+                        </label>
+                        <input
+                          class="input"
+                          size="5"
+                          type="text"
+                          v-model="gmail"
+                          :disabled="verified == true"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <div class="control">
+                    <button
+                      v-if="!verified"
+                      class="button is-link"
+                      type="button"
+                      @click="updateInfo"
+                    >Save changes</button>
+                    <div
+                      v-if="infoValidate"
+                      class="notification is-success is-light"
+                    >{{ infoValidateMessage }}</div>
+                  </div>
+                </div>
+                <div class="field">
+                  <div class="control">
+                    <label class="label">
+                      <b>Managed Hospitals:</b>
+                    </label>
+                    <button class="button" v-for="hospitals in hospitalOrigin">
+                      {{ hospitals.hospital }}&nbsp;
+                      <span
+                        class="has-text-danger"
+                        @click="pullHospital(hospitals.hospital)"
+                      >x</span>
+                    </button>&nbsp;
+                    <div class="dropdown" :class="{ 'is-active': isActiveDropdownHospital }">
+                      <div class="dropdown-trigger">
+                        <button @click="dropdownHospital" class="button">+</button>
+                      </div>
+                      <div class="dropdown-menu">
+                        <div
+                          class="dropdown-content"
+                          v-for="(hospitals, index) in hospitalList"
+                          :key="index"
+                        >
+                          <a
+                            class="dropdown-item"
+                            @click="promptVerificationHospital(hospitals.hospital)"
+                          >{{ hospitals.hospital }}</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <div class="control">
+                    <label class="label">
+                      <b>Specializations:</b>
+                    </label>
+                    <button
+                      class="button"
+                      style="margin: 5px"
+                      v-for="(specializations, index) in specialist"
+                      :key="index"
+                    >
+                      {{ specializations }}&nbsp;
+                      <span
+                        class="has-text-danger"
+                        @click="pullSpecialization(specializations)"
+                      >x</span>
+                    </button>&nbsp;
+                    <div class="dropdown" :class="{ 'is-active': isActiveDropdownSpecialist }">
+                      <div class="dropdown-trigger">
+                        <button @click="dropdownSpecialist" class="button">+</button>
+                      </div>
+                      <div class="dropdown-menu">
+                        <div
+                          class="dropdown-content"
+                          v-for="(specialist, index) in specializationList"
+                          :key="index"
+                        >
+                          <a
+                            class="dropdown-item"
+                            @click="addSpecialization(specialist)"
+                          >{{ specialist }}</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal" :class="{ 'is-active': modalActive }">
+            <div class="modal-background"></div>
+            <div class="modal-content">
+              <div class="field box" v-if="!codeSent">
+                <label class="label">Please check your email for the verification code.</label>
+                <div class="control">
+                  <input class="input" v-model="verificationCode" type="text" placeholder="code" />
+                </div>
+                <br />
+                <div class="has-text-centered">
+                  <button
+                    class="button is-primary"
+                    @click="addHospital"
+                    :disabled="verificationCode == ''"
+                  >Confirm</button>
+                </div>
+                <div
+                  v-if="errorCode"
+                  class="notification is-danger"
+                >Invalid login code, please check your email thoroughly.</div>
               </div>
               <div
-                v-if="errorCode"
                 class="notification is-danger"
-              >Invalid login code, please check your email thoroughly.</div>
+                v-else
+              >You can only request a verification code once, please try again in 10 minutes.</div>
             </div>
-            <div
-              class="notification is-danger"
-              v-else
-            >You can only request a verification code once, please try again in 10 minutes.</div>
+            <button class="modal-close is-large" aria-label="close" @click="modalClose"></button>
           </div>
-          <button class="modal-close is-large" aria-label="close" @click="modalClose"></button>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   </div>
 </template>
