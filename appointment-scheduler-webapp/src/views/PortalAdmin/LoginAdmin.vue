@@ -1,7 +1,7 @@
 <template>
   <section class="hero is-fullheight">
     <div class="hero-body animate__animated animate__fadeInLeft">
-      <div class="box has-text-centered " style="margin: auto">
+      <div class="box has-text-centered" style="margin: auto">
         <div class="container is-fluid" style="width: 100%; margin: auto">
           <form class="field" style="margin-top: 5%">
             <h1 class="title has-text-link has-text-left">Nice to see you Doc.</h1>
@@ -33,7 +33,7 @@
             <a @click="signup" class="is-danger">Create an account</a>
           </form>
         </div>
-        <ForgotPassword :userType="'doctor'"/>
+        <ForgotPassword :userType="'doctor'" />
       </div>
     </div>
   </section>
@@ -77,11 +77,16 @@ export default {
       }
       else {
         await axios
-          .get("/api/admin")
-          .then((response) => (this.userAdmin = response.data.find((item) => item.username == this.username &&
-            item.password == this.password)));
+          .post("/api/auth/doctor", {
+            username: this.username,
+            password: this.password
+          })
+          .then(
+            (response) =>
+              (this.userAdmin = response.data)
+          );
         // if username and password matched to a user
-        if (await this.userAdmin) {
+        if (await this.userAdmin !== false) {
           store.commit("alias", this.userAdmin.alias);
           store.commit("userID", this.userAdmin._id);
           await axios.post("/session/admin", {

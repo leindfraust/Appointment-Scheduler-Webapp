@@ -1,9 +1,7 @@
 <template>
   <NavigationTabVue />
   <section class="section is-medium">
-    <div
-      class="container has-text-centered animate__animated animate__fadeInLeft"
-    >
+    <div class="container has-text-centered animate__animated animate__fadeInLeft">
       <div class="box" style="width: 40%; margin: auto">
         <p
           class="notification is-success"
@@ -33,7 +31,7 @@
           Are you one of our doctors? Click
           <a href="/admin/login">here</a>
         </p>
-        <ForgotPassword :userType="'user'"/>
+        <ForgotPassword :userType="'patient'" />
       </div>
     </div>
   </section>
@@ -86,17 +84,16 @@ export default {
         this.validateMessage = "empty username or password";
       } else {
         await axios
-          .get("/api/user")
+          .post("/api/auth/patient", {
+            username: this.username,
+            password: this.password
+          })
           .then(
             (response) =>
-            (this.userPatient = response.data.find(
-              (item) =>
-                item.username == this.username &&
-                item.password == this.password
-            ))
+              (this.userPatient = response.data)
           );
         // if username and password matched to a user
-        if (await this.userPatient) {
+        if (await this.userPatient !== false) {
           socket.connect();
           store.commit("patientUsername", this.userPatient.username)
           store.commit("patientID", this.userPatient._id)
