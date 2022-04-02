@@ -1,143 +1,152 @@
 <template>
-  <div class="columns" style="height: 100vh; background-color: whitesmoke">
-    <div class="column is-2" style="background-color: whitesmoke;">
-      <AdminMenu />
-    </div>
-    <div class="column" style="background-color: whitesmoke;">
-      <div class="modal" :class="{ 'is-active': isActiveModal }">
-        <div class="modal-background"></div>
-        <div class="modal-content">
-          <div class="section box">
-            <div class="field is-horizontal">
-              <div class="field-body">
-                <div class="field">
-                  <div class="control">
-                    <label class="label">From:</label>
-                    <input class="input" type="text" :value="'Dr. ' + doctorName" disabled />
+  <div style="overflow-x: hidden; height: 100vh; background-color: whitesmoke;">
+    <div class="columns">
+      <div class="column is-2">
+        <AdminMenu />
+      </div>
+      <div class="column" style="background-color: whitesmoke;">
+        <div class="modal" :class="{ 'is-active': isActiveModal }">
+          <div class="modal-background"></div>
+          <div class="modal-content">
+            <div class="section box">
+              <div class="field is-horizontal">
+                <div class="field-body">
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">From:</label>
+                      <input class="input" type="text" :value="'Dr. ' + doctorName" disabled />
+                    </div>
                   </div>
-                </div>
-                <div class="field">
-                  <div class="control">
-                    <div class="label">To(Patient):</div>
-                    <div class="dropdown" :class="{ 'is-active': isActiveDropdown }">
-                      <div class="dropdown-trigger">
-                        <button class="button" @click="openPatients">
-                          <span v-if="selectedPatient == ''">Select</span>
-                          <span v-else>{{ selectedPatient }}</span>
-                        </button>
-                      </div>
-                      <div class="dropdown-menu">
-                        <div
-                          class="dropdown-content"
-                          v-for="(patient, index) in patients.patients"
-                          :key="patient._id"
-                        >
-                          <a
-                            class="dropdown-item"
-                            @click="selectPatient(patient.patient, patient.patientName)"
-                          >{{ patient.patientName }}</a>
+                  <div class="field">
+                    <div class="control">
+                      <div class="label">To(Patient):</div>
+                      <div class="dropdown" :class="{ 'is-active': isActiveDropdown }">
+                        <div class="dropdown-trigger">
+                          <button class="button" @click="openPatients">
+                            <span v-if="selectedPatient == ''">Select</span>
+                            <span v-else>{{ selectedPatient }}</span>
+                          </button>
+                        </div>
+                        <div class="dropdown-menu">
+                          <div
+                            class="dropdown-content"
+                            v-for="(patient, index) in patients.patients"
+                            :key="patient._id"
+                          >
+                            <a
+                              class="dropdown-item"
+                              @click="selectPatient(patient.patient, patient.patientName)"
+                            >{{ patient.patientName }}</a>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+              <div class="field">
+                <div class="control">
+                  <label class="label">Message:</label>
+                  <textarea class="textarea" placeholder="Message" v-model="noticeMsg"></textarea>
+                </div>
+              </div>
+              <div class="field">
+                <div class="control has-text-right">
+                  <button
+                    class="button is-primary"
+                    @click="sendNotif"
+                    :disabled="selectedPatient == '' || noticeMsg == ''"
+                  >Send</button>
+                </div>
+              </div>
+              <p v-if="notificationSent" class="has-text-success">
+                A message has been sent to
+                <b>{{ messageSuccessSelectedPatient }}</b>.
+              </p>
             </div>
+          </div>
+          <button class="modal-close is-large" aria-label="close" @click="modalInactive"></button>
+        </div>
+        <section class="section" style="background-color: whitesmoke;">
+          <div class="container is-widescreen is-fullhd" style="padding: 15">
+            <h1 class="title">
+              APPOINTMENT HISTORY
+              <button
+                class="button is-info"
+                @click="modalActive"
+              >Send a message to a patient</button>
+            </h1>
             <div class="field">
               <div class="control">
-                <label class="label">Message:</label>
-                <textarea class="textarea" placeholder="Message" v-model="noticeMsg"></textarea>
+                <input
+                  class="input"
+                  type="text"
+                  style="width: 50% !important"
+                  v-model="searchBar"
+                  placeholder="Search..."
+                />
               </div>
             </div>
-            <div class="field">
-              <div class="control has-text-right">
-                <button
-                  class="button is-primary"
-                  @click="sendNotif"
-                  :disabled="selectedPatient == '' || noticeMsg == ''"
-                >Send</button>
+            <div class="container" v-if="Object.keys(appointmentSchedules).length !== 0">
+              <div
+                class="box"
+                v-for="(appointmentList, index) in appointmentSchedules"
+                :key="index"
+                :class="{ 'is-hidden': new Date(index).toDateString() == new Date().toDateString() }"
+              >
+                <h1 class="subtitle has-text-black">Schedule: {{ new Date(index).toDateString() }}</h1>
+                <div class="table-container">
+                  <table class="table is-striped is-narrow is-fullwidth is-bordered">
+                    <thead>
+                      <tr>
+                        <th class="has-text-black-ter">Controls</th>
+                        <th class="has-text-black-ter">Priority No.</th>
+                        <th class="has-text-black-ter">Hospital Appointed</th>
+                        <th class="has-text-black-ter">First Name</th>
+                        <th class="has-text-black-ter">Last Name</th>
+                        <th class="has-text-black-ter">Contact Number</th>
+                        <th class="has-text-black-ter">Birthday</th>
+                        <th class="has-text-black-ter">Symptoms/Comments</th>
+                      </tr>
+                    </thead>
+                    <tbody v-for="appointments in appointmentList" :key="appointments._id">
+                      <tr>
+                        <button
+                          class="dropdown-item button has-text-danger"
+                          type="button"
+                          @click="deleteData(appointments._id)"
+                        >Delete</button>
+                        <br />
+                        <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
+                        <th class="has-text-black-ter">{{ appointments.hospital }}</th>
+                        <td class="has-text-black-ter">{{ appointments.firstName }}</td>
+                        <td class="has-text-black-ter">{{ appointments.lastName }}</td>
+                        <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
+                        <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
+                        <td class="has-text-black-ter">{{ appointments.comments }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-            <p v-if="notificationSent" class="has-text-success">
-              A message has been sent to
-              <b>{{ messageSuccessSelectedPatient }}</b>.
-            </p>
+            <div class="notification is-info" v-else>No previous appointments.</div>
           </div>
-        </div>
-        <button class="modal-close is-large" aria-label="close" @click="modalInactive"></button>
+        </section>
       </div>
-      <section class="section" style="background-color: whitesmoke;">
-        <div class="container is-widescreen is-fullhd" style="padding: 15">
-          <h1 class="title">
-            APPOINTMENT HISTORY
-            <button class="button is-info" @click="modalActive">Send a message to a patient</button>
-          </h1>
-          <div class="field">
-            <div class="control">
-              <input
-                class="input"
-                type="text"
-                style="width: 50% !important"
-                v-model="searchBar"
-                placeholder="Search..."
-              />
-            </div>
-          </div>
-          <div class="container" v-if="Object.keys(appointmentSchedules).length !== 0">
-            <div class="box" v-for="(appointmentList, index) in appointmentSchedules" :key="index">
-              <h1 class="subtitle has-text-black">Schedule: {{ new Date(index).toDateString() }}</h1>
-              <div class="table-container">
-                <table class="table is-striped is-narrow is-fullwidth is-bordered">
-                  <thead>
-                    <tr>
-                      <th class="has-text-black-ter">Controls</th>
-                      <th class="has-text-black-ter">Priority No.</th>
-                      <th class="has-text-black-ter">First Name</th>
-                      <th class="has-text-black-ter">Last Name</th>
-                      <th class="has-text-black-ter">Contact Number</th>
-                      <th class="has-text-black-ter">Birthday</th>
-                      <th class="has-text-black-ter">Symptoms/Comments</th>
-                    </tr>
-                  </thead>
-                  <tbody v-for="appointments in appointmentList" :key="appointments._id">
-                    <tr>
-                      <button
-                        class="dropdown-item button has-text-danger"
-                        type="button"
-                        @click="deleteData(appointments._id)"
-                      >Delete</button>
-                      <br />
-                      <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
-                      <td class="has-text-black-ter">{{ appointments.firstName }}</td>
-                      <td class="has-text-black-ter">{{ appointments.lastName }}</td>
-                      <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
-                      <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
-                      <td class="has-text-black-ter">{{ appointments.comments }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          <div class="notification is-info" v-else>No previous appointments.</div>
-        </div>
-      </section>
     </div>
   </div>
-  <FooterVue />
 </template>
 <script>
 import axios from 'axios'
 import _ from 'lodash'
 import AdminMenu from "../../components/AdminMenu.vue"
-import FooterVue from '../../components/Footer.vue'
 import socket from '../../socket'
 
 export default {
   name: "PatientLogs",
   components: {
-    AdminMenu,
-    FooterVue
+    AdminMenu
   },
   async mounted() {
     await axios
@@ -176,7 +185,7 @@ export default {
           );
         }).sort((a, b) => {
           return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
-        }).filter(x => { return new Date(x.schedule[0].id).toDateString() > new Date().toDateString() })
+        }).filter(x => { return new Date(x.schedule[0].date).getTime() < new Date().getTime() })
         ,
         "schedule[0].date"
       );
