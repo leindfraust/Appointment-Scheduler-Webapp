@@ -58,6 +58,9 @@ const provinceQuery = require('./routes/api/provinceQuery')
 const geoHospitalQuery = require('./routes/api/geoHospitalQuery')
 const imgUploader = require('./routes/api/imgUploader')
 const nodemailer = require('./routes/api/nodemailer')
+const loginAuth = require('./routes/api/loginAuth')
+const updatePassword = require('./routes/api/updatePassword');
+const fupdatePassword = require('./routes/api/forceUpdatePassword');
 
 //apis
 app.use('/api/manager', managerRoute)
@@ -76,6 +79,9 @@ app.use('/api', provinceQuery)
 app.use('/api', geoHospitalQuery)
 app.use('/api', imgUploader)
 app.use('/api', nodemailer)
+app.use('/api/auth', loginAuth)
+app.use('/api/updatePassword', updatePassword)
+app.use('/api/fupdatePassword', fupdatePassword)
 
 //connect to mongoDB
 const dbConnect = async () => {
