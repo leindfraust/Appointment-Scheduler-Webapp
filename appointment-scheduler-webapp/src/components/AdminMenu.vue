@@ -22,11 +22,14 @@
     <aside
         class="menu"
         :class="{ 'is-hidden-mobile': isActive, 'fixedMenu': isActive }"
-        style="background-color: white; padding: 20px; box-shadow: 5px 10px rgba(240, 240, 240, 0.966); height: 100vh"
+        style="background-color: white; padding: 20px; box-shadow: 5px 10px rgba(240, 240, 240, 0.966);"
     >
         <div class="has-text-centered block" style="padding: 5px;">
-            <figure class="image is-square" style="margin: auto; ">
-                <span  v-html="profileImg"></span>
+            <figure class="is-hidden-mobile is-hidden-touch image is-square" style="margin: auto; ">
+                <span v-html="profileImg"></span>
+            </figure>
+            <figure class="is-hidden-desktop image is-128x128" style="margin: auto; ">
+                <span v-html="profileImg"></span>
             </figure>
             <h5 class="title is-5" v-if="isActive">{{ alias }}</h5>
         </div>
@@ -103,5 +106,6 @@ export default {
 <style scoped>
 .fixedMenu {
     position: fixed;
+    height: 100vh;
 }
 </style>
