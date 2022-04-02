@@ -1,5 +1,5 @@
 <template>
-<NavigationTab/>
+  <NavigationTab />
   <section class="section" style="background-color: whitesmoke;">
     <div class="modal" :class="{ 'is-active': isSchedLoading }">
       <div class="modal-background"></div>
@@ -27,23 +27,11 @@
             <div class="has-text-danger">All fields are required.*</div>
             <label class="label">First name</label>
             <div class="control">
-              <input
-                class="input"
-                type="text"
-                :value="firstName"
-                placeholder="First Name"
-                required
-              />
+              <input class="input" type="text" :value="firstName" placeholder="First Name" required />
             </div>
             <label class="label">Last Name</label>
             <div class="control">
-              <input
-                class="input"
-                type="text"
-                v-model="lastName"
-                placeholder="Last Name"
-                required
-              />
+              <input class="input" type="text" v-model="lastName" placeholder="Last Name" required />
             </div>
             <label class="label">Contact Number:</label>
             <div class="block control">
@@ -76,7 +64,7 @@
             </div>
             <div class="block control">
               <label class="label">Current Address</label>
-              <input class="input" type="text" :value="currentAddress"/>
+              <input class="input" type="text" :value="currentAddress" />
             </div>
             <br />
             <div class="block has-text-centered">
@@ -154,7 +142,7 @@ export default {
   name: "RegForm",
   components: {
     NavigationTab
-},
+  },
   data() {
     return {
       checkPatientRecord: null,
@@ -209,7 +197,7 @@ export default {
             response.data.filter(
               (e) =>
                 e.schedule[0].date === this.schedule.date &&
-                e.doctor === this.doctor
+                e.doctorID == this.doctor
             ).length));
       //check how many appointed patients in regards to the appointment limit set by the doctor
       if (await this.patientsAppointed < this.schedule.appointmentLimit) {
@@ -222,7 +210,7 @@ export default {
               response.data.filter(
                 (e) =>
                   e.schedule[0].date === this.schedule.date &&
-                  e.doctor === this.doctor
+                  e.doctorID == this.doctor
               ).length + 1)
           );
         //if patient is new to the doctor, patient will be recorded as list of patients in doctor's profile
@@ -323,7 +311,7 @@ export default {
             response.data.filter(
               (e) =>
                 e.schedule[0].date === this.schedule.date &&
-                e.doctor === this.doctor
+                e.doctorID == this.doctor
             ).length));
       //check how many appointed patients in regards to the appointment limit set by the doctor
       //if available
@@ -332,7 +320,7 @@ export default {
         this.schedAvailability = true
         this.prefix = prefix
         statusSched[e].style.display = 'block'
-      // if not available
+        // if not available
       } else {
         this.isSchedLoading = false
         this.schedAvailability = false
