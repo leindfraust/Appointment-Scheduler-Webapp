@@ -19,11 +19,16 @@ router.post('/patient', async (req, res) => {
         } else {
             userDetails = await result
             bcrypt.compare(await password, result.password, (err, result) => {
+                delete userDetails.password
                 if (err) {
                     res.status(500).send(err);
                 } else {
                     if (result == true) {
-                        res.status(200).send(userDetails)
+                        let response_client = ({
+                            ...userDetails
+                        }._doc)
+                        delete response_client.password
+                        res.status(200).send(response_client)
                     } else {
                         res.status(200).send(result)
                     }
@@ -51,7 +56,11 @@ router.post('/doctor', async (req, res) => {
                     res.status(500).send(err);
                 } else {
                     if (result == true) {
-                        res.status(200).send(userDetails)
+                        let response_client = ({
+                            ...userDetails
+                        }._doc)
+                        delete response_client.password
+                        res.status(200).send(response_client)
                     } else {
                         res.status(200).send(result)
                     }
@@ -80,7 +89,11 @@ router.post('/manager', async (req, res) => {
                     res.status(500).send(err);
                 } else {
                     if (result == true) {
-                        res.status(200).send(userDetails)
+                        let response_client = ({
+                            ...userDetails
+                        }._doc)
+                        delete response_client.password
+                        res.status(200).send(response_client)
                     } else {
                         res.status(200).send(result)
                     }
