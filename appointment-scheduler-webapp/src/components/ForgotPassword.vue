@@ -69,6 +69,26 @@ async function forgotPasswordOTP() {
             } else {
                 noUserFound.value = true
             }
+        } else if (props.userType == 'manager') {
+            await axios.get('/api/manager').then(response => userData.value = response.data.find(x => x.username === props.username))
+            if (userData.value.status === 'Active' && userData.value.email === props.email) {
+                noUserFound.value = false
+                try {
+                    await axios.post('/api/code', {
+                        email: props.email,
+                        code: randomCode
+                    });
+                    await axios.post('/api/OTPMail', {
+                        email: props.email,
+                        code: randomCode
+                    });
+                    codeSent.value = true
+                } catch (err) {
+                    errMsg.value = err
+                }
+            } else {
+                noUserFound.value = true
+            }
         }
     }
 }
@@ -85,7 +105,8 @@ async function pushNewPassword() {
     if (newPassword.value === confirmPassword.value) {
         if (props.userType == 'patient') {
             try {
-                await axios.put(`/api/user/${userData.value._id}`, {
+                await axios.put('/api/fupdatePassword/patient', {
+                    patientID: userData.value._id,
                     password: newPassword.value
                 });
                 userData.value = ''
@@ -97,7 +118,21 @@ async function pushNewPassword() {
             }
         } else if (props.userType == 'doctor') {
             try {
-                await axios.put(`/api/admin/${userData.value._id}`, {
+                await axios.put('/api/fupdatePassword/doctor', {
+                    doctorID: userData.value._id,
+                    password: newPassword.value
+                });
+                userData.value = ''
+                passwordChanged.value = true
+            } catch (err) {
+                passwordChanged.value = false
+                errMsg.value = err
+                userData.value = ''
+            }
+        } else if (props.userType == 'manager') {
+            try {
+                await axios.put('/api/fupdatePassword/manager', {
+                    managerID: userData.value._id,
                     password: newPassword.value
                 });
                 userData.value = ''
