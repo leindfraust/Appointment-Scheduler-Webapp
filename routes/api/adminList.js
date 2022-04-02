@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt')
 const Admin = require('../../models/adminList');
 
 router.get('/', async (req, res) => {
@@ -15,16 +16,23 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-    const newAdmin = new Admin(req.body)
-    try {
-        const adminList = await newAdmin.save()
-        if (!adminList) throw new Error('Cannot save')
-        res.status(200).json(adminList)
-    } catch (err) {
-        res.status(500).json({
-            message: err.message
-        })
-    }
+    bcrypt.hash(req.body.password, 10, async (err, hash) => {
+        if (err) {
+            res.status(500).send(err)
+        } else {
+            req.body.password = hash
+            const newAdmin = new Admin(req.body)
+            try {
+                const adminList = await newAdmin.save()
+                if (!adminList) throw new Error('Cannot save')
+                res.status(200).json(adminList)
+            } catch (err) {
+                res.status(500).json({
+                    message: err.message
+                })
+            }
+        }
+    })
 });
 
 router.put('/:id', async (req, res) => {
