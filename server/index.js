@@ -26,7 +26,7 @@ app.use(cors());
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(history())
-app.use(express.static(path.join(__dirname, 'appointment-scheduler-webapp/dist')))
+app.use(express.static(path.join(__dirname, '../client/dist')))
 
 //use sessions
 app.use(session({
@@ -180,6 +180,6 @@ io.on('connection', (socket) => {
 //serve dist in node local server
 app.get('/', (req, res) => {
 
-    res.sendFile(path.join(__dirname, 'appointment-scheduler-webapp/dist/index.html'))
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'))
 
 });
