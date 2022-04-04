@@ -4,17 +4,10 @@
   "description": "appointment scheduler web server with express and mongodbatlas",
   "main": "index.js",
   "scripts": {
-<<<<<<< HEAD
-    "server": "cd server && npm run server --ignore 'client/",
-    "client": "cd client && npm run serve --prefix client",
-    "dev": "concurrently \"cd server && npm run server\" \"cd client && npm run serve\"",
-    "start": "cd server && npm run start"
-=======
     "server": "nodemon index.js --ignore 'appointment-scheduler-webapp/",
     "client": "npm run serve --prefix appointment-scheduler-webapp",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "start": "node index.js"
->>>>>>> parent of 94b79c79 (format folder structure to separate client and server folders)
   },
   "author": "Leindfraust",
   "license": "ISC",
