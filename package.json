@@ -1,26 +1,45 @@
 {
-  "name": "hospital-appointment-scheduler",
+  "name": "appointment_scheduler_webapp_expressmongodb",
   "version": "1.0.0",
-  "description": "a hospital appointment scheduler web application",
+  "description": "appointment scheduler web server with express and mongodbatlas",
   "main": "index.js",
   "scripts": {
+<<<<<<< HEAD
     "server": "cd server && npm run server --ignore 'client/",
     "client": "cd client && npm run serve --prefix client",
     "dev": "concurrently \"cd server && npm run server\" \"cd client && npm run serve\"",
     "start": "cd server && npm run start"
+=======
+    "server": "nodemon index.js --ignore 'appointment-scheduler-webapp/",
+    "client": "npm run serve --prefix appointment-scheduler-webapp",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "start": "node index.js"
+>>>>>>> parent of 94b79c79 (format folder structure to separate client and server folders)
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/leindfraust/Appointment-Scheduler-Webapp.git"
+  "author": "Leindfraust",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "cloudinary": "^1.28.1",
+    "connect-history-api-fallback": "^1.6.0",
+    "connect-mongo": "^4.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "express-fileupload": "^1.3.1",
+    "express-formidable": "^1.2.0",
+    "express-session": "^1.17.2",
+    "filter-obj": "^3.0.0",
+    "formidable": "^2.0.1",
+    "http-server": "^14.1.0",
+    "mongoose": "^6.2.8",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.7.3",
+    "socket.io": "^4.4.1",
+    "util": "^0.12.4"
   },
-  "author": "Romel Jr Zerna",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/leindfraust/Appointment-Scheduler-Webapp/issues"
-  },
-  "homepage": "https://github.com/leindfraust/Appointment-Scheduler-Webapp#readme",
   "devDependencies": {
-    "concurrently": "^7.1.0",
+    "concurrently": "^7.0.0",
     "nodemon": "^2.0.15"
   }
 }

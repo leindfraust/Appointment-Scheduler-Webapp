@@ -1,6 +1,6 @@
 {
     "include": [
-      "../client/src/**/*"
+      "appointment-scheduler-webapp/src/**/*"
     ],
     "exclude": ["node_modules"]
   }
