@@ -4,10 +4,10 @@
   "description": "a hospital appointment scheduler web application",
   "main": "index.js",
   "scripts": {
-    "server": "cd server && nodemon index.js --ignore 'client/",
+    "server": "cd server && npm run server --ignore 'client/",
     "client": "cd client && npm run serve --prefix client",
     "dev": "concurrently \"cd server && npm run server\" \"cd client && npm run serve\"",
-    "start": "cd server && node index.js"
+    "start": "cd server && npm run start"
   },
   "repository": {
     "type": "git",
