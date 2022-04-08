@@ -13,17 +13,17 @@ const store = createStore({
         superUserAuth: false,
         statusAvailability: false,
         alias: '',
-        doctorSched: [],
-        userID: null, //doctor's ID
+        doctorDetails: [],
         patientUsername: '',
         patientID: null,
+        doctorID: null,
         specialistList: [],
         patientDetails: [],
         profileImg: null,
         imgSuccess: false,
         imgSuccessManager: false,
         managerHospital: '',
-        hospitalID: '',
+        hospitalDetails: '',
         hospitalName: '',
         specializationList: ["Allergists", "Anesthesiologists", "Cardiologists", "Colon and Rectal Surgeons", "Critical Care Medicine Specialists", " Dermatologists", "Endocrinologists", "Emergency Medicine Specialists", "Family Physicians",
             "Gastroenterologists", "Geriatric Medicine Specialists", "Hematologists", "Hospice and Palliative Medicine Specialists", "Infectious Disease Specialists",
@@ -49,17 +49,17 @@ const store = createStore({
         alias(state, alias) {
             state.alias = alias
         },
-        doctorSched(state, doctorSched) {
-            state.doctorSched = doctorSched
-        },
-        userID(state, userID) {
-            state.userID = userID
+        doctorDetails(state, doctorDetails) {
+            state.doctorDetails = doctorDetails
         },
         patientUsername(state, patientUsername) {
             state.patientUsername = patientUsername
         },
         patientID(state, patientID) {
             state.patientID = patientID
+        },
+        doctorID(state, doctorID) {
+            state.doctorID = doctorID
         },
         statusTrue(state) {
             state.statusAvailability = true;
@@ -88,8 +88,8 @@ const store = createStore({
         managerHospital(state, managerHospital) {
             state.managerHospital = managerHospital
         },
-        hospitalID(state, hospitalID) {
-            state.hospitalID = hospitalID
+        hospitalDetails(state, hospitalDetails) {
+            state.hospitalDetails = hospitalDetails
         },
         hospitalName(state, hospitalName){
             state.hospitalName = hospitalName

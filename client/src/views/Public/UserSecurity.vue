@@ -56,7 +56,7 @@ async function changePassword() {
             passwordChanged.value = true
             errMsg.value = ''
         } catch (err) {
-            errMsg.value = err.response.data
+            errMsg.value = err
             passwordChanged.value = false
         }
     }
@@ -68,7 +68,7 @@ async function changePassword() {
     <section class="section">
         <div class="box" style="width: 50%; margin: auto">
             <h1 class="title">Security</h1>
-            <div class="notification is-danger" v-if="errMsg">{{ errMsg }}</div>
+            <div class="notification is-danger" v-if="errMsg">Oops, something went wrong. Try again later or <router-link :to="'/contactus'">contact us</router-link></div>
             <div
                 class="notification is-success"
                 v-if="passwordChanged"

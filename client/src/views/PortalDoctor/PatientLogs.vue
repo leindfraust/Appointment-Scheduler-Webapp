@@ -2,7 +2,7 @@
   <div style="overflow-x: hidden; height: 100vh; background-color: whitesmoke;">
     <div class="columns">
       <div class="column is-2">
-        <AdminMenu />
+        <DoctorMenu />
       </div>
       <div class="column" style="background-color: whitesmoke;">
         <div class="modal" :class="{ 'is-active': isActiveModal }">
@@ -140,13 +140,13 @@
 <script>
 import axios from 'axios'
 import _ from 'lodash'
-import AdminMenu from "../../components/AdminMenu.vue"
+import DoctorMenu from "../../components/DoctorMenu.vue"
 import socket from '../../socket'
 
 export default {
   name: "PatientLogs",
   components: {
-    AdminMenu
+    DoctorMenu
   },
   async mounted() {
     await axios
@@ -157,8 +157,8 @@ export default {
           (x) => x.doctorID === this.$store.state.userID
         ))
       );
-    await axios.get('/api/admin').then(response => this.patients = response.data.find(x => x.alias == this.alias))
-    await axios.get('/session/admin').then(response => this.doctorName = response.data.fullname)
+    await axios.get('/api/doctor').then(response => this.patients = response.data.find(x => x.alias == this.alias))
+    await axios.get('/session/doctor').then(response => this.doctorName = response.data.fullname)
   },
   data() {
     return {

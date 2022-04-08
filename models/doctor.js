@@ -3,7 +3,7 @@ const {
     Schema
 } = mongoose;
 
-const adminSchema = new Schema({
+const doctorSchema = new Schema({
     verified: {
         type: Boolean,
         default: false
@@ -38,6 +38,6 @@ const adminSchema = new Schema({
     hospitalOrigin: Array
 });
 
-const admin = mongoose.model('admin', adminSchema);
+const doctor = mongoose.model('doctor', doctorSchema);
 
-module.exports = admin
+module.exports = doctor

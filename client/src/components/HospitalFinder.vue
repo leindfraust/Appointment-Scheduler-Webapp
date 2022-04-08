@@ -138,7 +138,7 @@
                         >{{ parseInt(geoHospital.distance) / 1000 }} km away from you.</p>
                         <button
                             class="button is-link"
-                            @click="bookAppointment(geoHospital._id)"
+                            @click="bookAppointment(geoHospital)"
                             v-if="checkUser"
                         >Book an Appointment</button>
                     </div>
@@ -195,8 +195,8 @@ export default {
         }
     },
     methods: {
-        async bookAppointment(hospitalID) {
-            await this.$store.commit('hospitalID', hospitalID)
+        async bookAppointment(hospitalDetails) {
+            await this.$store.commit('hospitalDetails', hospitalDetails)
             await this.$router.push(`/user/${this.$store.state.patientUsername}/doctors`)
         },
         filterByCity(city) {
@@ -234,8 +234,7 @@ export default {
                 province: this.province,
                 latitude: this.userLatitude,
                 longitude: this.userLongitude
-            });
-            await axios.get('/api/geoHospitalNearestUser').then(response => { this.geoHospitalNearestUser = response.data })
+            }).then(response =>  this.geoHospitalNearestUser = response.data )
             this.isHospitalLoading = false
         },
         getUserLocation() {

@@ -90,7 +90,7 @@ async function cancelAppointment(id) {
         <div class="columns">
             <div class="column is-5">
                 <div class="box" v-if="patient.length !== 0">
-                    <div class="notification is-danger" v-if="errMsg">{{ errMsg }}</div>
+                    <div class="notification is-danger" v-if="errMsg">Oops, something went wrong. Try again later or <router-link :to="'/contactus'">contact us</router-link></div>
                     <div class="notification is-success" v-if="successMsg">Changes have been pushed.</div>
                     <div class="field is-horizontal">
                         <div class="field-body">

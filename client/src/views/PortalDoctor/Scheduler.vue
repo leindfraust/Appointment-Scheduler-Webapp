@@ -2,7 +2,7 @@
   <div style="overflow-x: hidden; height: 100vh; background-color: whitesmoke;">
     <div class="columns">
       <div class="column is-2">
-        <AdminMenu />
+        <DoctorMenu />
       </div>
       <div class="column" style="background-color: whitesmoke;">
         <section class="section">
@@ -131,12 +131,12 @@
 <script>
 import axios from "axios";
 import store from "../../store";
-import AdminMenu from "../../components/AdminMenu.vue"
+import DoctorMenu from "../../components/DoctorMenu.vue"
 
 export default {
   name: "Scheduler",
   components: {
-    AdminMenu
+    DoctorMenu
   },
   data() {
     return {
@@ -158,10 +158,10 @@ export default {
   },
   async mounted() {
     await axios
-      .get("/session/admin")
+      .get("/session/doctor")
       .then((response) => (this.days = response.data.schedule));
     await axios
-      .get("/session/admin")
+      .get("/session/doctor")
       .then((response) => (this.userID = response.data._id));
   },
   computed: {
@@ -195,14 +195,14 @@ export default {
         prefix: this.prefix
       });
 
-      await axios.put(`/api/admin/${this.userID}`, {
+      await axios.put(`/api/doctor/${this.userID}`, {
         schedule: this.days,
       });
-      await axios.put("/session/admin", {
+      await axios.put("/session/doctor", {
         schedule: this.days,
       });
       await axios
-        .get("/session/admin")
+        .get("/session/doctor")
         .then((response) => (this.days = response.data.schedule));
 
       this.uploadSchedSuccess = true
@@ -215,14 +215,14 @@ export default {
         this.loading = true
         this.days.splice(idx, 1);
         this.isActive = false;
-        await axios.put(`/api/admin/${this.userID}`, {
+        await axios.put(`/api/doctor/${this.userID}`, {
           schedule: this.days,
         });
-        await axios.put("/session/admin", {
+        await axios.put("/session/doctor", {
           schedule: this.days,
         });
         await axios
-          .get("/session/admin")
+          .get("/session/doctor")
           .then((response) => (this.days = response.data.schedule));
 
         this.uploadSchedSuccess = true

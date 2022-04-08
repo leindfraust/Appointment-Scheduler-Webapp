@@ -2,7 +2,7 @@
     <div style="overflow-x: hidden; height: 100vh; background-color: whitesmoke;">
         <div class="columns">
             <div class="column is-2">
-                <AdminMenu />
+                <DoctorMenu />
             </div>
             <div class="column" style="background-color: whitesmoke;">
                 <section class="section" style="background-color: whitesmoke;">
@@ -299,17 +299,17 @@
 </template>
 <script>
 import axios from 'axios'
-import AdminMenu from '../../components/AdminMenu.vue'
+import DoctorMenu from '../../components/DoctorMenu.vue'
 import ForgotPassword from '../../components/ForgotPassword.vue'
 
 export default {
-    name: 'AdminSecurity',
+    name: 'DoctorSecurity',
     components: {
-        AdminMenu,
+        DoctorMenu,
         ForgotPassword
     },
     async mounted() {
-        await axios.get("/session/admin").then(response => this.doctorDetails = response.data)
+        await axios.get("/session/doctor").then(response => this.doctorDetails = response.data)
         this.verified = await this.doctorDetails.verified
         this.id = await this.doctorDetails._id
         this.licenseNo = await this.doctorDetails.licenseNo
@@ -421,7 +421,7 @@ export default {
             let existingEmail = []
             let randomCode = Math.floor(1000 + Math.random() * 9000);
             await axios.get("/api/code").then(response => this.codes = response.data)
-            await axios.get("/api/admin").then(response => existingEmail = response.data.find(x => x.gmail === this.gmail))
+            await axios.get("/api/doctor").then(response => existingEmail = response.data.find(x => x.gmail === this.gmail))
             let confirmCode = await this.codes.find(x => x.code === randomCode)
             let confirmEmail = await this.codes.filter(x => x.email === this.gmail)
             if (await this.codes.length === 0) {
@@ -504,18 +504,18 @@ export default {
             let confirmCode = await this.codes.find(x => x.code === this.OTP && x.email === this.gmail)
             if (!this.codeError) {
                 if (await confirmCode) {
-                    await axios.put(`/api/admin/${this.id}`, {
+                    await axios.put(`/api/doctor/${this.id}`, {
                         gmail: this.gmail,
                         verified: true
                     });
-                    await axios.put('/session/admin', {
+                    await axios.put('/session/doctor', {
                         gmail: this.gmail,
                         verified: true
                     });
                     this.verified = true
                     this.isActiveModal = false
                     if (await !this.isActiveModal) {
-                        await axios.get('/session/admin').then(response => this.doctorDetails = response.data)
+                        await axios.get('/session/doctor').then(response => this.doctorDetails = response.data)
                     }
                 } else {
                     this.incorrectCode = true
@@ -526,16 +526,16 @@ export default {
         },
         async updateInfo() {
             if (this.verified) {
-                await axios.put(`/api/admin/${this.id}`, {
+                await axios.put(`/api/doctor/${this.id}`, {
                     licenseNo: this.licenseNo,
                     name: this.fullname
                 })
-                await axios.put("/session/admin", {
+                await axios.put("/session/doctor", {
                     licenseNo: this.licenseNo,
                     name: this.fullname
                 })
                 await axios
-                    .get("/session/admin")
+                    .get("/session/doctor")
                     .then((response) => (this.fullname = response.data.fullname));
 
                 this.updateInfoSuccess = true

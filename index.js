@@ -40,40 +40,48 @@ app.use(session({
         mongoUrl: encodeURI(mongoUri),
     })
 }));
+const sessDoctor = require('./sessions/doctor')
+const sessPatient = require('./sessions/user')
+const sessManager = require('./sessions/manager')
+const sessSuperuser = require('./sessions/superuser')
 
-//schemas and route logic
-const managerRoute = require('./routes/api/manager')
-const appointmentListRoute = require('./routes/api/appointmentList')
-const superUserRoute = require('./routes/api/superuser')
-const authenticationCodeRoute = require('./routes/api/authenticationCodes')
-const adminRoute = require('./routes/api/adminList')
-const sessAdmin = require('./sessions/models/admin')
-const sessPatient = require('./sessions/models/user')
-const sessManager = require('./sessions/models/manager')
-const sessSuperuser = require('./sessions/models/superuser')
+app.use('/session/doctor', sessDoctor)
+app.use('/session/patient', sessPatient)
+app.use('/session/manager', sessManager)
+app.use('/session/superuser', sessSuperuser)
+
+/* schemas and route logic */
+
+//accounts
 const user = require('./routes/api/user')
+const doctor = require('./routes/api/doctor')
+const manager = require('./routes/api/manager')
+const superuser = require('./routes/api/superuser')
+
+const appointmentList = require('./routes/api/appointmentList')
+const authenticationCodeRoute = require('./routes/api/authenticationCodes')
 const geolocation = require('./routes/api/geolocation')
 const doctorQuery = require('./routes/api/doctorQuery')
 const provinceQuery = require('./routes/api/provinceQuery')
 const geoHospitalQuery = require('./routes/api/geoHospitalQuery')
 const imgUploader = require('./routes/api/imgUploader')
 const nodemailer = require('./routes/api/nodemailer')
+
 const loginAuth = require('./routes/api/loginAuth')
 const updatePassword = require('./routes/api/updatePassword');
 const fupdatePassword = require('./routes/api/forceUpdatePassword');
 
-//apis
-app.use('/api/manager', managerRoute)
-app.use('/api/appointmentList', appointmentListRoute)
-app.use('/api/admin', adminRoute)
+/* APIs */
+
+//accounts
 app.use('/api/user', user)
-app.use('/api/superuser', superUserRoute)
+app.use('/api/doctor', doctor)
+app.use('/api/manager', manager)
+app.use('/api/superuser', superuser)
+
+app.use('/api/appointmentList', appointmentList)
 app.use('/api/code', authenticationCodeRoute)
 app.use('/api/geolocation', geolocation)
-app.use('/session/admin', sessAdmin)
-app.use('/session/patient', sessPatient)
-app.use('/session/manager', sessManager)
-app.use('/session/superuser', sessSuperuser)
 app.use('/api', doctorQuery)
 app.use('/api', provinceQuery)
 app.use('/api', geoHospitalQuery)
@@ -84,7 +92,7 @@ app.use('/api/updatePassword', updatePassword)
 app.use('/api/fupdatePassword', fupdatePassword)
 
 //connect to mongoDB
-const dbConnect = async () => {
+const dbConnect = async() => {
     await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,

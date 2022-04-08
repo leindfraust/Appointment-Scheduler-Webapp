@@ -6,16 +6,16 @@ import store from '../store'
 import Home from '../views/Public/Home.vue'
 import DoctorList from '../views/Public/DoctorList.vue'
 import RegForm from '../views/Public/RegForm.vue'
-import LoginAdmin from '../views/PortalAdmin/LoginAdmin.vue'
-import Admin from '../views/PortalAdmin/Admin.vue'
-import SignUpAdmin from '../views/PortalAdmin/SignUpAdmin.vue'
-import Scheduler from '../views/PortalAdmin/Scheduler.vue'
-import AdminProfile from '../views/PortalAdmin/Profile.vue'
-import PatientLogs from '../views/PortalAdmin/PatientLogs.vue'
-import AdminSecurity from '../views/PortalAdmin/Security.vue'
+import LoginDoctor from '../views/PortalDoctor/LoginDoctor.vue'
+import Doctor from '../views/PortalDoctor/Doctor.vue'
+import SignUpDoctor from '../views/PortalDoctor/SignUpDoctor.vue'
+import Scheduler from '../views/PortalDoctor/Scheduler.vue'
+import DoctorProfile from '../views/PortalDoctor/Profile.vue'
+import PatientLogs from '../views/PortalDoctor/PatientLogs.vue'
+import DoctorSecurity from '../views/PortalDoctor/Security.vue'
 import DoctorPickSuccess from '../views/PortalSuccessConfirmations/DoctorPickSuccess.vue'
 import ImageUploadSuccess from '../views/PortalSuccessConfirmations/ImageUploadSuccess'
-import ImageUploadSuccessAdmin from '../views/PortalSuccessConfirmations/ImageUploadSuccessAdmin.vue'
+import ImageUploadSuccessDoctor from '../views/PortalSuccessConfirmations/ImageUploadSuccessDoctor.vue'
 import ImageUploadSuccessManager from '../views/PortalSuccessConfirmations/imageUploadSuccessManager.vue'
 import UserSignUp from '../views/Public/UserSignUp.vue'
 import UserLogin from '../views/Public/UserLogin.vue'
@@ -69,45 +69,45 @@ const routes = [{
         path: '/user/superuser/login',
         component: SuperUserLogin,
     },
-    //Doctor account routes
+    //doctor account routes
     {
-        path: '/admin/login',
-        component: LoginAdmin,
+        path: '/doctor/login',
+        component: LoginDoctor,
     },
     {
-        path: '/admin/signup',
-        component: SignUpAdmin,
+        path: '/doctor/signup',
+        component: SignUpDoctor,
     },
     {
-        path: '/admin/user/:user',
-        component: Admin,
+        path: '/doctor/user/:user',
+        component: Doctor,
         meta: {
             requiresAuth: true
         },
     },
     {
-        path: '/admin/user/:user/schedule',
+        path: '/doctor/user/:user/schedule',
         component: Scheduler,
         meta: {
             requiresAuth: true
         },
     },
     {
-        path: '/admin/user/:user/profile',
-        component: AdminProfile,
+        path: '/doctor/user/:user/profile',
+        component: DoctorProfile,
         meta: {
             requiresAuth: true
         },
     },
     {
-        path: '/admin/user/:user/security',
-        component: AdminSecurity,
+        path: '/doctor/user/:user/security',
+        component: DoctorSecurity,
         meta: {
             requiresAuth: true
         },
     },
     {
-        path: '/admin/user/:user/patients',
+        path: '/doctor/user/:user/patients',
         component: PatientLogs,
         meta: {
             requiresAuth: true
@@ -122,8 +122,8 @@ const routes = [{
         }
     },
     {
-        path: '/imgUploadSuccessAdmin',
-        component: ImageUploadSuccessAdmin,
+        path: '/imgUploadSuccessDoctor',
+        component: ImageUploadSuccessDoctor,
         meta: {
             requireImgUploadSuccess: true
         }
@@ -212,7 +212,7 @@ router.beforeEach((to, from, next) => {
         if (store.state.imgSuccess === true) {
             return next();
         } else {
-            return next('/admin/login');
+            return next('/doctor/login');
         }
     }
     next();
@@ -245,7 +245,7 @@ router.beforeEach((to, from, next) => {
         if (store.state.alias) {
             return next();
         } else {
-            return next('/admin/login');
+            return next('/doctor/login');
         }
     }
     next();

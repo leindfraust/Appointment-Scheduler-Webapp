@@ -5,7 +5,8 @@
       style="margin: auto; width: 50%"
     >
       <!-- I know it sucks, having a form action for only image upload while separating a post with axios for the document, but shit works so I guess it's okay.-->
-      <form action="/api/imgUploadAdmin" method="post" enctype="multipart/form-data">
+      <div class="notification is-danger" v-if="errMsg">Oops, something went wrong. Try again later or <router-link :to="'/contactus'">contact us</router-link></div>
+      <form action="/api/imgUploadDoctor" method="post" enctype="multipart/form-data">
         <div class="field is-horizontal">
           <div class="field-body">
             <div class="field">
@@ -197,11 +198,12 @@ export default {
       specializationsSelected: [],
       specializationList: this.$store.getters.getSpecializationList,
       searchBarSpecialization: '',
+      errMsg: ''
     };
   },
   async mounted() {
     await axios
-      .get("/api/admin")
+      .get("/api/doctor")
       .then((response) => (this.evaluateData = response.data));
     await axios.get("/api/manager").then(response => this.hospitals = response.data)
   },
@@ -257,17 +259,21 @@ export default {
         this.aliasEvaluate == null &&
         this.usernameEvaluate == null
       ) {
-        await axios.post("/api/admin", {
-          alias: this.alias,
-          licenseNo: this.licenseCode,
-          name: this.name,
-          gmail: this.gmail,
-          specialist: this.specializationsSelected,
-          username: this.username,
-          password: this.password,
-        });
+        try {
+          await axios.post("/api/doctor", {
+            alias: this.alias,
+            licenseNo: this.licenseCode,
+            name: this.name,
+            gmail: this.gmail,
+            specialist: this.specializationsSelected,
+            username: this.username,
+            password: this.password,
+          });
 
-        await this.$store.commit("imgSuccess", true)
+          await this.$store.commit("imgSuccess", true)
+        } catch (err) {
+          this.errMsg = err
+        }
       }
     },
     selectSpecialization(specialization) {

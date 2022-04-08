@@ -97,7 +97,7 @@
                     <p class="subtitle is-6">{{ pickedSpecialist }}</p>
                     <button
                       class="button"
-                      @click="pickDoctor(doctors._id, doctors.schedule)"
+                      @click="pickDoctor(doctors)"
                     >Appoint</button>
                   </div>
                 </div>
@@ -122,11 +122,10 @@ export default {
   },
   data() {
     return {
-      hospitalID: this.$store.state.hospitalID,
-      hospitalDetails: null,
+      hospitalDetails: this.$store.state.hospitalDetails,
       patientDetails: null,
       doctorList: null,
-      specialistList: null,
+      specialistList: this.$store.state.hospitalDetails.specializations.sort(),
       pickedSpecialist: null,
       specializationClicked: false,
       isDoctorLoading: false
@@ -137,26 +136,21 @@ export default {
       .get("/session/patient")
       .then(response => this.patientDetails = response.data);
   },
-  async created() {
-    await axios.get("/api/manager").then(response => this.hospitalDetails = response.data.find(x => x._id == this.hospitalID));
-    this.specialistList = await this.hospitalDetails.specializations.sort();
-  },
   methods: {
     async getDoctors(specialization) {
       this.isDoctorLoading = true
       this.specializationClicked = true
       this.pickedSpecialist = specialization;
       await axios
-        .get("/api/admin")
+        .get("/api/doctor")
         .then((response) => (this.doctorList = response.data.filter((x) => x.verified === true && x.hospitalOrigin.find(x => x.hospital === this.hospitalDetails.hospital) && x.specialist.find(x => x === specialization) && x.schedule != "" && x.schedule.find(x => new Date(x.date).getTime() > new Date().getTime()))));
       this.isDoctorLoading = false
     },
     viewSpecializations() {
       this.specializationClicked = false
     },
-    async pickDoctor(id, schedule) {
-      store.commit("userID", id);
-      store.commit("doctorSched", schedule);
+    async pickDoctor(details) {
+      store.commit("doctorDetails", details);
       store.commit("statusAvailability", true);
       store.commit("hospitalName", this.hospitalDetails.hospital);
       await this.$router.push(`/user/${this.patientDetails.username}/registration`);

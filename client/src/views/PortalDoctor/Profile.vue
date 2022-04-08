@@ -2,7 +2,7 @@
   <div style="overflow-x: hidden; height: 100vh; background-color: whitesmoke;">
     <div class="columns">
       <div class="column is-2">
-        <AdminMenu />
+        <DoctorMenu />
       </div>
       <div class="column" style="background-color: whitesmoke;">
         <section class="section" style="background-color: whitesmoke;">
@@ -222,10 +222,10 @@
 import store from "../../store";
 import axios from "axios";
 import cld from '../../cloudinary'
-import AdminMenu from "../../components/AdminMenu.vue";
+import DoctorMenu from "../../components/DoctorMenu.vue";
 
 export default {
-  name: "AdminProfile",
+  name: "DoctorProfile",
   data() {
     return {
       alias: store.state.alias,
@@ -256,10 +256,10 @@ export default {
     };
   },
   components: {
-    AdminMenu
+    DoctorMenu
   },
   async mounted() {
-    await axios.get("/session/admin").then(response => this.doctorDetails = response.data)
+    await axios.get("/session/doctor").then(response => this.doctorDetails = response.data)
     this.verified = await this.doctorDetails.verified
     this.licenseNo = await this.doctorDetails.licenseNo
     this.fullname = await this.doctorDetails.fullname
@@ -272,18 +272,18 @@ export default {
   methods: {
     async updateInfo() {
       if (!this.verified) {
-        await axios.put(`/api/admin/${this.id}`, {
+        await axios.put(`/api/doctor/${this.id}`, {
           licenseNo: this.licenseNo,
           name: this.fullname,
           gmail: this.gmail
         })
-        await axios.put("/session/admin", {
+        await axios.put("/session/doctor", {
           licenseNo: this.licenseNo,
           name: this.fullname,
           gmail: this.gmail
         })
         await axios
-          .get("/session/admin")
+          .get("/session/doctor")
           .then((response) => (this.fullname = response.data.fullname));
 
         this.infoValidate = true
@@ -313,13 +313,13 @@ export default {
       if (!this.specialist.find(x => x === specialist)) {
         this.specialist.push(specialist)
         this.isActiveDropdownSpecialist = false
-        await axios.put(`/api/admin/${this.id}`, {
+        await axios.put(`/api/doctor/${this.id}`, {
           specialist: this.specialist
         });
-        await axios.put('/session/admin', {
+        await axios.put('/session/doctor', {
           specialist: this.specialist
         });
-        await axios.get('/session/admin').then(response => this.specialist = response.data.specialist)
+        await axios.get('/session/doctor').then(response => this.specialist = response.data.specialist)
       }
     },
     async promptVerificationHospital(hospital) {
@@ -363,13 +363,13 @@ export default {
           this.hospitalOrigin.push({
             hospital: this.selectedHospital
           });
-          await axios.put(`/api/admin/${this.id}`, {
+          await axios.put(`/api/doctor/${this.id}`, {
             hospitalOrigin: this.hospitalOrigin
           });
-          await axios.put('/session/admin', {
+          await axios.put('/session/doctor', {
             hospitalOrigin: this.hospitalOrigin
           });
-          await axios.get('/session/admin').then(response => this.hospitalOrigin = response.data.hospitalOrigin)
+          await axios.get('/session/doctor').then(response => this.hospitalOrigin = response.data.hospitalOrigin)
           this.selectedHospital = ''
           this.modalActive = false
         } else {
@@ -381,23 +381,23 @@ export default {
     },
     async pullSpecialization(specialization) {
       this.specialist = this.specialist.filter(x => x !== specialization)
-      await axios.put(`/api/admin/${this.id}`, {
+      await axios.put(`/api/doctor/${this.id}`, {
         specialist: this.specialist
       });
-      await axios.put('/session/admin', {
+      await axios.put('/session/doctor', {
         specialist: this.specialist
       });
-      await axios.get('/session/admin').then(response => this.specialist = response.data.specialist)
+      await axios.get('/session/doctor').then(response => this.specialist = response.data.specialist)
     },
     async pullHospital(hospital) {
       this.hospitalOrigin = this.hospitalOrigin.filter(x => x.hospital !== hospital)
-      await axios.put(`/api/admin/${this.id}`, {
+      await axios.put(`/api/doctor/${this.id}`, {
         hospitalOrigin: this.hospitalOrigin
       });
-      await axios.put('/session/admin', {
+      await axios.put('/session/doctor', {
         hospitalOrigin: this.hospitalOrigin
       });
-      await axios.get('/session/admin').then(response => this.hospitalOrigin = response.data.hospitalOrigin)
+      await axios.get('/session/doctor').then(response => this.hospitalOrigin = response.data.hospitalOrigin)
     },
     modalClose() {
       this.modalActive = false

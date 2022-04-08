@@ -647,7 +647,7 @@ export default {
             this.isActiveGeolocation = false
             this.isActiveTickets = false
 
-            await axios.get("/api/admin").then(response => this.doctorAccounts = response.data)
+            await axios.get("/api/doctor").then(response => this.doctorAccounts = response.data)
         },
         async patient() {
             this.isActiveMenu = true
@@ -710,10 +710,10 @@ export default {
                 await axios.get('/api/manager').then(response => this.managerAccounts = response.data)
                 this.isActiveModal = !this.isActiveModal
             } else if (this.type == 'doctor') {
-                await axios.put(`/api/admin/${this.id}`, {
+                await axios.put(`/api/doctor/${this.id}`, {
                     gmail: this.email
                 });
-                await axios.get('/api/admin').then(response => this.doctorAccounts = response.data)
+                await axios.get('/api/doctor').then(response => this.doctorAccounts = response.data)
                 this.isActiveModal = !this.isActiveModal
             } else if (this.type == 'patient') {
                 await axios.put(`/api/user/${this.id}`, {
@@ -728,8 +728,8 @@ export default {
             await axios.get('/api/manager').then(response => this.managerAccounts = response.data)
         },
         async doctorDelete(id) {
-            await axios.delete(`/api/admin/${id}`)
-            await axios.get('/api/admin').then(response => this.doctorAccounts = response.data)
+            await axios.delete(`/api/doctor/${id}`)
+            await axios.get('/api/doctor').then(response => this.doctorAccounts = response.data)
         },
         async patientDelete(id) {
             await axios.delete(`/api/user/${id}`)

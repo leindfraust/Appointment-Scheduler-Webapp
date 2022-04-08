@@ -85,9 +85,11 @@ export default {
     },
     methods: {
         async login() {
-            if (this.username == null && this.password == null) {
+            if (this.username == null || this.password == null) {
                 this.incorrectUserPass = false;
                 this.validateMessage = "empty username or password";
+                this.username = null
+                this.password = null
             }
             else {
                 await axios
@@ -97,7 +99,7 @@ export default {
                     })
                     .then((response) => (this.userManager = response.data));
                 // if username and password matched to a user
-                if (await this.userManager !== false) {
+                if (await this.userManager) {
                     this.$store.commit("managerHospital", this.userManager.hospital);
                     await axios.post("/session/manager", {
                         _id: this.userManager._id,

@@ -101,7 +101,7 @@ export default {
         this.loading = true
         await axios.get('/session/manager').then(response => this.managerHospital = response.data)
         await axios.get('/api/manager').then(response => this.hospitalStatus = response.data.find(x => x._id == this.managerHospital._id))
-        await axios.get('/api/admin').then(response => this.doctorAccounts = response.data.filter(x => x.hospitalOrigin.find(x => x.hospital === this.managerHospital.hospital)))
+        await axios.get('/api/doctor').then(response => this.doctorAccounts = response.data.filter(x => x.hospitalOrigin.find(x => x.hospital === this.managerHospital.hospital)))
         this.loading = false
     },
     data() {
@@ -123,10 +123,10 @@ export default {
             this.isActiveModal = true
         },
         async updateData() {
-            await axios.put(`/api/admin/${this.id}`, {
+            await axios.put(`/api/doctor/${this.id}`, {
                 gmail: this.email
             });
-            await axios.get('/api/admin').then(response => this.doctorAccounts = response.data)
+            await axios.get('/api/doctor').then(response => this.doctorAccounts = response.data)
             this.isActiveModal = !this.isActiveModal
         },
         async doctorRemove() {

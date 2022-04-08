@@ -51,7 +51,7 @@ export default {
     return {
       username: null,
       password: null,
-      userAdmin: null,
+      userDoctor: null,
       incorrectUserPass: Boolean,
       validateMessage: "",
       specializations: null,
@@ -60,22 +60,23 @@ export default {
   },
   async mounted() {
     await axios
-      .get("/session/admin")
-      .then((response) => (this.userAdmin = response.data));
-    if (await this.userAdmin.alias) {
-      store.commit("alias", this.userAdmin.alias);
-      store.commit("userID", this.userAdmin._id);
-      store.commit("profileImg", cld.imageTag(`assets/doctors/${this.userAdmin.alias}.jpg`).toHtml());
-      await this.$router.push(`/admin/user/${this.userAdmin.alias}`);
+      .get("/session/doctor")
+      .then((response) => (this.userDoctor = response.data));
+    if (await this.userDoctor.alias) {
+      store.commit("alias", this.userDoctor.alias);
+      store.commit("userID", this.userDoctor._id);
+      store.commit("profileImg", cld.imageTag(`assets/doctors/${this.userDoctor.alias}.jpg`).toHtml());
+      await this.$router.push(`/doctor/user/${this.userDoctor.alias}`);
     }
   },
   methods: {
     async login() {
-      if (this.username == null && this.password == null) {
+      if (await this.username == null || this.password == null) {
         this.incorrectUserPass = false;
         this.validateMessage = "empty username or password";
-      }
-      else {
+        this.username = null
+        this.password = null
+      } else {
         await axios
           .post("/api/auth/doctor", {
             username: this.username,
@@ -83,26 +84,26 @@ export default {
           })
           .then(
             (response) =>
-              (this.userAdmin = response.data)
+              (this.userDoctor = response.data)
           );
         // if username and password matched to a user
-        if (await this.userAdmin !== false) {
-          store.commit("alias", this.userAdmin.alias);
-          store.commit("userID", this.userAdmin._id);
-          await axios.post("/session/admin", {
-            verified: this.userAdmin.verified,
-            _id: this.userAdmin._id,
-            licenseNo: this.userAdmin.licenseNo,
-            alias: this.userAdmin.alias,
-            fullname: this.userAdmin.name,
-            specialist: this.userAdmin.specialist,
-            gmail: this.userAdmin.gmail,
-            hospitalOrigin: this.userAdmin.hospitalOrigin,
-            schedule: this.userAdmin.schedule,
-            username: this.userAdmin.username
+        if (await this.userDoctor) {
+          store.commit("alias", this.userDoctor.alias);
+          store.commit("doctorID", this.userDoctor._id);
+          await axios.post("/session/doctor", {
+            verified: this.userDoctor.verified,
+            _id: this.userDoctor._id,
+            licenseNo: this.userDoctor.licenseNo,
+            alias: this.userDoctor.alias,
+            fullname: this.userDoctor.name,
+            specialist: this.userDoctor.specialist,
+            gmail: this.userDoctor.gmail,
+            hospitalOrigin: this.userDoctor.hospitalOrigin,
+            schedule: this.userDoctor.schedule,
+            username: this.userDoctor.username
           });
-          store.commit("profileImg", cld.imageTag(`assets/doctors/${this.userAdmin.alias}.jpg`).toHtml());
-          await this.$router.push(`/admin/user/${this.userAdmin.alias}`);
+          store.commit("profileImg", cld.imageTag(`assets/doctors/${this.userDoctor.alias}.jpg`).toHtml());
+          await this.$router.push(`/doctor/user/${this.userDoctor.alias}`);
         }
         else {
           this.validateMessage = "Incorrect username or password";
@@ -113,7 +114,7 @@ export default {
       }
     },
     async signup() {
-      await this.$router.push("/admin/signup");
+      await this.$router.push("/doctor/signup");
     },
   },
   components: { ForgotPassword }

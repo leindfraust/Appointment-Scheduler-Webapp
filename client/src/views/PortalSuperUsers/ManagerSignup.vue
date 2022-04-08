@@ -1,6 +1,7 @@
 <template>
     <section class="section" style="background-color: whitesmoke;">
         <div class="container box" style="width: 50%; margin: auto;">
+        <div class="notification is-danger" v-if="errMsg">Oops, something went wrong. Try again later or <router-link :to="'/contactus'">contact us</router-link></div>
             <div class="field">
                 <label class="label">Hospital Name</label>
                 <input class="input" type="text" placeholder="Hospital name" v-model="hospital" />
@@ -338,7 +339,8 @@ export default {
             citiesData: [],
             specializationsSelected: [],
             specializationList: this.$store.getters.getSpecializationList,
-            searchBar: ''
+            searchBar: '',
+            errMsg: ''
         }
     },
     methods: {
@@ -394,26 +396,30 @@ export default {
             } else if (await this.password !== this.confirmPassword) {
                 this.passwordNotMatch = true
             } else {
-                await axios.post('/api/manager', {
-                    pricing: this.pricing,
-                    status: 'Inactive',
-                    hospital: this.hospital,
-                    type: this.hospitalType,
-                    email: this.email,
-                    province: this.province,
-                    city: this.city,
-                    barangayORStreet: this.barangayORStreet,
-                    postalCode: this.postalCode,
-                    location: {
-                        type: 'Point',
-                        coordinates: [this.longtitude, this.latitude]
-                    },
-                    specializations: this.specializationsSelected,
-                    username: this.username,
-                    password: this.password
-                });
-                await this.$store.commit('accountCreated', true)
-                await this.$router.push('/user/manager/login')
+                try {
+                    await axios.post('/api/manager', {
+                        pricing: this.pricing,
+                        status: 'Inactive',
+                        hospital: this.hospital,
+                        type: this.hospitalType,
+                        email: this.email,
+                        province: this.province,
+                        city: this.city,
+                        barangayORStreet: this.barangayORStreet,
+                        postalCode: this.postalCode,
+                        location: {
+                            type: 'Point',
+                            coordinates: [this.longtitude, this.latitude]
+                        },
+                        specializations: this.specializationsSelected,
+                        username: this.username,
+                        password: this.password
+                    });
+                    await this.$store.commit('accountCreated', true)
+                    await this.$router.push('/user/manager/login')
+                } catch (err) {
+                    this.errMsg = err
+                }
             }
         }
     }

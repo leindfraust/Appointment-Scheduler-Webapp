@@ -147,8 +147,7 @@ export default {
     return {
       checkPatientRecord: null,
       patient: null,
-      doctorSched: store.state.doctorSched,
-      doctor: store.state.userID,
+      doctorSched: store.state.doctorDetails.schedule,
       firstName: null,
       lastName: null,
       birthDay: null,
@@ -158,7 +157,7 @@ export default {
       currentAddress: null,
       priorityNum: null,
       patientsAppointed: null,
-      doctorDetails: null,
+      doctorDetails: store.state.doctorDetails,
       basicDetailsDone: false,
       isActiveTabOne: true,
       isActiveTabTwo: false,
@@ -170,14 +169,6 @@ export default {
     };
   },
   async mounted() {
-    await axios
-      .get("/api/admin")
-      .then(
-        (response) =>
-        (this.doctorDetails = response.data.find(
-          (x) => x._id === this.doctor
-        ))
-      );
     await axios.get('/session/patient').then(response => this.patient = response.data)
     this.firstName = await this.patient.name[0]
     this.lastName = await this.patient.name[1]
@@ -197,7 +188,7 @@ export default {
             response.data.filter(
               (e) =>
                 e.schedule[0].date === this.schedule.date &&
-                e.doctorID == this.doctor
+                e.doctorID == this.doctorDetails._id
             ).length));
       //check how many appointed patients in regards to the appointment limit set by the doctor
       if (await this.patientsAppointed < this.schedule.appointmentLimit) {
@@ -210,19 +201,19 @@ export default {
               response.data.filter(
                 (e) =>
                   e.schedule[0].date === this.schedule.date &&
-                  e.doctorID == this.doctor
+                  e.doctorID == this.doctorDetails._id
               ).length + 1)
           );
         //if patient is new to the doctor, patient will be recorded as list of patients in doctor's profile
         if (typeof this.checkPatientRecord === 'undefined' || !this.checkPatientRecord) {
           await axios.post('/api/patientUpdate', {
-            doctorID: this.doctor,
+            doctorID: this.doctorDetails._id,
             patientID: this.patient._id,
             patientFullName: this.firstName + " " + this.lastName
           });
           await axios.post("/api/appointmentList", {
             hospital: this.hospital,
-            doctorID: this.doctor,
+            doctorID: this.doctorDetails._id,
             doctorName: this.doctorDetails.name,
             patientID: this.patient._id,
             firstName: this.firstName,
@@ -249,7 +240,7 @@ export default {
         } else {
           await axios.post("/api/appointmentList", {
             hospital: this.hospital,
-            doctorID: this.doctor,
+            doctorID: this.doctorDetails._id,
             doctorName: this.doctorDetails.name,
             patientID: this.patient._id,
             firstName: this.firstName,
@@ -311,7 +302,7 @@ export default {
             response.data.filter(
               (e) =>
                 e.schedule[0].date === this.schedule.date &&
-                e.doctorID == this.doctor
+                e.doctorID == this.doctorDetails._id
             ).length));
       //check how many appointed patients in regards to the appointment limit set by the doctor
       //if available

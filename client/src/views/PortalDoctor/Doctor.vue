@@ -2,7 +2,7 @@
   <div style="overflow-x: hidden; height: 100vh; background-color: whitesmoke;">
     <div class="columns">
       <div class="column is-2">
-        <AdminMenu />
+        <DoctorMenu />
       </div>
       <div class="column" style="background-color: whitesmoke;">
         <section class="section" style="background-color: whitesmoke;">
@@ -153,12 +153,12 @@
 import axios from "axios";
 import store from "../../store";
 import _ from 'lodash'
-import AdminMenu from "../../components/AdminMenu.vue";
+import DoctorMenu from "../../components/DoctorMenu.vue";
 
 export default {
-  name: "Admin",
+  name: "Doctor",
   components: {
-    AdminMenu
+    DoctorMenu
   },
   data() {
     return {

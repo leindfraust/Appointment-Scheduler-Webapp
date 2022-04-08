@@ -29,7 +29,7 @@
         </div>
         <p class="notification is-info">
           Are you one of our doctors? Click
-          <a href="/admin/login">here</a>
+          <a href="/doctor/login">here</a>
         </p>
         <ForgotPassword :userType="'patient'" />
       </div>
@@ -79,9 +79,11 @@ export default {
   },
   methods: {
     async login() {
-      if (this.username == null && this.password == null) {
+      if (this.username == null || this.password == null) {
         this.incorrectUserPass = false;
         this.validateMessage = "empty username or password";
+        this.username = null
+        this.password = null
       } else {
         await axios
           .post("/api/auth/patient", {
@@ -93,7 +95,7 @@ export default {
               (this.userPatient = response.data)
           );
         // if username and password matched to a user
-        if (await this.userPatient !== false) {
+        if (await this.userPatient) {
           socket.connect();
           store.commit("patientUsername", this.userPatient.username)
           store.commit("patientID", this.userPatient._id)

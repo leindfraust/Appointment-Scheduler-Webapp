@@ -79,23 +79,23 @@ export default {
     methods: {
         async logout() {
             store.commit("alias", null);
-            await axios.delete("/session/admin");
-            await this.$router.push("/admin/login");
+            await axios.delete("/session/doctor");
+            await this.$router.push("/doctor/login");
         },
         async routeHome() {
-            await this.$router.push(`/admin/user/${this.alias}`);
+            await this.$router.push(`/doctor/user/${this.alias}`);
         },
         async profile() {
-            await this.$router.push(`/admin/user/${this.alias}/profile`);
+            await this.$router.push(`/doctor/user/${this.alias}/profile`);
         },
         async patientLogs() {
-            await this.$router.push(`/admin/user/${this.alias}/patients`)
+            await this.$router.push(`/doctor/user/${this.alias}/patients`)
         },
         async openSecurity() {
-            await this.$router.push(`/admin/user/${this.alias}/security`)
+            await this.$router.push(`/doctor/user/${this.alias}/security`)
         },
         async openSchedule() {
-            await this.$router.push(`/admin/user/${this.alias}/schedule`);
+            await this.$router.push(`/doctor/user/${this.alias}/schedule`);
         },
         menuNav() {
             this.isActive = !this.isActive
