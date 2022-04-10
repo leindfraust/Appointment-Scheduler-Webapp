@@ -4,8 +4,14 @@ const {
     getManagers,
     pushManager,
     updateManager,
-    deleteManager
+    deleteManager,
+    verify_username,
+    check_username
 } = require('../../controllers/managerController')
+
+router.post('/check_username', check_username)
+
+router.post('/verify_username', verify_username)
 
 router.get('/', getManagers);
 

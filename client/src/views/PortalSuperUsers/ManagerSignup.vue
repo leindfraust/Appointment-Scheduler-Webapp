@@ -1,7 +1,10 @@
 <template>
     <section class="section" style="background-color: whitesmoke;">
         <div class="container box" style="width: 50%; margin: auto;">
-        <div class="notification is-danger" v-if="errMsg">Oops, something went wrong. Try again later or <router-link :to="'/contactus'">contact us</router-link></div>
+            <div class="notification is-danger" v-if="errMsg">
+                Oops, something went wrong. Try again later or
+                <router-link :to="'/contactus'">contact us</router-link>
+            </div>
             <div class="field">
                 <label class="label">Hospital Name</label>
                 <input class="input" type="text" placeholder="Hospital name" v-model="hospital" />
@@ -134,11 +137,28 @@
                     <div class="field">
                         <div class="control">
                             <label class="label">Username:</label>
+                            <div v-if="usernameFound !== ''">
+                                <p class="help is-danger" v-if="usernameFound">
+                                    Unavailable
+                                    <i
+                                        class="fas fa-spinner fa-spin"
+                                        v-if="loadingUsername"
+                                    ></i>
+                                </p>
+                                <p class="help is-success" v-else>
+                                    Available
+                                    <i
+                                        class="fas fa-spinner fa-spin"
+                                        v-if="loadingUsername"
+                                    ></i>
+                                </p>
+                            </div>
                             <input
                                 class="input"
                                 type="text"
                                 placeholder="Username"
                                 v-model="username"
+                                @keyup="usernameFinder($event)"
                             />
                         </div>
                         <div
@@ -331,10 +351,10 @@ export default {
             city: '',
             province: '',
             username: '',
-            checkUsername: '',
-            usernameAlreadyTaken: false,
             password: '',
             confirmPassword: '',
+            loadingUsername: false,
+            usernameFound: '',
             passwordNotMatch: false,
             citiesData: [],
             specializationsSelected: [],
@@ -344,6 +364,18 @@ export default {
         }
     },
     methods: {
+        async usernameFinder(e) {
+            this.loadingUsername = true
+            if (await e) {
+                await axios.post('/api/manager/check_username', {
+                    username: this.username
+                }).then(response => { this.usernameFound = response.data })
+                if (await this.username == '') {
+                    this.usernameFound = ''
+                }
+            }
+            this.loadingUsername = false
+        },
         async selectProvince(province) {
             this.city = ''
             this.province = province
@@ -384,18 +416,15 @@ export default {
             this.specializationsSelected = this.specializationsSelected.filter(x => x.specialist !== specialization)
         },
         async create() {
-            await axios.get('/api/manager').then(response => this.checkUsername = response.data)
-            this.usernameAlreadyTaken = false
             this.passwordNotMatch = false
 
-            if (await this.checkUsername.find(x => x.username == this.username)) {
-                this.usernameAlreadyTaken = true
-                if (await this.password !== this.confirmPassword) {
-                    this.passwordNotMatch = true
-                }
-            } else if (await this.password !== this.confirmPassword) {
+            if (await this.password !== this.confirmPassword) {
                 this.passwordNotMatch = true
             } else {
+                this.passwordNotMatch = false
+            }
+
+            if (await this.password === this.confirmPassword && !this.usernameFound) {
                 try {
                     await axios.post('/api/manager', {
                         pricing: this.pricing,

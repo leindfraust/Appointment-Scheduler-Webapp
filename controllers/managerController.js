@@ -11,6 +11,43 @@ const getManagers = (async (req, res) => {
     }
 });
 
+const check_username = (async (req, res) => {
+    let username = req.body.username
+    try {
+        const userAccount = await manager.findOne({
+            username: new RegExp(`^${username}$`, 'i')
+        });
+        if (userAccount) {
+            res.status(200).send(true)
+        } else {
+            res.status(200).send(false)
+        }
+    } catch (err) {
+        res.status(500).send(err)
+    }
+});
+
+const verify_username = (async (req, res) => {
+    let username = req.body.username
+    let email = req.body.email
+    try {
+        const userAccount = await manager.findOne({
+            username: username
+        });
+        if (userAccount) {
+            if (userAccount.email === email) {
+                res.status(200).send(true)
+            } else {
+                res.status(200).send(false)
+            }
+        } else {
+            res.status(200).send(false)
+        }
+    } catch (err) {
+        res.status(500).send(err)
+    }
+});
+
 const pushManager = (async (req, res) => {
     bcrypt.hash(req.body.password, 10, async (err, hash) => {
         if (err) {
@@ -60,6 +97,8 @@ const deleteManager = (async (req, res) => {
 });
 
 module.exports = {
+    verify_username,
+    check_username,
     getManagers,
     pushManager,
     updateManager,

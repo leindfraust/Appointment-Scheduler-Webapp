@@ -13,6 +13,59 @@ const getDoctors = (async (req, res) => {
     }
 });
 
+const check_alias = (async (req, res) => {
+    let alias = req.body.alias
+    try {
+        const userAccount = await Doctor.findOne({
+            alias: new RegExp(`^${alias}$`, 'i')
+        });
+        if (userAccount) {
+            res.status(200).send(true)
+        } else {
+            res.status(200).send(false)
+        }
+    } catch (err) {
+        res.status(500).send(err)
+    }
+});
+
+const check_username = (async (req, res) => {
+    let username = req.body.username
+    try {
+        const userAccount = await Doctor.findOne({
+            username: new RegExp(`^${username}$`, 'i')
+        });
+        if (userAccount) {
+            res.status(200).send(true)
+        } else {
+            res.status(200).send(false)
+        }
+    } catch (err) {
+        res.status(500).send(err)
+    }
+});
+
+const verify_username = (async (req, res) => {
+    let username = req.body.username
+    let email = req.body.email
+    try {
+        const userAccount = await Doctor.findOne({
+            username: username
+        });
+        if (userAccount) {
+            if (userAccount.gmail === email) {
+                res.status(200).send(true)
+            } else {
+                res.status(200).send(false)
+            }
+        } else {
+            res.status(200).send(false)
+        }
+    } catch (err) {
+        res.status(500).send(err)
+    }
+});
+
 const pushDoctor = (async (req, res) => {
     bcrypt.hash(req.body.password, 10, async (err, hash) => {
         if (err) {
@@ -118,6 +171,9 @@ const pushPatientDoctor = ((req, res) => {
 });
 
 module.exports = {
+    check_alias,
+    check_username,
+    verify_username,
     getDoctors,
     pushDoctor,
     updateDoctor,

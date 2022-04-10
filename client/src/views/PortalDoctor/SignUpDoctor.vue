@@ -5,7 +5,10 @@
       style="margin: auto; width: 50%"
     >
       <!-- I know it sucks, having a form action for only image upload while separating a post with axios for the document, but shit works so I guess it's okay.-->
-      <div class="notification is-danger" v-if="errMsg">Oops, something went wrong. Try again later or <router-link :to="'/contactus'">contact us</router-link></div>
+      <div class="notification is-danger" v-if="errMsg">
+        Oops, something went wrong. Try again later or
+        <router-link :to="'/contactus'">contact us</router-link>
+      </div>
       <form action="/api/imgUploadDoctor" method="post" enctype="multipart/form-data">
         <div class="field is-horizontal">
           <div class="field-body">
@@ -23,6 +26,16 @@
             </div>
             <div class="field">
               <label class="label">Alias</label>
+              <div v-if="aliasFound !== ''">
+                <p class="help is-danger" v-if="aliasFound">
+                  Unavailable
+                  <i class="fas fa-spinner fa-spin" v-if="loadingAlias"></i>
+                </p>
+                <p class="help is-success" v-else>
+                  Available
+                  <i class="fas fa-spinner fa-spin" v-if="loadingAlias"></i>
+                </p>
+              </div>
               <div class="control">
                 <input
                   class="input"
@@ -31,9 +44,9 @@
                   placeholder="alias"
                   name="alias"
                   required
+                  @keyup="aliasFinder($event)"
                 />
               </div>
-              <p class="subtitle has-text-danger">{{ aliasEvaluate }}</p>
             </div>
           </div>
         </div>
@@ -63,10 +76,26 @@
           <div class="field-body">
             <div class="field">
               <label class="label">Username</label>
-              <div class="control">
-                <input class="input" type="text" v-model="username" placeholder="username" required />
+              <div v-if="usernameFound !== ''">
+                <p class="help is-danger" v-if="usernameFound">
+                  Unavailable
+                  <i class="fas fa-spinner fa-spin" v-if="loadingUsername"></i>
+                </p>
+                <p class="help is-success" v-else>
+                  Available
+                  <i class="fas fa-spinner fa-spin" v-if="loadingUsername"></i>
+                </p>
               </div>
-              <p class="subtitle has-text-danger">{{ usernameEvaluate }}</p>
+              <div class="control">
+                <input
+                  class="input"
+                  type="text"
+                  v-model="username"
+                  @keyup="usernameFinder($event)"
+                  placeholder="username"
+                  required
+                />
+              </div>
             </div>
             <div class="field">
               <label class="label">Gmail</label>
@@ -190,45 +219,52 @@ export default {
   data() {
     return {
       passwordMatch: null,
-      aliasConfirm: null,
-      usernameConfirm: null,
-      aliasEvaluate: null,
-      usernameEvaluate: null,
-      evaluateData: null,
+      aliasFound: '',
+      usernameFound: '',
+      loadingUsername: false,
+      loadingAlias: false,
       specializationsSelected: [],
       specializationList: this.$store.getters.getSpecializationList,
       searchBarSpecialization: '',
       errMsg: ''
     };
   },
-  async mounted() {
-    await axios
-      .get("/api/doctor")
-      .then((response) => (this.evaluateData = response.data));
-    await axios.get("/api/manager").then(response => this.hospitals = response.data)
-  },
   methods: {
+    async usernameFinder(e) {
+      this.loadingUsername = true
+      if (await e) {
+        await axios.post('/api/doctor/check_username', {
+          username: this.username
+        }).then(response => { this.usernameFound = response.data })
+        if (await this.username == '') {
+          this.usernameFound = ''
+        }
+      }
+      this.loadingUsername = false
+    },
+    async aliasFinder(e) {
+      this.loadingAlias = true
+      if (await e) {
+        await axios.post('/api/doctor/check_alias', {
+          alias: this.alias
+        }).then(response => { this.aliasFound = response.data })
+        if (await this.alias == '') {
+          this.aliasFound = ''
+        }
+      }
+      this.loadingAlias = false
+    },
     async create(e) {
-      this.aliasConfirm = this.evaluateData.find((x) => x.alias === this.alias);
-      this.usernameConfirm = this.evaluateData.find(
-        (x) => x.username === this.username
-      );
       //password, alias and username checks
       if ((await this.password) !== this.passwordRepeat) {
         this.passwordMatch = "password do not match";
         if (await this.alias) {
-          if (typeof this.aliasConfirm == "undefined") {
-            this.aliasEvaluate = null;
-          } else if ((await this.aliasConfirm.alias) === this.alias) {
-            this.aliasEvaluate = "alias already taken";
+          if (this.aliasFound == '' || this.aliasFound) {
             await e.preventDefault();
           }
         }
         if (await this.username) {
-          if (typeof this.usernameConfirm == "undefined") {
-            this.usernameEvaluate = null;
-          } else if ((await this.usernameConfirm.username) === this.username) {
-            this.usernameEvaluate = "username already taken";
+          if (this.usernameFound == '' || this.usernameFound) {
             await e.preventDefault();
           }
         }
@@ -237,18 +273,12 @@ export default {
         this.passwordMatch = null;
 
         if (await this.alias) {
-          if (typeof this.aliasConfirm == "undefined") {
-            this.aliasEvaluate = null;
-          } else if ((await this.aliasConfirm.alias) === this.alias) {
-            this.aliasEvaluate = "alias already taken";
+          if (this.aliasFound == '' || this.aliasFound) {
             await e.preventDefault();
           }
         }
         if (await this.username) {
-          if (typeof this.usernameConfirm == "undefined") {
-            this.usernameEvaluate = null;
-          } else if ((await this.usernameConfirm.username) === this.username) {
-            this.usernameEvaluate = "username already taken";
+          if (this.usernameFound == '' || this.usernameFound) {
             await e.preventDefault();
           }
         }
@@ -256,8 +286,8 @@ export default {
       //if no errors, proceed to POST
       if (await
         this.password === this.passwordRepeat &&
-        this.aliasEvaluate == null &&
-        this.usernameEvaluate == null
+        !this.aliasFound &&
+        !this.usernameFound
       ) {
         try {
           await axios.post("/api/doctor", {

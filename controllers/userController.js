@@ -2,12 +2,12 @@ const bcrypt = require('bcrypt');
 const user = require('../models/user');
 
 const check_username = (async (req, res) => {
-    let username_client = req.body.username
+    let username = req.body.username
     try {
-        const username_found = await user.findOne({
-            username: username_client
-        }).exec();
-        if (username_found) {
+        const userAccount = await user.findOne({
+            username: new RegExp(`^${username}$`, 'i')
+        });
+        if (userAccount) {
             res.status(200).send(true)
         } else {
             res.status(200).send(false)
@@ -15,7 +15,28 @@ const check_username = (async (req, res) => {
     } catch (err) {
         res.status(500).send(err)
     }
-})
+});
+
+const verify_username = (async (req, res) => {
+    let username = req.body.username
+    let email = req.body.email
+    try {
+        const userAccount = await user.findOne({
+            username: username
+        });
+        if (userAccount) {
+            if(userAccount.gmail === email){
+                res.status(200).send(true)
+            } else {
+                res.status(200).send(false)
+            }
+        } else {
+            res.status(200).send(false)
+        }
+    } catch (err) {
+        res.status(500).send(err)
+    }
+});
 
 const getUsers = (async (req, res) => {
     try {
@@ -87,6 +108,7 @@ const deleteUser = (async (req, res) => {
 
 module.exports = {
     check_username,
+    verify_username,
     getUsers,
     pushUser,
     updateUser,

@@ -117,8 +117,9 @@
         <p class="control">
           <label class="label">Username:</label>
         <div v-if="usernameFound !== ''">
-          <p class="help is-danger" v-if="usernameFound">Unavailable</p>
-          <p class="help is-success" v-else>Available</p>
+          <p class="help is-danger" v-if="usernameFound">Unavailable<i class="fas fa-spinner fa-spin"
+              v-if="loadingUsername"></i></p>
+          <p class="help is-success" v-else>Available<i class="fas fa-spinner fa-spin" v-if="loadingUsername"></i></p>
         </div>
         <input class="input" type="text" placeholder="username" v-model="username" @keyup="usernameFinder($event)"
           required />
@@ -187,19 +188,17 @@ export default {
       citiesData: [],
       termsAndConditionsAgreed: false,
       errMsg: '',
-      usernameFound: ''
+      usernameFound: '',
+      loadingUsername: false
     }
   },
   async mounted() {
-    await axios
-      .get("/api/user")
-      .then((response) => (this.evaluateData = response.data));
     await axios.get('/api/geolocation').then(response => this.geolocationData = response.data)
   },
   methods: {
     async usernameFinder(e) {
+      this.loadingUsername = true
       if (await e) {
-        console.log(await e)
         await axios.post('/api/user/check_username', {
           username: this.username
         }).then(response => { this.usernameFound = response.data })
@@ -207,6 +206,7 @@ export default {
           this.usernameFound = ''
         }
       }
+      this.loadingUsername = false
     },
     agreeTermsAndConditions() {
       this.termsAndConditionsAgreed = true
@@ -237,22 +237,9 @@ export default {
     async signup(e) {
       if ((await this.password) !== this.passwordRepeat) {
         this.passwordMatch = "password do not match";
-        if (await this.username) {
-          if (this.usernameFound == '' || this.usernameFound) {
-            await e.preventDefault();
-          }
-        }
-        await e.preventDefault();
       } else {
         this.passwordMatch = null;
-
-        if (await this.username) {
-          if (this.usernameFound == '' || this.usernameFound) {
-            await e.preventDefault();
-          }
-        }
       }
-
       if (await
         this.password === this.passwordRepeat &&
         !this.usernameFound

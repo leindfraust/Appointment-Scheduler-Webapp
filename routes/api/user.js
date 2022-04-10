@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     check_username,
+    verify_username,
     getUsers,
     pushUser,
     updateUser,
@@ -9,6 +10,8 @@ const {
 } = require('../../controllers/userController')
 
 router.post('/check_username', check_username);
+
+router.post('/verify_username', verify_username)
 
 router.get('/', getUsers);
 

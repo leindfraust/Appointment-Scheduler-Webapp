@@ -4,8 +4,17 @@ const {
     getDoctors,
     pushDoctor,
     updateDoctor,
-    deleteDoctor
+    deleteDoctor,
+    verify_username,
+    check_username,
+    check_alias
 } = require('../../controllers/doctorController');
+
+router.post('/check_alias', check_alias)
+
+router.post('/check_username', check_username)
+
+router.post('/verify_username', verify_username)
 
 router.get('/', getDoctors);
 

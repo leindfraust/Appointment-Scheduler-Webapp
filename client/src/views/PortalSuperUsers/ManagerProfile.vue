@@ -8,7 +8,7 @@
             <ManagerMenuVue />
         </div>
         <div class="column">
-            <section class="section is-medium">
+            <section class="section">
                 <h1 class="title">PROFILE</h1>
                 <div
                     class="notification is-light is-info"
