@@ -14,7 +14,7 @@ const getDoctors = (async (req, res) => {
 });
 
 const check_alias = (async (req, res) => {
-    let alias = req.body.alias
+    let alias = req.body.alias.trim()
     try {
         const userAccount = await Doctor.findOne({
             alias: new RegExp(`^${alias}$`, 'i')
@@ -30,7 +30,7 @@ const check_alias = (async (req, res) => {
 });
 
 const check_username = (async (req, res) => {
-    let username = req.body.username
+    let username = req.body.username.trim()
     try {
         const userAccount = await Doctor.findOne({
             username: new RegExp(`^${username}$`, 'i')
@@ -46,7 +46,7 @@ const check_username = (async (req, res) => {
 });
 
 const verify_username = (async (req, res) => {
-    let username = req.body.username
+    let username = req.body.username.trim()
     let email = req.body.email
     try {
         const userAccount = await Doctor.findOne({

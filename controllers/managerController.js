@@ -12,7 +12,7 @@ const getManagers = (async (req, res) => {
 });
 
 const check_username = (async (req, res) => {
-    let username = req.body.username
+    let username = req.body.username.trim()
     try {
         const userAccount = await manager.findOne({
             username: new RegExp(`^${username}$`, 'i')
@@ -28,7 +28,7 @@ const check_username = (async (req, res) => {
 });
 
 const verify_username = (async (req, res) => {
-    let username = req.body.username
+    let username = req.body.username.trim()
     let email = req.body.email
     try {
         const userAccount = await manager.findOne({
