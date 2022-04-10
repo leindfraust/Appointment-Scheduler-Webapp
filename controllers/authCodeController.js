@@ -2,9 +2,31 @@ const authenticationCode = require('../models/authenticationCodes');
 
 const getCode = (async (req, res) => {
     try {
-        const authenticationCodeList = await authenticationCode.find()
-        if (!authenticationCodeList) throw new Error('no items')
-        res.status(200).send(authenticationCodeList)
+        const authCode = await authenticationCode.findOne({
+            email: req.body.email
+        });
+        if (!authCode) {
+            res.status(200).send(false)
+        } else {
+            res.status(200).send(true)
+        }
+    } catch (error) {
+        res.status(500).send({
+            message: error.message
+        })
+    }
+});
+
+const verifyCode = (async (req, res) => {
+    try {
+        const authCode = await authenticationCode.findOne({
+            code: req.body.code
+        });
+        if (!authCode) {
+            res.status(200).send(false)
+        } else {
+            res.status(200).send(true)
+        }
     } catch (error) {
         res.status(500).send({
             message: error.message
@@ -15,9 +37,9 @@ const getCode = (async (req, res) => {
 const pushCode = (async (req, res) => {
     const newAuthenticationCode = new authenticationCode(req.body)
     try {
-        const authenticationCodeList = await newAuthenticationCode.save()
-        if (!authenticationCodeList) throw new Error('Cannot save')
-        res.status(200).send(authenticationCodeList)
+        const authCode = await newAuthenticationCode.save()
+        if (!authCode) throw new Error('Cannot save')
+        res.status(200).send(authCode)
     } catch (err) {
         res.status(500).send({
             message: err.message
@@ -61,6 +83,7 @@ const deleteCode = (async (req, res) => {
 
 module.exports = {
     getCode,
+    verifyCode,
     pushCode,
     updateCode,
     deleteCode

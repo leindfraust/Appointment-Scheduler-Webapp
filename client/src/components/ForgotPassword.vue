@@ -21,17 +21,20 @@ const props = defineProps({
 });
 
 async function forgotPasswordOTP() {
-    let codes
     let confirmEmail
     let randomCode = Math.floor(1000 + Math.random() * 9000);
-    await axios.get('/api/code').then(response => codes = response.data)
-    confirmEmail = codes.find(x => x.email === props.email)
-    if (await confirmEmail) {
+    await axios.post('/api/code', {
+        email: props.email
+    }).then(response => confirmEmail = response.data)
+    if (confirmEmail) {
         emailExists.value = true
     } else {
         if (props.userType == 'patient') {
-            await axios.get('/api/user').then(response => userData.value = response.data.find(x => x.username === props.username))
-            if (userData.value.gmail === props.email) {
+            await axios.post('/api/user/verify_username', {
+                username: props.username,
+                email: props.email
+            }).then(response => userData.value = response.data)
+            if (userData.value) {
                 noUserFound.value = false
                 try {
                     await axios.post('/api/code', {
@@ -50,8 +53,11 @@ async function forgotPasswordOTP() {
                 noUserFound.value = true
             }
         } else if (props.userType == 'doctor') {
-            await axios.get('/api/admin').then(response => userData.value = response.data.find(x => x.username === props.username))
-            if (userData.value.verified === true && userData.value.gmail === props.email) {
+            await axios.post('/api/doctor/verify_username', {
+                username: props.username,
+                email: props.email
+            }).then(response => userData.value = response.data)
+            if (userData.value) {
                 noUserFound.value = false
                 try {
                     await axios.post('/api/code', {
@@ -70,8 +76,11 @@ async function forgotPasswordOTP() {
                 noUserFound.value = true
             }
         } else if (props.userType == 'manager') {
-            await axios.get('/api/manager').then(response => userData.value = response.data.find(x => x.username === props.username))
-            if (userData.value.status === 'Active' && userData.value.email === props.email) {
+            await axios.post('/api/manager/verify_username', {
+                username: props.username,
+                email: props.email
+            }).then(response => userData.value = response.data)
+            if (userData.value) {
                 noUserFound.value = false
                 try {
                     await axios.post('/api/code', {
@@ -93,11 +102,11 @@ async function forgotPasswordOTP() {
     }
 }
 async function verifyCode() {
-    let codes
     let confirmCode
-    await axios.get('/api/code').then(response => codes = response.data)
-    confirmCode = codes.find(x => x.code === code.value)
-    if (await confirmCode) {
+    await axios.post('/api/code/verify', {
+        code: code.value
+    }).then(response => confirmCode = response.data)
+    if (confirmCode) {
         codeVerified.value = true
     }
 }
