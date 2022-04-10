@@ -7,7 +7,7 @@ const check_username = (async (req, res) => {
         const userAccount = await user.findOne({
             username: new RegExp(`^${username}$`, 'i')
         });
-        if (userAccount) {
+        if (await userAccount) {
             res.status(200).send(true)
         } else {
             res.status(200).send(false)
@@ -24,8 +24,8 @@ const verify_username = (async (req, res) => {
         const userAccount = await user.findOne({
             username: username
         });
-        if (userAccount) {
-            if(userAccount.gmail === email){
+        if (await userAccount) {
+            if(await userAccount.gmail === email){
                 res.status(200).send(true)
             } else {
                 res.status(200).send(false)

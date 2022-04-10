@@ -19,7 +19,7 @@ const check_alias = (async (req, res) => {
         const userAccount = await Doctor.findOne({
             alias: new RegExp(`^${alias}$`, 'i')
         });
-        if (userAccount) {
+        if (await userAccount) {
             res.status(200).send(true)
         } else {
             res.status(200).send(false)
@@ -35,7 +35,7 @@ const check_username = (async (req, res) => {
         const userAccount = await Doctor.findOne({
             username: new RegExp(`^${username}$`, 'i')
         });
-        if (userAccount) {
+        if (await userAccount) {
             res.status(200).send(true)
         } else {
             res.status(200).send(false)
@@ -52,7 +52,7 @@ const verify_username = (async (req, res) => {
         const userAccount = await Doctor.findOne({
             username: username
         });
-        if (userAccount) {
+        if (await userAccount) {
             if (userAccount.gmail === email) {
                 res.status(200).send(true)
             } else {
