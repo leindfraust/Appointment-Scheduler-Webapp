@@ -7,7 +7,7 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
-    "@popperjs/core": "^2.11.4",
+    "@popperjs/core": "^2.11.5",
     "animate.css": "^4.1.1",
     "axios": "^0.26.1",
     "bulma": "^0.9.3",
