@@ -21,8 +21,24 @@ const io = require("socket.io")(server, {
     }
 });
 
+//cors option
+let allowlist = ['https://desolate-lowlands-18826.herokuapp.com', 'http://localhost:8080']
+let corsOptionsDelegate = function (req, callback) {
+    let corsOptions;
+    if (allowlist.indexOf(req.header('Origin')) !== -1) {
+        corsOptions = {
+            origin: true
+        } // reflect (enable) the requested origin in the CORS response
+    } else {
+        corsOptions = {
+            origin: false
+        } // disable CORS for this request
+    }
+    callback(null, corsOptions) // callback expects two parameters: error and options
+}
+
 //express usages
-app.use(cors());
+app.use(cors(corsOptionsDelegate));
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(history())
@@ -32,12 +48,15 @@ app.use(express.static(path.join(__dirname, 'client/dist')))
 app.use(session({
     secret: 'leindfraust',
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
         maxAge: 24 * 60 * 60 * 1000
     },
     store: MongoStore.create({
         mongoUrl: encodeURI(mongoUri),
+        crypto: {
+            secret: 'leindfraust'
+        },
     })
 }));
 const sessDoctor = require('./sessions/doctor')
@@ -92,7 +111,7 @@ app.use('/api/updatePassword', updatePassword)
 app.use('/api/fupdatePassword', fupdatePassword)
 
 //connect to mongoDB
-const dbConnect = async() => {
+const dbConnect = async () => {
     await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
