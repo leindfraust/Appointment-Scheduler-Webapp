@@ -144,7 +144,7 @@
                     </div>
                 </div>
             </div>
-            <div class="container box notification is-danger has-text-centered" v-else>
+            <div class="container box notification is-danger has-text-centered" v-else-if="!isHospitalLoading">
                 <h1 class="title" style="margin-top: 12.5%">Hospitals unavailable. Coming soon...</h1>
             </div>
         </div>
