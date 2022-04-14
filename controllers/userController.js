@@ -40,7 +40,7 @@ const verify_username = (async (req, res) => {
 
 const getUsers = (async (req, res) => {
     try {
-        const userList = await user.find()
+        const userList = await user.find().select('-password -username')
         if (!userList) throw new Error('no items')
         res.status(200).send(userList)
     } catch (error) {
@@ -61,7 +61,7 @@ const pushUser = (async (req, res) => {
             try {
                 const userList = await newuser.save()
                 if (!userList) throw new Error('Cannot save')
-                res.status(200).send(userList)
+                res.status(200).end()
             } catch (err) {
                 res.status(500).send({
                     message: err.message
@@ -78,11 +78,7 @@ const updateUser = (async (req, res) => {
     try {
         const response = await user.findByIdAndUpdate(id, req.body)
         if (!response) throw new Error('cannot update')
-        const updated = {
-            ...response._doc,
-            ...req.body
-        }
-        res.status(200).send(updated)
+        res.status(200).end()
     } catch (err) {
         res.status(500).send({
             message: err.message

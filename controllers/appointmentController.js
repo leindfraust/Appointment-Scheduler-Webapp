@@ -15,7 +15,7 @@ const pushAppointment = (async (req, res) => {
     try {
         const appointmentList = await newAppointment.save()
         if (!appointmentList) throw new Error('Cannot save')
-        res.status(200).send(appointmentList)
+        res.status(200).end()
     } catch (err) {
         res.status(500).send(err)
     }
@@ -28,11 +28,7 @@ const updateAppointment = (async (req, res) => {
     try {
         const response = await AppointmentList.findByIdAndUpdate(id, req.body)
         if (!response) throw new Error('cannot update')
-        const updated = {
-            ...response._doc,
-            ...req.body
-        }
-        res.status(200).send(updated)
+        res.status(200).end()
     } catch (err) {
         res.status(500).send(err)
     }
@@ -45,7 +41,7 @@ const deleteAppointment = (async (req, res) => {
     try {
         const removed = await AppointmentList.findByIdAndDelete(id)
         if (!removed) throw new Error('something went wrong, try again later')
-        res.status(200).send(removed)
+        res.status(200).end()
     } catch (err) {
         res.status(500).send(err)
     }

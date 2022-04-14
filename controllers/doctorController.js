@@ -1,9 +1,16 @@
 const bcrypt = require('bcrypt')
 const Doctor = require('../models/doctor');
+const cloudinary = require('cloudinary')
+
+cloudinary.config({
+    cloud_name: process.env.cloudinary_cloud_name,
+    api_key: process.env.cloudinary_api_key,
+    api_secret: process.env.cloudinary_api_secret
+});
 
 const getDoctors = (async (req, res) => {
     try {
-        const doctorList = await Doctor.find().select('-password -username -licenseNo -__v -_id')
+        const doctorList = await Doctor.find().select('-password -username -licenseNo')
         if (!doctorList) throw new Error('no items')
         res.status(200).send(doctorList)
     } catch (error) {
@@ -76,7 +83,7 @@ const pushDoctor = (async (req, res) => {
             try {
                 const doctorList = await newDoctor.save()
                 if (!doctorList) throw new Error('Cannot save')
-                res.status(200)
+                res.status(200).end()
             } catch (err) {
                 res.status(500).send({
                     message: err.message
@@ -109,7 +116,14 @@ const deleteDoctor = (async (req, res) => {
         const removed = await Doctor.findByIdAndDelete(id)
 
         if (!removed) throw new Error('something went wrong, try again later')
-        res.status(200)
+        if (removed) {
+            cloudinary.v2.uploader.destroy(`assets/doctors/${removed.alias}`, {
+                invalidate: true
+            }, ((err, result) => {
+                err ? console.log(err) : console.log(result)
+            }));
+        }
+        res.status(200).end()
     } catch (err) {
         res.status(500).send({
             message: err.message

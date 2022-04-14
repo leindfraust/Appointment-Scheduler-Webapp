@@ -4,9 +4,9 @@ const getSuperusers = (async (req, res) => {
     try {
         const SuperuserList = await Superuser.find()
         if (!SuperuserList) throw new Error('no items')
-        res.status(200).json(SuperuserList)
+        res.status(200).send(SuperuserList)
     } catch (error) {
-        res.status(500).json({
+        res.status(500).send({
             message: error.message
         })
     }
@@ -16,10 +16,9 @@ const pushSuperuser = (async (req, res) => {
     const newSuperuser = new Superuser(req.body)
     try {
         const SuperuserList = await newSuperuser.save()
-        if (!SuperuserList) throw new Error('Cannot save')
-        res.status(200).json(SuperuserList)
+        res.status(200).end()
     } catch (err) {
-        res.status(500).json({
+        res.status(500).send({
             message: err.message
         })
     }
@@ -32,13 +31,9 @@ const updateSuperuser = (async (req, res) => {
     try {
         const response = await Superuser.findByIdAndUpdate(id, req.body)
         if (!response) throw new Error('cannot update')
-        const updated = {
-            ...response._doc,
-            ...req.body
-        }
-        res.status(200).json(updated)
+        res.status(200).end()
     } catch (err) {
-        res.status(500).json({
+        res.status(500).send({
             message: err.message
         })
     }
@@ -51,9 +46,9 @@ const deleteSuperuser = (async (req, res) => {
     try {
         const removed = await Superuser.findByIdAndDelete(id)
         if (!removed) throw new Error('something went wrong, try again later')
-        res.status(200).json(removed)
+        res.status(200).end()
     } catch (err) {
-        res.status(500).json({
+        res.status(500).send({
             message: err.message
         })
     }
