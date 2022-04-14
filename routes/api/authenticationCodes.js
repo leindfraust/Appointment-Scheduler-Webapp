@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const {
-    getCode,
+    verifySuperUser,
     verifyCode,
     pushCode,
     updateCode,
     deleteCode
 } = require('../../controllers/authCodeController')
 
-router.post('/', getCode);
+router.post('/superuser', verifySuperUser);
 
 router.post('/', pushCode);
 

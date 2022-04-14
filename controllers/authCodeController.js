@@ -1,11 +1,12 @@
 const authenticationCode = require('../models/authenticationCodes');
+const superuser = require('../models/superuser')
 
-const getCode = (async (req, res) => {
+const verifySuperUser = (async (req, res) => {
     try {
-        const authCode = await authenticationCode.findOne({
-            email: req.body.email
+        const authSuperuser = await superuser.findOne({
+            gmail: req.body.email
         });
-        if (!authCode) {
+        if (!authSuperuser) {
             res.status(200).send(false)
         } else {
             res.status(200).send(true)
@@ -82,7 +83,7 @@ const deleteCode = (async (req, res) => {
 });
 
 module.exports = {
-    getCode,
+    verifySuperUser,
     verifyCode,
     pushCode,
     updateCode,
