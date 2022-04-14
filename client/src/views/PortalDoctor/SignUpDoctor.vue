@@ -125,7 +125,7 @@
           </div>
         </div>
         <div class="has-text-right">
-          <button type="submit" class="button is-primary" @click="create($event)"
+          <button type="submit" value="submit" class="button is-primary" @click="create($event)"
             :disabled="specializationsSelected == ''">Create account</button>
         </div>
       </form>
@@ -210,27 +210,27 @@ export default {
       //password, alias and username checks
       if ((await this.password) !== this.passwordRepeat) {
         this.passwordMatch = "password do not match";
+        await e.preventDefault();
         if (await this.alias) {
-          if (this.aliasFound == '' || this.aliasFound) {
+          if (this.aliasFound == null || this.aliasFound) {
             await e.preventDefault();
           }
         }
         if (await this.username) {
-          if (this.usernameFound == '' || this.usernameFound) {
+          if (this.usernameFound == null || this.usernameFound) {
             await e.preventDefault();
           }
         }
-        await e.preventDefault();
       } else {
         this.passwordMatch = null;
 
         if (await this.alias) {
-          if (this.aliasFound == '' || this.aliasFound) {
+          if (this.aliasFound == null || this.aliasFound) {
             await e.preventDefault();
           }
         }
         if (await this.username) {
-          if (this.usernameFound == '' || this.usernameFound) {
+          if (this.usernameFound == null || this.usernameFound) {
             await e.preventDefault();
           }
         }
@@ -240,21 +240,16 @@ export default {
         !this.aliasFound &&
         !this.usernameFound
       ) {
-        try {
-          await axios.post("/api/doctor", {
-            alias: this.alias,
-            licenseNo: this.licenseCode,
-            name: this.name,
-            gmail: this.gmail,
-            specialist: this.specializationsSelected,
-            username: this.username,
-            password: this.password,
-          });
-
-          await this.$store.commit("imgSuccess", true)
-        } catch (err) {
-          this.errMsg = err
-        }
+        await axios.post("/api/doctor", {
+          alias: this.alias,
+          licenseNo: this.licenseCode,
+          name: this.name,
+          gmail: this.gmail,
+          specialist: this.specializationsSelected,
+          username: this.username,
+          password: this.password,
+        }).catch(err => this.errMsg = err);
+        await this.$store.commit("imgSuccess", true)
       }
     },
     selectSpecialization(specialization) {
