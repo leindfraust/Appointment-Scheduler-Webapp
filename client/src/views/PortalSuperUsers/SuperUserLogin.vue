@@ -4,21 +4,14 @@
         <div class="field">
             <label class="label">Email</label>
             <div class="control">
-                <input
-                    class="input is-rounded"
-                    v-model="superUserEmail"
-                    type="text"
-                    placeholder="email"
-                />
+                <input class="input is-rounded" v-model="superUserEmail" type="text" placeholder="email" />
             </div>
             <br />
             <div class="has-text-centered">
                 <button class="button is-success" @click="authenticateMail">Authenticate</button>
             </div>
-            <p
-                v-if="statusMessage == 'invalid developer'"
-                class="subtitle has-text-danger"
-            >Sorry, email not identified as superuser/developer. Please try again.</p>
+            <p v-if="statusMessage == 'invalid developer'" class="subtitle has-text-danger">Sorry, email not identified
+                as superuser/developer. Please try again.</p>
         </div>
 
         <div class="modal" :class="{ 'is-active': modalActive }">
@@ -33,10 +26,8 @@
                     <div class="has-text-centered">
                         <button class="button is-primary" @click="authenticateCode">Confirm</button>
                     </div>
-                    <p
-                        v-if="statusMessage == 'invalid code'"
-                        class="subtitle has-text-danger"
-                    >Invalid login code, please check your email thoroughly.</p>
+                    <p v-if="statusMessage == 'invalid code'" class="subtitle has-text-danger">Invalid login code,
+                        please check your email thoroughly.</p>
                 </div>
             </div>
             <button class="modal-close is-large" aria-label="close" @click="modalClose"></button>
@@ -49,7 +40,6 @@ import axios from 'axios'
 export default {
     name: "SuperUserLogin",
     async mounted() {
-        await axios.get('/api/superuser').then(response => this.gmails = response.data)
         await axios.get('/session/superuser').then(response => this.superUserConfirmEmail = response.data)
 
         if (this.superUserConfirmEmail.superuser) {
@@ -72,21 +62,12 @@ export default {
     },
     methods: {
         async authenticateMail() {
-            await axios.get('/api/code').then(response => this.codes = response.data)
-            this.superUserConfirmEmail = await this.gmails[0].gmail.find(x => x === this.superUserEmail)
+            await axios.post('/api/code/superuser', {
+                email: this.superUserEmail
+            }).then(response => this.superUserConfirmEmail = response.data)
             if (await this.superUserConfirmEmail) {
                 let randomCode = Math.floor(1000 + Math.random() * 9000);
                 if (this.codes.length === 0) {
-                    this.modalActive = true
-                    await axios.post("/api/code", {
-                        email: this.superUserEmail,
-                        code: randomCode
-                    });
-                    await axios.post('/api/sendMail', {
-                        email: this.superUserEmail,
-                        code: randomCode
-                    });
-                } else if (randomCode != this.codes.find(x => x.code === randomCode)) {
                     this.modalActive = true
                     await axios.post("/api/code", {
                         email: this.superUserEmail,
@@ -106,13 +87,13 @@ export default {
             }
         },
         async authenticateCode() {
-            await axios.get('/api/code').then(response => this.codes = response.data)
-            this.superUserConfirmCode = await this.codes.find(x => x.code == this.superUserCode && x.email == this.superUserEmail)
+            await axios.post('/api/code/verify', {
+                code: this.superUserCode
+            }).then(response => this.superUserConfirmCode = response.data)
             if (await this.superUserConfirmCode) {
                 await axios.post('/session/superuser', {
                     superuser: this.superUserEmail
                 });
-                await axios.delete(`/api/code/${this.superUserConfirmCode._id}`);
                 await this.$store.commit('superUserAuth', true)
                 await this.$router.push('/user/superuser')
             } else {
