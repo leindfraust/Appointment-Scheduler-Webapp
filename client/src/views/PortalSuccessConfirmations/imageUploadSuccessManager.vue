@@ -7,7 +7,7 @@
     <h1 class="subtitle has-text-centered">Redirecting browser in 15 seconds.</h1>
     <h1 class="subtitle has-text-centered">
       If the browser does not reload automatically, please click
-      <a href="/admin/login">here</a>
+      <a href="/user/manager/login">here</a>
     </h1>
   </div>
 </template>
