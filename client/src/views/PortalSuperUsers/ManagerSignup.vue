@@ -10,12 +10,7 @@
                 <input class="input" type="text" placeholder="Hospital name" v-model="hospital" />
 
                 <label class="label">E-mail</label>
-                <input
-                    class="input"
-                    type="email"
-                    placeholder="Official hospital email"
-                    v-model="email"
-                />
+                <input class="input" type="email" placeholder="Official hospital email" v-model="email" />
             </div>
             <div class="field is-horizontal">
                 <div class="field-body">
@@ -23,25 +18,16 @@
                         <label class="label">Province</label>
                         <div class="dropdown" :class="{ 'is-active': isActiveDropdownProvince }">
                             <div class="dropdown-trigger">
-                                <button
-                                    class="button"
-                                    aria-haspopup="true"
-                                    @click="provinceDropdown"
-                                >
+                                <button class="button" aria-haspopup="true" @click="provinceDropdown">
                                     <span v-if="province == ''">Select</span>
                                     <span v-else>{{ province }}</span>
                                 </button>
                             </div>
                             <div class="dropdown-menu">
-                                <div
-                                    class="dropdown-content"
-                                    v-for="provinces in geolocationData"
-                                    :key="provinces._id"
-                                >
-                                    <a
-                                        class="dropdown-item"
-                                        @click="selectProvince(provinces.province)"
-                                    >{{ provinces.province }}</a>
+                                <div class="dropdown-content" v-for="provinces in geolocationData" :key="provinces._id">
+                                    <a class="dropdown-item" @click="selectProvince(provinces.province)">{{
+                                        provinces.province
+                                    }}</a>
                                 </div>
                             </div>
                         </div>
@@ -50,27 +36,16 @@
                         <label class="label">City/Municipality</label>
                         <div class="dropdown" :class="{ 'is-active': isActiveDropdownCity }">
                             <div class="dropdown-trigger">
-                                <button
-                                    class="button"
-                                    aria-haspopup="true"
-                                    @click="cityDropdown"
-                                    :disabled="province == ''"
-                                >
+                                <button class="button" aria-haspopup="true" @click="cityDropdown"
+                                    :disabled="province == ''">
                                     <span v-if="city == ''">Select</span>
                                     <span v-else>{{ city }}</span>
                                 </button>
                             </div>
                             <div class="dropdown-menu">
-                                <div
-                                    class="dropdown-content"
-                                    v-if="province"
-                                    v-for="cities in citiesData"
-                                    :key="cities.name"
-                                >
-                                    <a
-                                        class="dropdown-item"
-                                        @click="selectCity(cities.name)"
-                                    >{{ cities.name }}</a>
+                                <div class="dropdown-content" v-if="province" v-for="cities in citiesData"
+                                    :key="cities.name">
+                                    <a class="dropdown-item" @click="selectCity(cities.name)">{{ cities.name }}</a>
                                 </div>
                             </div>
                         </div>
@@ -98,12 +73,8 @@
             <div class="field">
                 <div class="control">
                     <label class="label">Barangay or Street</label>
-                    <input
-                        class="input"
-                        type="text"
-                        placeholder="Barangay or Street of the hospital"
-                        v-model="barangayORStreet"
-                    />
+                    <input class="input" type="text" placeholder="Barangay or Street of the hospital"
+                        v-model="barangayORStreet" />
                 </div>
             </div>
             <div class="field is-horizontal">
@@ -111,23 +82,15 @@
                     <div class="field">
                         <div class="control">
                             <label class="label">Latitude</label>
-                            <input
-                                class="input"
-                                type="number"
-                                placeholder="Latitude of the hospital location"
-                                v-model="latitude"
-                            />
+                            <input class="input" type="number" placeholder="Latitude of the hospital location"
+                                v-model="latitude" />
                         </div>
                     </div>
                     <div class="field">
                         <div class="control">
                             <label class="label">Longtitude</label>
-                            <input
-                                class="input"
-                                type="number"
-                                placeholder="Longtitude of the hospital location"
-                                v-model="longtitude"
-                            />
+                            <input class="input" type="number" placeholder="Longtitude of the hospital location"
+                                v-model="longtitude" />
                         </div>
                     </div>
                 </div>
@@ -140,55 +103,31 @@
                             <div v-if="usernameFound !== ''">
                                 <p class="help is-danger" v-if="usernameFound">
                                     Unavailable
-                                    <i
-                                        class="fas fa-spinner fa-spin"
-                                        v-if="loadingUsername"
-                                    ></i>
+                                    <i class="fas fa-spinner fa-spin" v-if="loadingUsername"></i>
                                 </p>
                                 <p class="help is-success" v-else>
                                     Available
-                                    <i
-                                        class="fas fa-spinner fa-spin"
-                                        v-if="loadingUsername"
-                                    ></i>
+                                    <i class="fas fa-spinner fa-spin" v-if="loadingUsername"></i>
                                 </p>
                             </div>
-                            <input
-                                class="input"
-                                type="text"
-                                placeholder="Username"
-                                v-model="username"
-                                @keyup="usernameFinder($event)"
-                            />
+                            <input class="input" type="text" placeholder="Username" v-model="username"
+                                @keyup="usernameFindTimeout" />
                         </div>
-                        <div
-                            class="notification is-light is-danger"
-                            v-if="usernameAlreadyTaken"
-                        >Username is already taken.</div>
+                        <div class="notification is-light is-danger" v-if="usernameAlreadyTaken">Username is already
+                            taken.</div>
                     </div>
                     <div class="field">
                         <div class="control">
                             <label class="label">Password</label>
-                            <input
-                                class="input"
-                                type="password"
-                                placeholder="Password"
-                                v-model="password"
-                            />
+                            <input class="input" type="password" placeholder="Password" v-model="password" />
                         </div>
                         <div class="control">
                             <label class="label">Confirm Password</label>
-                            <input
-                                class="input"
-                                type="password"
-                                placeholder="Confirm Password"
-                                v-model="confirmPassword"
-                            />
+                            <input class="input" type="password" placeholder="Confirm Password"
+                                v-model="confirmPassword" />
                         </div>
-                        <div
-                            class="notification is-light is-danger"
-                            v-if="passwordNotMatch"
-                        >Password does not match.</div>
+                        <div class="notification is-light is-danger" v-if="passwordNotMatch">Password does not match.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -197,23 +136,12 @@
                     <label class="label">Specializations offered(Select all that applies)</label>
                     <nav class="panel">
                         <div class="panel-block">
-                            <input
-                                class="input"
-                                type="text"
-                                v-model="searchBar"
-                                placeholder="Search"
-                            />
+                            <input class="input" type="text" v-model="searchBar" placeholder="Search" />
                         </div>
                         <div style="max-height: 20em; overflow: auto">
-                            <div
-                                class="panel-block"
-                                v-for="(specializations, index) in specializationListIndexed"
-                                :key="index"
-                                :value="specializations"
-                            >
-                                <a
-                                    @click="selectSpecialization(specializations)"
-                                >{{ specializations }}</a>
+                            <div class="panel-block" v-for="(specializations, index) in specializationListIndexed"
+                                :key="index" :value="specializations">
+                                <a @click="selectSpecialization(specializations)">{{ specializations }}</a>
                             </div>
                         </div>
                     </nav>
@@ -222,17 +150,11 @@
                     <label class="label">Selected</label>
                     <div class="columns is-multiline">
                         <div class="column" id="selectedSpecializations">
-                            <button
-                                v-for="(specialist, index) in specializationsSelected"
-                                :key="index"
-                                class="button is-light"
-                                style="margin: 5px"
-                            >
+                            <button v-for="(specialist, index) in specializationsSelected" :key="index"
+                                class="button is-light" style="margin: 5px">
                                 {{ specialist.specialist }}&nbsp;
-                                <span
-                                    class="has-text-danger"
-                                    @click="undoSpecialization(specialist.specialist)"
-                                >X</span>
+                                <span class="has-text-danger"
+                                    @click="undoSpecialization(specialist.specialist)">X</span>
                             </button>
                         </div>
                     </div>
@@ -244,10 +166,7 @@
                     <div class="card">
                         <div class="card-image">
                             <figure class="image is-4by3">
-                                <img
-                                    src="https://bulma.io/images/placeholders/1280x960.png"
-                                    alt="Placeholder image"
-                                />
+                                <img src="https://bulma.io/images/placeholders/1280x960.png" alt="Placeholder image" />
                             </figure>
                         </div>
                         <div class="card-content">
@@ -264,12 +183,7 @@
                             <div class="field">
                                 <div class="control">
                                     <label class="radio">
-                                        <input
-                                            class="radio"
-                                            name="plan"
-                                            type="radio"
-                                            @click="selectStandardPlan"
-                                        />
+                                        <input class="radio" name="plan" type="radio" @click="selectStandardPlan" />
                                     </label>
                                 </div>
                             </div>
@@ -280,10 +194,7 @@
                     <div class="card">
                         <div class="card-image">
                             <figure class="image is-4by3">
-                                <img
-                                    src="https://bulma.io/images/placeholders/1280x960.png"
-                                    alt="Placeholder image"
-                                />
+                                <img src="https://bulma.io/images/placeholders/1280x960.png" alt="Placeholder image" />
                             </figure>
                         </div>
                         <div class="card-content">
@@ -301,12 +212,7 @@
                             <div class="field">
                                 <div class="control">
                                     <label class="radio">
-                                        <input
-                                            class="radio"
-                                            name="plan"
-                                            type="radio"
-                                            @click="selectPremiumPlan"
-                                        />
+                                        <input class="radio" name="plan" type="radio" @click="selectPremiumPlan" />
                                     </label>
                                 </div>
                             </div>
@@ -314,11 +220,9 @@
                     </div>
                 </div>
             </div>
-            <button
-                class="button is-primary"
-                @click="create"
-                :disabled="pricing == '' || hospital == '' || email == '' || hospitalType == '' || latitude == '' || longtitude == '' || barangayORStreet == '' || city == '' || province == '' || specializationsSelected == []"
-            >Create Account</button>
+            <button class="button is-primary" @click="create"
+                :disabled="pricing == '' || hospital == '' || email == '' || hospitalType == '' || latitude == '' || longtitude == '' || barangayORStreet == '' || city == '' || province == '' || specializationsSelected == []">Create
+                Account</button>
         </div>
     </section>
 </template>
@@ -360,19 +264,25 @@ export default {
             specializationsSelected: [],
             specializationList: this.$store.getters.getSpecializationList,
             searchBar: '',
-            errMsg: ''
+            errMsg: '',
+            searchTimeout: null
         }
     },
     methods: {
-        async usernameFinder(e) {
+        async usernameFindTimeout() {
+            if (this.searchTimeout) {
+                clearTimeout(this.searchTimeout)
+                this.searchTimeout = null
+            }
+            this.searchTimeout = setTimeout(this.usernameFinder, 500)
+        },
+        async usernameFinder() {
             this.loadingUsername = true
-            if (await e) {
-                await axios.post('/api/manager/check_username', {
-                    username: this.username
-                }).then(response => { this.usernameFound = response.data })
-                if (await this.username == '') {
-                    this.usernameFound = ''
-                }
+            await axios.post('/api/manager/check_username', {
+                username: this.username
+            }).then(response => { this.usernameFound = response.data })
+            if (await this.username == '') {
+                this.usernameFound = ''
             }
             this.loadingUsername = false
         },
@@ -459,10 +369,12 @@ export default {
     max-height: 20em;
     overflow: auto;
 }
+
 #selectedSpecializations {
     max-height: 26em;
     overflow: auto;
 }
+
 @media (max-width: 991.98px) {
     .container {
         width: 100% !important;

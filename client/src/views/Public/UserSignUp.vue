@@ -121,7 +121,7 @@
               v-if="loadingUsername"></i></p>
           <p class="help is-success" v-else>Available<i class="fas fa-spinner fa-spin" v-if="loadingUsername"></i></p>
         </div>
-        <input class="input" type="text" placeholder="username" v-model="username" @keyup="usernameFinder($event)"
+        <input class="input" type="text" placeholder="username" v-model="username" @keyup="usernameFindTimeout"
           required />
         </p>
       </div>
@@ -189,22 +189,28 @@ export default {
       termsAndConditionsAgreed: false,
       errMsg: '',
       usernameFound: '',
-      loadingUsername: false
+      loadingUsername: false,
+      searchTimeout: null
     }
   },
   async mounted() {
     await axios.get('/api/geolocation').then(response => this.geolocationData = response.data)
   },
   methods: {
-    async usernameFinder(e) {
+    async usernameFindTimeout() {
+      if (this.searchTimeout) {
+        clearTimeout(this.searchTimeout)
+        this.searchTimeout = null
+      }
+      this.searchTimeout = setTimeout(this.usernameFinder, 500)
+    },
+    async usernameFinder() {
       this.loadingUsername = true
-      if (await e) {
-        await axios.post('/api/user/check_username', {
-          username: this.username
-        }).then(response => { this.usernameFound = response.data })
-        if (await this.username == '') {
-          this.usernameFound = ''
-        }
+      await axios.post('/api/user/check_username', {
+        username: this.username
+      }).then(response => { this.usernameFound = response.data })
+      if (await this.username == '') {
+        this.usernameFound = ''
       }
       this.loadingUsername = false
     },
@@ -271,10 +277,12 @@ export default {
 .section {
   background-color: whitesmoke;
 }
+
 .dropdown-menu {
   max-height: 13em;
   overflow: auto;
 }
+
 @media (max-width: 991.98px) {
   .container {
     width: 100% !important;
