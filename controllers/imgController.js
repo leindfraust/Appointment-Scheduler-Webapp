@@ -58,7 +58,7 @@ const imgUploadDoctor = ((req, res, next) => {
         });
     });
     setTimeout(() => {
-        res.status(200).redirect('/imgUploadSuccessAdmin')
+        res.status(200).redirect('/imgUploadSuccessDoctor')
     }, 5000)
 });
 
