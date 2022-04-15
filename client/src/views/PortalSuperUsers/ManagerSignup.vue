@@ -111,7 +111,7 @@
                                 </p>
                             </div>
                             <input class="input" type="text" placeholder="Username" v-model="username"
-                                @keyup="usernameFindTimeout" />
+                                @input="usernameFindTimeout" />
                         </div>
                         <div class="notification is-light is-danger" v-if="usernameAlreadyTaken">Username is already
                             taken.</div>

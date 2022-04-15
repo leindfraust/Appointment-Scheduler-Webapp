@@ -121,7 +121,7 @@
               v-if="loadingUsername"></i></p>
           <p class="help is-success" v-else>Available<i class="fas fa-spinner fa-spin" v-if="loadingUsername"></i></p>
         </div>
-        <input class="input" type="text" placeholder="username" v-model="username" @keyup="usernameFindTimeout"
+        <input class="input" type="text" placeholder="username" v-model="username" @input="usernameFindTimeout"
           required />
         </p>
       </div>

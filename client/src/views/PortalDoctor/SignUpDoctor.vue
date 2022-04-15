@@ -29,7 +29,7 @@
               </div>
               <div class="control">
                 <input class="input" type="text" v-model="alias" placeholder="alias" name="alias" required
-                  @keyup="aliasFindTimeout" />
+                  @input="aliasFindTimeout" />
               </div>
             </div>
           </div>
@@ -66,7 +66,7 @@
                 </p>
               </div>
               <div class="control">
-                <input class="input" type="text" v-model="username" @keyup="usernameFindTimeout" placeholder="username"
+                <input class="input" type="text" v-model="username" @input="usernameFindTimeout" placeholder="username"
                   required />
               </div>
             </div>
