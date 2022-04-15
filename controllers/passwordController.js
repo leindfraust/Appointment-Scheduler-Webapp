@@ -10,17 +10,17 @@ const patientUpdatePassword = (async (req, res) => {
 
     Patient.findOne({
         _id: patientID
-    }, async(err, result) => {
+    }, async (err, result) => {
         if (err) {
             res.status(500).send(err)
         } else {
             userDetails = await result
-            bcrypt.compare(await currentPassword, result.password, async(err, result) => {
+            bcrypt.compare(await currentPassword, result.password, async (err, result) => {
                 if (err) {
                     res.status(500).send(err);
                 } else {
                     if (result == true) {
-                        bcrypt.hash(await newPassword, 10, async(err, hash) => {
+                        bcrypt.hash(await newPassword, 10, async (err, hash) => {
 
                             if (err) {
                                 res.status(500).send(err)
@@ -37,14 +37,14 @@ const patientUpdatePassword = (async (req, res) => {
                                     if (err) {
                                         res.status(500).send(err)
                                     } else {
-                                        res.status(200).end()
+                                        res.status(200).send(true)
                                     }
                                 })
                             }
 
                         });
                     } else {
-                        res.status(500).send('Incorrect current password')
+                        res.status(200).send(false)
                     }
                 }
             })
@@ -59,12 +59,12 @@ const doctorUpdatePassword = (async (req, res) => {
 
     Doctor.findOne({
         _id: doctorID
-    }, async(err, result) => {
+    }, async (err, result) => {
         if (err) {
             res.status(500).send(err)
         } else {
             userDetails = await result
-            bcrypt.compare(await currentPassword, result.password, async(err, result) => {
+            bcrypt.compare(await currentPassword, result.password, async (err, result) => {
                 if (err) {
                     res.status(500).send(err);
                 } else {
@@ -86,14 +86,14 @@ const doctorUpdatePassword = (async (req, res) => {
                                     if (err) {
                                         res.status(500).send(err)
                                     } else {
-                                        res.status(200).end()
+                                        res.status(200).send(true)
                                     }
                                 })
                             }
 
                         });
                     } else {
-                        res.status(500).send('Incorrect current password')
+                        res.status(200).send(false)
                     }
                 }
             })
@@ -189,4 +189,10 @@ const managerfUpdatePassword = (async (req, res) => {
     });
 });
 
-module.exports = {patientUpdatePassword, doctorUpdatePassword, patientfUpdatePassword, managerfUpdatePassword, doctorfUpdatePassword}
+module.exports = {
+    patientUpdatePassword,
+    doctorUpdatePassword,
+    patientfUpdatePassword,
+    managerfUpdatePassword,
+    doctorfUpdatePassword
+}

@@ -20,61 +20,38 @@
                         <div class="columns">
                             <div class="column">
                                 <h1 class="title">Change password:</h1>
-                                <ForgotPassword
-                                    :userType="'doctor'"
-                                    :username="doctorDetails.username"
-                                    :email="gmail"
-                                />
+                                <ForgotPassword :userType="'doctor'" :username="doctorDetails.username"
+                                    :email="gmail" />
                                 <div class="block"></div>
                                 <div class="field">
                                     <div class="control">
                                         <label class="label">Current password</label>
-                                        <input
-                                            class="input password"
-                                            size="5"
-                                            type="password"
-                                            v-model="currentPassword"
-                                            required
-                                        />
+                                        <input class="input password" size="5" type="password" v-model="currentPassword"
+                                            required />
                                     </div>
-                                    <div
-                                        v-if="incorrectPasswordValidate"
-                                        class="notification is-warning"
-                                    >{{ currentPasswordValidateMessage }}</div>
+                                    <div v-if="incorrectPasswordValidate" class="notification is-warning">{{
+                                        currentPasswordValidateMessage
+                                    }}</div>
                                 </div>
                                 <div class="field">
                                     <div class="control">
                                         <label class="label">Create new password:</label>
-                                        <input
-                                            class="input password"
-                                            size="5"
-                                            type="password"
-                                            v-model="password"
-                                            required
-                                            :class="{ 'is-danger': passwordValidate }"
-                                        />
+                                        <input class="input password" size="5" type="password" v-model="password"
+                                            required :class="{ 'is-danger': passwordValidate }" />
                                     </div>
-                                    <div
-                                        v-if="passwordValidate"
-                                        class="notification is-danger"
-                                    >{{ passwordValidateMessage }}</div>
+                                    <div v-if="passwordValidate" class="notification is-danger">{{
+                                        passwordValidateMessage
+                                    }}</div>
                                 </div>
                                 <div class="field">
                                     <div class="control">
                                         <label class="label">Repeat new password:</label>
-                                        <input
-                                            class="input password"
-                                            size="5"
-                                            type="password"
-                                            v-model="passwordRepeat"
-                                            required
-                                            :class="{ 'is-danger': passwordValidate }"
-                                        />
+                                        <input class="input password" size="5" type="password" v-model="passwordRepeat"
+                                            required :class="{ 'is-danger': passwordValidate }" />
                                     </div>
-                                    <div
-                                        v-if="passwordValidate"
-                                        class="notification is-danger"
-                                    >{{ passwordValidateMessage }}</div>
+                                    <div v-if="passwordValidate" class="notification is-danger">{{
+                                        passwordValidateMessage
+                                    }}</div>
                                 </div>
                                 <div class="field">
                                     <div class="control">
@@ -86,141 +63,77 @@
                                 </div>
                                 <div class="field">
                                     <div class="control">
-                                        <button
-                                            class="button is-danger"
-                                            type="submit"
-                                            @click="updatePassword"
-                                            :disabled="currentPassword == null || password == null || passwordRepeat == null"
-                                        >Confirm</button>
-                                        <div
-                                            v-if="passwordSuccess"
-                                            class="notification is-success"
-                                        >Password has been changed.</div>
+                                        <button class="button is-danger" type="submit" @click="updatePassword"
+                                            :disabled="currentPassword == null || password == null || passwordRepeat == null">Confirm</button>
+                                        <div v-if="passwordSuccess" class="notification is-success">Password has been
+                                            changed.</div>
                                     </div>
                                 </div>
                             </div>
                             <div class="column">
                                 <p>
-                                    <a
-                                        class="has-text-info"
-                                        v-if="verified"
-                                        @click="modalUpEditInfo"
-                                    >[Edit Information]</a>
-                                    <a
-                                        class="has-text-danger"
-                                        v-else
-                                        @click="modalUpInfoVerify"
-                                    >[Verify Now]</a>
+                                    <a class="has-text-info" v-if="verified" @click="modalUpEditInfo">[Edit
+                                        Information]</a>
+                                    <a class="has-text-danger" v-else @click="modalUpInfoVerify">[Verify Now]</a>
                                 </p>
                                 <div class="modal" :class="{ 'is-active': isActiveModal }">
                                     <div class="modal-background"></div>
-                                    <div
-                                        v-if="verified"
-                                        class="modal-content box section"
-                                        id="OTPModal"
-                                        style="width: 33%;"
-                                    >
-                                        <div
-                                            class="notification is-info is-light"
-                                            v-if="!codeError"
-                                        >We have sent you a verification code on your email.</div>
-                                        <div
-                                            v-else
-                                            class="notification is-danger"
-                                        >You can only request a verification code once, please try again in 10 minutes.</div>
+                                    <div v-if="verified" class="modal-content box section" id="OTPModal"
+                                        style="width: 33%;">
+                                        <div class="notification is-info is-light" v-if="!codeError">We have sent you a
+                                            verification code on your email.</div>
+                                        <div v-else class="notification is-danger">You can only request a verification
+                                            code once, please try again in 10 minutes.</div>
                                         <div class="field" v-if="!codeError">
                                             <div class="control has-text-centered">
-                                                <input
-                                                    class="input"
-                                                    type="number"
-                                                    maxlength="4"
-                                                    id="OTP"
-                                                    v-model="OTP"
+                                                <input class="input" type="number" maxlength="4" id="OTP" v-model="OTP"
                                                     oninput="this.value=this.value.slice(0,this.maxLength)"
-                                                    :disabled="codeError"
-                                                />
+                                                    :disabled="codeError" />
                                             </div>
                                         </div>
                                         <div class="has-text-centered" v-if="!codeError">
-                                            <button
-                                                class="button is-info"
-                                                :disabled="OTP === ''"
-                                                @click="confirmOTPEditInfo"
-                                            >Confirm</button>
-                                            <div
-                                                class="notification is-danger"
-                                                v-if="incorrectCode"
-                                            >Incorrect code, please check your email thoroughly.</div>
+                                            <button class="button is-info" :disabled="OTP === ''"
+                                                @click="confirmOTPEditInfo">Confirm</button>
+                                            <div class="notification is-danger" v-if="incorrectCode">Incorrect code,
+                                                please check your email thoroughly.</div>
                                         </div>
-                                        <button
-                                            class="modal-close is-large"
-                                            aria-label="close"
-                                            @click="closeModal"
-                                        ></button>
+                                        <button class="modal-close is-large" aria-label="close"
+                                            @click="closeModal"></button>
                                     </div>
-                                    <div
-                                        v-else
-                                        class="modal-content box section"
-                                        id="OTPModal"
-                                        style="width: 33%;"
-                                    >
+                                    <div v-else class="modal-content box section" id="OTPModal" style="width: 33%;">
                                         <div v-if="!verifyEmailSent" class="field">
-                                            <div
-                                                class="notification is-success is-light"
-                                            >Verify your email.</div>
+                                            <div class="notification is-success is-light">Verify your email.</div>
                                             <div class="control has-text-centered">
                                                 <input class="input" type="email" v-model="gmail" />
                                             </div>
                                             <div class="has-text-centered">
-                                                <button
-                                                    class="button is-success"
-                                                    @click="sendVerificationEmail"
-                                                    :disabled="gmail === ''"
-                                                >Verify</button>
+                                                <button class="button is-success" @click="sendVerificationEmail"
+                                                    :disabled="gmail === ''">Verify</button>
                                             </div>
                                         </div>
                                         <div v-if="verifyEmailSent" class="field">
-                                            <div
-                                                v-if="!codeError"
-                                                class="notification is-info is-light"
-                                            >We have sent you a verification code on your email.</div>
+                                            <div v-if="!codeError" class="notification is-info is-light">We have sent
+                                                you a verification code on your email.</div>
                                             <div v-else class="notification is-danger is-light">
-                                                <span
-                                                    v-if="emailTaken"
-                                                >Email address is already taken.</span>
-                                                <span
-                                                    v-else
-                                                >You can only request a verification code once, please try again in 10 minutes.</span>
+                                                <span v-if="emailTaken">Email address is already taken.</span>
+                                                <span v-else>You can only request a verification code once, please try
+                                                    again in 10 minutes.</span>
                                             </div>
                                             <div class="control has-text-centered">
-                                                <input
-                                                    v-if="!codeError"
-                                                    class="input"
-                                                    type="number"
-                                                    maxlength="4"
-                                                    id="OTP"
-                                                    v-model="OTP"
+                                                <input v-if="!codeError" class="input" type="number" maxlength="4"
+                                                    id="OTP" v-model="OTP"
                                                     oninput="this.value=this.value.slice(0,this.maxLength)"
-                                                    :disabled="codeError || OTP == ''"
-                                                />
+                                                    :disabled="codeError || OTP == ''" />
                                             </div>
                                             <div class="has-text-centered" v-if="!codeError">
-                                                <button
-                                                    class="button is-info"
-                                                    :disabled="OTP === ''"
-                                                    @click="verifyEmail"
-                                                >Confirm</button>
-                                                <div
-                                                    class="notification is-danger"
-                                                    v-if="incorrectCode"
-                                                >Incorrect code, please check your email thoroughly.</div>
+                                                <button class="button is-info" :disabled="OTP === ''"
+                                                    @click="verifyEmail">Confirm</button>
+                                                <div class="notification is-danger" v-if="incorrectCode">Incorrect code,
+                                                    please check your email thoroughly.</div>
                                             </div>
                                         </div>
-                                        <button
-                                            class="modal-close is-large"
-                                            aria-label="close"
-                                            @click="closeModal"
-                                        ></button>
+                                        <button class="modal-close is-large" aria-label="close"
+                                            @click="closeModal"></button>
                                     </div>
                                 </div>
                                 <div class="field">
@@ -228,14 +141,8 @@
                                         <label class="label">
                                             <b>License No.</b>
                                         </label>
-                                        <input
-                                            class="input"
-                                            type="text"
-                                            v-model="licenseNo"
-                                            style="width: 33%"
-                                            :disabled="!authorized"
-                                            :class="{ 'is-success': authorized }"
-                                        />
+                                        <input class="input" type="text" v-model="licenseNo" style="width: 33%"
+                                            :disabled="!authorized" :class="{ 'is-success': authorized }" />
                                     </div>
                                 </div>
                                 <div class="field is-horizontal">
@@ -245,50 +152,30 @@
                                                 <label class="label">
                                                     <b>Full Name:</b>
                                                 </label>
-                                                <input
-                                                    class="input"
-                                                    size="5"
-                                                    type="text"
-                                                    v-model="fullname"
-                                                    :disabled="!authorized"
-                                                    :class="{ 'is-success': authorized }"
-                                                />
+                                                <input class="input" size="5" type="text" v-model="fullname"
+                                                    :disabled="!authorized" :class="{ 'is-success': authorized }" />
                                             </div>
                                         </div>
                                         <div class="field">
                                             <div class="control">
                                                 <label class="label">
                                                     Email
-                                                    <span
-                                                        v-if="verified"
-                                                        class="has-text-success"
-                                                    >
+                                                    <span v-if="verified" class="has-text-success">
                                                         <b>Verified ✓</b>
                                                     </span>
                                                     <span v-else class="has-text-danger">
                                                         <b>Requires verification ❌</b>
                                                     </span>
                                                 </label>
-                                                <input
-                                                    class="input"
-                                                    size="5"
-                                                    type="text"
-                                                    v-model="gmail"
-                                                    disabled
-                                                />
+                                                <input class="input" size="5" type="text" v-model="gmail" disabled />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <button
-                                    class="button is-link"
-                                    :disabled="!authorized"
-                                    @click="updateInfo"
-                                >Confirm</button>
-                                <div
-                                    v-if="updateInfoSuccess"
-                                    class="notification is-success is-light"
-                                >Changes have been updated successfully.</div>
+                                <button class="button is-link" :disabled="!authorized"
+                                    @click="updateInfo">Confirm</button>
+                                <div v-if="updateInfoSuccess" class="notification is-success is-light">Changes have been
+                                    updated successfully.</div>
                             </div>
                         </div>
                     </div>
@@ -342,7 +229,8 @@ export default {
             emailTaken: false,
             codeError: false,
             updateInfoSuccess: false,
-            incorrectCode: false
+            incorrectCode: false,
+            errMsg: ''
         }
     },
     methods: {
@@ -358,18 +246,26 @@ export default {
                             doctorID: this.id,
                             currentPassword: this.currentPassword,
                             newPassword: this.password
+                        }).then(response => {
+                            if (response.data) {
+                                this.incorrectPasswordValidate = false
+                                this.passwordValidate = false
+                                this.passwordSuccess = true
+                                this.currentPassword = null
+                                this.password = null
+                                this.passwordRepeat = null
+                            } else {
+                                this.passwordValidate = false
+                                this.passwordSuccess = false
+                                this.incorrectPasswordValidate = true
+                                this.currentPasswordValidateMessage = 'Incorrect current password'
+                            }
                         });
-                        this.incorrectPasswordValidate = false
-                        this.passwordValidate = false
-                        this.passwordSuccess = true
-                        this.currentPassword = null
-                        this.password = null
-                        this.passwordRepeat = null
                     } catch (err) {
                         this.passwordValidate = false
                         this.passwordSuccess = false
                         this.incorrectPasswordValidate = true
-                        this.currentPasswordValidateMessage = err.response.data
+                        this.errMsg = err
                     }
                 }
             }
@@ -553,11 +449,13 @@ input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
+
 #OTP {
     border: 0;
     letter-spacing: 2em;
     width: 50%;
 }
+
 @media (max-width: 991.98px) {
     #OTPModal {
         width: 100% !important;

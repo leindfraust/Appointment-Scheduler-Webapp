@@ -11,6 +11,7 @@ let confirmPassword = ref('')
 let errMsg = ref('')
 let passwordChanged = ref(false)
 let newPasswordNotMatch = ref(false)
+let currentPasswordIncorrect = ref(false)
 
 onMounted(async () => {
     await axios.get('/session/patient').then(response => patient.value = response.data);
@@ -49,12 +50,18 @@ async function changePassword() {
                 patientID: patient.value._id,
                 currentPassword: currentPassword.value,
                 newPassword: newPassword.value
+            }).then(response => {
+                if (response.data) {
+                    currentPassword.value = ''
+                    newPassword.value = ''
+                    confirmPassword.value = ''
+                    passwordChanged.value = true
+                    errMsg.value = ''
+                } else {
+                    passwordChanged.value = false
+                    currentPasswordIncorrect.value = true
+                }
             });
-            currentPassword.value = ''
-            newPassword.value = ''
-            confirmPassword.value = ''
-            passwordChanged.value = true
-            errMsg.value = ''
         } catch (err) {
             errMsg.value = err
             passwordChanged.value = false
@@ -68,43 +75,30 @@ async function changePassword() {
     <section class="section">
         <div class="box" style="width: 50%; margin: auto">
             <h1 class="title">Security</h1>
-            <div class="notification is-danger" v-if="errMsg">Oops, something went wrong. Try again later or <router-link :to="'/contactus'">contact us</router-link></div>
-            <div
-                class="notification is-success"
-                v-if="passwordChanged"
-            >Password changed successfully.</div>
+            <div class="notification is-danger" v-if="errMsg">Oops, something went wrong. Try again later or
+                <router-link :to="'/contactus'">contact us</router-link>
+            </div>
+            <div class="notification is-success" v-if="passwordChanged">Password changed successfully.</div>
             <div class="field">
                 <div class="control">
                     <label class="label">Current Password:</label>
-                    <input
-                        class="input password"
-                        v-model="currentPassword"
-                        type="password"
-                        placeholder="Current password"
-                    />
+                    <input class="input password" v-model="currentPassword" type="password"
+                        placeholder="Current password" />
+                    <p class="help is-danger" v-if="currentPasswordIncorrect">Current password is incorrect.</p>
                 </div>
             </div>
             <div class="field">
                 <div class="control">
                     <label class="label">New Password:</label>
-                    <input
-                        class="input password"
-                        v-model="newPassword"
-                        type="password"
-                        placeholder="New password"
-                    />
+                    <input class="input password" v-model="newPassword" type="password" placeholder="New password" />
                 </div>
                 <p class="help is-danger" v-if="newPasswordNotMatch">Password do not match.</p>
             </div>
             <div class="field">
                 <div class="control">
                     <label class="label">Confirm Password:</label>
-                    <input
-                        class="input password"
-                        v-model="confirmPassword"
-                        type="password"
-                        placeholder="Confirm password"
-                    />
+                    <input class="input password" v-model="confirmPassword" type="password"
+                        placeholder="Confirm password" />
                 </div>
                 <p class="help is-danger" v-if="newPasswordNotMatch">Password do not match.</p>
             </div>
@@ -118,18 +112,12 @@ async function changePassword() {
             </div>
             <div class="field has-text-right">
                 <div class="control">
-                    <button
-                        class="button is-danger"
-                        @click="changePassword"
-                        :disabled="currentPassword === '' || newPassword === '' || confirmPassword === ''"
-                    >Change password</button>
+                    <button class="button is-danger" @click="changePassword"
+                        :disabled="currentPassword === '' || newPassword === '' || confirmPassword === ''">Change
+                        password</button>
                 </div>
             </div>
-            <ForgotPassword
-                :userType="'patient'"
-                :username="patient.username"
-                :email="patient.email"
-            />
+            <ForgotPassword :userType="'patient'" :username="patient.username" :email="patient.email" />
         </div>
     </section>
 </template>
