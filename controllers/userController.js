@@ -2,10 +2,10 @@ const bcrypt = require('bcrypt');
 const user = require('../models/user');
 
 const check_username = (async (req, res) => {
-    let username = await req.body.username.trim()
+    let username = await req.body.username
     try {
         const userAccount = await user.findOne({
-            username: new RegExp(`^${username}$`, 'i')
+            username: new RegExp(`^${username.trim()}$`, 'i')
         });
         if (await userAccount) {
             await res.status(200).send(true)
@@ -18,11 +18,11 @@ const check_username = (async (req, res) => {
 });
 
 const verify_username = (async (req, res) => {
-    let username = await req.body.username.trim()
+    let username = await req.body.username
     let email = await req.body.email
     try {
         const userAccount = await user.findOne({
-            username: username
+            username: username.trim()
         });
         if (await userAccount) {
             if (await userAccount.gmail === email) {
