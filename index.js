@@ -17,7 +17,7 @@ const server = app.listen(PORT, () => {
 });
 const io = require("socket.io")(server, {
     cors: {
-        origin: "http://localhost:8080" || "http://192.168.1.11:8080"
+        origin: ["http://localhost:8080", "http://192.168.1.11:8080"]
     }
 });
 
@@ -132,7 +132,7 @@ io.on('connection', (socket) => {
         }).then(response => {
             io.to(roomNo).emit('messages', response[0].messages)
         }).catch(error => {
-            //do nothing
+            //ignore type error
         })
     });
     console.log('Client connected');
@@ -156,7 +156,6 @@ io.on('connection', (socket) => {
             if (error) {
                 console.log(error)
             } else {
-                console.log(success)
                 io.to(roomNo).emit('send messages', success.messages)
             }
         });
@@ -171,8 +170,6 @@ io.on('connection', (socket) => {
         }, function (error, success) {
             if (error) {
                 console.log(error)
-            } else {
-                console.log(success)
             }
         });
     });
@@ -193,8 +190,6 @@ io.on('connection', (socket) => {
         }, function (error, success) {
             if (error) {
                 console.log(error)
-            } else {
-                console.log(success)
             }
         }).clone().catch((err) => {
             console.log(err)
