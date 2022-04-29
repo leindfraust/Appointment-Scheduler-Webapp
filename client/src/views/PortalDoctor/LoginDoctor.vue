@@ -6,27 +6,16 @@
           <form class="field" style="margin-top: 5%">
             <h1 class="title has-text-link has-text-left">Nice to see you Doc.</h1>
             <div class="control">
-              <input class="input" type="text" v-model="username" placeholder="username" required />
+              <input class="input" type="text" v-model="username" placeholder="username" @keyup.enter="login"
+                required />
             </div>
             <div class="control" style="margin-top: 2%">
-              <input
-                class="input"
-                type="password"
-                v-model="password"
-                placeholder="password"
-                required
-              />
+              <input class="input" type="password" v-model="password" placeholder="password" @keyup.enter="login"
+                required />
             </div>
-            <p
-              v-if="incorrectUserPass"
-              class="has-text-danger"
-              style="margin-top: 5%"
-            >{{ validateMessage }}</p>
-            <p
-              v-else-if="incorrectUserPass == false"
-              class="has-text-danger"
-              style="margin-top: 5%"
-            >{{ validateMessage }}</p>
+            <p v-if="incorrectUserPass" class="has-text-danger" style="margin-top: 5%">{{ validateMessage }}</p>
+            <p v-else-if="incorrectUserPass == false" class="has-text-danger" style="margin-top: 5%">{{ validateMessage
+            }}</p>
             <button type="button" class="button is-primary" @click="login">Login</button>
             <hr />
             <h1 class="title">Or</h1>
@@ -125,10 +114,12 @@ export default {
 .hero {
   background-color: whitesmoke !important;
 }
+
 @media (max-width: 991.98px) {
   .customField {
     width: 100% !important;
   }
+
   .card {
     width: 100% !important;
   }
