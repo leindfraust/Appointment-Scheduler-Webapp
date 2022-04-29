@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import axios from 'axios';
 
+let isLoading = ref(false)
 let errMsg = ref('')
 let modal = ref(false)
 let emailExists = ref(false)
@@ -21,9 +22,10 @@ const props = defineProps({
 });
 
 async function forgotPasswordOTP() {
+    isLoading.value = true
     let confirmEmail
     let randomCode = Math.floor(1000 + Math.random() * 9000);
-    await axios.post('/api/code', {
+    await axios.post('/api/code/email', {
         email: props.email
     }).then(response => confirmEmail = response.data)
     if (confirmEmail) {
@@ -100,6 +102,7 @@ async function forgotPasswordOTP() {
             }
         }
     }
+    isLoading.value = false
 }
 async function verifyCode() {
     let confirmCode
@@ -186,6 +189,7 @@ async function pushNewPassword() {
                         <div class="control">
                             <button
                                 class="button"
+                                :class="{'is-loading': isLoading}"
                                 @click="forgotPasswordOTP"
                                 :disabled="email == ''"
                             >Send OTP</button>
