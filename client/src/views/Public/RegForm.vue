@@ -1,7 +1,7 @@
 <template>
   <NavigationTab />
   <section class="section" style="background-color: whitesmoke;">
-    <div class="modal" :class="{ 'is-active': isSchedLoading }">
+    <div class="modal" :class="{ 'is-active': isLoading }">
       <div class="modal-background"></div>
       <div class="modal-content" style="overflow: hidden">
         <div class="loader" style="margin: auto;"></div>
@@ -161,7 +161,7 @@ export default {
       basicDetailsDone: false,
       isActiveTabOne: true,
       isActiveTabTwo: false,
-      isSchedLoading: false,
+      isLoading: false,
       schedAvailability: false,
       radioIndex: null,
       prefix: null,
@@ -177,6 +177,7 @@ export default {
   },
   methods: {
     async appoint() {
+      this.isLoading = true
       let radio = document.getElementsByClassName('radioSched');
       let statusSched = document.getElementsByClassName('statusSched')
       //check appointed patients in the selected date
@@ -262,12 +263,13 @@ export default {
             schedule: this.schedule,
             priorityNum: this.prefix + "-" + this.priorityNum,
           };
+          this.isLoading = false
           store.commit("patientDetails", patientDetails);
           await this.$router.push("/success");
         }
         //if not
       } else {
-        this.isSchedLoading = false
+        this.isLoading = false
         this.schedAvailability = false
         this.schedule = null
         radio[this.radioIndex].checked = false
@@ -287,7 +289,7 @@ export default {
     },
     async pickSched(e, sched, prefix) {
       this.radioIndex = e
-      this.isSchedLoading = true
+      this.isLoading = true
       let radio = document.getElementsByClassName('radioSched');
       let statusSched = document.getElementsByClassName('statusSched')
       for (let i = 0; i < statusSched.length; i++) {
@@ -307,13 +309,13 @@ export default {
       //check how many appointed patients in regards to the appointment limit set by the doctor
       //if available
       if (await this.patientsAppointed < this.schedule.appointmentLimit) {
-        this.isSchedLoading = false
+        this.isLoading = false
         this.schedAvailability = true
         this.prefix = prefix
         statusSched[e].style.display = 'block'
         // if not available
       } else {
-        this.isSchedLoading = false
+        this.isLoading = false
         this.schedAvailability = false
         this.schedule = null
         radio[e].checked = false
