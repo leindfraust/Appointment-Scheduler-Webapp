@@ -5,15 +5,8 @@
                 <img src="https://bulma.io/images/bulma-logo.png" width="112" />
             </a>
 
-            <a
-                role="button"
-                class="navbar-burger"
-                :class="{ 'is-active': isActive }"
-                aria-label="menu"
-                aria-expanded="false"
-                data-target="navbar"
-                @click="navbar"
-            >
+            <a role="button" class="navbar-burger" :class="{ 'is-active': isActive }" aria-label="menu"
+                aria-expanded="false" data-target="navbar" @click="navbar">
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
@@ -26,48 +19,43 @@
                 <a class="navbar-item" @click="this.$router.push('/contactus')">Contact Us</a>
             </div>
             <div class="navbar-end" v-if="patient != ''">
-                <router-link :to="`/user/${patient}/profile`" class="navbar-item">Profile</router-link>
-                <router-link :to="`/user/${patient}/security`" class="navbar-item">Security</router-link>
-                <div class="navbar-item">
-                    <div class="dropdown" :class="{ 'is-active': isActiveNotifications }">
-                        <div class="dropdown-trigger">
-                            <a class="button" @click="notification">🔔</a>
-                        </div>
-                        <div class="dropdown-menu" v-if="notifications.length !== 0">
-                            <div
-                                class="dropdown-content"
-                                v-for="(notifs, index) in notifications.sort((a, b) => {
-                                    return new Date(b.date).getTime() - new Date(a.date).getTime()
-                                })"
-                                :key="index"
-                            >
-                                <a @click="openNotif(notifs, index)">
-                                    <div
-                                        class="dropdown-item notification is-info"
-                                        :class="{ 'is-light': !notifs.new }"
-                                        style="margin: 5%"
-                                    >
-                                        <button class="delete" @click="deleteNotif(notifs)"></button>
-                                        From Dr. {{ notifs.from }}
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="dropdown-menu" v-else>
-                            <div class="dropdown-content">
-                                <p class="dropdown-item">No new notifications.</p>
+                <div class="navbar-item has-dropdown" :class="{ 'is-active': isActiveNotifications }">
+                    <a class="navbar-link" @click="notification"><span class="has-text-danger"
+                            v-if="notifications.find(x => x.new === true)"><i
+                                class="fa-solid fa-bell animate__animated animate__heartBeat animate__infinite"><span
+                                    class="is-size-7">{{ notifications.filter(x =>
+                                            x.new).length
+                                    }}</span></i></span><span class="has-text-info" v-else><i
+                                class="fa-solid fa-bell"></i></span></a>
+                    <div class="navbar-dropdown is-right" v-if="notifications.length !== 0">
+                        <div class="navbar-item" v-for="(notifs, index) in notifications.sort((a, b) => {
+                            return new Date(b.date).getTime() - new Date(a.date).getTime()
+                        })" :key="index">
+                            <div class="notification is-info" :class="{ 'is-light': !notifs.new }">
+                                <a style="text-decoration: none;" @click="openNotif(notifs, index)">From Dr. {{
+                                    notifs.from
+                            }}</a>
+                            <button class="delete" @click="deleteNotif(notifs)"></button>
                             </div>
                         </div>
                     </div>
-                    <div class="buttons">
-                        <a class="button is-light" href="#">
-                            <img :src="imgPreUrl + patient + svgExtUrl" />
-                            {{ patient }}
-                        </a>
-                        <a class="button is-danger" @click="logout">
+                    <div class="navbar-dropdown is-right" v-else>
+                        <div class="navbar-item">No new notifications.</div>
+                    </div>
+                </div>
+                <div class="navbar-item has-dropdown" :class="{ 'is-active': isActiveMenuDropdown }"
+                    @click="isActiveMenuDropdown = !isActiveMenuDropdown">
+                    <a class="navbar-link"><img :src="imgPreUrl + patient + svgExtUrl" />
+                        {{ patient }}</a>
+                    <div class="navbar-dropdown">
+                        <router-link :to="`/user/${patient}/profile`" class="navbar-item">Profile</router-link>
+                        <router-link :to="`/user/${patient}/security`" class="navbar-item">Security</router-link>
+                        <hr class="navbar-divider">
+                        <a class="navbar-item has-text-danger" @click="logout">
                             <strong>Logout</strong>
                         </a>
                     </div>
+
                 </div>
             </div>
             <div class="navbar-end" v-else>
@@ -101,21 +89,25 @@ import socket from '../socket'
 export default {
     name: 'NavigationTab',
     mounted() {
-        socket.emit('join room', this.$store.state.patientID)
-        socket.on('send messages', (response) => {
-            this.notifications = response
-        });
-        socket.on('delete messages', (response) => {
-            this.notifications = response
-        });
-        socket.on('messages', (response) => {
-            this.notifications = response
-        });
+        if (this.$store.state.patientID) {
+            socket.connect()
+            socket.emit('join room', this.$store.state.patientID)
+            socket.on('send messages', (response) => {
+                this.notifications = response
+            });
+            socket.on('delete messages', (response) => {
+                this.notifications = response
+            });
+            socket.on('messages', (response) => {
+                this.notifications = response
+            });
+        }
     },
     data() {
         return {
             isActiveNotifications: false,
             isActiveModal: false,
+            isActiveMenuDropdown: false,
             isActive: false,
             patient: this.$store.state.patientUsername,
             imgPreUrl: "https://avatars.dicebear.com/api/micah/",
@@ -148,7 +140,6 @@ export default {
                 this.notifications[index].new = false
                 socket.emit('update message', this.notifications)
             }
-
         },
         closeNotificationModal() {
             this.isActiveModal = false
