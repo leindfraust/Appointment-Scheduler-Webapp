@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     verifySuperUser,
+    verifyEmail,
     verifyCode,
     pushCode,
     updateCode,
@@ -9,6 +10,8 @@ const {
 } = require('../../controllers/authCodeController')
 
 router.post('/superuser', verifySuperUser);
+
+router.post('/email', verifyEmail)
 
 router.post('/', pushCode);
 
