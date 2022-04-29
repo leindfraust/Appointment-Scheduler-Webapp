@@ -29,6 +29,8 @@ import ManagerLogin from '../views/PortalSuperUsers/ManagerLogin.vue'
 import ManagerSignup from '../views/PortalSuperUsers/ManagerSignup.vue'
 import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
 import ContactSupport from '../views/Public/ContactSupport.vue'
+import PageNotExist from '../views/Public/PageNotExist.vue'
+
 
 const routes = [{
         path: '/',
@@ -189,6 +191,10 @@ const routes = [{
     {
         path: '/contactus',
         component: ContactSupport
+    },
+    {
+        path: '/:catchAll404(.*)*',
+        component: PageNotExist
     }
 ]
 const router = createRouter({
