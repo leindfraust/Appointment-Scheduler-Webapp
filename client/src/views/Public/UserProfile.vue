@@ -86,8 +86,9 @@ async function cancelAppointment(id) {
 </script>
 <template>
     <NavigationTab />
-    <section class="section">
-        <div class="box" v-if="patient.length !== 0">
+    <section class="section" style="width: 75%; margin: auto;">
+        <div class="container" v-if="patient.length !== 0">
+            <h1 class="title">Profile</h1>
             <div class="notification is-danger" v-if="errMsg">
                 Oops, something went wrong. Try again later or
                 <router-link :to="'/contactus'">contact us</router-link>
@@ -132,24 +133,17 @@ async function cancelAppointment(id) {
                             <label class="label">Province:</label>
                             <div class="dropdown" :class="{ 'is-active': dropDownProvince }">
                                 <div class="dropdown-trigger">
-                                    <button
-                                        class="button"
-                                        @click="dropDownProvince = !dropDownProvince"
-                                    >
+                                    <button class="button" @click="dropDownProvince = !dropDownProvince">
                                         <span v-if="userProvince == ''">Select</span>
                                         <span v-else>{{ userProvince }}</span>
                                     </button>
                                 </div>
                                 <div class="dropdown-menu">
-                                    <div
-                                        class="dropdown-content"
-                                        v-for="provinces in geolocationData"
-                                        :key="provinces._id"
-                                    >
-                                        <a
-                                            class="dropdown-item"
-                                            @click="selectProvince(provinces.province)"
-                                        >{{ provinces.province }}</a>
+                                    <div class="dropdown-content" v-for="provinces in geolocationData"
+                                        :key="provinces._id">
+                                        <a class="dropdown-item" @click="selectProvince(provinces.province)">{{
+                                                provinces.province
+                                        }}</a>
                                     </div>
                                 </div>
                             </div>
@@ -161,27 +155,16 @@ async function cancelAppointment(id) {
                             <div class="label">City/Municipality:</div>
                             <div class="dropdown" :class="{ 'is-active': dropDownCity }">
                                 <div class="dropdown-trigger">
-                                    <button
-                                        class="button"
-                                        aria-haspopup="true"
-                                        @click="dropDownCity = !dropDownCity"
-                                        :disabled="userProvince == ''"
-                                    >
+                                    <button class="button" aria-haspopup="true" @click="dropDownCity = !dropDownCity"
+                                        :disabled="userProvince == ''">
                                         <span v-if="userCity == ''">Select</span>
                                         <span v-else>{{ userCity }}</span>
                                     </button>
                                 </div>
                                 <div class="dropdown-menu">
-                                    <div
-                                        class="dropdown-content"
-                                        v-if="userProvince"
-                                        v-for="cities in citiesData"
-                                        :key="cities.name"
-                                    >
-                                        <a
-                                            class="dropdown-item"
-                                            @click="selectCity(cities.name)"
-                                        >{{ cities.name }}</a>
+                                    <div class="dropdown-content" v-if="userProvince" v-for="cities in citiesData"
+                                        :key="cities.name">
+                                        <a class="dropdown-item" @click="selectCity(cities.name)">{{ cities.name }}</a>
                                     </div>
                                 </div>
                             </div>
@@ -201,7 +184,7 @@ async function cancelAppointment(id) {
                 </p>
             </div>
         </div>
-        <div class="table-container box" v-if="Object.keys(ongoingAppointments).length !== 0">
+        <div class="table-container" v-if="Object.keys(ongoingAppointments).length !== 0">
             <h1 class="title">Ongoing Appointments</h1>
             <table class="table is-striped is-narrow is-fullwidth is-bordered">
                 <thead>
@@ -210,6 +193,7 @@ async function cancelAppointment(id) {
                         <th class="has-text-black-ter">Schedule</th>
                         <th class="has-text-black-ter">Priority No.</th>
                         <th class="has-text-black-ter">Hospital Appointed</th>
+                        <th class="has-text-black-ter">Doctor Appointed</th>
                         <th class="has-text-black-ter">First Name</th>
                         <th class="has-text-black-ter">Last Name</th>
                         <th class="has-text-black-ter">Contact Number</th>
@@ -219,17 +203,13 @@ async function cancelAppointment(id) {
                 </thead>
                 <tbody v-for="appointments in ongoingAppointments" :key="appointments._id">
                     <tr>
-                        <button
-                            class="dropdown-item button has-text-danger"
-                            type="button"
-                            @click="cancelAppointment(appointments._id)"
-                        >Cancel</button>
+                        <button class="dropdown-item button has-text-danger" type="button"
+                            @click="cancelAppointment(appointments._id)">Cancel</button>
                         <br />
-                        <th
-                            class="has-text-black-ter"
-                        >{{ new Date(appointments.schedule[0].date).toDateString() }}</th>
+                        <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString() }}</th>
                         <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
                         <th class="has-text-black-ter">{{ appointments.hospital }}</th>
+                        <th class="has-text-black-ter">{{ appointments.doctorName }}</th>
                         <td class="has-text-black-ter">{{ appointments.firstName }}</td>
                         <td class="has-text-black-ter">{{ appointments.lastName }}</td>
                         <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
@@ -245,9 +225,9 @@ async function cancelAppointment(id) {
     </section>
 </template>
 <style scoped>
-@media (max-width: 991.98px) {
-    .box {
-        width: 100% !important;
+@media (max-width: 991.98px){
+    .section {
+        width: 100% !important
     }
 }
 </style>

@@ -1,8 +1,8 @@
 <script setup>
-import Home from '../../views/Public/Home'
+import HomeView from '../../views/Public/Home'
 </script>
 <template>
-    <Home />
+    <HomeView />
 </template>
 <style scoped>
 </style>

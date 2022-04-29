@@ -72,8 +72,8 @@ async function changePassword() {
 <template>
     <Navigation />
 
-    <section class="section">
-        <div class="box" style="width: 50%; margin: auto">
+    <section class="section" style="width: 75%; margin: auto">
+        <div class="container">
             <h1 class="title">Security</h1>
             <div class="notification is-danger" v-if="errMsg">Oops, something went wrong. Try again later or
                 <router-link :to="'/contactus'">contact us</router-link>
@@ -123,7 +123,7 @@ async function changePassword() {
 </template>
 <style scoped>
 @media (max-width: 991.98px) {
-    .box {
+    .section {
         width: 100% !important;
     }
 }
