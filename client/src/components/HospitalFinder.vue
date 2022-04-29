@@ -11,15 +11,9 @@
             <div class="dropdown-trigger">
                 <div class="field">
                     <div class="control">
-                        <input
-                            class="input"
-                            type="text"
-                            v-model="province"
-                            style="width: 300px;"
-                            placeholder="What region are you located?"
-                            @click="regionSelect"
-                            :disabled="locationPermissionDenied"
-                        />
+                        <input class="input" type="text" v-model="province" style="width: 300px;"
+                            placeholder="What region are you located?" @click="regionSelect"
+                            :disabled="locationPermissionDenied" />
                     </div>
                     <div class="notification is-light is-danger" v-if="locationPermissionDenied">
                         <a class="has-text-success" @click="getUserLocation">Enable</a> location to start booking an
@@ -28,12 +22,8 @@
                 </div>
                 <div class="dropdown-menu">
                     <div class="dropdown-content has-text-left">
-                        <a
-                            class="dropdown-item"
-                            v-for="geodata in geolocationIndexed"
-                            :key="geodata._id"
-                            @click="selectRegion(geodata.province)"
-                        >{{ geodata.province }}</a>
+                        <a class="dropdown-item" v-for="geodata in geolocationIndexed" :key="geodata._id"
+                            @click="selectRegion(geodata.province)">{{ geodata.province }}</a>
                     </div>
                 </div>
             </div>
@@ -42,11 +32,7 @@
     <div class="container block" v-if="citiesOrMunicipalities != ''">
         <br />
         <div class="block" v-if="this.checkUser == false">
-            <div
-                class="notification box"
-                id="notification"
-                style="width: 50%; margin: auto; background-color: white;"
-            >
+            <div class="notification box" id="notification" style="width: 50%; margin: auto; background-color: white;">
                 You must
                 <a class="has-text-success" href="/user/login">login</a>. or
                 <a class="has-text-danger" href="/user/signup">create an account</a>. to make an appointment.
@@ -58,13 +44,8 @@
                     <p class="title is-5">Filter</p>
                     <div class="field has-text-left">
                         <div class="control">
-                            <input
-                                class="input"
-                                type="text"
-                                v-model="hospital"
-                                style="width: 300px;"
-                                placeholder="Search Hospital..."
-                            />
+                            <input class="input" type="text" v-model="hospital" style="width: 300px;"
+                                placeholder="Search Hospital..." />
                         </div>
                     </div>
                     <hr />
@@ -87,60 +68,40 @@
                     <nav class="breadcrumb has-dot-separator" aria-label="breadcrumbs">
                         <ul>
                             <span style="color: #b5b5b5">&#183;</span>
-                            <li
-                                v-for="(cityorMunicipality, index) in citiesOrMunicipalities.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
-                                :key="index"
-                            >
-                                <a
-                                    @click="filterByCity(cityorMunicipality.name)"
-                                >{{ cityorMunicipality.name }}</a>
+                            <li v-for="(cityorMunicipality, index) in citiesOrMunicipalities.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
+                                :key="index">
+                                <a @click="filterByCity(cityorMunicipality.name)">{{ cityorMunicipality.name }}</a>
                             </li>
                         </ul>
                     </nav>
                 </ul>
             </div>
             <div class="column" v-if="geoHospitalNearestUser.length !== 0">
-                <div
-                    class="columns has-text-left box"
-                    id="hospital"
-                    style="margin-bottom: 5%"
+                <div class="columns has-text-left box" id="hospital" style="margin-bottom: 5%"
                     v-for="geoHospital in geoHospitalNearestUserIndexed.filter(x => x.type == this.filter1 || x.type == this.filter2).filter(x => x.city.includes(this.city))"
-                    :key="geoHospital._id"
-                >
+                    :key="geoHospital._id">
                     <div class="column is-5">
                         <figure class="image is-square">
-                            <img
-                                :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/managers/${geoHospital.hospital}.jpg`"
-                            />
+                            <img loading="lazy"
+                                :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/managers/${geoHospital.hospital}.jpg`" />
                         </figure>
                     </div>
                     <div class="column">
                         <h1 class="title">{{ geoHospital.hospital }}</h1>
-                        <p
-                            class="subtitle"
-                        >📌 {{ geoHospital.barangayORStreet }}, {{ geoHospital.city }}, {{ geoHospital.province }}</p>
-                        <iframe width="500" height="300" id="geoIframe"
-                            :src="`https://maps.google.com/maps?q=${geoHospital.location.coordinates[1]},${geoHospital.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"
-                        ></iframe>
+                        <p class="subtitle">📌 {{ geoHospital.barangayORStreet }}, {{ geoHospital.city }}, {{
+                                geoHospital.province
+                        }}</p>
+                        <iframe loading="lazy" width="500" height="300" id="geoIframe"
+                            :src="`https://maps.google.com/maps?q=${geoHospital.location.coordinates[1]},${geoHospital.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"></iframe>
                         <br />
                         <br />
                         <p class="subtitle">Contacts:</p>
-                        <ul
-                            class="block"
-                            v-if="typeof geoHospital.details[0].contacts !== 'undefined'"
-                        >
-                            <li
-                                v-for="contacts in geoHospital.details[0].contacts"
-                            >{{ contacts.contact }}</li>
+                        <ul class="block" v-if="typeof geoHospital.details[0].contacts !== 'undefined'">
+                            <li v-for="contacts in geoHospital.details[0].contacts">{{ contacts.contact }}</li>
                         </ul>
-                        <p
-                            class="subtitle"
-                        >{{ parseInt(geoHospital.distance) / 1000 }} km away from you.</p>
-                        <button
-                            class="button is-link"
-                            @click="bookAppointment(geoHospital)"
-                            v-if="checkUser"
-                        >Book an Appointment</button>
+                        <p class="subtitle">{{ parseInt(geoHospital.distance) / 1000 }} km away from you.</p>
+                        <button class="button is-link" @click="bookAppointment(geoHospital)" v-if="checkUser">Book an
+                            Appointment</button>
                     </div>
                 </div>
             </div>
@@ -229,12 +190,11 @@ export default {
             this.province = province
             this.citiesOrMunicipalities = this.geolocation.find(x => x.province === province)
             this.isActiveDropdown = false
-            this.$store.commit('disableCSSVH', false)
             await axios.post('/api/geoFindHospitalNearestUser', {
                 province: this.province,
                 latitude: this.userLatitude,
                 longitude: this.userLongitude
-            }).then(response =>  this.geoHospitalNearestUser = response.data )
+            }).then(response => this.geoHospitalNearestUser = response.data)
             this.isHospitalLoading = false
         },
         getUserLocation() {
@@ -268,12 +228,13 @@ export default {
 }
 </script>
 <style scoped>
-@media (max-width: 991.98px){
+@media (max-width: 991.98px) {
     #geoIframe {
         width: 75vw;
         height: 200px;
     }
 }
+
 .loader {
     border: 7px solid #f3f3f3;
     border-radius: 50%;
@@ -289,6 +250,7 @@ export default {
     0% {
         -webkit-transform: rotate(0deg);
     }
+
     100% {
         -webkit-transform: rotate(360deg);
     }
@@ -298,14 +260,17 @@ export default {
     0% {
         transform: rotate(0deg);
     }
+
     100% {
         transform: rotate(360deg);
     }
 }
+
 @media (max-width: 991.98px) {
     #notification {
         width: 100% !important;
     }
+
     #hospital {
         margin-bottom: 15% !important;
     }
