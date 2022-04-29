@@ -18,6 +18,24 @@ const verifySuperUser = (async (req, res) => {
     }
 });
 
+//for forgot password
+const verifyEmail = (async (req, res) => {
+    try {
+        const email = await authenticationCode.findOne({
+            email: req.body.email
+        });
+        if (!email) {
+            res.status(200).send(false)
+        } else {
+            res.status(200).send(true)
+        }
+    } catch (error) {
+        res.status(500).send({
+            message: error.message
+        })
+    }
+});
+
 const verifyCode = (async (req, res) => {
     try {
         const authCode = await authenticationCode.findOne({
@@ -84,6 +102,7 @@ const deleteCode = (async (req, res) => {
 
 module.exports = {
     verifySuperUser,
+    verifyEmail,
     verifyCode,
     pushCode,
     updateCode,
