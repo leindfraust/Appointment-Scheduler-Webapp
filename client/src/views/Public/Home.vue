@@ -1,6 +1,6 @@
 <template>
   <NavigationTabVue />
-  <section class="section has-text-centered" :class="{ 'css-vh': this.$store.state.disableCSSVH }">
+  <section class="section is-medium has-text-centered" >
     <HospitalFinderVue />
     <div class="container box" id="covidAPI" style="width: 70%;">
       <h1 class="title has-text-left">Latest COVID-19 Data</h1>
@@ -81,9 +81,6 @@ export default {
 </script>
 
 <style scoped>
-.css-vh {
-  height: 100vh;
-}
 .section {
   background-color: whitesmoke !important;
 }
