@@ -8,7 +8,6 @@ const store = createStore({
     state: {
         notificationClicked: false,
         accountCreated: false,
-        disableCSSVH: true,
         userAuth: false,
         superUserAuth: false,
         statusAvailability: false,
@@ -42,9 +41,6 @@ const store = createStore({
         },
         accountCreated(state, accountCreated) {
             state.accountCreated = accountCreated
-        },
-        disableCSSVH(state, disableCSSVH){
-            state.disableCSSVH = disableCSSVH
         },
         alias(state, alias) {
             state.alias = alias
