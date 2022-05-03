@@ -177,12 +177,32 @@ const pushPatientDoctor = ((req, res) => {
     }, function (error, success) {
         if (error) {
             console.log(error)
+            res.status(500)
         } else {
             console.log(success)
-            res.end()
+            res.status(200).end()
         }
     });
 });
+
+//get copy of doctor's messages to a patient
+const pushMessages = ((req, res) => {
+    Doctor.findOneAndUpdate({
+        _id: req.body.id}, {
+        $push: {
+            messageHistory: req.body.message
+        }, 
+    }, {
+        returnOriginal: false
+    }, ((err, success) => {
+        if(err) {
+            console.log(err)
+        } else {
+            console.log(success)
+            res.status(200).send(success.messageHistory)
+        }
+    }))
+})
 
 module.exports = {
     check_alias,
@@ -193,5 +213,6 @@ module.exports = {
     updateDoctor,
     deleteDoctor,
     pullDoctorHospital,
-    pushPatientDoctor
+    pushPatientDoctor,
+    pushMessages
 }

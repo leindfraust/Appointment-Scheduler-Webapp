@@ -28,15 +28,11 @@
                           </button>
                         </div>
                         <div class="dropdown-menu">
-                          <div
-                            class="dropdown-content"
-                            v-for="(patient, index) in patients.patients"
-                            :key="patient._id"
-                          >
-                            <a
-                              class="dropdown-item"
-                              @click="selectPatient(patient.patient, patient.patientName)"
-                            >{{ patient.patientName }}</a>
+                          <div class="dropdown-content" v-for="(patient, index) in patients.patients"
+                            :key="patient._id">
+                            <a class="dropdown-item" @click="selectPatient(patient.patient, patient.patientName)">{{
+                                patient.patientName
+                            }}</a>
                           </div>
                         </div>
                       </div>
@@ -52,17 +48,29 @@
               </div>
               <div class="field">
                 <div class="control has-text-right">
-                  <button
-                    class="button is-primary"
-                    @click="sendNotif"
-                    :disabled="selectedPatient == '' || noticeMsg == ''"
-                  >Send</button>
+                  <button class="button is-primary" @click="sendNotif"
+                    :disabled="selectedPatient == '' || noticeMsg == ''">Send</button>
                 </div>
               </div>
               <p v-if="notificationSent" class="has-text-success">
                 A message has been sent to
                 <b>{{ messageSuccessSelectedPatient }}</b>.
               </p>
+              <p class="subtitle">Messaging History</p>
+              <div v-if="Object.keys(messageHistory).length !== 0">
+              <div class="container" v-for="(message, index) in messageHistory" :key="index">
+                <div class="notification" style="margin: 5%">
+                  <div class="content">
+                    <p>To: {{message.to}}</p>
+                    <p>Message: {{message.message}}</p>
+                    <p>Date: {{new Date(message.date).toString()}}</p>
+                  </div>
+                </div>
+              </div>
+              </div>
+              <div v-else>
+                <p>No past messages yet.</p>
+              </div>
             </div>
           </div>
           <button class="modal-close is-large" aria-label="close" @click="modalInactive"></button>
@@ -71,29 +79,17 @@
           <div class="container is-widescreen is-fullhd" style="padding: 15">
             <h1 class="title">
               APPOINTMENT HISTORY
-              <button
-                class="button is-info"
-                @click="modalActive"
-              >Send a message to a patient</button>
+              <button class="button is-info" @click="modalActive">Send a message to a patient</button>
             </h1>
             <div class="field">
               <div class="control">
-                <input
-                  class="input"
-                  type="text"
-                  style="width: 50% !important"
-                  v-model="searchBar"
-                  placeholder="Search..."
-                />
+                <input class="input" type="text" style="width: 50% !important" v-model="searchBar"
+                  placeholder="Search..." />
               </div>
             </div>
             <div class="container" v-if="Object.keys(appointmentSchedules).length !== 0">
-              <div
-                class="box"
-                v-for="(appointmentList, index) in appointmentSchedules"
-                :key="index"
-                :class="{ 'is-hidden': new Date(index).toDateString() == new Date().toDateString() }"
-              >
+              <div class="box" v-for="(appointmentList, index) in appointmentSchedules" :key="index"
+                :class="{ 'is-hidden': new Date(index).toDateString() == new Date().toDateString() }">
                 <h1 class="subtitle has-text-black">Schedule: {{ new Date(index).toDateString() }}</h1>
                 <div class="table-container">
                   <table class="table is-striped is-narrow is-fullwidth is-bordered">
@@ -111,11 +107,8 @@
                     </thead>
                     <tbody v-for="appointments in appointmentList" :key="appointments._id">
                       <tr>
-                        <button
-                          class="dropdown-item button has-text-danger"
-                          type="button"
-                          @click="deleteData(appointments._id)"
-                        >Delete</button>
+                        <button class="dropdown-item button has-text-danger" type="button"
+                          @click="deleteData(appointments._id)">Delete</button>
                         <br />
                         <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
                         <th class="has-text-black-ter">{{ appointments.hospital }}</th>
@@ -154,11 +147,12 @@ export default {
       .then(
         (response) =>
         (this.appointmentSched = response.data.filter(
-          (x) => x.doctorID === this.$store.state.userID
+          (x) => x.doctorID === this.$store.state.doctorID
         ))
       );
     await axios.get('/api/doctor').then(response => this.patients = response.data.find(x => x.alias == this.alias))
     await axios.get('/session/doctor').then(response => this.doctorName = response.data.fullname)
+    await axios.get('/session/doctor').then(response => this.messageHistory = response.data.messageHistory.reverse())
   },
   data() {
     return {
@@ -172,7 +166,8 @@ export default {
       messageSuccessSelectedPatient: '',
       doctorName: '',
       noticeMsg: '',
-      notificationSent: false
+      notificationSent: false,
+      messageHistory: []
     }
   },
   computed: {
@@ -199,7 +194,7 @@ export default {
         .then(
           (response) =>
           (this.appointmentSched = response.data.filter(
-            (x) => x.doctor === this.$store.state.userID
+            (x) => x.doctor === this.$store.state.doctorID
           ))
         );
     },
@@ -222,8 +217,24 @@ export default {
       socket.disconnect()
     },
     async sendNotif() {
+      console.log(this.$store.state.doctorID)
       this.messageSuccessSelectedPatient = this.selectedPatient
       socket.emit('message', this.noticeMsg, this.doctorName, new Date())
+      await axios.post('/api/pushMsg', {
+        id: this.$store.state.doctorID,
+        message: {
+          to: this.selectedPatient,
+          message: this.noticeMsg,
+          date: new Date(),
+        }
+      }).then(response => this.messageHistory = response.data.reverse()).catch(err => {console.log(err)})
+      await axios.put('/session/doctor', {
+        messageHistory: {
+          to: this.selectedPatient,
+          message: this.noticeMsg,
+          date: new Date(),
+        }
+      })
       this.noticeMsg = ''
       this.selectedPatient = ''
       this.notificationSent = true

@@ -35,7 +35,8 @@ const doctorSchema = new Schema({
     specialist: Array,
     schedule: Array,
     patients: Array,
-    hospitalOrigin: Array
+    hospitalOrigin: Array,
+    messageHistory: Array
 });
 
 const doctor = mongoose.model('doctor', doctorSchema);

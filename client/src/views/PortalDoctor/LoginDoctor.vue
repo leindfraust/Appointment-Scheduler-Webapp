@@ -89,7 +89,8 @@ export default {
             gmail: this.userDoctor.gmail,
             hospitalOrigin: this.userDoctor.hospitalOrigin,
             schedule: this.userDoctor.schedule,
-            username: this.userDoctor.username
+            username: this.userDoctor.username,
+            messageHistory: this.userDoctor.messageHistory
           });
           store.commit("profileImg", cld.imageTag(`assets/doctors/${this.userDoctor.alias}.jpg`).toHtml());
           await this.$router.push(`/doctor/user/${this.userDoctor.alias}`);
