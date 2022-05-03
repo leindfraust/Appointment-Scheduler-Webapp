@@ -27,7 +27,7 @@
                                             x.new).length
                                     }}</span></i></span><span class="has-text-info" v-else><i
                                 class="fa-solid fa-bell"></i></span></a>
-                    <div class="navbar-dropdown is-right" v-if="notifications.length !== 0">
+                    <div class="navbar-dropdown is-right notif-list" v-if="notifications.length !== 0">
                         <div class="navbar-item" v-for="(notifs, index) in notifications.sort((a, b) => {
                             return new Date(b.date).getTime() - new Date(a.date).getTime()
                         })" :key="index">
@@ -148,8 +148,9 @@ export default {
 }
 </script>
 <style scoped>
-.dropdown-menu {
+.notif-list {
     max-height: 20em;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 </style>
