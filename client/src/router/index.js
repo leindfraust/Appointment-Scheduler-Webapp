@@ -237,7 +237,7 @@ router.beforeEach((to, from, next) => {
 
 router.beforeEach((to, from, next) => {
     if (to.matched.some(route => route.meta.requireSuccessPickDoctor)) {
-        if (store.state.userID) {
+        if (store.state.doctorID) {
             return next();
         } else {
             return next('/user/:user/registration');
