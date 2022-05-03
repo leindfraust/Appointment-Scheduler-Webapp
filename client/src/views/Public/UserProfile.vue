@@ -31,7 +31,7 @@ onMounted(async () => {
 const ongoingAppointments = computed(() => {
     return appointmentList.value.sort((a, b) => {
         return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
-    }).filter(x => { return new Date(x.schedule[0].date).getMonth() > new Date().getMonth() })
+    }).filter(x => { return new Date(x.schedule[0].date).getTime() >= new Date().getTime() && new Date(x.schedule[0].date).getMonth() >= new Date().getMonth() })
 })
 //methods
 async function selectProvince(province) {
@@ -225,7 +225,7 @@ async function cancelAppointment(id) {
     </section>
 </template>
 <style scoped>
-@media (max-width: 991.98px){
+@media (max-width: 991.98px) {
     .section {
         width: 100% !important
     }
