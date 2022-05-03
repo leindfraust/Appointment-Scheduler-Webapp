@@ -817,7 +817,6 @@ export default {
                 ticketActive: false
             });
             await axios.get("/api/superuser").then(response => this.ticketList = response.data[0].tickets)
-            console.log(await this.ticketList)
         },
         async reopenTicket(id) {
             await axios.post('/api/superuser/updateTicket', {
