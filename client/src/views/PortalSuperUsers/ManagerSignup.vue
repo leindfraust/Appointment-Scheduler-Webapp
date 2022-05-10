@@ -42,8 +42,8 @@
                                     <span v-else>{{ city }}</span>
                                 </button>
                             </div>
-                            <div class="dropdown-menu">
-                                <div class="dropdown-content" v-if="province" v-for="cities in citiesData"
+                            <div class="dropdown-menu" v-if="province">
+                                <div class="dropdown-content" v-for="cities in citiesData"
                                     :key="cities.name">
                                     <a class="dropdown-item" @click="selectCity(cities.name)">{{ cities.name }}</a>
                                 </div>
