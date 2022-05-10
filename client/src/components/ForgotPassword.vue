@@ -22,87 +22,89 @@ const props = defineProps({
 });
 
 async function forgotPasswordOTP() {
-    isLoading.value = true
-    let confirmEmail
-    let randomCode = Math.floor(1000 + Math.random() * 9000);
-    await axios.post('/api/code/email', {
-        email: props.email
-    }).then(response => confirmEmail = response.data)
-    if (confirmEmail) {
-        emailExists.value = true
-    } else {
-        if (props.userType == 'patient') {
-            await axios.post('/api/user/verify_username', {
-                username: props.username,
-                email: props.email
-            }).then(response => userData.value = response.data)
-            if (userData.value) {
-                noUserFound.value = false
-                try {
-                    await axios.post('/api/code', {
-                        email: props.email,
-                        code: randomCode
-                    });
-                    await axios.post('/api/OTPMail', {
-                        email: props.email,
-                        code: randomCode
-                    });
-                    codeSent.value = true
-                } catch (err) {
-                    errMsg.value = err
+    if (props.username != null || props.email != null) {
+        isLoading.value = true
+        let confirmEmail
+        let randomCode = Math.floor(1000 + Math.random() * 9000);
+        await axios.post('/api/code/email', {
+            email: props.email
+        }).then(response => confirmEmail = response.data)
+        if (confirmEmail) {
+            emailExists.value = true
+        } else {
+            if (props.userType == 'patient') {
+                await axios.post('/api/user/verify_username', {
+                    username: props.username,
+                    email: props.email
+                }).then(response => userData.value = response.data)
+                if (userData.value) {
+                    noUserFound.value = false
+                    try {
+                        await axios.post('/api/code', {
+                            email: props.email,
+                            code: randomCode
+                        });
+                        await axios.post('/api/OTPMail', {
+                            email: props.email,
+                            code: randomCode
+                        });
+                        codeSent.value = true
+                    } catch (err) {
+                        errMsg.value = err
+                    }
+                } else {
+                    noUserFound.value = true
                 }
-            } else {
-                noUserFound.value = true
-            }
-        } else if (props.userType == 'doctor') {
-            await axios.post('/api/doctor/verify_username', {
-                username: props.username,
-                email: props.email
-            }).then(response => userData.value = response.data)
-            if (userData.value) {
-                noUserFound.value = false
-                try {
-                    await axios.post('/api/code', {
-                        email: props.email,
-                        code: randomCode
-                    });
-                    await axios.post('/api/OTPMail', {
-                        email: props.email,
-                        code: randomCode
-                    });
-                    codeSent.value = true
-                } catch (err) {
-                    errMsg.value = err
+            } else if (props.userType == 'doctor') {
+                await axios.post('/api/doctor/verify_username', {
+                    username: props.username,
+                    email: props.email
+                }).then(response => userData.value = response.data)
+                if (userData.value) {
+                    noUserFound.value = false
+                    try {
+                        await axios.post('/api/code', {
+                            email: props.email,
+                            code: randomCode
+                        });
+                        await axios.post('/api/OTPMail', {
+                            email: props.email,
+                            code: randomCode
+                        });
+                        codeSent.value = true
+                    } catch (err) {
+                        errMsg.value = err
+                    }
+                } else {
+                    noUserFound.value = true
                 }
-            } else {
-                noUserFound.value = true
-            }
-        } else if (props.userType == 'manager') {
-            await axios.post('/api/manager/verify_username', {
-                username: props.username,
-                email: props.email
-            }).then(response => userData.value = response.data)
-            if (userData.value) {
-                noUserFound.value = false
-                try {
-                    await axios.post('/api/code', {
-                        email: props.email,
-                        code: randomCode
-                    });
-                    await axios.post('/api/OTPMail', {
-                        email: props.email,
-                        code: randomCode
-                    });
-                    codeSent.value = true
-                } catch (err) {
-                    errMsg.value = err
+            } else if (props.userType == 'manager') {
+                await axios.post('/api/manager/verify_username', {
+                    username: props.username,
+                    email: props.email
+                }).then(response => userData.value = response.data)
+                if (userData.value) {
+                    noUserFound.value = false
+                    try {
+                        await axios.post('/api/code', {
+                            email: props.email,
+                            code: randomCode
+                        });
+                        await axios.post('/api/OTPMail', {
+                            email: props.email,
+                            code: randomCode
+                        });
+                        codeSent.value = true
+                    } catch (err) {
+                        errMsg.value = err
+                    }
+                } else {
+                    noUserFound.value = true
                 }
-            } else {
-                noUserFound.value = true
             }
         }
+        isLoading.value = false
     }
-    isLoading.value = false
 }
 async function verifyCode() {
     let confirmCode
@@ -168,10 +170,8 @@ async function pushNewPassword() {
             <section class="section box" v-if="!codeSent">
                 <p class="title is-4 has-text-danger">Forgot Password</p>
                 <div class="notification is-danger" v-if="errMsg">{{ errMsg }}</div>
-                <div
-                    class="notification is-warning"
-                    v-if="noUserFound"
-                >No account has been found linked with this email.</div>
+                <div class="notification is-warning" v-if="noUserFound">No account has been found linked with this
+                    email.</div>
                 <div class="container" v-if="!emailExists">
                     <div class="field">
                         <div class="control">
@@ -187,19 +187,13 @@ async function pushNewPassword() {
                     </div>
                     <div class="field">
                         <div class="control">
-                            <button
-                                class="button"
-                                :class="{'is-loading': isLoading}"
-                                @click="forgotPasswordOTP"
-                                :disabled="email == ''"
-                            >Send OTP</button>
+                            <button class="button" :class="{ 'is-loading': isLoading }" @click="forgotPasswordOTP"
+                                :disabled="email == null || username == null">Send OTP</button>
                         </div>
                     </div>
                 </div>
-                <div
-                    class="notification is-danger"
-                    v-else
-                >You have to wait 10 minutes before requesting a code again.</div>
+                <div class="notification is-danger" v-else>You have to wait 10 minutes before requesting a code again.
+                </div>
             </section>
             <section class="section box" v-else>
                 <div class="container" v-if="!codeVerified">
@@ -232,18 +226,13 @@ async function pushNewPassword() {
                         </div>
                         <div class="field">
                             <div class="control">
-                                <button
-                                    class="button"
-                                    @click="pushNewPassword"
-                                    :disabled="newPassword == '' && confirmPassword == ''"
-                                >Confirm</button>
+                                <button class="button" @click="pushNewPassword"
+                                    :disabled="newPassword == '' && confirmPassword == ''">Confirm</button>
                             </div>
                         </div>
                     </div>
                     <div class="container" v-else>
-                        <div
-                            class="notification is-success"
-                        >Your password has been successfully changed.</div>
+                        <div class="notification is-success">Your password has been successfully changed.</div>
                     </div>
                 </div>
             </section>

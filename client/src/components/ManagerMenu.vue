@@ -33,7 +33,7 @@
         <p class="menu-label">Security</p>
         <ul class="menu-list">
             <li>
-                <a>Change Password</a>
+                <a @click="navChangePass">Change Password</a>
             </li>
             <li>
                 <a>Doctor Registration</a>
@@ -80,6 +80,9 @@ export default {
         },
         navDoctors() {
             this.$router.push(`/user/manager/${this.managerHospital}`)
+        },
+        navChangePass() {
+            this.$router.push(`/user/manager/${this.managerHospital}/security`)
         }
     }
 }

@@ -28,6 +28,7 @@ import Manager from '../views/PortalSuperUsers/Manager.vue'
 import ManagerLogin from '../views/PortalSuperUsers/ManagerLogin.vue'
 import ManagerSignup from '../views/PortalSuperUsers/ManagerSignup.vue'
 import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
+import ManagerSecurity from '../views/PortalSuperUsers/ManagerSecurity.vue'
 import ContactSupport from '../views/Public/ContactSupport.vue'
 import PageNotExist from '../views/Public/PageNotExist.vue'
 
@@ -55,6 +56,13 @@ const routes = [{
     {
         path: '/user/manager/:user/profile',
         component: ManagerProfile,
+        meta: {
+            requiresManagerAuth: true
+        }
+    },
+    {
+        path: '/user/manager/:user/security',
+        component: ManagerSecurity,
         meta: {
             requiresManagerAuth: true
         }

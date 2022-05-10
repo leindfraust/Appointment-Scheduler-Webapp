@@ -18,6 +18,7 @@
                                         v-model="username"
                                         placeholder="username"
                                         required
+                                        @keyup.enter="login"
                                     />
                                 </div>
                                 <div class="control" style="margin-top: 2%">
@@ -27,6 +28,7 @@
                                         v-model="password"
                                         placeholder="password"
                                         required
+                                        @keyup.enter="login"
                                     />
                                 </div>
                                 <p

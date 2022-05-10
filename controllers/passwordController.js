@@ -101,6 +101,55 @@ const doctorUpdatePassword = (async (req, res) => {
     })
 });
 
+const managerUpdatePassword = (async (req, res) => {
+    let managerID = req.body.managerID
+    let currentPassword = req.body.currentPassword
+    let newPassword = req.body.newPassword
+
+    Manager.findOne({
+        _id: managerID
+    }, async (err, result) => {
+        if (err) {
+            res.status(500).send(err)
+        } else {
+            userDetails = await result
+            bcrypt.compare(await currentPassword, result.password, async (err, result) => {
+                if (err) {
+                    res.status(500).send(err);
+                } else {
+                    if (result == true) {
+                        bcrypt.hash(await newPassword, 10, (err, hash) => {
+
+                            if (err) {
+                                res.status(500).send(err)
+                            } else {
+                                Manager.findOneAndUpdate({
+                                    _id: managerID
+                                }, {
+                                    $set: {
+                                        password: hash
+                                    }
+                                }, {
+                                    returnOriginal: false,
+                                }, (err, success) => {
+                                    if (err) {
+                                        res.status(500).send(err)
+                                    } else {
+                                        res.status(200).send(true)
+                                    }
+                                })
+                            }
+
+                        });
+                    } else {
+                        res.status(200).send(false)
+                    }
+                }
+            })
+        }
+    })
+});
+
 
 const patientfUpdatePassword = (async (req, res) => {
     let patientID = req.body.patientID
@@ -192,6 +241,7 @@ const managerfUpdatePassword = (async (req, res) => {
 module.exports = {
     patientUpdatePassword,
     doctorUpdatePassword,
+    managerUpdatePassword,
     patientfUpdatePassword,
     managerfUpdatePassword,
     doctorfUpdatePassword
