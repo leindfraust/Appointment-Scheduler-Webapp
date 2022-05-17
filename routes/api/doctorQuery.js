@@ -3,7 +3,8 @@ const router = express.Router();
 const {
     pushPatientDoctor,
     pullDoctorHospital,
-    pushMessages
+    pushMessages,
+    checkAvailabilityDoctors
 } = require('../../controllers/doctorController')
 
 //pull doctor from a hospital
@@ -13,5 +14,7 @@ router.post('/doctorPullHospital', pullDoctorHospital);
 router.post('/patientUpdate', pushPatientDoctor);
 
 router.post('/pushMsg', pushMessages)
+
+router.post('/checkDoctorAvailability', checkAvailabilityDoctors)
 
 module.exports = router;

@@ -11,21 +11,19 @@
       <div class="column">
         <div class="container box" v-if="hospitalDetails">
           <h1 class="title">{{ hospitalDetails.hospital }}</h1>
-          <p
-            class="subtitle"
-          >📌 {{ hospitalDetails.barangayORStreet }}, {{ hospitalDetails.city }}, {{ hospitalDetails.province }}</p>
+          <p class="subtitle">📌 {{ hospitalDetails.barangayORStreet }}, {{ hospitalDetails.city }}, {{
+              hospitalDetails.province
+          }}</p>
           <p class="subtitle is-6">{{ hospitalDetails.details[0].description }}</p>
           <figure class="image is-16by9">
             <img
-              :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/managers/${hospitalDetails.hospital}.jpg`"
-            />
+              :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/managers/${hospitalDetails.hospital}.jpg`" />
           </figure>
           <br />
           <div class="columns">
             <div class="column">
               <iframe
-                :src="`https://maps.google.com/maps?q=${hospitalDetails.location.coordinates[1]},${hospitalDetails.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"
-              ></iframe>
+                :src="`https://maps.google.com/maps?q=${hospitalDetails.location.coordinates[1]},${hospitalDetails.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"></iframe>
             </div>
             <div class="column">
               <p class="subtitle">Contacts:</p>
@@ -42,27 +40,18 @@
             <h1 class="title">Pick a specialist.</h1>
             <p class="subtitle" v-if="!specializationClicked">
               Having trouble picking a specialist? Get appointed to a
-              <a
-                class="has-text-link"
-                @click="getDoctors('General Practitioner')"
-              >General Practitioner</a>.
+              <a class="has-text-link" @click="getDoctors('General Practitioner')">General Practitioner</a>.
             </p>
             <div class="columns is-multiline is-mobile" v-if="!specializationClicked">
               <div class="column is-4" v-for="(specialist, index) in specialistList" :key="index">
                 <a @click="getDoctors(specialist.specialist)">
-                  <figure
-                    class="image is-4by3"
-                    v-if="specialist.specialist !== 'General Practitioner'"
-                  >
-                    <img
-                      :src="`https://ui-avatars.com/api/?name=${specialist.specialist}`
-                      "
-                    />
+                  <figure class="image is-4by3" v-if="specialist.specialist !== 'General Practitioner'">
+                    <img :src="`https://ui-avatars.com/api/?name=${specialist.specialist}`
+                    " />
                   </figure>
-                  <p
-                    class="subtitle has-text-centered"
-                    v-if="specialist.specialist !== 'General Practitioner'"
-                  >{{ specialist.specialist }}</p>
+                  <p class="subtitle has-text-centered" v-if="specialist.specialist !== 'General Practitioner'">{{
+                      specialist.specialist
+                  }}</p>
                 </a>
               </div>
             </div>
@@ -70,35 +59,24 @@
               <button class="button" @click="viewSpecializations">⬅️ Specializations</button>
               <div v-if="doctorList == ''">
                 <br />
-                <p
-                  class="subtitle has-text-centered"
-                >No doctors are currently available in this specialization.</p>
+                <p class="subtitle has-text-centered">No doctors are currently available in this specialization.</p>
               </div>
               <div v-else>
-                <br/>
+                <br />
                 <h1 class="title is-3">Choose a doctor:</h1>
               </div>
-              <div
-                v-if="specializationClicked"
-                class="card-content"
-                v-for="doctors in doctorList"
-                :key="doctors._id"
-              >
+              <div v-if="specializationClicked" class="card-content" v-for="doctors in doctorList" :key="doctors._id">
                 <div class="media">
                   <figure class="media-left">
                     <p class="image is-64x64">
                       <img
-                        :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${doctors.alias}.jpg`"
-                      />
+                        :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${doctors.alias}.jpg`" />
                     </p>
                   </figure>
                   <div class="media-content">
                     <p class="title is-4">{{ doctors.name }}</p>
                     <p class="subtitle is-6">{{ pickedSpecialist }}</p>
-                    <button
-                      class="button"
-                      @click="pickDoctor(doctors)"
-                    >Appoint</button>
+                    <button class="button" @click="pickDoctor(doctors)">Appoint</button>
                   </div>
                 </div>
               </div>
@@ -141,9 +119,10 @@ export default {
       this.isDoctorLoading = true
       this.specializationClicked = true
       this.pickedSpecialist = specialization;
-      await axios
-        .get("/api/doctor")
-        .then((response) => (this.doctorList = response.data.filter((x) => x.verified === true && x.hospitalOrigin.find(x => x.hospital === this.hospitalDetails.hospital) && x.specialist.find(x => x === specialization) && x.schedule != "" && x.schedule.find(x => new Date(x.date).getTime() > new Date().getTime()))));
+      await axios.post("/api/checkDoctorAvailability", {
+        hospital: this.hospitalDetails.hospital,
+        specialist: specialization
+      }).then(response => response ? this.doctorList = response.data.filter(x => x.schedule.find(x => new Date(x.date).getTime() > new Date().getTime())) : this.doctorList = '').catch(err => console.log(err))
       this.isDoctorLoading = false
     },
     viewSpecializations() {
@@ -166,14 +145,17 @@ export default {
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
 .doctorContainer {
   width: 50% !important;
 }
+
 @media (max-width: 991.98px) {
   .doctorContainer {
     width: 97% !important;
   }
 }
+
 .loader {
   border: 7px solid #f3f3f3;
   border-radius: 50%;
@@ -189,6 +171,7 @@ export default {
   0% {
     -webkit-transform: rotate(0deg);
   }
+
   100% {
     -webkit-transform: rotate(360deg);
   }
@@ -198,14 +181,17 @@ export default {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
 }
+
 @media (max-width: 991.98px) {
   #notification {
     width: 100% !important;
   }
+
   #hospital {
     margin-bottom: 15% !important;
   }

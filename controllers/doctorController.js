@@ -20,6 +20,27 @@ const getDoctors = (async (req, res) => {
     }
 });
 
+const checkAvailabilityDoctors = (async (req, res) => {
+    hospital = req.body.hospital
+    specialist = req.body.specialist
+    try {
+        const availableDoctors = await Doctor.find({
+            verified: true,
+            "hospitalOrigin.hospital": hospital,
+            specialist: specialist,
+            schedule: {$exists: true, $not: {$size: 0}} 
+        }).select('-password -username -licenseNo -messageHistory -gmail -specialist -hospitalOrigin');
+        if (availableDoctors) {
+            res.status(200).send(availableDoctors)
+        } else {
+            res.status(200).send(false)
+        }
+    } catch (err) {
+        res.status(500).send(err)
+        console.log(err)
+    }
+})
+
 const check_alias = (async (req, res) => {
     let alias = await req.body.alias
     try {
@@ -188,14 +209,15 @@ const pushPatientDoctor = ((req, res) => {
 //get copy of doctor's messages to a patient
 const pushMessages = ((req, res) => {
     Doctor.findOneAndUpdate({
-        _id: req.body.id}, {
+        _id: req.body.id
+    }, {
         $push: {
             messageHistory: req.body.message
-        }, 
+        },
     }, {
         returnOriginal: false
     }, ((err, success) => {
-        if(err) {
+        if (err) {
             console.log(err)
         } else {
             console.log(success)
@@ -207,6 +229,7 @@ const pushMessages = ((req, res) => {
 module.exports = {
     check_alias,
     check_username,
+    checkAvailabilityDoctors,
     verify_username,
     getDoctors,
     pushDoctor,
