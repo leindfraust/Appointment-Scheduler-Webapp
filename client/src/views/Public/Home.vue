@@ -1,43 +1,47 @@
 <template>
   <NavigationTabVue />
-  <section class="section is-medium has-text-centered" >
-    <HospitalFinderVue />
-    <div class="container box" id="covidAPI" style="width: 70%;">
-      <h1 class="title has-text-left">Latest COVID-19 Data</h1>
-      <hr>
-      <div class="columns">
-        <div class="column">
-          <h4 class="title is-2">Worldwide 🌎</h4>
-          <div class="container is-fluid has-text-left">
-            <p class="subtitle">
-              <b>Total Active Cases:</b>
-              {{ covidAPIWorldWide.active }}+
-            </p>
-            <p class="subtitle">
-              <b>Total Deaths:</b>
-              {{ covidAPIWorldWide.deaths }}+
-            </p>
-            <p class="subtitle">
-              <b>Total Recoveries:</b>
-              {{ covidAPIWorldWide.recovered }}+
-            </p>
-          </div>
-        </div>
-        <div class="column">
-          <h4 class="title is-2">Philippines 🇵🇭</h4>
-          <div class="container is-fluid has-text-left">
-            <p class="subtitle">
-              <b>Total Active Cases:</b>
-              {{ covidAPIPh.active }}+
-            </p>
-            <p class="subtitle">
-              <b>Total Deaths:</b>
-              {{ covidAPIPh.deaths }}+
-            </p>
-            <p class="subtitle">
-              <b>Total Recoveries:</b>
-              {{ covidAPIPh.recovered }}+
-            </p>
+  <section class="hero is-fullheight">
+    <div class="hero-body">
+      <div class="container has-text-centered">
+        <HospitalFinderVue />
+        <div class="container box" id="covidAPI" style="width: 70%;">
+          <h1 class="title has-text-left">Latest COVID-19 Data</h1>
+          <hr>
+          <div class="columns">
+            <div class="column">
+              <h4 class="title is-2">Worldwide 🌎</h4>
+              <div class="container is-fluid has-text-left">
+                <p class="subtitle">
+                  <b>Total Active Cases:</b>
+                  {{ covidAPIWorldWide.active }}+
+                </p>
+                <p class="subtitle">
+                  <b>Total Deaths:</b>
+                  {{ covidAPIWorldWide.deaths }}+
+                </p>
+                <p class="subtitle">
+                  <b>Total Recoveries:</b>
+                  {{ covidAPIWorldWide.recovered }}+
+                </p>
+              </div>
+            </div>
+            <div class="column">
+              <h4 class="title is-2">Philippines 🇵🇭</h4>
+              <div class="container is-fluid has-text-left">
+                <p class="subtitle">
+                  <b>Total Active Cases:</b>
+                  {{ covidAPIPh.active }}+
+                </p>
+                <p class="subtitle">
+                  <b>Total Deaths:</b>
+                  {{ covidAPIPh.deaths }}+
+                </p>
+                <p class="subtitle">
+                  <b>Total Recoveries:</b>
+                  {{ covidAPIPh.recovered }}+
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -81,9 +85,10 @@ export default {
 </script>
 
 <style scoped>
-.section {
+.hero {
   background-color: whitesmoke !important;
 }
+
 @media (max-width: 991.98px) {
   #covidAPI {
     width: 100% !important;
