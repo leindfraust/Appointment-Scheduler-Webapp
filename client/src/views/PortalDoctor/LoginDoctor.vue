@@ -53,7 +53,7 @@ export default {
       .then((response) => (this.userDoctor = response.data));
     if (await this.userDoctor.alias) {
       store.commit("alias", this.userDoctor.alias);
-      store.commit("userID", this.userDoctor._id);
+      store.commit("doctorID", this.userDoctor._id);
       store.commit("profileImg", cld.imageTag(`assets/doctors/${this.userDoctor.alias}.jpg`).toHtml());
       await this.$router.push(`/doctor/user/${this.userDoctor.alias}`);
     }

@@ -197,7 +197,7 @@ export default {
       .then(
         (response) =>
         (this.appointmentSched = response.data.filter(
-          (x) => x.doctorID === store.state.userID
+          (x) => x.doctorID === store.state.doctorID
         ))
       );
   },
