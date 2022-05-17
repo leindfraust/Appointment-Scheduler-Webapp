@@ -3,6 +3,7 @@
       "./src/**/*"
     ],
     "vueCompilerOptions": {
-      "experimentalDisableTemplateSupport": true
+      "experimentalDisableTemplateSupport": true,
+      "experimentalShamefullySupportOptionsApi": true
     }
   }
