@@ -16,46 +16,21 @@
                   <div class="content has-text-centered">
                     <div class="control block">
                       <label class="label">Prefix:</label>
-                      <input
-                        class="input"
-                        type="text"
-                        maxlength="10"
-                        v-model="prefix"
-                        style="width: 33%;"
-                        placeholder="e.g. ROOM305"
-                      />
+                      <input class="input" type="text" maxlength="10" v-model="prefix" style="width: 33%;"
+                        placeholder="e.g. ROOM305" />
                     </div>
                     <label class="label">Time start:</label>
-                    <v-date-picker
-                      v-model="timeStart"
-                      mode="time"
-                      :timezone="timezone"
-                      class="block"
-                    />
+                    <v-date-picker v-model="timeStart" mode="time" :timezone="timezone" class="block" />
                     <br />
                     <label class="label">Time end:</label>
-                    <v-date-picker
-                      v-model="timeEnd"
-                      mode="time"
-                      :timezone="timezone"
-                      class="block"
-                    />
+                    <v-date-picker v-model="timeEnd" mode="time" :timezone="timezone" class="block" />
                     <div class="control block">
                       <label class="label">Appointment limit:</label>
-                      <input
-                        class="input"
-                        type="number"
-                        v-model="appointmentLimits"
-                        style="width: 33%;"
-                      />
+                      <input class="input" type="number" v-model="appointmentLimits" style="width: 33%;" />
                     </div>
                     <div class="block">
-                      <button
-                        class="button is-primary"
-                        type="button"
-                        @click="addSched"
-                        :disabled="prefix == ''"
-                      >Confirm</button>
+                      <button class="button is-primary" type="button" @click="addSched"
+                        :disabled="prefix == ''">Confirm</button>
                     </div>
                   </div>
                 </div>
@@ -70,47 +45,26 @@
           </div>
           <div class="columns">
             <div class="column">
-              <div
-                class="notification is-success has-text-centered"
-                v-if="uploadSchedSuccess"
-              >Schedules Added/Updated!</div>
-              <v-calendar
-                :columns="$screens({ default: 1, lg: 2 })"
-                :rows="$screens({ default: 1, lg: 2 })"
-                :is-expanded="$screens({ default: true, lg: false })"
-                v-model="date"
-                :min-date="new Date()"
-                :attributes="attributes"
-                @dayclick="modalUp"
-                :timezone="timezone"
-              />
+              <div class="notification is-success has-text-centered" v-if="uploadSchedSuccess">Schedules Added/Updated!
+              </div>
+              <v-calendar :columns="$screens({ default: 1, lg: 2 })" :rows="$screens({ default: 1, lg: 2 })"
+                :is-expanded="$screens({ default: true, lg: false })" v-model="date" :min-date="new Date()"
+                :attributes="attributes" @dayclick="modalUp" :timezone="timezone" />
             </div>
             <div class="column">
               <div class="container">
                 <h1 class="subtitle">Ongoing Schedules:</h1>
-                <div
-                  class="columns is-multiline"
-                  style="overflow: scroll; max-height: 30em"
-                  v-if="Object.keys(daysIndexed).length !== 0"
-                >
-                  <div
-                    class="column is-6"
-                    v-for="(schedules, index) in daysIndexed"
-                    :key="schedules.id"
-                  >
+                <div class="columns is-multiline" style="overflow: scroll; max-height: 30em"
+                  v-if="Object.keys(daysIndexed).length !== 0">
+                  <div class="column is-6" v-for="(schedules, index) in daysIndexed" :key="schedules.id">
                     <div class="block card">
                       <div class="card-content">
                         <div class="content">
-                          <p
-                            class="title is-4 has-text-black has-text-left"
-                          >{{ new Date(schedules.date).toDateString() }}</p>
+                          <p class="title is-4 has-text-black has-text-left">{{ new Date(schedules.date).toDateString()
+                          }}</p>
                           <p class="has-text-black">Prefix: {{ schedules.prefix }}</p>
-                          <p
-                            class="has-text-black"
-                          >{{ schedules.timeStart }} - {{ schedules.timeEnd }}</p>
-                          <p
-                            class="has-text-black"
-                          >Appointment limit: {{ schedules.appointmentLimit }}</p>
+                          <p class="has-text-black">{{ schedules.timeStart }} - {{ schedules.timeEnd }}</p>
+                          <p class="has-text-black">Appointment limit: {{ schedules.appointmentLimit }}</p>
                         </div>
                       </div>
                     </div>
@@ -186,7 +140,7 @@ export default {
   methods: {
     async onDayClick(day) {
       this.loading = true
-      await this.days.push({
+      this.days.push({
         id: day.id,
         date: day.date,
         timeStart: this.timeStart.toLocaleTimeString(),
@@ -209,28 +163,30 @@ export default {
       this.loading = false
     },
     async modalUp(day) {
-      this.isActive = true;
-      const idx = this.days.findIndex((d) => d.id === day.id);
-      if (await idx >= 0) {
-        this.loading = true
-        this.days.splice(idx, 1);
-        this.isActive = false;
-        await axios.put(`/api/doctor/${this.userID}`, {
-          schedule: this.days,
-        });
-        await axios.put("/session/doctor", {
-          schedule: this.days,
-        });
-        await axios
-          .get("/session/doctor")
-          .then((response) => (this.days = response.data.schedule));
+      if (!day?.isDisabled) {
+        this.isActive = true;
+        const idx = this.days.findIndex((d) => d.id === day.id);
+        if (idx >= 0) {
+          this.loading = true
+          this.days.splice(idx, 1);
+          this.isActive = false;
+          await axios.put(`/api/doctor/${this.userID}`, {
+            schedule: this.days,
+          });
+          await axios.put("/session/doctor", {
+            schedule: this.days,
+          });
+          await axios
+            .get("/session/doctor")
+            .then((response) => (this.days = response.data.schedule));
 
-        this.uploadSchedSuccess = true
-        this.loading = false
+          this.uploadSchedSuccess = true
+          this.loading = false
+        }
+        this.day = day;
+        this.timeStart = day.date;
+        this.timeEnd = day.date;
       }
-      this.day = day;
-      this.timeStart = day.date;
-      this.timeEnd = day.date;
     },
     addSched(day) {
       day = this.day;
