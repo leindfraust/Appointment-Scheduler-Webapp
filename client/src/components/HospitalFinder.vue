@@ -21,9 +21,14 @@
                     </div>
                 </div>
                 <div class="dropdown-menu">
-                    <div class="dropdown-content has-text-left">
+                    <div class="dropdown-content has-text-left" v-if="Object.keys(geolocationIndexed).length !== 0">
                         <a class="dropdown-item" v-for="geodata in geolocationIndexed" :key="geodata._id"
                             @click="selectRegion(geodata.province)">{{ geodata.province }}</a>
+                    </div>
+                    <div class="dropdown-content has-text-left" v-else>
+                        <p class="dropdown-item has-text-danger">
+                            Region not found or supported, please try again.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -128,7 +133,7 @@ export default {
     },
     async created() {
         await axios.get('/api/geolocation').then(response => this.geolocation = response.data)
-        await this.getUserLocation();
+        this.getUserLocation();
     },
     async mounted() {
         if (this.$store.state.patientID !== null) {
