@@ -295,7 +295,7 @@ export default {
                     email: this.gmail,
                     code: randomCode
                 });
-            } else if (typeof confirmCode === undefined || !confirmEmail) {
+            } else if (typeof confirmCode === 'undefined' || !confirmEmail) {
                 this.isActiveModal = true
                 await axios.post("/api/code", {
                     email: this.gmail,

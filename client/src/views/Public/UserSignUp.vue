@@ -98,8 +98,8 @@
                       <span v-else>{{ city }}</span>
                     </button>
                   </div>
-                  <div class="dropdown-menu">
-                    <div class="dropdown-content" v-if="province" v-for="cities in citiesData" :key="cities.name">
+                  <div class="dropdown-menu" v-if="province">
+                    <div class="dropdown-content" v-for="cities in citiesData" :key="cities.name">
                       <a class="dropdown-item" @click="selectCity(cities.name)">{{ cities.name }}</a>
                     </div>
                   </div>
@@ -116,16 +116,17 @@
           </p>
         </div>
         <div class="field">
-          <p class="control">
+          <div class="control">
             <label class="label">Username:</label>
-          <div v-if="usernameFound !== ''">
-            <p class="help is-danger" v-if="usernameFound">Unavailable<i class="fas fa-spinner fa-spin"
-                v-if="loadingUsername"></i></p>
-            <p class="help is-success" v-else>Available<i class="fas fa-spinner fa-spin" v-if="loadingUsername"></i></p>
+            <div v-if="usernameFound !== ''">
+              <p class="help is-danger" v-if="usernameFound">Unavailable<i class="fas fa-spinner fa-spin"
+                  v-if="loadingUsername"></i></p>
+              <p class="help is-success" v-else>Available<i class="fas fa-spinner fa-spin" v-if="loadingUsername"></i>
+              </p>
+            </div>
+            <input class="input" type="text" placeholder="username" v-model="username" @input="usernameFindTimeout"
+              required />
           </div>
-          <input class="input" type="text" placeholder="username" v-model="username" @input="usernameFindTimeout"
-            required />
-          </p>
         </div>
         <div class="field is-horizontal">
           <div class="field-body">
@@ -161,26 +162,20 @@
 </template>
 <script>
 import axios from 'axios'
-import NavigationTabVue from '../../components/NavigationTab.vue';
 
 export default {
   username: "UserSignUp",
-  components: {
-    NavigationTabVue
-  },
-  props: {
-    firstName: String,
-    lastName: String,
-    age: Number,
-    contactNum: Number,
-    gmail: String,
-    currentAddress: String,
-    username: String,
-    password: String,
-    passwordRepeat: String
-  },
   data() {
     return {
+      firstName: '',
+      lastName: '',
+      age: '',
+      contactNum: '',
+      gmail: '',
+      currentAddress: '',
+      uername: '',
+      password: '',
+      passwordRepeat: '',
       sex: null,
       passwordMatch: '',
       geolocationData: [],
@@ -243,14 +238,13 @@ export default {
     cityDropdown() {
       this.isActiveDropdownCity = !this.isActiveDropdownCity
     },
-    async signup(e) {
-      if ((await this.password) !== this.passwordRepeat) {
+    async signup() {
+      if ((this.password) !== this.passwordRepeat) {
         this.passwordMatch = "password do not match";
       } else {
         this.passwordMatch = null;
       }
-      if (await
-        this.password === this.passwordRepeat &&
+      if (this.password === this.passwordRepeat &&
         !this.usernameFound
       ) {
         try {

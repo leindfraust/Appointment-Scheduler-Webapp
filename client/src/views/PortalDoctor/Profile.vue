@@ -31,23 +31,13 @@
             <div class="columns is-gapless">
               <div class="column is-6">
                 <span id="profile-img" v-html="profileImg"></span>
-                <form
-                  id="formUpload"
-                  action="/api/imgUpload"
-                  method="post"
-                  enctype="multipart/form-data"
-                  style="margin: auto; width: 50%"
-                  class="field"
-                >
+                <form id="formUpload" action="/api/imgUpload" method="post" enctype="multipart/form-data"
+                  style="margin: auto; width: 50%" class="field">
                   <div class="control">
                     <input type="hidden" name="alias" :value="(alias)" />
                     <input class="input" type="file" name="imgFile" @click="imgSuccess" required />
                     <div class="has-text-centered">
-                      <button
-                        type="submit"
-                        value="Upload"
-                        class="button is-primary"
-                      >Change profile picture</button>
+                      <button type="submit" value="Upload" class="button is-primary">Change profile picture</button>
                     </div>
                   </div>
                 </form>
@@ -59,13 +49,8 @@
                     <label class="label">
                       <b>License No.</b>
                     </label>
-                    <input
-                      class="input"
-                      type="text"
-                      v-model="licenseNo"
-                      style="width: 33%"
-                      :disabled="verified == true"
-                    />
+                    <input class="input" type="text" v-model="licenseNo" style="width: 33%"
+                      :disabled="verified == true" />
                   </div>
                 </div>
                 <div class="field is-horizontal">
@@ -75,13 +60,7 @@
                         <label class="label">
                           <b>Full Name:</b>
                         </label>
-                        <input
-                          class="input"
-                          size="5"
-                          type="text"
-                          v-model="fullname"
-                          :disabled="verified == true"
-                        />
+                        <input class="input" size="5" type="text" v-model="fullname" :disabled="verified == true" />
                       </div>
                     </div>
                     <div class="field">
@@ -89,29 +68,16 @@
                         <label class="label">
                           <b>Gmail:</b>
                         </label>
-                        <input
-                          class="input"
-                          size="5"
-                          type="text"
-                          v-model="gmail"
-                          :disabled="verified == true"
-                        />
+                        <input class="input" size="5" type="text" v-model="gmail" :disabled="verified == true" />
                       </div>
                     </div>
                   </div>
                 </div>
                 <div class="field">
                   <div class="control">
-                    <button
-                      v-if="!verified"
-                      class="button is-link"
-                      type="button"
-                      @click="updateInfo"
-                    >Save changes</button>
-                    <div
-                      v-if="infoValidate"
-                      class="notification is-success is-light"
-                    >{{ infoValidateMessage }}</div>
+                    <button v-if="!verified" class="button is-link" type="button" @click="updateInfo">Save
+                      changes</button>
+                    <div v-if="infoValidate" class="notification is-success is-light">{{ infoValidateMessage }}</div>
                   </div>
                 </div>
                 <div class="field">
@@ -119,27 +85,19 @@
                     <label class="label">
                       <b>Managed Hospitals:</b>
                     </label>
-                    <button class="button" v-for="hospitals in hospitalOrigin">
+                    <button class="button" v-for="hospitals in hospitalOrigin" :key="hospitals.hospital">
                       {{ hospitals.hospital }}&nbsp;
-                      <span
-                        class="has-text-danger"
-                        @click="pullHospital(hospitals.hospital)"
-                      >x</span>
+                      <span class="has-text-danger" @click="pullHospital(hospitals.hospital)">x</span>
                     </button>&nbsp;
                     <div class="dropdown" :class="{ 'is-active': isActiveDropdownHospital }">
                       <div class="dropdown-trigger">
                         <button @click="dropdownHospital" class="button">+</button>
                       </div>
                       <div class="dropdown-menu">
-                        <div
-                          class="dropdown-content"
-                          v-for="(hospitals, index) in hospitalList"
-                          :key="index"
-                        >
-                          <a
-                            class="dropdown-item"
-                            @click="promptVerificationHospital(hospitals.hospital)"
-                          >{{ hospitals.hospital }}</a>
+                        <div class="dropdown-content" v-for="(hospitals, index) in hospitalList" :key="index">
+                          <a class="dropdown-item" @click="promptVerificationHospital(hospitals.hospital)">{{
+                              hospitals.hospital
+                          }}</a>
                         </div>
                       </div>
                     </div>
@@ -150,32 +108,18 @@
                     <label class="label">
                       <b>Specializations:</b>
                     </label>
-                    <button
-                      class="button"
-                      style="margin: 5px"
-                      v-for="(specializations, index) in specialist"
-                      :key="index"
-                    >
+                    <button class="button" style="margin: 5px" v-for="(specializations, index) in specialist"
+                      :key="index">
                       {{ specializations }}&nbsp;
-                      <span
-                        class="has-text-danger"
-                        @click="pullSpecialization(specializations)"
-                      >x</span>
+                      <span class="has-text-danger" @click="pullSpecialization(specializations)">x</span>
                     </button>&nbsp;
                     <div class="dropdown" :class="{ 'is-active': isActiveDropdownSpecialist }">
                       <div class="dropdown-trigger">
                         <button @click="dropdownSpecialist" class="button">+</button>
                       </div>
                       <div class="dropdown-menu">
-                        <div
-                          class="dropdown-content"
-                          v-for="(specialist, index) in specializationList"
-                          :key="index"
-                        >
-                          <a
-                            class="dropdown-item"
-                            @click="addSpecialization(specialist)"
-                          >{{ specialist }}</a>
+                        <div class="dropdown-content" v-for="(specialist, index) in specializationList" :key="index">
+                          <a class="dropdown-item" @click="addSpecialization(specialist)">{{ specialist }}</a>
                         </div>
                       </div>
                     </div>
@@ -194,21 +138,14 @@
                 </div>
                 <br />
                 <div class="has-text-centered">
-                  <button
-                    class="button is-primary"
-                    @click="addHospital"
-                    :disabled="verificationCode == ''"
-                  >Confirm</button>
+                  <button class="button is-primary" @click="addHospital"
+                    :disabled="verificationCode == ''">Confirm</button>
                 </div>
-                <div
-                  v-if="errorCode"
-                  class="notification is-danger"
-                >Invalid login code, please check your email thoroughly.</div>
+                <div v-if="errorCode" class="notification is-danger">Invalid login code, please check your email
+                  thoroughly.</div>
               </div>
-              <div
-                class="notification is-danger"
-                v-else
-              >You can only request a verification code once, please try again in 10 minutes.</div>
+              <div class="notification is-danger" v-else>You can only request a verification code once, please try again
+                in 10 minutes.</div>
             </div>
             <button class="modal-close is-large" aria-label="close" @click="modalClose"></button>
           </div>
@@ -221,7 +158,6 @@
 <script>
 import store from "../../store";
 import axios from "axios";
-import cld from '../../cloudinary'
 import DoctorMenu from "../../components/DoctorMenu.vue";
 
 export default {
@@ -412,17 +348,21 @@ export default {
   margin: auto;
   width: 50%;
 }
+
 .dropdown-menu {
   max-height: 12em;
   overflow: auto;
 }
+
 @media (max-width: 991.98px) {
   #profile-image {
     width: 100% !important;
   }
+
   form {
     width: 100% !important;
   }
+
   .input {
     width: 100% !important;
   }

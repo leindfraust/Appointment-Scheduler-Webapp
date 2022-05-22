@@ -1,6 +1,6 @@
 <template>
-  <NavigationTabVue />
   <section class="hero is-fullheight">
+    <NavigationTabVue/>
     <div class="hero-body">
       <div class="container has-text-centered">
         <HospitalFinderVue />
@@ -54,7 +54,7 @@ import HospitalFinderVue from "../../components/HospitalFinder.vue";
 import NavigationTabVue from "../../components/NavigationTab.vue";
 import axios from 'axios'
 export default {
-  name: "Home",
+  name: "HomePage",
   components: {
     NavigationTabVue,
     HospitalFinderVue

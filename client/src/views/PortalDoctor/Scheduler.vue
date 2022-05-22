@@ -56,7 +56,7 @@
                 <h1 class="subtitle">Ongoing Schedules:</h1>
                 <div class="columns is-multiline" style="overflow: scroll; max-height: 30em"
                   v-if="Object.keys(daysIndexed).length !== 0">
-                  <div class="column is-6" v-for="(schedules, index) in daysIndexed" :key="schedules.id">
+                  <div class="column is-6" v-for="schedules in daysIndexed" :key="schedules.id">
                     <div class="block card">
                       <div class="card-content">
                         <div class="content">
@@ -88,7 +88,7 @@ import store from "../../store";
 import DoctorMenu from "../../components/DoctorMenu.vue"
 
 export default {
-  name: "Scheduler",
+  name: "SchedulerPage",
   components: {
     DoctorMenu
   },
@@ -130,14 +130,19 @@ export default {
     },
     daysIndexed() {
       if (this.days !== '') {
-        return this.days.sort((a, b) => {
-          return new Date(a.date).getTime() - new Date(b.date).getTime()
-        }).filter(x => { return new Date(x.date).getTime() > new Date().getTime() })
+        return this.sortDate
+      } else {
+        return false
       }
 
     }
   },
   methods: {
+    sortDate(){
+      this.days.sort((a, b) => {
+          return new Date(a.date).getTime() - new Date(b.date).getTime()
+        }).filter(x => { return new Date(x.date).getTime() > new Date().getTime() })
+    },
     async onDayClick(day) {
       this.loading = true
       this.days.push({

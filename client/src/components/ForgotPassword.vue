@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, defineProps } from 'vue'
 import axios from 'axios';
 
 let isLoading = ref(false)
@@ -15,6 +15,8 @@ let passwordNotMatch = ref(false)
 let passwordChanged = ref(false)
 let noUserFound = ref(false)
 let userData = ref('')
+let usernameHandler = ref(props.username)
+let emailHandler = ref(props.email)
 const props = defineProps({
     userType: String,
     username: String,
@@ -22,30 +24,30 @@ const props = defineProps({
 });
 
 async function forgotPasswordOTP() {
-    if (props.username != null || props.email != null) {
+    if (usernameHandler.value != null || emailHandler.value != null) {
         isLoading.value = true
         let confirmEmail
         let randomCode = Math.floor(1000 + Math.random() * 9000);
         await axios.post('/api/code/email', {
-            email: props.email
+            email: emailHandler.value
         }).then(response => confirmEmail = response.data)
         if (confirmEmail) {
             emailExists.value = true
         } else {
             if (props.userType == 'patient') {
                 await axios.post('/api/user/verify_username', {
-                    username: props.username,
-                    email: props.email
+                    username: usernameHandler.value,
+                    email: emailHandler.value
                 }).then(response => userData.value = response.data)
                 if (userData.value) {
                     noUserFound.value = false
                     try {
                         await axios.post('/api/code', {
-                            email: props.email,
+                            email: emailHandler.value,
                             code: randomCode
                         });
                         await axios.post('/api/OTPMail', {
-                            email: props.email,
+                            email: emailHandler.value,
                             code: randomCode
                         });
                         codeSent.value = true
@@ -57,18 +59,18 @@ async function forgotPasswordOTP() {
                 }
             } else if (props.userType == 'doctor') {
                 await axios.post('/api/doctor/verify_username', {
-                    username: props.username,
-                    email: props.email
+                    username: usernameHandler.value,
+                    email: emailHandler.value
                 }).then(response => userData.value = response.data)
                 if (userData.value) {
                     noUserFound.value = false
                     try {
                         await axios.post('/api/code', {
-                            email: props.email,
+                            email: emailHandler.value,
                             code: randomCode
                         });
                         await axios.post('/api/OTPMail', {
-                            email: props.email,
+                            email: emailHandler.value,
                             code: randomCode
                         });
                         codeSent.value = true
@@ -80,18 +82,18 @@ async function forgotPasswordOTP() {
                 }
             } else if (props.userType == 'manager') {
                 await axios.post('/api/manager/verify_username', {
-                    username: props.username,
-                    email: props.email
+                    username: usernameHandler.value,
+                    email: emailHandler.value
                 }).then(response => userData.value = response.data)
                 if (userData.value) {
                     noUserFound.value = false
                     try {
                         await axios.post('/api/code', {
-                            email: props.email,
+                            email: emailHandler.value,
                             code: randomCode
                         });
                         await axios.post('/api/OTPMail', {
-                            email: props.email,
+                            email: emailHandler.value,
                             code: randomCode
                         });
                         codeSent.value = true
@@ -176,19 +178,19 @@ async function pushNewPassword() {
                     <div class="field">
                         <div class="control">
                             <label class="label">Enter Username</label>
-                            <input class="input" type="email" v-model="username" />
+                            <input class="input" type="email" v-model="usernameHandler" />
                         </div>
                     </div>
                     <div class="field">
                         <div class="control">
                             <label class="label">Enter Email</label>
-                            <input class="input" type="email" v-model="email" />
+                            <input class="input" type="email" v-model="emailHandler" />
                         </div>
                     </div>
                     <div class="field">
                         <div class="control">
                             <button class="button" :class="{ 'is-loading': isLoading }" @click="forgotPasswordOTP"
-                                :disabled="email == null || username == null">Send OTP</button>
+                                :disabled="emailHandler == null || usernameHandler == null">Send OTP</button>
                         </div>
                     </div>
                 </div>

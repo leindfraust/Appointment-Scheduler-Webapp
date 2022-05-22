@@ -19,7 +19,7 @@ import ImageUploadSuccessDoctor from '../views/PortalSuccessConfirmations/ImageU
 import ImageUploadSuccessManager from '../views/PortalSuccessConfirmations/imageUploadSuccessManager.vue'
 import UserSignUp from '../views/Public/UserSignUp.vue'
 import UserLogin from '../views/Public/UserLogin.vue'
-import User from '../views/Public/User.vue'
+import User from '../views/Public/UserView.vue'
 import UserProfile from '../views/Public/UserProfile.vue'
 import UserSecurity from '../views/Public/UserSecurity.vue'
 import SuperUser from '../views/PortalSuperUsers/SuperUser.vue'

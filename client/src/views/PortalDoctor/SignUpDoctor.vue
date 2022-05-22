@@ -138,15 +138,6 @@ import axios from "axios";
 
 export default {
   name: "SignUp",
-  props: {
-    licenseCode: String,
-    alias: String,
-    name: String,
-    username: String,
-    password: String,
-    passwordRepeat: String,
-    gmail: String
-  },
   computed: {
     specializationListIndexed() {
       return this.specializationList.filter(x => x.toLowerCase().includes(this.searchBarSpecialization.toLowerCase()))
@@ -154,6 +145,13 @@ export default {
   },
   data() {
     return {
+      licenseCode: '',
+      alias: '',
+      name: '',
+      username: '',
+      password: '',
+      passwordRepeat: '',
+      gmail: '',
       passwordMatch: null,
       aliasFound: '',
       usernameFound: '',

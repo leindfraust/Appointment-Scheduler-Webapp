@@ -29,10 +29,13 @@ onMounted(async () => {
 });
 
 const ongoingAppointments = computed(() => {
-    return appointmentList.value.sort((a, b) => {
+    return sortAppointments
+})
+function sortAppointments() {
+    appointmentList.value.sort((a, b) => {
         return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
     }).filter(x => { return new Date(x.schedule[0].date).getTime() >= new Date().getTime() && new Date(x.schedule[0].date).getMonth() >= new Date().getMonth() })
-})
+}
 //methods
 async function selectProvince(province) {
     dropDownProvince.value = false
@@ -161,9 +164,8 @@ async function cancelAppointment(id) {
                                         <span v-else>{{ userCity }}</span>
                                     </button>
                                 </div>
-                                <div class="dropdown-menu">
-                                    <div class="dropdown-content" v-if="userProvince" v-for="cities in citiesData"
-                                        :key="cities.name">
+                                <div class="dropdown-menu" v-if="userProvince">
+                                    <div class="dropdown-content" v-for="cities in citiesData" :key="cities.name">
                                         <a class="dropdown-item" @click="selectCity(cities.name)">{{ cities.name }}</a>
                                     </div>
                                 </div>

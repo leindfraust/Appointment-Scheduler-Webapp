@@ -34,7 +34,7 @@ import axios from "axios";
 import cld from "../../cloudinary"
 import ForgotPassword from "../../components/ForgotPassword.vue";
 export default {
-  name: "Login",
+  name: "LoginDoctor",
   component: ForgotPassword,
   data() {
     return {

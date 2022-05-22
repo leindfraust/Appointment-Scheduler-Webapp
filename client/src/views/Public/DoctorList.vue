@@ -28,7 +28,8 @@
             <div class="column">
               <p class="subtitle">Contacts:</p>
               <ul class="block" v-if="typeof hospitalDetails.details[0].contacts !== 'undefined'">
-                <li v-for="contacts in hospitalDetails.details[0].contacts">{{ contacts.contact }}</li>
+                <li v-for="contacts in hospitalDetails.details[0].contacts" :key="contacts.contact">{{ contacts.contact
+                }}</li>
               </ul>
             </div>
           </div>
@@ -65,18 +66,20 @@
                 <br />
                 <h1 class="title is-3">Choose a doctor:</h1>
               </div>
-              <div v-if="specializationClicked" class="card-content" v-for="doctors in doctorList" :key="doctors._id">
-                <div class="media">
-                  <figure class="media-left">
-                    <p class="image is-64x64">
-                      <img
-                        :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${doctors.alias}.jpg`" />
-                    </p>
-                  </figure>
-                  <div class="media-content">
-                    <p class="title is-4">{{ doctors.name }}</p>
-                    <p class="subtitle is-6">{{ pickedSpecialist }}</p>
-                    <button class="button" @click="pickDoctor(doctors)">Appoint</button>
+              <div v-if="specializationClicked">
+                <div class="card-content" v-for="doctors in doctorList" :key="doctors._id">
+                  <div class="media">
+                    <figure class="media-left">
+                      <p class="image is-64x64">
+                        <img
+                          :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${doctors.alias}.jpg`" />
+                      </p>
+                    </figure>
+                    <div class="media-content">
+                      <p class="title is-4">{{ doctors.name }}</p>
+                      <p class="subtitle is-6">{{ pickedSpecialist }}</p>
+                      <button class="button" @click="pickDoctor(doctors)">Appoint</button>
+                    </div>
                   </div>
                 </div>
               </div>

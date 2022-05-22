@@ -102,7 +102,7 @@
                         <br />
                         <p class="subtitle">Contacts:</p>
                         <ul class="block" v-if="typeof geoHospital.details[0].contacts !== 'undefined'">
-                            <li v-for="contacts in geoHospital.details[0].contacts">{{ contacts.contact }}</li>
+                            <li v-for="(contacts, index) in geoHospital.details[0].contacts" :key="index">{{ contacts.contact }}</li>
                         </ul>
                         <p class="subtitle">{{ parseInt(geoHospital.distance) / 1000 }} km away from you.</p>
                         <button class="button is-link" @click="bookAppointment(geoHospital)" v-if="checkUser">Book an
@@ -128,6 +128,8 @@ export default {
         geoHospitalNearestUserIndexed() {
             if (this.geoHospitalNearestUser) {
                 return this.geoHospitalNearestUser.filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()) })
+            } else {
+                return false
             }
         }
     },

@@ -54,7 +54,7 @@
                                 <td class="has-text-black-ter">{{ doctor.gmail }}</td>
                                 <td
                                     class="has-text-black-ter"
-                                    v-for="doctorSchedule in doctor.schedule"
+                                    v-for="doctorSchedule in doctor.schedule" :key="doctorSchedule.id"
                                 >{{ doctorSchedule.date }}</td>
                             </tr>
                         </tbody>
@@ -88,7 +88,7 @@ import axios from 'axios'
 import ManagerMenuVue from '../../components/ManagerMenu.vue'
 
 export default {
-    name: "Manager",
+    name: "ManagerDashboard",
     components: {
         ManagerMenuVue
     },

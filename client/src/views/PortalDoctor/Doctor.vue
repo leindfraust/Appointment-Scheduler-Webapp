@@ -156,7 +156,7 @@ import _ from 'lodash'
 import DoctorMenu from "../../components/DoctorMenu.vue";
 
 export default {
-  name: "Doctor",
+  name: "DoctorDashboard",
   components: {
     DoctorMenu
   },

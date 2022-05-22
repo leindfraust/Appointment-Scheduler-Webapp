@@ -281,7 +281,7 @@ export default {
             await axios.post('/api/manager/check_username', {
                 username: this.username
             }).then(response => { this.usernameFound = response.data })
-            if (await this.username == '') {
+            if (this.username == '') {
                 this.usernameFound = ''
             }
             this.loadingUsername = false
@@ -328,13 +328,13 @@ export default {
         async create() {
             this.passwordNotMatch = false
 
-            if (await this.password !== this.confirmPassword) {
+            if (this.password !== this.confirmPassword) {
                 this.passwordNotMatch = true
             } else {
                 this.passwordNotMatch = false
             }
 
-            if (await this.password === this.confirmPassword && !this.usernameFound) {
+            if (this.password === this.confirmPassword && !this.usernameFound) {
                 try {
                     await axios.post('/api/manager', {
                         pricing: this.pricing,

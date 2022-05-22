@@ -4,23 +4,16 @@
             <nav class="navbar is-hidden-desktop">
                 <div class="navbar-brand">
                     <p class="navbar-item">Hello: {{ superUser }}</p>
-                    <a
-                        role="button"
-                        class="navbar-burger"
-                        :class="{ 'is-active': !isActiveMenu }"
-                        @click="isActiveMenu = !isActiveMenu"
-                    >
+                    <a role="button" class="navbar-burger" :class="{ 'is-active': !isActiveMenu }"
+                        @click="isActiveMenu = !isActiveMenu">
                         <span aria-hidden="true"></span>
                         <span aria-hidden="true"></span>
                         <span aria-hidden="true"></span>
                     </a>
                 </div>
             </nav>
-            <aside
-                class="menu box"
-                style="background-color: white; padding: 20px; height: 100vh"
-                :class="{ 'is-hidden-mobile': isActiveMenu, 'fixedMenu': isActiveMenu }"
-            >
+            <aside class="menu box" style="background-color: white; padding: 20px; height: 100vh"
+                :class="{ 'is-hidden-mobile': isActiveMenu, 'fixedMenu': isActiveMenu }">
                 <p class="subtitle is-6 is-hidden-mobile">Hello {{ superUser }}</p>
                 <p class="menu-label">General</p>
                 <ul class="menu-list">
@@ -31,28 +24,19 @@
                 <p class="menu-label">Accounts</p>
                 <ul class="menu-list">
                     <li>
-                        <a
-                            :class="{ 'is-active': isActiveManager }"
-                            @click="manager"
-                        >Manager accounts</a>
+                        <a :class="{ 'is-active': isActiveManager }" @click="manager">Manager accounts</a>
                     </li>
                     <li>
                         <a :class="{ 'is-active': isActiveDoctor }" @click="doctor">Doctor accounts</a>
                     </li>
                     <li>
-                        <a
-                            :class="{ 'is-active': isActivePatient }"
-                            @click="patient"
-                        >Patient accounts</a>
+                        <a :class="{ 'is-active': isActivePatient }" @click="patient">Patient accounts</a>
                     </li>
                 </ul>
                 <p class="menu-label">Operations</p>
                 <ul class="menu-list">
                     <li>
-                        <a
-                            :class="{ 'is-active': isActiveGeolocation }"
-                            @click="geolocation"
-                        >Geolocation</a>
+                        <a :class="{ 'is-active': isActiveGeolocation }" @click="geolocation">Geolocation</a>
                     </li>
                     <li>
                         <a :class="{ 'is-active': isActiveTickets }" @click="tickets">Tickets</a>
@@ -68,56 +52,42 @@
                     <div class="column">
                         <iframe
                             style="background: #21313C;border: none;border-radius: 2px;box-shadow: 0 2px 10px 0 rgba(70, 76, 79, .2);"
-                            width="530"
-                            height="480"
-                            src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=624199be-220b-4ba6-8f32-84eb27e8aa13&maxDataAge=86400&theme=dark&autoRefresh=true"
-                        ></iframe>
+                            width="530" height="480"
+                            src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=624199be-220b-4ba6-8f32-84eb27e8aa13&maxDataAge=86400&theme=dark&autoRefresh=true"></iframe>
                     </div>
                     <div class="column">
                         <iframe
                             style="background: #21313C;border: none;border-radius: 2px;box-shadow: 0 2px 10px 0 rgba(70, 76, 79, .2);"
-                            width="530"
-                            height="480"
-                            src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=6241b58b-377f-452d-8971-c364718db3ff&maxDataAge=86400&theme=dark&autoRefresh=true"
-                        ></iframe>
+                            width="530" height="480"
+                            src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=6241b58b-377f-452d-8971-c364718db3ff&maxDataAge=86400&theme=dark&autoRefresh=true"></iframe>
                     </div>
                     <div class="column">
                         <iframe
                             style="background: #21313C;border: none;border-radius: 2px;box-shadow: 0 2px 10px 0 rgba(70, 76, 79, .2);"
-                            width="340"
-                            height="240"
-                            src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=6241b7a6-a205-4291-8c3b-da5132939df6&maxDataAge=86400&theme=dark&autoRefresh=true"
-                        ></iframe>
+                            width="340" height="240"
+                            src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=6241b7a6-a205-4291-8c3b-da5132939df6&maxDataAge=86400&theme=dark&autoRefresh=true"></iframe>
                     </div>
                     <div class="column">
                         <iframe
                             style="background: #21313C;border: none;border-radius: 2px;box-shadow: 0 2px 10px 0 rgba(70, 76, 79, .2);"
-                            width="320"
-                            height="240"
-                            src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=6241b45e-220b-4919-8476-84eb27f87521&maxDataAge=86400&theme=dark&autoRefresh=true"
-                        ></iframe>
+                            width="320" height="240"
+                            src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=6241b45e-220b-4919-8476-84eb27f87521&maxDataAge=86400&theme=dark&autoRefresh=true"></iframe>
                     </div>
                     <div class="column">
                         <iframe
                             style="background: #21313C;border: none;border-radius: 2px;box-shadow: 0 2px 10px 0 rgba(70, 76, 79, .2);"
-                            width="320"
-                            height="240"
-                            src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=6241a5a0-797a-4051-869a-5157a21251ca&maxDataAge=86400&theme=dark&autoRefresh=true"
-                        ></iframe>
+                            width="320" height="240"
+                            src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=6241a5a0-797a-4051-869a-5157a21251ca&maxDataAge=86400&theme=dark&autoRefresh=true"></iframe>
                     </div>
                     <div class="column">
                         <iframe
                             style="background: #21313C;border: none;border-radius: 2px;box-shadow: 0 2px 10px 0 rgba(70, 76, 79, .2);"
-                            width="530"
-                            height="480"
-                            src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=6241b38b-0445-478b-8bf9-19a45abf8264&maxDataAge=86400&theme=dark&autoRefresh=true"
-                        ></iframe>
+                            width="530" height="480"
+                            src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=6241b38b-0445-478b-8bf9-19a45abf8264&maxDataAge=86400&theme=dark&autoRefresh=true"></iframe>
                     </div>
                 </div>
-                <div
-                    class="controls"
-                    v-if="isActiveManager || isActiveDoctor || isActivePatient || isActiveGeolocation || isActiveTickets"
-                >
+                <div class="controls"
+                    v-if="isActiveManager || isActiveDoctor || isActivePatient || isActiveGeolocation || isActiveTickets">
                     <label class="label">Search:</label>
                     <input class="input" type="text" placeholder="Search..." v-model="searchBar" />
                 </div>
@@ -129,90 +99,56 @@
                             <div class="card">
                                 <div class="card-content">
                                     <div class="content">
-                                        <div
-                                            v-if="type == 'manager'"
-                                            class="dropdown"
-                                            :class="{ 'is-active': isActiveDropdownEditStatus }"
-                                        >
+                                        <div v-if="type == 'manager'" class="dropdown"
+                                            :class="{ 'is-active': isActiveDropdownEditStatus }">
                                             <div class="dropdown-trigger">
-                                                <button
-                                                    class="button is-danger"
-                                                    @click="dropdown"
-                                                >Edit Status</button>
+                                                <button class="button is-danger" @click="dropdown">Edit Status</button>
                                             </div>
                                             <div class="dropdown-menu block">
                                                 <div class="dropdown-content">
-                                                    <a
-                                                        class="dropdown-item"
+                                                    <a class="dropdown-item"
                                                         :class="{ 'is-active': isActiveDropdownItemOne }"
-                                                        @click="statusActive"
-                                                    >Active</a>
-                                                    <a
-                                                        class="dropdown-item"
+                                                        @click="statusActive">Active</a>
+                                                    <a class="dropdown-item"
                                                         :class="{ 'is-active': isActiveDropdownItemTwo }"
-                                                        @click="statusInactive"
-                                                    >Inactive</a>
+                                                        @click="statusInactive">Inactive</a>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="block"></div>
-                                        <div
-                                            v-if="type == 'manager'"
-                                            class="dropdown"
-                                            :class="{ 'is-active': isActiveDropdownEditPricing }"
-                                        >
+                                        <div v-if="type == 'manager'" class="dropdown"
+                                            :class="{ 'is-active': isActiveDropdownEditPricing }">
                                             <div class="dropdown-trigger">
-                                                <button
-                                                    class="button is-link"
-                                                    @click="dropdownPricing"
-                                                >Edit Pricing</button>
+                                                <button class="button is-link" @click="dropdownPricing">Edit
+                                                    Pricing</button>
                                             </div>
                                             <div class="dropdown-menu block">
                                                 <div class="dropdown-content">
-                                                    <a
-                                                        class="dropdown-item"
+                                                    <a class="dropdown-item"
                                                         :class="{ 'is-active': isActiveDropdownPricingItemOne }"
-                                                        @click="pricingStandard"
-                                                    >Standard</a>
-                                                    <a
-                                                        class="dropdown-item"
+                                                        @click="pricingStandard">Standard</a>
+                                                    <a class="dropdown-item"
                                                         :class="{ 'is-active': isActiveDropdownPricingItemTwo }"
-                                                        @click="pricingPremium"
-                                                    >Premium</a>
+                                                        @click="pricingPremium">Premium</a>
                                                 </div>
                                             </div>
                                         </div>
                                         <form class="field has-text-centered">
                                             <label class="label">New Email</label>
                                             <div class="control">
-                                                <input
-                                                    class="input"
-                                                    type="text"
-                                                    v-model="email"
-                                                    placeholder="Gmail, Yahoo mail..."
-                                                    required
-                                                />
+                                                <input class="input" type="text" v-model="email"
+                                                    placeholder="Gmail, Yahoo mail..." required />
                                             </div>
-                                            <button
-                                                class="button is-primary"
-                                                type="button"
-                                                @click="updateData"
-                                            >Submit</button>
+                                            <button class="button is-primary" type="button"
+                                                @click="updateData">Submit</button>
                                         </form>
                                     </div>
                                 </div>
                             </div>
-                            <button
-                                class="modal-close is-large"
-                                aria-label="close"
-                                @click="closeModal"
-                            ></button>
+                            <button class="modal-close is-large" aria-label="close" @click="closeModal"></button>
                         </div>
                     </div>
-                    <table
-                        v-if="isActiveManager"
-                        class="table is-striped is-fullwidth is-narrow is-bordered"
-                    >
+                    <table v-if="isActiveManager" class="table is-striped is-fullwidth is-narrow is-bordered">
                         <thead>
                             <tr>
                                 <th class="has-text-black-ter">Controls</th>
@@ -229,29 +165,15 @@
                                 <th class="has-text-black-ter">Specializations</th>
                             </tr>
                         </thead>
-                        <tbody
-                            v-for="(manager, index) in managerAccountsIndexed"
-                            :key="manager._id"
-                        >
+                        <tbody v-for="(manager, index) in managerAccountsIndexed" :key="manager._id">
                             <tr>
-                                <button
-                                    class="dropdown-item button has-text-info"
-                                    type="button"
-                                    @click="managerEdit(manager._id, manager.email)"
-                                >Edit</button>
-                                <button
-                                    class="button dropdown-item has-text-danger"
-                                    type="button"
-                                    @click="managerDelete(manager._id)"
-                                >Delete</button>
-                                <td
-                                    class="has-text-success"
-                                    v-if="manager.status == 'Active'"
-                                >{{ manager.status }}</td>
-                                <td
-                                    class="has-text-danger"
-                                    v-if="manager.status == 'Inactive'"
-                                >{{ manager.status }}</td>
+                                <button class="dropdown-item button has-text-info" type="button"
+                                    @click="managerEdit(manager._id, manager.email)">Edit</button>
+                                <button class="button dropdown-item has-text-danger" type="button"
+                                    @click="managerDelete(manager._id)">Delete</button>
+                                <td class="has-text-success" v-if="manager.status == 'Active'">{{ manager.status }}</td>
+                                <td class="has-text-danger" v-if="manager.status == 'Inactive'">{{ manager.status }}
+                                </td>
                                 <td class="has-text-black-ter">{{ index + 1 }}</td>
                                 <td class="has-text-black-ter">{{ manager.pricing }}</td>
                                 <td class="has-text-black-ter">{{ manager.hospital }}</td>
@@ -261,18 +183,13 @@
                                 <td class="has-text-black-ter">{{ manager.barangayORStreet }}</td>
                                 <td class="has-text-black-ter">{{ manager.location.coordinates[1] }}</td>
                                 <td class="has-text-black-ter">{{ manager.location.coordinates[0] }}</td>
-                                <td
-                                    class="has-text-black-ter"
-                                    v-for="specialist in manager.specializations"
-                                >{{ specialist.specialist }}</td>
+                                <td class="has-text-black-ter" v-for="specialist in manager.specializations"
+                                    :key="specialist.specialist">{{ specialist.specialist }}</td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <table
-                        v-if="isActiveDoctor"
-                        class="table is-striped is-fullwidth is-narrow is-bordered"
-                    >
+                    <table v-if="isActiveDoctor" class="table is-striped is-fullwidth is-narrow is-bordered">
                         <thead>
                             <tr>
                                 <th class="has-text-black-ter">Controls</th>
@@ -286,32 +203,21 @@
                         </thead>
                         <tbody v-for="(doctor, index) in doctorAccountsIndexed" :key="doctor._id">
                             <tr>
-                                <button
-                                    class="dropdown-item button has-text-info"
-                                    type="button"
-                                    @click="doctorRecoverEmail(doctor._id, doctor.gmail)"
-                                >Recover</button>
-                                <button
-                                    class="button dropdown-item has-text-danger"
-                                    type="button"
-                                    @click="doctorDelete(doctor._id)"
-                                >Delete</button>
+                                <button class="dropdown-item button has-text-info" type="button"
+                                    @click="doctorRecoverEmail(doctor._id, doctor.gmail)">Recover</button>
+                                <button class="button dropdown-item has-text-danger" type="button"
+                                    @click="doctorDelete(doctor._id)">Delete</button>
                                 <td class="has-text-black-ter">{{ index + 1 }}</td>
                                 <td class="has-text-black-ter">{{ doctor.alias }}</td>
                                 <td class="has-text-black-ter">{{ doctor.name }}</td>
                                 <td class="has-text-black-ter">{{ doctor.specialist.toString() }}</td>
                                 <td class="has-text-black-ter">{{ doctor.gmail }}</td>
-                                <td
-                                    class="has-text-black-ter"
-                                    v-for="doctorSchedule in doctor.schedule"
-                                >{{ doctorSchedule.date }}</td>
+                                <td class="has-text-black-ter" v-for="doctorSchedule in doctor.schedule"
+                                    :key="doctorSchedule.id">{{ doctorSchedule.date }}</td>
                             </tr>
                         </tbody>
                     </table>
-                    <table
-                        v-if="isActivePatient"
-                        class="table is-striped is-fullwidth is-narrow is-bordered"
-                    >
+                    <table v-if="isActivePatient" class="table is-striped is-fullwidth is-narrow is-bordered">
                         <thead>
                             <tr>
                                 <th class="has-text-black-ter">Controls</th>
@@ -326,21 +232,12 @@
                                 <th class="has-text-black-ter">City</th>
                             </tr>
                         </thead>
-                        <tbody
-                            v-for="(patient, index) in patientAccountsIndexed"
-                            :key="patient._id"
-                        >
+                        <tbody v-for="(patient, index) in patientAccountsIndexed" :key="patient._id">
                             <tr>
-                                <button
-                                    class="dropdown-item button has-text-info"
-                                    type="button"
-                                    @click="patientRecoverEmail(patient._id, patient.gmail)"
-                                >Recover</button>
-                                <button
-                                    class="button dropdown-item has-text-danger"
-                                    type="button"
-                                    @click="patientDelete(patient._id)"
-                                >Delete</button>
+                                <button class="dropdown-item button has-text-info" type="button"
+                                    @click="patientRecoverEmail(patient._id, patient.gmail)">Recover</button>
+                                <button class="button dropdown-item has-text-danger" type="button"
+                                    @click="patientDelete(patient._id)">Delete</button>
                                 <td class="has-text-black-ter">{{ index + 1 }}</td>
                                 <td class="has-text-black-ter">{{ patient.name[0] }}</td>
                                 <td class="has-text-black-ter">{{ patient.name[1] }}</td>
@@ -353,10 +250,7 @@
                             </tr>
                         </tbody>
                     </table>
-                    <table
-                        v-if="isActiveTickets"
-                        class="table is-striped is-fullwidth is-narrow is-bordered"
-                    >
+                    <table v-if="isActiveTickets" class="table is-striped is-fullwidth is-narrow is-bordered">
                         <thead>
                             <tr>
                                 <th class="has-text-black-ter">Controls</th>
@@ -371,23 +265,13 @@
                         </thead>
                         <tbody v-for="(ticket, index) in ticketsIndexed" :key="ticket.id">
                             <tr>
-                                <button
-                                    v-if="ticket.active"
-                                    class="dropdown-item button has-text-info"
-                                    type="button"
-                                    @click="closeTicket(ticket.id)"
-                                >Close Ticket</button>
-                                <button
-                                    v-if="!ticket.active"
-                                    class="dropdown-item button has-text-info"
-                                    type="button"
-                                    @click="reopenTicket(ticket.id)"
-                                >Reopen Ticket</button>
-                                <button
-                                    class="dropdown-item button has-text-danger"
-                                    type="button"
-                                    @click="deleteTicket(ticket.id, ticket.type, ticket.email, ticket.title, ticket.message, ticket.active)"
-                                >Delete ticket</button>
+                                <button v-if="ticket.active" class="dropdown-item button has-text-info" type="button"
+                                    @click="closeTicket(ticket.id)">Close Ticket</button>
+                                <button v-if="!ticket.active" class="dropdown-item button has-text-info" type="button"
+                                    @click="reopenTicket(ticket.id)">Reopen Ticket</button>
+                                <button class="dropdown-item button has-text-danger" type="button"
+                                    @click="deleteTicket(ticket.id, ticket.type, ticket.email, ticket.title, ticket.message, ticket.active)">Delete
+                                    ticket</button>
                                 <td class="has-text-success" v-if="ticket.active">Active</td>
                                 <td class="has-text-danger" v-if="!ticket.active">Inactive</td>
                                 <td class="has-text-black-ter">{{ index + 1 }}</td>
@@ -399,53 +283,39 @@
                             </tr>
                         </tbody>
                     </table>
-                    <div
-                        class="box"
-                        v-if="isActiveGeolocation"
-                        v-for="(geolocation, index) in provinceAndCitiesIndexed"
-                        :key="index"
-                    >
-                        <a
-                            class="has-text-danger"
-                            @click="deleteProvince(geolocation[0]._id)"
-                        >Delete Province</a>
-                        <p class="subtitle has-text-black">Province: {{ index }}</p>
+                    <div v-if="isActiveGeolocation">
+                        <div class="box" v-for="(geolocation, index) in provinceAndCitiesIndexed" :key="index">
+                            <a class="has-text-danger" @click="deleteProvince(geolocation[0]._id)">Delete Province</a>
+                            <p class="subtitle has-text-black">Province: {{ index }}</p>
 
-                        <table class="table is-striped is-fullwidth is-narrow is-bordered">
-                            <thead>
-                                <tr>
-                                    <th class="has-text-black-ter">Controls</th>
-                                    <th class="has-text-black-ter">No.</th>
-                                    <th class="has-text-black-ter">City/Municipality</th>
-                                    <th class="has-text-black-ter">Postal Code</th>
-                                    <th class="has-text-black-ter">Latitude</th>
-                                    <th class="has-text-black-ter">Longitude</th>
-                                </tr>
-                            </thead>
-                            <tbody
-                                v-for="(cityOrMunicipality, index) in geolocation[0].citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
-                                :key="index"
-                            >
-                                <tr>
-                                    <button
-                                        class="button dropdown-item has-text-danger"
-                                        type="button"
-                                        @click="cityDelete(geolocation[0]._id, cityOrMunicipality.name, cityOrMunicipality.location.coordinates[1], cityOrMunicipality.location.coordinates[0], cityOrMunicipality.postalCode)"
-                                    >Delete</button>
-                                    <td class="has-text-black-ter">{{ index + 1 }}</td>
-                                    <td class="has-text-black-ter">{{ cityOrMunicipality.name }}</td>
-                                    <td
-                                        class="has-text-black-ter"
-                                    >{{ cityOrMunicipality.postalCode }}</td>
-                                    <td
-                                        class="has-text-black-ter"
-                                    >{{ cityOrMunicipality.location.coordinates[1] }}</td>
-                                    <td
-                                        class="has-text-black-ter"
-                                    >{{ cityOrMunicipality.location.coordinates[0] }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table class="table is-striped is-fullwidth is-narrow is-bordered">
+                                <thead>
+                                    <tr>
+                                        <th class="has-text-black-ter">Controls</th>
+                                        <th class="has-text-black-ter">No.</th>
+                                        <th class="has-text-black-ter">City/Municipality</th>
+                                        <th class="has-text-black-ter">Postal Code</th>
+                                        <th class="has-text-black-ter">Latitude</th>
+                                        <th class="has-text-black-ter">Longitude</th>
+                                    </tr>
+                                </thead>
+                                <tbody
+                                    v-for="(cityOrMunicipality, index) in geolocation[0].citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
+                                    :key="index">
+                                    <tr>
+                                        <button class="button dropdown-item has-text-danger" type="button"
+                                            @click="cityDelete(geolocation[0]._id, cityOrMunicipality.name, cityOrMunicipality.location.coordinates[1], cityOrMunicipality.location.coordinates[0], cityOrMunicipality.postalCode)">Delete</button>
+                                        <td class="has-text-black-ter">{{ index + 1 }}</td>
+                                        <td class="has-text-black-ter">{{ cityOrMunicipality.name }}</td>
+                                        <td class="has-text-black-ter">{{ cityOrMunicipality.postalCode }}</td>
+                                        <td class="has-text-black-ter">{{ cityOrMunicipality.location.coordinates[1] }}
+                                        </td>
+                                        <td class="has-text-black-ter">{{ cityOrMunicipality.location.coordinates[0] }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <section v-if="isActiveGeolocation" class="section" style="width: 50%;">
@@ -453,31 +323,16 @@
                         <h1 class="title">Create a new Province</h1>
                         <div class="control">
                             <label class="label">Province</label>
-                            <input
-                                class="input"
-                                type="text"
-                                v-model="province"
-                                placeholder="Province"
-                            />
-                            <button
-                                class="button"
-                                type="button"
-                                @click="provincePost"
-                                :disabled="province == ''"
-                            >Confirm</button>
-                            <div
-                                v-if="provincePostSuccess"
-                                class="has-text-success"
-                            >Province has been created.</div>
+                            <input class="input" type="text" v-model="province" placeholder="Province" />
+                            <button class="button" type="button" @click="provincePost"
+                                :disabled="province == ''">Confirm</button>
+                            <div v-if="provincePostSuccess" class="has-text-success">Province has been created.</div>
                         </div>
                     </div>
                     <div class="field">
                         <h1 class="title">Push City/Municipality into a Province</h1>
                         <div class="control">
-                            <div
-                                class="dropdown"
-                                :class="{ 'is-active': isActiveDropdownProvince }"
-                            >
+                            <div class="dropdown" :class="{ 'is-active': isActiveDropdownProvince }">
                                 <div class="dropdown-trigger">
                                     <button class="button" @click="provinceDropdownActive()">
                                         <span v-if="selectedProvince == ''">Select a Province</span>
@@ -485,59 +340,28 @@
                                     </button>
                                 </div>
                                 <div class="dropdown-menu" id="dropdown-menu" role="menu">
-                                    <div
-                                        class="dropdown-content"
-                                        v-for="province in provinceList"
-                                        :key="province._id"
-                                    >
-                                        <a
-                                            @click="chooseProvince(province._id, province.province)"
-                                            class="dropdown-item"
-                                        >{{ province.province }}</a>
+                                    <div class="dropdown-content" v-for="province in provinceList" :key="province._id">
+                                        <a @click="chooseProvince(province._id, province.province)"
+                                            class="dropdown-item">{{ province.province }}</a>
                                     </div>
                                 </div>
                             </div>
                             <br />
                             <br />
                             <label class="label">City/Municipality</label>
-                            <input
-                                class="input"
-                                type="text"
-                                v-model="cityOrMunicipality"
-                                placeholder="City or Municipality"
-                            />
+                            <input class="input" type="text" v-model="cityOrMunicipality"
+                                placeholder="City or Municipality" />
                             <span>e.g Bais City or Bindoy Municipality</span>
                             <label class="label">Postal Code</label>
-                            <input
-                                class="input"
-                                type="number"
-                                v-model="postalCode"
-                                placeholder="Postal Code"
-                            />
+                            <input class="input" type="number" v-model="postalCode" placeholder="Postal Code" />
                             <label class="label">Latitude N</label>
-                            <input
-                                class="input"
-                                type="number"
-                                v-model="latitude"
-                                placeholder="Latitude"
-                            />
+                            <input class="input" type="number" v-model="latitude" placeholder="Latitude" />
                             <label class="label">longitude E</label>
-                            <input
-                                class="input"
-                                type="number"
-                                v-model="longitude"
-                                placeholder="longitude"
-                            />
-                            <button
-                                class="button"
-                                type="button"
-                                @click="cityOrMunicipalityPost"
-                                :disabled="selectedProvince == '' || cityOrMunicipality == '' || latitude == '' || longitude == ''"
-                            >Confirm</button>
-                            <div
-                                v-if="cityOrMunicipalityPostSuccess"
-                                class="has-text-success"
-                            >City or Municipality added</div>
+                            <input class="input" type="number" v-model="longitude" placeholder="longitude" />
+                            <button class="button" type="button" @click="cityOrMunicipalityPost"
+                                :disabled="selectedProvince == '' || cityOrMunicipality == '' || latitude == '' || longitude == ''">Confirm</button>
+                            <div v-if="cityOrMunicipalityPostSuccess" class="has-text-success">City or Municipality
+                                added</div>
                         </div>
                     </div>
                 </section>

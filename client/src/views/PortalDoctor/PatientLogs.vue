@@ -28,8 +28,7 @@
                           </button>
                         </div>
                         <div class="dropdown-menu">
-                          <div class="dropdown-content" v-for="(patient, index) in patients.patients"
-                            :key="patient._id">
+                          <div class="dropdown-content" v-for="patient in patients.patients" :key="patient._id">
                             <a class="dropdown-item" @click="selectPatient(patient.patient, patient.patientName)">{{
                                 patient.patientName
                             }}</a>
@@ -58,15 +57,15 @@
               </p>
               <p class="subtitle">Messaging History</p>
               <div v-if="Object.keys(messageHistory).length !== 0">
-              <div class="container" v-for="(message, index) in messageHistory" :key="index">
-                <div class="notification" style="margin: 5%">
-                  <div class="content">
-                    <p>To: {{message.to}}</p>
-                    <p>Message: {{message.message}}</p>
-                    <p>Date: {{new Date(message.date).toString()}}</p>
+                <div class="container" v-for="(message, index) in messageHistory" :key="index">
+                  <div class="notification" style="margin: 5%">
+                    <div class="content">
+                      <p>To: {{ message.to }}</p>
+                      <p>Message: {{ message.message }}</p>
+                      <p>Date: {{ new Date(message.date).toString() }}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
               </div>
               <div v-else>
                 <p>No past messages yet.</p>
@@ -227,7 +226,7 @@ export default {
           message: this.noticeMsg,
           date: new Date(),
         }
-      }).then(response => this.messageHistory = response.data.reverse()).catch(err => {console.log(err)})
+      }).then(response => this.messageHistory = response.data.reverse()).catch(err => { console.log(err) })
       await axios.put('/session/doctor', {
         messageHistory: {
           to: this.selectedPatient,

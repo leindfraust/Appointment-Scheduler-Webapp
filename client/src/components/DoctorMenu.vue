@@ -66,7 +66,6 @@
 <script>
 import store from '../store'
 import axios from 'axios'
-import cld from '../cloudinary'
 export default {
     name: "AdminMenu",
     data() {
