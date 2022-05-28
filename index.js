@@ -49,14 +49,13 @@ app.use(session({
     secret: 'leindfraust',
     resave: false,
     saveUninitialized: false,
-    cookie: {
-        maxAge: 24 * 60 * 60 * 1000
-    },
     store: MongoStore.create({
         mongoUrl: encodeURI(mongoUri),
         crypto: {
             secret: 'leindfraust'
         },
+        autoRemove: 'native',
+        ttl: 14 * 24 * 60 * 60
     })
 }));
 const sessDoctor = require('./sessions/doctor')
@@ -112,7 +111,7 @@ app.use('/api/fupdatePassword', fupdatePassword)
 
 //connect to mongoDB
 const dbConnect = async () => {
-    await mongoose.connect(mongoUri, {
+    mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     })
