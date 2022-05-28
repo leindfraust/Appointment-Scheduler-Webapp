@@ -130,7 +130,7 @@ export default {
     },
     daysIndexed() {
       if (this.days !== '') {
-        return this.sortDate
+        return this.sortDate()
       } else {
         return false
       }
@@ -139,8 +139,8 @@ export default {
   },
   methods: {
     sortDate(){
-      this.days.sort((a, b) => {
-          return new Date(a.date).getTime() - new Date(b.date).getTime()
+      return this.days.sort((a, b) => {
+          new Date(a.date).getTime() - new Date(b.date).getTime()
         }).filter(x => { return new Date(x.date).getTime() > new Date().getTime() })
     },
     async onDayClick(day) {

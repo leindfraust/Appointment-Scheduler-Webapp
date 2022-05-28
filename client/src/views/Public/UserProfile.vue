@@ -19,21 +19,19 @@ onMounted(async () => {
     await axios.get('/api/appointmentList').then(response => appointmentList.value = response.data.filter(x => x.patientID === store.state.patientID));
     await axios.get("/session/patient").then(response => patient.value = response.data);
     await axios.get("/api/geolocation").then(response => geolocationData.value = response.data)
-
     userProvince.value = await patient.value.province
     userCity.value = await patient.value.city
 
     await axios.get('/api/geolocation').then(response => citiesData.value = response.data.find(x => x.province === userProvince.value))
     citiesData.value = await citiesData.value.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })
-
 });
 
 const ongoingAppointments = computed(() => {
-    return sortAppointments
+    return sortAppointments()
 })
 function sortAppointments() {
-    appointmentList.value.sort((a, b) => {
-        return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
+    return appointmentList.value.sort((a, b) => {
+        new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
     }).filter(x => { return new Date(x.schedule[0].date).getTime() >= new Date().getTime() && new Date(x.schedule[0].date).getMonth() >= new Date().getMonth() })
 }
 //methods
