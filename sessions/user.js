@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const app = express()
-const parser = app.use(express.json())
 
 router.get('/', (req, res) => {
     res.send(req.session)
 });
 
-router.post('/', parser, (req, res) => {
+router.post('/', (req, res) => {
     req.session._id = req.body._id
     req.session.name = req.body.name
     req.session.email = req.body.email
@@ -23,7 +21,7 @@ router.post('/', parser, (req, res) => {
     res.status(200).send('OK');
 });
 
-router.put('/', parser, (req, res) => {
+router.put('/', (req, res) => {
     req.session.alias = req.body.alias || req.session.alias
     req.session.name = req.body.name || req.session.name
     req.session.email = req.body.email || req.session.email
