@@ -183,7 +183,6 @@ export default {
       isActiveDropdownHospital: false,
       licenseNo: null,
       verified: null,
-      codes: [],
       modalActive: false,
       verificationCode: '',
       errorCode: false,
@@ -263,57 +262,49 @@ export default {
         this.selectedHospital = hospital
         this.modalActive = true
         let randomCode = Math.floor(1000 + Math.random() * 9000);
-        await axios.get('/api/code').then(response => this.codes = response.data)
-        let confirmCode = await this.codes.find(x => x.code === randomCode)
-        let confirmEmail = await this.codes.filter(x => x.email === this.gmail)
-        console.log(await this.codes)
-        if (await this.codes.length === 0) {
-          await axios.post("/api/code", {
-            email: this.gmail,
-            code: randomCode
-          });
-          await axios.post('/api/OTPMail', {
-            email: this.gmail,
-            code: randomCode
-          });
-        } else if (typeof confirmCode === 'undefined' && Object.keys(confirmEmail).length === 0) {
-          await axios.post("/api/code", {
-            email: this.gmail,
-            code: randomCode
-          });
-          await axios.post('/api/OTPMail', {
-            email: this.gmail,
-            code: randomCode
-          });
-        } else {
-          this.codeSent = true
-        }
+        await axios.post('/api/code/email', {
+          email: this.gmail
+        }).then(async response => {
+          if (!response.data) {
+            await axios.post("/api/code", {
+              email: this.gmail,
+              code: randomCode
+            });
+            await axios.post('/api/OTPMail', {
+              email: this.gmail,
+              code: randomCode
+            });
+          } else {
+            this.codeSent = true
+          }
+        })
       }
     },
     async addHospital() {
-      await axios.get('/api/code').then(response => this.codes = response.data)
-      console.log(await this.codes)
-      let confirmCode = await this.codes.find(x => x.code == this.verificationCode && x.email == this.gmail)
-      if (!this.errorCode) {
-        if (await confirmCode) {
-          this.hospitalOrigin.push({
-            hospital: this.selectedHospital
-          });
-          await axios.put(`/api/doctor/${this.id}`, {
-            hospitalOrigin: this.hospitalOrigin
-          });
-          await axios.put('/session/doctor', {
-            hospitalOrigin: this.hospitalOrigin
-          });
-          await axios.get('/session/doctor').then(response => this.hospitalOrigin = response.data.hospitalOrigin)
-          this.selectedHospital = ''
-          this.modalActive = false
+      await axios.post('/api/code/verify', {
+        code: this.verificationCode
+      }).then(async response => {
+        if (response.data) {
+          if (!this.errorCode) {
+            this.hospitalOrigin.push({
+              hospital: this.selectedHospital
+            });
+            await axios.put(`/api/doctor/${this.id}`, {
+              hospitalOrigin: this.hospitalOrigin
+            });
+            await axios.put('/session/doctor', {
+              hospitalOrigin: this.hospitalOrigin
+            });
+            await axios.get('/session/doctor').then(response => this.hospitalOrigin = response.data.hospitalOrigin)
+            this.selectedHospital = ''
+            this.modalActive = false
+          } else {
+            this.errorCode = true
+          }
         } else {
           this.errorCode = true
         }
-      } else {
-        this.errorCode = true
-      }
+      });
     },
     async pullSpecialization(specialization) {
       this.specialist = this.specialist.filter(x => x !== specialization)

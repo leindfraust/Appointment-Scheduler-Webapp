@@ -30,7 +30,7 @@
                                             required />
                                     </div>
                                     <div v-if="incorrectPasswordValidate" class="notification is-warning">{{
-                                        currentPasswordValidateMessage
+                                            currentPasswordValidateMessage
                                     }}</div>
                                 </div>
                                 <div class="field">
@@ -40,7 +40,7 @@
                                             required :class="{ 'is-danger': passwordValidate }" />
                                     </div>
                                     <div v-if="passwordValidate" class="notification is-danger">{{
-                                        passwordValidateMessage
+                                            passwordValidateMessage
                                     }}</div>
                                 </div>
                                 <div class="field">
@@ -50,7 +50,7 @@
                                             required :class="{ 'is-danger': passwordValidate }" />
                                     </div>
                                     <div v-if="passwordValidate" class="notification is-danger">{{
-                                        passwordValidateMessage
+                                            passwordValidateMessage
                                     }}</div>
                                 </div>
                                 <div class="field">
@@ -206,7 +206,6 @@ export default {
     data() {
         return {
             doctorDetails: [],
-            codes: [],
             OTP: null,
             id: null,
             isActiveModal: false,
@@ -282,33 +281,24 @@ export default {
         },
         async modalUpEditInfo() {
             let randomCode = Math.floor(1000 + Math.random() * 9000);
-            await axios.get("/api/code").then(response => this.codes = response.data)
-            let confirmCode = await this.codes.find(x => x.code === randomCode)
-            let confirmEmail = await this.codes.filter(x => x.email === this.gmail)
-            if (await this.codes.length === 0) {
-                this.isActiveModal = true
-                await axios.post("/api/code", {
-                    email: this.gmail,
-                    code: randomCode
-                });
-                await axios.post('/api/OTPMail', {
-                    email: this.gmail,
-                    code: randomCode
-                });
-            } else if (typeof confirmCode === 'undefined' || !confirmEmail) {
-                this.isActiveModal = true
-                await axios.post("/api/code", {
-                    email: this.gmail,
-                    code: randomCode
-                });
-                await axios.post('/api/OTPMail', {
-                    email: this.gmail,
-                    code: randomCode
-                });
-            } else {
-                this.isActiveModal = true
-                this.codeError = true
-            }
+            await axios.post("/api/code/email", {
+                email: this.gmail
+            }).then(async response => {
+                if (!response.data) {
+                    this.isActiveModal = true
+                    await axios.post("/api/code", {
+                        email: this.gmail,
+                        code: randomCode
+                    });
+                    await axios.post('/api/OTPMail', {
+                        email: this.gmail,
+                        code: randomCode
+                    });
+                } else {
+                    this.isActiveModal = true
+                    this.codeError = true
+                }
+            })
         },
         async modalUpInfoVerify() {
             this.isActiveModal = true
@@ -316,18 +306,13 @@ export default {
         async sendVerificationEmail() {
             let existingEmail = []
             let randomCode = Math.floor(1000 + Math.random() * 9000);
-            await axios.get("/api/code").then(response => this.codes = response.data)
+
             await axios.get("/api/doctor").then(response => existingEmail = response.data.find(x => x.gmail === this.gmail))
-            let confirmCode = await this.codes.find(x => x.code === randomCode)
-            let confirmEmail = await this.codes.filter(x => x.email === this.gmail)
-            if (await this.codes.length === 0) {
-                if (typeof existingEmail !== 'undefined') {
-                    if (await existingEmail._id !== this.id) {
-                        this.verifyEmailSent = true
-                        this.codeError = true
-                        this.emailTaken = true
-                    } else {
-                        this.verifyEmailSent = true
+            if (typeof existingEmail !== 'undefined') {
+                await axios.post("/api/code/email", {
+                    email: this.gmail
+                }).then(async response => {
+                    if (!response.data) {
                         await axios.post("/api/code", {
                             email: this.gmail,
                             code: randomCode
@@ -336,89 +321,59 @@ export default {
                             email: this.gmail,
                             code: randomCode
                         });
-                    }
-                } else if (typeof existingEmail === 'undefined') {
-                    this.verifyEmailSent = true
-                    await axios.post("/api/code", {
-                        email: this.gmail,
-                        code: randomCode
-                    });
-                    await axios.post('/api/OTPMail', {
-                        email: this.gmail,
-                        code: randomCode
-                    });
-                }
-            } else if (typeof confirmCode === 'undefined' && Object.keys(confirmEmail).length === 0) {
-                if (typeof existingEmail !== 'undefined') {
-                    if (await existingEmail._id !== this.id) {
                         this.verifyEmailSent = true
-                        this.codeError = true
-                        this.emailTaken = true
                     } else {
                         this.verifyEmailSent = true
-                        await axios.post("/api/code", {
-                            email: this.gmail,
-                            code: randomCode
-                        });
-                        await axios.post('/api/OTPMail', {
-                            email: this.gmail,
-                            code: randomCode
-                        });
+                        this.codeError = true
                     }
-                } else if (typeof existingEmail === 'undefined') {
-                    this.verifyEmailSent = true
-                    await axios.post("/api/code", {
-                        email: this.gmail,
-                        code: randomCode
-                    });
-                    await axios.post('/api/OTPMail', {
-                        email: this.gmail,
-                        code: randomCode
-                    });
-                }
+                })
             } else {
                 this.verifyEmailSent = true
                 this.codeError = true
+                this.emailTaken = true
             }
+
         },
         async confirmOTPEditInfo() {
-            await axios.get("/api/code").then(response => this.codes = response.data)
-            let confirmCode = await this.codes.find(x => x.code === this.OTP && x.email === this.gmail)
-            if (!this.codeError) {
-                if (await confirmCode) {
-                    this.authorized = true
-                    this.isActiveModal = false
-                } else {
-                    this.incorrectCode = true
-                }
-            } else {
-                this.incorrectCode = true
-            }
-        },
-        async verifyEmail() {
-            await axios.get("/api/code").then(response => this.codes = response.data)
-            let confirmCode = await this.codes.find(x => x.code === this.OTP && x.email === this.gmail)
-            if (!this.codeError) {
-                if (await confirmCode) {
-                    await axios.put(`/api/doctor/${this.id}`, {
-                        gmail: this.gmail,
-                        verified: true
-                    });
-                    await axios.put('/session/doctor', {
-                        gmail: this.gmail,
-                        verified: true
-                    });
-                    this.verified = true
-                    this.isActiveModal = false
-                    if (await !this.isActiveModal) {
-                        await axios.get('/session/doctor').then(response => this.doctorDetails = response.data)
+            await axios.post("/api/code/verify", {
+                code: this.OTP
+            }).then(response => {
+                if (response.data) {
+                    if (!this.codeError) {
+                        this.authorized = true
+                        this.isActiveModal = false
                     }
                 } else {
                     this.incorrectCode = true
                 }
-            } else {
-                this.incorrectCode = true
-            }
+            })
+        },
+        async verifyEmail() {
+            await axios.post("/api/code/verify", {
+                code: this.OTP
+            }).then(async response => {
+                if (await response.data) {
+                    if (!this.codeError) {
+                        await axios.put(`/api/doctor/${this.id}`, {
+                            gmail: this.gmail,
+                            verified: true
+                        });
+                        await axios.put('/session/doctor', {
+                            gmail: this.gmail,
+                            verified: true
+                        });
+                        this.verified = true
+                        this.isActiveModal = false
+                        if (!this.isActiveModal) {
+                            await axios.get('/session/doctor').then(response => this.doctorDetails = response.data)
+                        }
+                    } else {
+                        this.incorrectCode = true
+                    }
+                } else {
+                    this.incorrectCode = true
+                }
+            });
         },
         async updateInfo() {
             if (this.verified) {
