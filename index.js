@@ -49,6 +49,7 @@ app.use(session({
     secret: 'leindfraust',
     resave: false,
     saveUninitialized: false,
+    maxAge: 14 * 24 * 60 * 60,
     store: MongoStore.create({
         mongoUrl: encodeURI(mongoUri),
         crypto: {
