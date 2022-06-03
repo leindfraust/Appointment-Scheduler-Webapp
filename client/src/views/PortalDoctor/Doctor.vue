@@ -7,31 +7,16 @@
       <div class="column" style="background-color: whitesmoke;">
         <section class="section" style="background-color: whitesmoke;">
           <h1 class="title">APPOINTMENTS</h1>
-          <div
-            class="container is-widescreen is-fullhd"
-            v-if="Object.keys(appointmentSchedules).length !== 0"
-          >
+          <div class="container is-widescreen is-fullhd" v-if="Object.keys(appointmentSchedules).length !== 0">
             <div class="field">
               <div class="control">
-                <input
-                  class="input"
-                  type="text"
-                  style="width: 50% !important"
-                  v-model="searchBar"
-                  placeholder="Search..."
-                />
+                <input class="input" type="text" style="width: 50% !important" v-model="searchBar"
+                  placeholder="Search..." />
               </div>
             </div>
-            <div
-              class="box"
-              v-for="(appointmentList, index) in appointmentSchedules"
-              :key="index"
-              :style="new Date(index).toDateString() == new Date().toDateString() ? 'box-shadow: rgb(10 10 10 / 10%) 0px 0.5em 1em -0.125em, #485fc7 0px 0px 0px 1px !important;' : ''"
-            >
-              <h1
-                class="subtitle"
-                v-if="new Date(index).toDateString() == new Date().toDateString()"
-              >
+            <div class="box" v-for="(appointmentList, index) in appointmentSchedules" :key="index"
+              :style="new Date(index).toDateString() == new Date().toDateString() ? 'box-shadow: rgb(10 10 10 / 10%) 0px 0.5em 1em -0.125em, #485fc7 0px 0px 0px 1px !important;' : ''">
+              <h1 class="subtitle" v-if="new Date(index).toDateString() == new Date().toDateString()">
                 <b>TODAY</b>
               </h1>
               <h1 class="subtitle has-text-black">Schedule: {{ new Date(index).toDateString() }}</h1>
@@ -51,79 +36,42 @@
                   </thead>
                   <tbody v-for="appointments in appointmentList" :key="appointments._id">
                     <tr>
-                      <button
-                        class="dropdown-item button has-text-info"
-                        type="button"
-                        @click="
-                          toggleModal(
-                            appointments.firstName,
-                            appointments.lastName,
-                            appointments.emailAdd,
-                            appointments.contactNum,
-                            appointments.birthDay,
-                            appointments._id
-                          )
-                        "
-                      >Edit</button>
+                      <button class="dropdown-item button has-text-info" type="button" @click="
+                        toggleModal(
+                          appointments.firstName,
+                          appointments.lastName,
+                          appointments.emailAdd,
+                          appointments.contactNum,
+                          appointments.birthDay,
+                          appointments._id
+                        )
+                      ">Edit</button>
                       <br />
                       <div class="modal" :class="{ 'is-active': isActiveModal }">
                         <div class="modal-background"></div>
                         <div class="modal-content animate__animated animate__fadeInLeft">
-                          <form
-                            class="field customField has-text-centered"
-                          >
+                          <form class="field customField has-text-centered">
                             <label class="label">First Name</label>
                             <div class="control">
-                              <input
-                                class="input"
-                                type="text"
-                                v-model="firstName"
-                                placeholder="First Name"
-                                required
-                              />
+                              <input class="input" type="text" v-model="firstName" placeholder="First Name" required />
                             </div>
                             <label class="label">Last Name</label>
                             <div class="control">
-                              <input
-                                class="input"
-                                type="text"
-                                v-model="lastName"
-                                placeholder="Last Name"
-                                required
-                              />
+                              <input class="input" type="text" v-model="lastName" placeholder="Last Name" required />
                             </div>
                             <label class="label">Contact Number</label>
                             <div class="control">
-                              <input
-                                class="input"
-                                type="number"
-                                v-model="contactNum"
-                                placeholder="Contact Number"
-                                required
-                              />
+                              <input class="input" type="number" v-model="contactNum" placeholder="Contact Number"
+                                required />
                             </div>
                             <label class="label">Birthday</label>
                             <div class="control">
-                              <input
-                                class="input"
-                                type="text"
-                                v-model="birthDay"
-                                placeholder="Birthday"
-                                required
-                              />
+                              <input class="input" type="text" v-model="birthDay" placeholder="Birthday" required />
                             </div>
-                            <button
-                              class="button is-primary"
-                              type="button"
-                              @click="updateData"
-                            >Submit</button>
+                            <button class="button is-primary" type="button" @click="updateData">Submit</button>
                           </form>
                         </div>
-                        <button
-                          class="modal-close is-large"
-                          aria-label="close"
-                          @click="toggleModal"
-                        ></button>
+                        <button class="modal-close is-large" aria-label="close" @click="toggleModal"></button>
                       </div>
                       <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
                       <th class="has-text-black-ter">{{ appointments.hospital }}</th>
@@ -177,18 +125,22 @@ export default {
   },
   computed: {
     appointmentSchedules() {
-      return _.groupBy(
-        this.appointmentSched.filter((x) => {
-          return (
-            x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
-            x.lastName.toLowerCase().includes(this.searchBar.toLowerCase())
-          );
-        }).sort((a, b) => {
-          return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
-        }).filter(x => { return new Date(x.schedule[0].date).getTime() >= new Date().getTime() && new Date(x.schedule[0].date).getMonth() >= new Date().getMonth() })
-        ,
-        "schedule[0].date"
-      );
+      if (this.appointmentSched) {
+        return _.groupBy(
+          this.appointmentSched.filter((x) => {
+            return (
+              x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
+              x.lastName.toLowerCase().includes(this.searchBar.toLowerCase())
+            );
+          }).sort((a, b) => {
+            return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
+          }).filter(x => { return new Date(x.schedule[0].date).getTime() >= new Date().getTime() && new Date(x.schedule[0].date).getMonth() >= new Date().getMonth() })
+          ,
+          "schedule[0].date"
+        );
+      } else {
+        return false
+      }
     },
   },
   async mounted() {
@@ -215,7 +167,7 @@ export default {
         .then(
           (response) =>
           (this.appointmentSched = response.data.filter(
-            (x) => x.doctorID === store.state.userID
+            (x) => x.doctorID === store.state.doctorID
           ))
         );
       this.isActiveModal = !this.isActiveModal;
@@ -245,21 +197,26 @@ export default {
   padding: 1%;
   border-radius: 15px;
 }
+
 th {
   font-weight: bold;
 }
+
 .modal input {
   width: 300px !important;
 }
+
 .modal-content {
   background-color: whitesmoke;
   padding: 15px;
   border-radius: 10px;
 }
+
 @media (max-width: 991.98px) {
   .modal input {
     width: 300px !important;
   }
+
   #titleBox {
     width: 100% !important;
   }

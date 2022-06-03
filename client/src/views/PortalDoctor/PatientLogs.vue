@@ -171,18 +171,22 @@ export default {
   },
   computed: {
     appointmentSchedules() {
-      return _.groupBy(
-        this.appointmentSched.filter((x) => {
-          return (
-            x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
-            x.lastName.toLowerCase().includes(this.searchBar.toLowerCase())
-          );
-        }).sort((a, b) => {
-          return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
-        }).filter(x => { return new Date(x.schedule[0].date).getTime() < new Date().getTime() })
-        ,
-        "schedule[0].date"
-      );
+      if (this.appointmentSched) {
+        return _.groupBy(
+          this.appointmentSched.filter((x) => {
+            return (
+              x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
+              x.lastName.toLowerCase().includes(this.searchBar.toLowerCase())
+            );
+          }).sort((a, b) => {
+            return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
+          }).filter(x => { return new Date(x.schedule[0].date).getTime() < new Date().getTime() })
+          ,
+          "schedule[0].date"
+        );
+      } else {
+        return false
+      }
     },
   },
   methods: {
@@ -193,7 +197,7 @@ export default {
         .then(
           (response) =>
           (this.appointmentSched = response.data.filter(
-            (x) => x.doctor === this.$store.state.doctorID
+            (x) => x.doctorID === this.$store.state.doctorID
           ))
         );
     },
