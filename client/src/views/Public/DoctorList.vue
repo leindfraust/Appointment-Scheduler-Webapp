@@ -65,22 +65,32 @@
               <div v-else>
                 <br />
                 <h1 class="title is-3">Choose a doctor:</h1>
+                <div class="field">
+                  <div class="control">
+                    <input class="input" type="text" v-model="doctorSearchBar" placeholder="Search..." />
+                  </div>
+                </div>
               </div>
               <div v-if="specializationClicked">
-                <div class="card-content" v-for="doctors in doctorList" :key="doctors._id">
-                  <div class="media">
-                    <figure class="media-left">
-                      <p class="image is-64x64">
-                        <img
-                          :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${doctors.alias}.jpg`" />
-                      </p>
-                    </figure>
-                    <div class="media-content">
-                      <p class="title is-4">{{ doctors.name }}</p>
-                      <p class="subtitle is-6">{{ pickedSpecialist }}</p>
-                      <button class="button" @click="pickDoctor(doctors)">Appoint</button>
+                <div v-if="Object.keys(doctorSearch).length !== 0">
+                  <div class="card-content" v-for="doctors in doctorSearch" :key="doctors._id">
+                    <div class="media">
+                      <figure class="media-left">
+                        <p class="image is-64x64">
+                          <img
+                            :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${doctors.alias}.jpg`" />
+                        </p>
+                      </figure>
+                      <div class="media-content">
+                        <p class="title is-4">{{ doctors.name }}</p>
+                        <p class="subtitle is-6">{{ pickedSpecialist }}</p>
+                        <button class="button" @click="pickDoctor(doctors)">Appoint</button>
+                      </div>
                     </div>
                   </div>
+                </div>
+                <div v-else>
+                  <div v-if="doctorList != ''" class="notification is-info">No such doctor is available right now.</div>
                 </div>
               </div>
             </div>
@@ -109,6 +119,7 @@ export default {
       specialistList: this.$store.state.hospitalDetails.specializations.sort(),
       pickedSpecialist: null,
       specializationClicked: false,
+      doctorSearchBar: '',
       isDoctorLoading: false
     };
   },
@@ -117,8 +128,18 @@ export default {
       .get("/session/patient")
       .then(response => this.patientDetails = response.data);
   },
+  computed: {
+    doctorSearch() {
+      if (this.doctorList) {
+        return this.doctorList.filter(x => x.name.toLowerCase().includes(this.doctorSearchBar.toLowerCase()))
+      } else {
+        return false
+      }
+    }
+  },
   methods: {
     async getDoctors(specialization) {
+      this.doctorSearchBar = ''
       this.isDoctorLoading = true
       this.specializationClicked = true
       this.pickedSpecialist = specialization;
