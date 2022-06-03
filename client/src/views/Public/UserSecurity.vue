@@ -12,9 +12,12 @@ let errMsg = ref('')
 let passwordChanged = ref(false)
 let newPasswordNotMatch = ref(false)
 let currentPasswordIncorrect = ref(false)
-
+let username = ref('')
+let email = ref('')
 onMounted(async () => {
     await axios.get('/session/patient').then(response => patient.value = response.data);
+    username.value = await patient.value.username
+    email.value = await patient.value.email
 })
 
 //methods
@@ -117,7 +120,8 @@ async function changePassword() {
                         password</button>
                 </div>
             </div>
-            <ForgotPassword :userType="'patient'" :username="patient.username" :email="patient.email" />
+            <ForgotPassword v-if="username != '' && email != ''" :userType="'patient'" :username="username"
+                :email="email" />
         </div>
     </section>
 </template>
