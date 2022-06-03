@@ -20,8 +20,7 @@
                         <div class="columns">
                             <div class="column">
                                 <h1 class="title">Change password:</h1>
-                                <ForgotPassword :userType="'doctor'" :username="doctorDetails.username"
-                                    :email="gmail" />
+                                <ForgotPassword v-if="gmail != null"  :userType="'doctor'" :email='gmail' />
                                 <div class="block"></div>
                                 <div class="field">
                                     <div class="control">
@@ -187,13 +186,13 @@
 <script>
 import axios from 'axios'
 import DoctorMenu from '../../components/DoctorMenu.vue'
-import ForgotPassword from '../../components/ForgotPassword.vue'
+import { defineAsyncComponent } from 'vue'
 
 export default {
     name: 'DoctorSecurity',
     components: {
         DoctorMenu,
-        ForgotPassword
+        ForgotPassword: defineAsyncComponent(() => import('../../components/ForgotPassword.vue'))
     },
     async mounted() {
         await axios.get("/session/doctor").then(response => this.doctorDetails = response.data)
