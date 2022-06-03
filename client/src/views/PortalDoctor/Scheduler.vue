@@ -16,7 +16,7 @@
                   <div class="content has-text-centered">
                     <div class="control block">
                       <label class="label">Prefix:</label>
-                      <input class="input" type="text" maxlength="10" v-model="prefix" style="width: 33%;"
+                      <input class="input" type="text" v-model="prefix" style="width: 33%;"
                         placeholder="e.g. ROOM305" />
                     </div>
                     <label class="label">Time start:</label>
@@ -49,7 +49,8 @@
               </div>
               <v-calendar :columns="$screens({ default: 1, lg: 2 })" :rows="$screens({ default: 1, lg: 2 })"
                 :is-expanded="$screens({ default: true, lg: false })" v-model="date" :min-date="new Date()"
-                :attributes="attributes" @dayclick="modalUp" :timezone="timezone" />
+                :disabled-dates="[{ start: new Date(), end: new Date() }]" :attributes="attributes" @dayclick="modalUp"
+                :timezone="timezone" />
             </div>
             <div class="column">
               <div class="container">
@@ -60,8 +61,13 @@
                     <div class="block card">
                       <div class="card-content">
                         <div class="content">
-                          <p class="title is-4 has-text-black has-text-left">{{ new Date(schedules.date).toDateString()
-                          }}</p>
+                          <p class="title is-5 has-text-black has-text-left">{{ new Date(schedules.date).toDateString()
+                          }} &nbsp;<span class="icon-text">
+                              <span class="icon">
+                                <a class="has-text-black-ter" @click="modalUp(schedules.dayDetail)"><i
+                                    class="fa-solid fa-trash-can"></i></a>
+                              </span>
+                            </span></p>
                           <p class="has-text-black">Prefix: {{ schedules.prefix }}</p>
                           <p class="has-text-black">{{ schedules.timeStart }} - {{ schedules.timeEnd }}</p>
                           <p class="has-text-black">Appointment limit: {{ schedules.appointmentLimit }}</p>
@@ -100,7 +106,7 @@ export default {
       date: new Date(),
       timeStart: '',
       timeEnd: '',
-      timezone: "",
+      timezone: "Asia/Hong_Kong",
       prefix: '',
       days: [],
       appointmentLimits: 10,
@@ -138,14 +144,15 @@ export default {
     }
   },
   methods: {
-    sortDate(){
+    sortDate() {
       return this.days.sort((a, b) => {
-          new Date(a.date).getTime() - new Date(b.date).getTime()
-        }).filter(x => { return new Date(x.date).getTime() > new Date().getTime() })
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+      }).filter(x => { return new Date(x.date).getTime() > new Date().getTime() })
     },
     async onDayClick(day) {
       this.loading = true
       this.days.push({
+        dayDetail: day,
         id: day.id,
         date: day.date,
         timeStart: this.timeStart.toLocaleTimeString(),
