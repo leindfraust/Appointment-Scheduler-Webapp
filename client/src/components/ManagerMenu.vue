@@ -33,10 +33,7 @@
         <p class="menu-label">Security</p>
         <ul class="menu-list">
             <li>
-                <a @click="navChangePass">Change Password</a>
-            </li>
-            <li>
-                <a>Doctor Registration</a>
+                <a @click="navChangePass">Registration and Password</a>
             </li>
         </ul>
         <p class="menu-label">Support</p>
