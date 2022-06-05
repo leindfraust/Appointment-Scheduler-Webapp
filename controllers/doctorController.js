@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt')
 const Doctor = require('../models/doctor');
+const Manager = require('../models/manager');
 const cloudinary = require('cloudinary')
 
 cloudinary.config({
@@ -28,7 +29,12 @@ const checkAvailabilityDoctors = (async (req, res) => {
             verified: true,
             "hospitalOrigin.hospital": hospital,
             specialist: specialist,
-            schedule: {$exists: true, $not: {$size: 0}} 
+            schedule: {
+                $exists: true,
+                $not: {
+                    $size: 0
+                }
+            }
         }).select('-password -username -licenseNo -messageHistory -gmail -specialist -hospitalOrigin');
         if (availableDoctors) {
             res.status(200).send(availableDoctors)
@@ -40,6 +46,22 @@ const checkAvailabilityDoctors = (async (req, res) => {
         console.log(err)
     }
 })
+
+const check_registrationCode = (async (req, res) => {
+    let registrationCode = await req.body.registrationCode
+    try {
+        const codeExist = await Manager.findOne({
+            registrationCode: registrationCode
+        });
+        if (await codeExist) {
+            res.status(200).send(true)
+        } else {
+            res.status(200).send(false)
+        }
+    } catch (err) {
+        res.status(500).send(err)
+    }
+});
 
 const check_alias = (async (req, res) => {
     let alias = await req.body.alias
@@ -227,6 +249,7 @@ const pushMessages = ((req, res) => {
 })
 
 module.exports = {
+    check_registrationCode,
     check_alias,
     check_username,
     checkAvailabilityDoctors,
