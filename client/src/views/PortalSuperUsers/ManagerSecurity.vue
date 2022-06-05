@@ -12,12 +12,40 @@ let managerID = ref('')
 let errMsg = ref('')
 let passwordChanged = ref(false)
 let incorrectCurrentPassword = ref(false)
+let registrationCode = ref('')
 
 onMounted(async () => {
     await axios.get('/session/manager').then(response => managerID.value = response.data._id)
+    await axios.get('/session/manager').then(response => registrationCode.value = response.data.registrationCode)
+    console.log(registrationCode.value)
 });
 
 //methods
+
+function generateCode() {
+    let result = '';
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let charactersLength = characters.length;
+    for (let i = 0; i < 8; i++) {
+        result += characters.charAt(Math.floor(Math.random() *
+            charactersLength));
+    }
+    registrationCode.value = result.toUpperCase()
+}
+
+async function updateRegistrationCode() {
+    generateCode()
+    try {
+        await axios.put(`/api/manager/${managerID.value}`, {
+            registrationCode: registrationCode.value
+        });
+        await axios.put('/session/manager', {
+            registrationCode: registrationCode.value
+        });
+    } catch (err) {
+        errMsg.value = err
+    }
+}
 
 function showPassword() {
     let passwordToggle = document.getElementsByClassName("password");
@@ -66,8 +94,18 @@ async function changePassword() {
         </div>
         <div class="column">
             <section class="section">
-                <h1 class="title">Change Password</h1>
                 <div class="container box">
+                    <label class="label">Registration Code</label>
+                    <div class="field has-addons">
+                        <div class="control">
+                            <input class="input" type="text" v-model="registrationCode" />
+                        </div>
+                        <div class="control">
+                            <a class="button" @click="updateRegistrationCode"><i
+                                    class="fa-solid fa-arrows-rotate"></i></a>
+                        </div>
+                    </div>
+                    <hr>
                     <div class="notification is-success" v-if="passwordChanged">Password has been changed successfully.
                     </div>
                     <div class="notification is-danger" v-if="errMsg"> {{ errMsg }}</div>

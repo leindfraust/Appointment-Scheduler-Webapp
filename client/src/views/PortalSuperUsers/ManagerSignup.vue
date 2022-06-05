@@ -26,7 +26,7 @@
                             <div class="dropdown-menu">
                                 <div class="dropdown-content" v-for="provinces in geolocationData" :key="provinces._id">
                                     <a class="dropdown-item" @click="selectProvince(provinces.province)">{{
-                                        provinces.province
+                                            provinces.province
                                     }}</a>
                                 </div>
                             </div>
@@ -43,8 +43,7 @@
                                 </button>
                             </div>
                             <div class="dropdown-menu" v-if="province">
-                                <div class="dropdown-content" v-for="cities in citiesData"
-                                    :key="cities.name">
+                                <div class="dropdown-content" v-for="cities in citiesData" :key="cities.name">
                                     <a class="dropdown-item" @click="selectCity(cities.name)">{{ cities.name }}</a>
                                 </div>
                             </div>
@@ -113,8 +112,6 @@
                             <input class="input" type="text" placeholder="Username" v-model="username"
                                 @input="usernameFindTimeout" />
                         </div>
-                        <div class="notification is-light is-danger" v-if="usernameAlreadyTaken">Username is already
-                            taken.</div>
                     </div>
                     <div class="field">
                         <div class="control">
@@ -244,6 +241,7 @@ export default {
             geolocationData: [],
             isActiveDropdownProvince: false,
             isActiveDropdownCity: false,
+            registrationCode: '',
             pricing: '',
             hospital: '',
             email: '',
@@ -269,6 +267,16 @@ export default {
         }
     },
     methods: {
+        generateCode() {
+            let result = '';
+            let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let charactersLength = characters.length;
+            for (let i = 0; i < 12; i++) {
+                result += characters.charAt(Math.floor(Math.random() *
+                    charactersLength));
+            }
+            this.registrationCode = result.toUpperCase()
+        },
         async usernameFindTimeout() {
             if (this.searchTimeout) {
                 clearTimeout(this.searchTimeout)
@@ -326,6 +334,7 @@ export default {
             this.specializationsSelected = this.specializationsSelected.filter(x => x.specialist !== specialization)
         },
         async create() {
+            this.generateCode()
             this.passwordNotMatch = false
 
             if (this.password !== this.confirmPassword) {
@@ -337,6 +346,7 @@ export default {
             if (this.password === this.confirmPassword && !this.usernameFound) {
                 try {
                     await axios.post('/api/manager', {
+                        registrationCode: this.registrationCode,
                         pricing: this.pricing,
                         status: 'Inactive',
                         hospital: this.hospital,
