@@ -4,6 +4,10 @@ const {
 } = mongoose;
 
 const managerSchema = new Schema({
+    registrationCode: {
+        type: String,
+        required: true
+    },
     pricing: {
         type: String,
         required: true
@@ -61,7 +65,9 @@ const managerSchema = new Schema({
     details: Array
 });
 
-managerSchema.index({location: '2dsphere'})
+managerSchema.index({
+    location: '2dsphere'
+})
 const manager = mongoose.model('manager', managerSchema);
 
 module.exports = manager

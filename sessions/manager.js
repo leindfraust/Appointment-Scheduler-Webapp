@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/',(req, res) => {
+router.get('/', (req, res) => {
     res.send(req.session)
 });
 
 router.post('/', (req, res) => {
     req.session._id = req.body._id
+    req.session.registrationCode = req.body.registrationCode
     req.session.hospital = req.body.hospital
-    req.session.username = req.body.username
     req.session.save((err) => {
         if (err) {
             return next(err);
@@ -19,6 +19,7 @@ router.post('/', (req, res) => {
 
 router.put('/', (req, res) => {
     req.session.hospital = req.body.hospital || req.session.hospital
+    req.session.registrationCode = req.body.registrationCode || req.session.registrationCode
     req.session.save((err) => {
         if (err) {
             return next(err);

@@ -7,8 +7,11 @@ const {
     deleteDoctor,
     verify_username,
     check_username,
-    check_alias
+    check_alias,
+    check_registrationCode
 } = require('../../controllers/doctorController');
+
+router.post('/check_registrationCode', check_registrationCode)
 
 router.post('/check_alias', check_alias)
 
