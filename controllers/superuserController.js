@@ -70,6 +70,7 @@ const submitTicket = (async (req, res) => {
                 email: email,
                 title: ticketTitle,
                 message: ticketMessage,
+                date: new Date(),
                 active: true
             }
 
