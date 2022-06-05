@@ -1,25 +1,23 @@
 <template>
-<div class="modal" :class="{ 'is-active': loading }">
-            <div class="modal-background"></div>
-            <div class="modal-content loader"></div>
-        </div>
+    <div class="modal" :class="{ 'is-active': loading }">
+        <div class="modal-background"></div>
+        <div class="modal-content loader"></div>
+    </div>
     <div class="columns">
         <div class="column is-2">
-            <ManagerMenuVue/>
+            <ManagerMenuVue />
         </div>
         <div class="column" style="overflow: auto;">
-        <div class="notification is-light is-danger" v-if="hospitalStatus.status == 'Inactive'">The account is not activated yet and will not be displayed on hospital searches, complete the hospital's <router-link :to="`/user/manager/${this.managerHospital.hospital}/profile`" class="has-text-link">profile</router-link> to activate the account.</div>
             <section class="section">
+                <div class="notification is-light is-danger" v-if="hospitalStatus.status == 'Inactive'">The account is
+                    not activated yet and will not be displayed on hospital searches, complete the hospital's
+                    <router-link :to="`/user/manager/${this.managerHospital.hospital}/profile`" class="has-text-link">
+                        profile</router-link> to activate the account.</div>
                 <h1 class="title">{{ managerHospital.hospital }}</h1>
                 <div class="field">
                     <div class="control" style="width: 33%;">
                         <label class="label">Search:</label>
-                        <input
-                            class="input"
-                            type="text"
-                            v-model="searchBar"
-                            placeholder="Search..."
-                        />
+                        <input class="input" type="text" v-model="searchBar" placeholder="Search..." />
                     </div>
                 </div>
                 <div class="table-container" v-if="Object.keys(doctorAccountsIndexed).length !== 0">
@@ -37,30 +35,26 @@
                         </thead>
                         <tbody v-for="(doctor, index) in doctorAccountsIndexed" :key="doctor._id">
                             <tr>
-                                <button
-                                    class="dropdown-item button has-text-info"
-                                    type="button"
-                                    @click="doctorRecoverEmail(doctor._id, doctor.gmail)"
-                                >Recover</button>
-                                <button
-                                    class="button dropdown-item has-text-danger"
-                                    type="button"
-                                    @click="doctorRemove(doctor._id)"
-                                >Remove</button>
+                                <button class="dropdown-item button has-text-info" type="button"
+                                    @click="doctorRecoverEmail(doctor._id, doctor.gmail)">Recover</button>
+                                <button class="button dropdown-item has-text-danger" type="button"
+                                    @click="doctorRemove(doctor._id)">Remove</button>
                                 <td class="has-text-black-ter">{{ index + 1 }}</td>
                                 <td class="has-text-black-ter">{{ doctor.alias }}</td>
                                 <td class="has-text-black-ter">{{ doctor.name }}</td>
                                 <td class="has-text-black-ter">{{ doctor.specialist.toString() }}</td>
                                 <td class="has-text-black-ter">{{ doctor.gmail }}</td>
-                                <td
-                                    class="has-text-black-ter"
-                                    v-for="doctorSchedule in doctor.schedule" :key="doctorSchedule.id"
-                                >{{ doctorSchedule.date }}</td>
+                                <td class="has-text-black-ter" v-for="doctorSchedule in doctor.schedule"
+                                    :key="doctorSchedule.id">{{ new Date(doctorSchedule.date).toLocaleDateString() }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="notification is-warning" v-else><h1 class="title is-4">No doctors as of yet, generate a security code for your doctors to use in linking to this hospital.</h1></div>
+                <div class="notification is-warning" v-else>
+                    No doctors as of yet, generate a security code in <b>Registration and Password</b> for your doctors to use in
+                        registering to their account.
+                </div>
                 <div class="modal" :class="{ 'is-active': isActiveModal }">
                     <div class="modal-background"></div>
                     <div class="modal-content">
@@ -69,11 +63,7 @@
                                 <div class="control">
                                     <input class="input" type="text" v-model="email" />
                                 </div>
-                                <button
-                                    class="button is-success"
-                                    type="button"
-                                    @click="updateData"
-                                >Confirm</button>
+                                <button class="button is-success" type="button" @click="updateData">Confirm</button>
                             </div>
                         </div>
                         <button class="modal-close is-large" aria-label="close" @click="closeModal"></button>
