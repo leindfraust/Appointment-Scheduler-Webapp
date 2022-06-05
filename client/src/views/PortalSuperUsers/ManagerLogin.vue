@@ -3,44 +3,25 @@
         <div class="hero-body">
             <div class="container has-text-centered">
                 <div class="animate__animated animate__fadeInLeft">
-                    <p
-                        class="notification is-success"
-                        v-if="newAccount"
-                    >The account has been successfully created, login to activate the account now.</p>
+                    <p class="notification is-success" v-if="newAccount">The account has been successfully created,
+                        login to activate the account now.</p>
                     <div class="box" style="width: 33%; margin: auto">
                         <div class="content">
                             <form class="field" style="margin-top: 5%">
                                 <h1 class="title">Login</h1>
                                 <div class="control">
-                                    <input
-                                        class="input"
-                                        type="text"
-                                        v-model="username"
-                                        placeholder="username"
-                                        required
-                                        @keyup.enter="login"
-                                    />
+                                    <input class="input" type="text" v-model="username" placeholder="username" required
+                                        @keyup.enter="login" />
                                 </div>
                                 <div class="control" style="margin-top: 2%">
-                                    <input
-                                        class="input"
-                                        type="password"
-                                        v-model="password"
-                                        placeholder="password"
-                                        required
-                                        @keyup.enter="login"
-                                    />
+                                    <input class="input" type="password" v-model="password" placeholder="password"
+                                        required @keyup.enter="login" />
                                 </div>
-                                <p
-                                    v-if="incorrectUserPass"
-                                    class="has-text-danger"
-                                    style="margin-top: 5%"
-                                >{{ validateMessage }}</p>
-                                <p
-                                    v-else-if="incorrectUserPass == false"
-                                    class="has-text-danger"
-                                    style="margin-top: 5%"
-                                >{{ validateMessage }}</p>
+                                <p v-if="incorrectUserPass" class="has-text-danger" style="margin-top: 5%">{{
+                                        validateMessage
+                                }}</p>
+                                <p v-else-if="incorrectUserPass == false" class="has-text-danger"
+                                    style="margin-top: 5%">{{ validateMessage }}</p>
                                 <button type="button" class="button is-primary" @click="login">Login</button>
                                 <hr />
                                 <h1 class="title">Or</h1>
@@ -105,6 +86,7 @@ export default {
                     this.$store.commit("managerHospital", this.userManager.hospital);
                     await axios.post("/session/manager", {
                         _id: this.userManager._id,
+                        registrationCode: this.userManager.registrationCode,
                         hospital: this.userManager.hospital
                     });
                     await this.$router.push(`/user/manager/${this.userManager.hospital}`);
