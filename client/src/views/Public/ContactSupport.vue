@@ -44,7 +44,7 @@ function generateTicket() {
         result += characters.charAt(Math.floor(Math.random() *
             charactersLength));
     }
-    ticketID.value = result
+    ticketID.value = result.toUpperCase()
 }
 </script>
 <template>
