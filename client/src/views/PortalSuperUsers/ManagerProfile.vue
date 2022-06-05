@@ -10,52 +10,32 @@
         <div class="column">
             <section class="section">
                 <h1 class="title">PROFILE</h1>
-                <div
-                    class="notification is-light is-info"
-                    v-if="hospitalStatus == 'Inactive'"
-                >To get started, upload a photo of your hospital and fill in the details of your description and contacts. Activation of the account is available when editing.</div>
+                <div class="notification is-light is-info" v-if="hospitalStatus == 'Inactive'">To get started, upload a
+                    <b>photo</b> of your hospital and fill in the details of your <b>description</b> and
+                    <b>contacts</b>. Activation of the
+                    account is available when clicking <b>"Edit"</b>.
+                </div>
                 <div class="columns box">
                     <div class="column">
-                        <figure class="image is-16by9">
+                        <figure class="image is-16by9" v-if="hospitalStatus !== 'Inactive'">
                             <img
-                                :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/managers/${managerHospital}.jpg`"
-                            />
+                                :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/managers/${managerHospital}.jpg`" />
                         </figure>
                         <!--Hospital picture & upload -->
-                        <form
-                            id="formUpload"
-                            action="/api/imgUploadManager"
-                            method="post"
-                            enctype="multipart/form-data"
-                            style="margin: auto; width: 50%"
-                            class="field"
-                        >
+                        <form id="formUpload" action="/api/imgUploadManager" method="post" enctype="multipart/form-data"
+                            style="margin: auto; width: 50%" class="field">
                             <div class="control">
                                 <input type="hidden" name="hospital" :value="(managerHospital)" />
-                                <input
-                                    class="input"
-                                    type="file"
-                                    name="imgFile"
-                                    @click="imgSuccess"
-                                    required
-                                />
+                                <input class="input" type="file" name="imgFile" @click="imgSuccess" required />
                                 <div class="has-text-centered">
-                                    <button
-                                        type="submit"
-                                        value="Upload"
-                                        class="button is-primary"
-                                    >Change profile picture</button>
+                                    <button type="submit" value="Upload" class="button is-primary">Upload Photo</button>
                                 </div>
                             </div>
                         </form>
                         <br />
                         <div class="container has-text-centered">
-                            <iframe
-                                v-if="hospitalData !== ''"
-                                width="300"
-                                height="300"
-                                :src="`https://maps.google.com/maps?q=${hospitalData.location.coordinates[1]},${hospitalData.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"
-                            ></iframe>
+                            <iframe v-if="hospitalData !== ''" width="300" height="300"
+                                :src="`https://maps.google.com/maps?q=${hospitalData.location.coordinates[1]},${hospitalData.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"></iframe>
                         </div>
                     </div>
                     <div class="column">
@@ -67,11 +47,8 @@
                                 <p class="subtitle" v-if="!editingMode">{{ description }}</p>
                                 <form class="form" v-if="editingMode">
                                     <div class="control">
-                                        <textarea
-                                            class="textarea"
-                                            v-model="editDescription"
-                                            placeholder="Edit description..."
-                                        ></textarea>
+                                        <textarea class="textarea" v-model="editDescription"
+                                            placeholder="Edit description..."></textarea>
                                     </div>
                                 </form>
                             </div>
@@ -86,31 +63,20 @@
                                     <li v-for="(contactEdit, index) in editContacts" :key="index">
                                         <p class="subtitle">
                                             {{ contactEdit.contact }}
-                                            <a
-                                                v-if="editingMode"
-                                                class="has-text-danger"
-                                                @click="removeContact(contactEdit.contact)"
-                                            >Remove</a>
+                                            <a v-if="editingMode" class="has-text-danger"
+                                                @click="removeContact(contactEdit.contact)">Remove</a>
                                         </p>
                                     </li>
                                 </ul>
                                 <br />
                                 <div class="field has-addons" v-if="editingMode">
                                     <div class="control">
-                                        <input
-                                            class="input"
-                                            type="number"
-                                            v-model="contact"
-                                            placeholder="Add contacts..."
-                                        />
+                                        <input class="input" type="number" v-model="contact"
+                                            placeholder="Add contacts..." />
                                     </div>
                                     <div class="control">
-                                        <button
-                                            type="submit"
-                                            class="button is-light"
-                                            @click="addContact"
-                                            :disabled="contact == ''"
-                                        >+</button>
+                                        <button type="submit" class="button is-light" @click="addContact"
+                                            :disabled="contact == ''">+</button>
                                     </div>
                                 </div>
                             </div>
@@ -123,11 +89,9 @@
                             </label>
                         </div>
                         <br />
-                        <button
-                            class="button is-danger"
-                            v-if="editingMode"
-                            @click="saveProfileEdit"
-                        >Save Changes</button>
+                        <button class="button is-danger" v-if="editingMode" @click="saveProfileEdit"
+                            :disabled="editDescription == '' || editContacts.length == 0">Save
+                            Changes</button>
                     </div>
                 </div>
             </section>
@@ -143,14 +107,16 @@ export default {
     components: {
         ManagerMenuVue
     },
-    async created() {
+    async mounted() {
         this.loading = true
         await axios.get('/session/manager').then(response => this.managerHospital = response.data.hospital)
         await axios.get('/session/manager').then(response => this.managerHospitalID = response.data._id)
         await axios.get('/api/manager').then(response => this.hospitalData = response.data.find(x => x._id == this.managerHospitalID))
-        this.description = await this.hospitalData.details[0].description
-        this.contacts = await this.hospitalData.details[0].contacts
         this.hospitalStatus = await this.hospitalData.status
+        if (this.hospitalStatus !== "Inactive") {
+            this.description = await this.hospitalData.details[0].description
+            this.contacts = await this.hospitalData.details[0].contacts
+        }
         this.loading = false
     },
     data() {
@@ -198,31 +164,33 @@ export default {
             this.activate = true
         },
         async saveProfileEdit() {
-            this.details.push({
-                description: this.editDescription,
-                contacts: this.editContacts
-            });
-            if (this.activate) {
-                await axios.put(`/api/manager/${this.managerHospitalID}`, {
-                    details: this.details,
-                    status: 'Active'
+            if (this.editDescription !== '' && this.editContacts.length !== 0) {
+                this.details.push({
+                    description: this.editDescription,
+                    contacts: this.editContacts
                 });
-            } else {
-                await axios.put(`/api/manager/${this.managerHospitalID}`, {
-                    details: this.details
-                });
+                if (this.activate) {
+                    await axios.put(`/api/manager/${this.managerHospitalID}`, {
+                        details: this.details,
+                        status: 'Active'
+                    });
+                } else {
+                    await axios.put(`/api/manager/${this.managerHospitalID}`, {
+                        details: this.details
+                    });
+                }
+
+                await axios.get('/api/manager').then(response => this.hospitalData = response.data.find(x => x._id == this.managerHospitalID))
+                this.description = await this.hospitalData.details[0].description
+                this.contacts = await this.hospitalData.details[0].contacts
+                this.hospitalStatus = await this.hospitalData.status
+
+                this.editingMode = false
+                this.editDescription = ''
+                this.editContacts = []
+                this.details = []
+                this.activate = false
             }
-
-            await axios.get('/api/manager').then(response => this.hospitalData = response.data.find(x => x._id == this.managerHospitalID))
-            this.description = await this.hospitalData.details[0].description
-            this.contacts = await this.hospitalData.details[0].contacts
-            this.hospitalStatus = await this.hospitalData.status
-
-            this.editingMode = false
-            this.editDescription = ''
-            this.editContacts = []
-            this.details = []
-            this.activate = false
         }
     }
 }
