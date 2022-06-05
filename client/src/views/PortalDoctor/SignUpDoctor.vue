@@ -51,6 +51,23 @@
             </div>
           </div>
         </div>
+        <div class="field">
+          <label class="label">Registration Code</label>
+          <div v-if="registrationCodeFound !== ''">
+            <p class="help is-success" v-if="registrationCodeFound">
+              Registration code is correct.
+              <i class="fas fa-spinner fa-spin" v-if="loadingRegistrationCode"></i>
+            </p>
+            <p class="help is-danger" v-else>
+              Incorrect registration code, please refer to your hospital for your registration code.
+              <i class="fas fa-spinner fa-spin" v-if="loadingRegistrationCode"></i>
+            </p>
+          </div>
+          <div class="control">
+            <input class="input" type="text" v-model="registrationCode" @input="registrationCodeFindTimeout"
+              placeholder="registration code" required />
+          </div>
+        </div>
         <div class="field is-horizontal">
           <div class="field-body">
             <div class="field">
@@ -125,7 +142,7 @@
           </div>
         </div>
         <div class="has-text-right">
-          <button type="submit" value="submit" class="button is-primary" @click="create($event)"
+          <button type="submit" value="Submit" class="button is-primary" @click="create($event)"
             :disabled="specializationsSelected == ''">Create account</button>
         </div>
       </form>
@@ -148,6 +165,7 @@ export default {
       licenseCode: '',
       alias: '',
       name: '',
+      registrationCode: '',
       username: '',
       password: '',
       passwordRepeat: '',
@@ -155,17 +173,27 @@ export default {
       passwordMatch: null,
       aliasFound: '',
       usernameFound: '',
+      registrationCodeFound: '',
       loadingUsername: false,
       loadingAlias: false,
+      loadingRegistrationCode: false,
       specializationsSelected: [],
       specializationList: this.$store.getters.getSpecializationList,
       searchBarSpecialization: '',
       errMsg: '',
       searchTimeoutUsername: null,
-      searchTimeoutAlias: null
+      searchTimeoutAlias: null,
+      searchTimeoutRegistrationCode: null
     };
   },
   methods: {
+    async registrationCodeFindTimeout() {
+      if (this.searchTimeoutRegistrationCode) {
+        clearTimeout(this.searchTimeoutRegistrationCode)
+        this.searchTimeoutRegistrationCode = null
+      }
+      this.searchTimeoutRegistrationCode = setTimeout(this.registrationCodeFinder, 500)
+    },
     async usernameFindTimeout() {
       if (this.searchTimeoutUsername) {
         clearTimeout(this.searchTimeoutUsername)
@@ -180,6 +208,18 @@ export default {
       }
       this.searchTimeoutAlias = setTimeout(this.aliasFinder, 500)
     },
+    async registrationCodeFinder() {
+      this.loadingRegistrationCode = true
+      await axios.post('/api/doctor/check_registrationCode', {
+        registrationCode: this.registrationCode
+      }).then(response => {
+        this.registrationCodeFound = response.data
+      })
+      if (this.registrationCode == '') {
+        this.registrationCodeFound = ''
+      }
+      this.loadingRegistrationCode = false
+    },
     async usernameFinder() {
       this.loadingUsername = true
       await axios.post('/api/doctor/check_username', {
@@ -187,7 +227,7 @@ export default {
       }).then(response => {
         this.usernameFound = response.data
       })
-      if (await this.username == '') {
+      if (this.username == '') {
         this.usernameFound = ''
       }
       this.loadingUsername = false
@@ -199,22 +239,27 @@ export default {
       }).then(response => {
         this.aliasFound = response.data
       })
-      if (await this.alias == '') {
+      if (this.alias == '') {
         this.aliasFound = ''
       }
       this.loadingAlias = false
     },
     async create(e) {
       //password, alias and username checks
-      if ((await this.password) !== this.passwordRepeat) {
+      if ((this.password) !== this.passwordRepeat) {
         this.passwordMatch = "password do not match";
         await e.preventDefault();
-        if (await this.alias) {
+        if (this.registrationCode) {
+          if (this.registrationCodeFound != null || !this.registrationCodeFound) {
+            await e.preventDefault();
+          }
+        }
+        if (this.alias) {
           if (this.aliasFound == null || this.aliasFound) {
             await e.preventDefault();
           }
         }
-        if (await this.username) {
+        if (this.username) {
           if (this.usernameFound == null || this.usernameFound) {
             await e.preventDefault();
           }
@@ -222,21 +267,27 @@ export default {
       } else {
         this.passwordMatch = null;
 
-        if (await this.alias) {
+        if (this.registrationCode) {
+          if (this.registrationCodeFound == null || !this.registrationCodeFound) {
+            await e.preventDefault();
+          }
+        }
+        if (this.alias) {
           if (this.aliasFound == null || this.aliasFound) {
             await e.preventDefault();
           }
         }
-        if (await this.username) {
+        if (this.username) {
           if (this.usernameFound == null || this.usernameFound) {
             await e.preventDefault();
           }
         }
       }
       //if no errors, proceed to POST
-      if (await this.password === this.passwordRepeat &&
+      if (this.password === this.passwordRepeat &&
         !this.aliasFound &&
-        !this.usernameFound
+        !this.usernameFound &&
+        this.registrationCodeFound
       ) {
         await axios.post("/api/doctor", {
           alias: this.alias,
