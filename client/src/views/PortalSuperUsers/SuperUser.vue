@@ -213,7 +213,7 @@
                                 <td class="has-text-black-ter">{{ doctor.specialist.toString() }}</td>
                                 <td class="has-text-black-ter">{{ doctor.gmail }}</td>
                                 <td class="has-text-black-ter" v-for="doctorSchedule in doctor.schedule"
-                                    :key="doctorSchedule.id">{{ doctorSchedule.date }}</td>
+                                    :key="doctorSchedule.id">{{ new Date(doctorSchedule.date).toLocaleDateString() }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -256,6 +256,7 @@
                                 <th class="has-text-black-ter">Controls</th>
                                 <th class="has-text-black-ter">Status</th>
                                 <th class="has-text-black-ter">No.</th>
+                                <th class="has-text-black-ter">Date Issued</th>
                                 <th class="has-text-black-ter">ID</th>
                                 <th class="has-text-black-ter">Type</th>
                                 <th class="has-text-black-ter">Email</th>
@@ -275,6 +276,7 @@
                                 <td class="has-text-success" v-if="ticket.active">Active</td>
                                 <td class="has-text-danger" v-if="!ticket.active">Inactive</td>
                                 <td class="has-text-black-ter">{{ index + 1 }}</td>
+                                <td class="has-text-black-ter">{{ new Date(ticket.date).toLocaleDateString() }}</td>
                                 <td class="has-text-black-ter">{{ ticket.id }}</td>
                                 <td class="has-text-black-ter">{{ ticket.type }}</td>
                                 <td class="has-text-black-ter">{{ ticket.email }}</td>
