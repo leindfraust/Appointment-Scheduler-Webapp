@@ -15,7 +15,7 @@ const patientUpdatePassword = (async (req, res) => {
             res.status(500).send(err)
         } else {
             userDetails = await result
-            bcrypt.compare(await currentPassword, result.password, async (err, result) => {
+            bcrypt.compare(await currentPassword, await result.password, async (err, result) => {
                 if (err) {
                     res.status(500).send(err);
                 } else {
@@ -64,7 +64,7 @@ const doctorUpdatePassword = (async (req, res) => {
             res.status(500).send(err)
         } else {
             userDetails = await result
-            bcrypt.compare(await currentPassword, result.password, async (err, result) => {
+            bcrypt.compare(await currentPassword, await result.password, async (err, result) => {
                 if (err) {
                     res.status(500).send(err);
                 } else {
@@ -113,7 +113,7 @@ const managerUpdatePassword = (async (req, res) => {
             res.status(500).send(err)
         } else {
             userDetails = await result
-            bcrypt.compare(await currentPassword, result.password, async (err, result) => {
+            bcrypt.compare(await currentPassword, await result.password, async (err, result) => {
                 if (err) {
                     res.status(500).send(err);
                 } else {
