@@ -6,7 +6,8 @@ const {
 const managerSchema = new Schema({
     registrationCode: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     pricing: {
         type: String,
@@ -26,7 +27,8 @@ const managerSchema = new Schema({
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     province: {
         type: String,
@@ -56,7 +58,8 @@ const managerSchema = new Schema({
     },
     username: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     password: {
         type: String,
@@ -69,5 +72,16 @@ managerSchema.index({
     location: '2dsphere'
 })
 const manager = mongoose.model('manager', managerSchema);
+
+//need to be study at
+const accountDeletion = manager.discriminator('Deletion', new mongoose.Schema({
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        index: {
+            expires: 600
+        }
+    }
+}))
 
 module.exports = manager

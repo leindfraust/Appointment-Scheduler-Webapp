@@ -6,11 +6,13 @@ const {
 const authenticationCodeSchema = new Schema({
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     code: {
         type: Number,
-        required: true
+        required: true,
+        unique: true
     },
     createdAt: {
         type: Date,

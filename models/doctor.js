@@ -11,10 +11,12 @@ const doctorSchema = new Schema({
     alias: {
         type: String,
         required: true,
+        unique: true
     },
     licenseNo: {
         type: String,
         required: true,
+        unique: true
     },
     name: {
         type: String,
@@ -22,11 +24,13 @@ const doctorSchema = new Schema({
     },
     gmail: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     username: {
         type: String,
         required: true,
+        unique: true
     },
     password: {
         type: String,

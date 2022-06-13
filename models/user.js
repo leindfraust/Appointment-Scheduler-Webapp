@@ -6,7 +6,8 @@ const {
 const userSchema = new Schema({
     username: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     password: {
         type: String,
@@ -28,7 +29,11 @@ const userSchema = new Schema({
         type: Number,
         required: true
     },
-    gmail: String,
+    gmail: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
     province: {
         type: String,
         required: true
