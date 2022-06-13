@@ -173,7 +173,7 @@ export default {
       contactNum: '',
       gmail: '',
       currentAddress: '',
-      uername: '',
+      username: '',
       password: '',
       passwordRepeat: '',
       sex: null,
