@@ -39,7 +39,7 @@
                 <a @click="routeHome">Appointments</a>
             </li>
             <li>
-                <a @click="patientLogs">Patients</a>
+                <a @click="patientLogs">Patient History</a>
             </li>
             <li>
                 <a @click="openSchedule">Schedule</a>
