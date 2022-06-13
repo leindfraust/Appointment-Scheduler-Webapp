@@ -3,6 +3,9 @@ const nodemailer = require('nodemailer')
 //nodemailer config
 let transporter = nodemailer.createTransport({
     service: 'Hotmail',
+    host: 'smpt.office365.com',
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.nodemaileruser,
         pass: process.env.nodemailerpass
