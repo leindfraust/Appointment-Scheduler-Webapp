@@ -54,7 +54,7 @@
             </div>
             <div class="column">
               <div class="container">
-                <h1 class="subtitle">Ongoing Schedules:</h1>
+                <h1 class="subtitle has-text-weight-bold">Ongoing Schedules:</h1>
                 <div class="columns is-multiline" style="overflow: scroll; max-height: 30em"
                   v-if="Object.keys(daysIndexed).length !== 0">
                   <div class="column is-6" v-for="schedules in daysIndexed" :key="schedules.id">
