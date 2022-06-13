@@ -7,6 +7,8 @@
         <div class="loader" style="margin: auto;"></div>
       </div>
     </div>
+    <div class="notification is-danger" v-if="errMsg">Something went wrong, please try again later or <a
+        href="/contactus">Contact us</a></div>
     <div class="container">
       <div class="tabs is-centered">
         <ul>
@@ -18,10 +20,8 @@
           </li>
         </ul>
       </div>
-      <section
-        class="section animate__animated animate__fadeInLeft"
-        style="width: 40%; margin: auto; background-color: white; border-radius: 5px; box-shadow: 5px 10px rgb(221, 221, 221);"
-      >
+      <section class="section animate__animated animate__fadeInLeft"
+        style="width: 40%; margin: auto; background-color: white; border-radius: 5px; box-shadow: 5px 10px rgb(221, 221, 221);">
         <form class="field">
           <div v-if="!basicDetailsDone">
             <div class="has-text-danger">All fields are required.*</div>
@@ -35,21 +35,11 @@
             </div>
             <label class="label">Contact Number:</label>
             <div class="block control">
-              <input
-                class="input"
-                type="number"
-                v-model="contactNum"
-                placeholder="Contact Number"
-                required
-              />
+              <input class="input" type="number" v-model="contactNum" placeholder="Contact Number" required />
             </div>
             <label class="label">What are you feeling?</label>
-            <textarea
-              class="textarea"
-              v-model="comments"
-              placeholder="Your symptoms, general well being etc..."
-              required
-            ></textarea>
+            <textarea class="textarea" v-model="comments" placeholder="Your symptoms, general well being etc..."
+              required></textarea>
             <label class="label">Birthday</label>
             <div class="control">
               <v-date-picker class="block" v-model="birthDay">
@@ -68,12 +58,9 @@
             </div>
             <br />
             <div class="block has-text-centered">
-              <button
-                type="button"
-                class="button is-success"
+              <button type="button" class="button is-success"
                 :disabled="firstName == '' || lastName == '' || birthDay == null || contactNum == '' || comments == '' || currentAddress == ''"
-                @click="proceedSched"
-              >Proceed</button>
+                @click="proceedSched">Proceed</button>
             </div>
           </div>
         </form>
@@ -83,21 +70,13 @@
             <h1 class="subtitle has-text-black has-text-weight-bold">Pick your preferred schedule:</h1>
             <div
               v-for="(schedules, index) in doctorSched.filter(x => new Date(x.date).getTime() > new Date().getTime()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())"
-              :key="schedules.id"
-              style="width: 75%; margin:auto"
-            >
+              :key="schedules.id" style="width: 75%; margin:auto">
               <hr />
               <div class="controls">
                 <label class="radio">
-                  <input
-                    type="radio"
-                    class="radioSched"
-                    name="schedule"
-                    @click="pickSched(index, schedules, schedules.prefix)"
-                  />
-                  <span
-                    class="subtitle has-text-black"
-                  >{{ new Date(schedules.date).toDateString() }}</span>
+                  <input type="radio" class="radioSched" name="schedule"
+                    @click="pickSched(index, schedules, schedules.prefix)" />
+                  <span class="subtitle has-text-black">{{ new Date(schedules.date).toDateString() }}</span>
                   <br />
                   <span class="has-text-black">{{ schedules.timeStart }} - {{ schedules.timeEnd }}</span>
                 </label>
@@ -112,18 +91,9 @@
             <br />
             <div class="block has-text-centered">
               <span>
-                <button
-                  class="button is-danger"
-                  type="button"
-                  style="margin-right: 5%"
-                  @click="goBack"
-                >Go Back</button>
-                <button
-                  type="button"
-                  class="button is-primary"
-                  :disabled="schedule == null"
-                  @click="appoint"
-                >Submit appointment</button>
+                <button class="button is-danger" type="button" style="margin-right: 5%" @click="goBack">Go Back</button>
+                <button type="button" class="button is-primary" :disabled="schedule == null" @click="appoint">Submit
+                  appointment</button>
               </span>
             </div>
           </form>
@@ -165,7 +135,9 @@ export default {
       schedAvailability: false,
       radioIndex: null,
       prefix: null,
-      hospital: store.state.hospitalName
+      hospital: store.state.hospitalName,
+      refID: null,
+      errMsg: false
     };
   },
   async mounted() {
@@ -207,65 +179,79 @@ export default {
           );
         //if patient is new to the doctor, patient will be recorded as list of patients in doctor's profile
         if (typeof this.checkPatientRecord === 'undefined' || !this.checkPatientRecord) {
-          await axios.post('/api/patientUpdate', {
-            doctorID: this.doctorDetails._id,
-            patientID: this.patient._id,
-            patientFullName: this.firstName + " " + this.lastName
-          });
-          await axios.post("/api/appointmentList", {
-            hospital: this.hospital,
-            doctorID: this.doctorDetails._id,
-            doctorName: this.doctorDetails.name,
-            patientID: this.patient._id,
-            firstName: this.firstName,
-            lastName: this.lastName,
-            contactNum: this.contactNum,
-            birthDay: this.birthDay.toDateString(),
-            comments: this.comments,
-            schedule: this.schedule,
-            priorityNum: this.prefix + "-" + this.priorityNum,
-          });
-          let patientDetails = {
-            hospital: this.hospital,
-            doctor: this.doctorDetails.name,
-            firstName: this.firstName,
-            lastName: this.lastName,
-            contactNum: this.contactNum,
-            birthDay: this.birthDay.toDateString(),
-            comments: this.comments,
-            schedule: this.schedule,
-            priorityNum: this.prefix + "-" + this.priorityNum,
-          };
-          store.commit("patientDetails", patientDetails);
-          await this.$router.push("/success");
+          try {
+            this.generateRefID()
+
+            await axios.post('/api/patientUpdate', {
+              doctorID: this.doctorDetails._id,
+              patientID: this.patient._id,
+              patientFullName: this.firstName + " " + this.lastName
+            });
+            await axios.post("/api/appointmentList", {
+              referenceID: this.refID,
+              hospital: this.hospital,
+              doctorID: this.doctorDetails._id,
+              doctorName: this.doctorDetails.name,
+              patientID: this.patient._id,
+              firstName: this.firstName,
+              lastName: this.lastName,
+              contactNum: this.contactNum,
+              birthDay: this.birthDay.toDateString(),
+              comments: this.comments,
+              schedule: this.schedule,
+              priorityNum: this.prefix + "-" + this.priorityNum,
+            });
+            let patientDetails = {
+              referenceID: this.refID,
+              hospital: this.hospital,
+              doctor: this.doctorDetails.name,
+              firstName: this.firstName,
+              lastName: this.lastName,
+              contactNum: this.contactNum,
+              birthDay: this.birthDay.toDateString(),
+              comments: this.comments,
+              schedule: this.schedule,
+              priorityNum: this.prefix + "-" + this.priorityNum,
+            };
+            store.commit("patientDetails", patientDetails);
+            await this.$router.push("/success");
+          } catch (err) { this.errMsg = err }
         } else {
-          await axios.post("/api/appointmentList", {
-            hospital: this.hospital,
-            doctorID: this.doctorDetails._id,
-            doctorName: this.doctorDetails.name,
-            patientID: this.patient._id,
-            firstName: this.firstName,
-            lastName: this.lastName,
-            contactNum: this.contactNum,
-            birthDay: this.birthDay.toDateString(),
-            comments: this.comments,
-            schedule: this.schedule,
-            priorityNum: this.prefix + "-" + this.priorityNum,
-          });
-          let patientDetails = {
-            hospital: this.hospital,
-            doctor: this.doctorDetails.name,
-            firstName: this.firstName,
-            lastName: this.lastName,
-            contactNum: this.contactNum,
-            birthDay: this.birthDay.toDateString(),
-            comments: this.comments,
-            schedule: this.schedule,
-            priorityNum: this.prefix + "-" + this.priorityNum,
-          };
-          this.isLoading = false
-          store.commit("patientDetails", patientDetails);
-          await this.$router.push("/success");
+          try {
+            this.generateRefID()
+
+            await axios.post("/api/appointmentList", {
+              referenceID: this.refID,
+              hospital: this.hospital,
+              doctorID: this.doctorDetails._id,
+              doctorName: this.doctorDetails.name,
+              patientID: this.patient._id,
+              firstName: this.firstName,
+              lastName: this.lastName,
+              contactNum: this.contactNum,
+              birthDay: this.birthDay.toDateString(),
+              comments: this.comments,
+              schedule: this.schedule,
+              priorityNum: this.prefix + "-" + this.priorityNum,
+            });
+            let patientDetails = {
+              referenceID: this.refID,
+              hospital: this.hospital,
+              doctor: this.doctorDetails.name,
+              firstName: this.firstName,
+              lastName: this.lastName,
+              contactNum: this.contactNum,
+              birthDay: this.birthDay.toDateString(),
+              comments: this.comments,
+              schedule: this.schedule,
+              priorityNum: this.prefix + "-" + this.priorityNum,
+            };
+            this.isLoading = false
+            store.commit("patientDetails", patientDetails);
+            await this.$router.push("/success");
+          } catch (err) {
+            this.errMsg = err
+          }
         }
         //if not
       } else {
@@ -323,6 +309,16 @@ export default {
         statusSched[e].style.display = 'block'
       }
     },
+    generateRefID() {
+      let result = '';
+      let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let charactersLength = characters.length;
+      for (let i = 0; i < 12; i++) {
+        result += characters.charAt(Math.floor(Math.random() *
+          charactersLength));
+      }
+      this.refID = result.toUpperCase()
+    }
   },
 };
 </script>
