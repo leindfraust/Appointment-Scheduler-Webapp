@@ -4,12 +4,18 @@ const {
     getAppointments,
     pushAppointment,
     updateAppointment,
-    deleteAppointment
+    deleteAppointment,
+    getAppointmentsforDoctor,
+    getAppointmentsforPatient
 } = require('../../controllers/appointmentController')
 
 router.get('/', getAppointments);
 
 router.post('/', pushAppointment);
+
+router.post('/doctors', getAppointmentsforDoctor)
+
+router.post('/patients', getAppointmentsforPatient)
 
 router.put('/:id', updateAppointment);
 

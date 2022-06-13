@@ -4,6 +4,11 @@ const {
 } = mongoose;
 
 const appointmentSchema = new Schema({
+    referenceID: {
+        type: String,
+        required: true,
+        unique: true
+    },
     hospital: {
         type: String,
         required: true

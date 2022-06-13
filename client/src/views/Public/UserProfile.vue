@@ -15,8 +15,10 @@ let dropDownProvince = ref(false)
 let dropDownCity = ref(false)
 let errMsg = ref('')
 let successMsg = ref(false)
+let navOngoingAppointments = ref(true)
+let navPastAppointments = ref(false)
 onMounted(async () => {
-    await axios.get('/api/appointmentList').then(response => appointmentList.value = response.data.filter(x => x.patientID === store.state.patientID));
+    await axios.post('/api/appointmentList/patients', { id: store.state.patientID }).then(response => appointmentList.value = response.data);
     await axios.get("/session/patient").then(response => patient.value = response.data);
     await axios.get("/api/geolocation").then(response => geolocationData.value = response.data)
     userProvince.value = await patient.value.province
@@ -27,9 +29,19 @@ onMounted(async () => {
 });
 
 const ongoingAppointments = computed(() => {
-    return sortAppointments()
-})
-function sortAppointments() {
+    return sortOngoingAppointments()
+});
+const pastAppointments = computed(() => {
+    return sortPastAppointments()
+});
+
+function sortPastAppointments() {
+    return appointmentList.value.sort((a, b) => {
+        return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
+    }).filter(x => { return new Date(x.schedule[0].date).getTime() < new Date().getTime() })
+
+}
+function sortOngoingAppointments() {
     return appointmentList.value.sort((a, b) => {
         new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
     }).filter(x => { return new Date(x.schedule[0].date).getTime() >= new Date().getTime() && new Date(x.schedule[0].date).getMonth() >= new Date().getMonth() })
@@ -184,43 +196,91 @@ async function cancelAppointment(id) {
                 </p>
             </div>
         </div>
-        <div class="table-container" v-if="Object.keys(ongoingAppointments).length !== 0">
-            <h1 class="title">Ongoing Appointments</h1>
-            <table class="table is-striped is-narrow is-fullwidth is-bordered">
-                <thead>
-                    <tr>
-                        <th class="has-text-black-ter">Controls</th>
-                        <th class="has-text-black-ter">Schedule</th>
-                        <th class="has-text-black-ter">Priority No.</th>
-                        <th class="has-text-black-ter">Hospital Appointed</th>
-                        <th class="has-text-black-ter">Doctor Appointed</th>
-                        <th class="has-text-black-ter">First Name</th>
-                        <th class="has-text-black-ter">Last Name</th>
-                        <th class="has-text-black-ter">Contact Number</th>
-                        <th class="has-text-black-ter">Birthday</th>
-                        <th class="has-text-black-ter">Symptoms/Comments</th>
-                    </tr>
-                </thead>
-                <tbody v-for="appointments in ongoingAppointments" :key="appointments._id">
-                    <tr>
-                        <button class="dropdown-item button has-text-danger" type="button"
-                            @click="cancelAppointment(appointments._id)">Cancel</button>
-                        <br />
-                        <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString() }}</th>
-                        <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
-                        <th class="has-text-black-ter">{{ appointments.hospital }}</th>
-                        <th class="has-text-black-ter">{{ appointments.doctorName }}</th>
-                        <td class="has-text-black-ter">{{ appointments.firstName }}</td>
-                        <td class="has-text-black-ter">{{ appointments.lastName }}</td>
-                        <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
-                        <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
-                        <td class="has-text-black-ter">{{ appointments.comments }}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <br />
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li :class="{ 'is-active': navOngoingAppointments }"><a
+                        @click="navOngoingAppointments = true, navPastAppointments = false">Ongoing Appointments</a>
+                </li>
+                <li :class="{ 'is-active': navPastAppointments }"><a
+                        @click="navOngoingAppointments = false, navPastAppointments = true">Past Appointments</a></li>
+            </ul>
+        </nav>
+        <div class="container" v-if="navOngoingAppointments">
+            <div class="table-container" v-if="Object.keys(ongoingAppointments).length !== 0">
+                <table class="table is-striped is-narrow is-fullwidth is-bordered">
+                    <thead>
+                        <tr>
+                            <th class="has-text-black-ter">Controls</th>
+                            <th class="has-text-black-ter">Schedule</th>
+                            <th class="has-text-black-ter">Priority No.</th>
+                            <th class="has-text-black-ter">Hospital Appointed</th>
+                            <th class="has-text-black-ter">Doctor Appointed</th>
+                            <th class="has-text-black-ter">First Name</th>
+                            <th class="has-text-black-ter">Last Name</th>
+                            <th class="has-text-black-ter">Contact Number</th>
+                            <th class="has-text-black-ter">Birthday</th>
+                            <th class="has-text-black-ter">Symptoms/Comments</th>
+                        </tr>
+                    </thead>
+                    <tbody v-for="appointments in ongoingAppointments" :key="appointments._id">
+                        <tr>
+                            <button class="dropdown-item button has-text-danger" type="button"
+                                @click="cancelAppointment(appointments._id)">Cancel</button>
+                            <br />
+                            <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString()
+                            }}</th>
+                            <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
+                            <th class="has-text-black-ter">{{ appointments.hospital }}</th>
+                            <th class="has-text-black-ter">{{ appointments.doctorName }}</th>
+                            <td class="has-text-black-ter">{{ appointments.firstName }}</td>
+                            <td class="has-text-black-ter">{{ appointments.lastName }}</td>
+                            <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
+                            <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
+                            <td class="has-text-black-ter">{{ appointments.comments }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="container" v-else>
+                <div class="notification is-info">You do not have any ongoing appointments.</div>
+            </div>
         </div>
-        <div class="container" v-else>
-            <div class="notification is-info">You do not have any ongoing appointments.</div>
+        <div class="container" v-if="navPastAppointments">
+            <div class="table-container" v-if="Object.keys(pastAppointments).length !== 0">
+                <table class="table is-striped is-narrow is-fullwidth is-bordered">
+                    <thead>
+                        <tr>
+                            <th class="has-text-black-ter">Schedule</th>
+                            <th class="has-text-black-ter">Priority No.</th>
+                            <th class="has-text-black-ter">Hospital Appointed</th>
+                            <th class="has-text-black-ter">Doctor Appointed</th>
+                            <th class="has-text-black-ter">First Name</th>
+                            <th class="has-text-black-ter">Last Name</th>
+                            <th class="has-text-black-ter">Contact Number</th>
+                            <th class="has-text-black-ter">Birthday</th>
+                            <th class="has-text-black-ter">Symptoms/Comments</th>
+                        </tr>
+                    </thead>
+                    <tbody v-for="appointments in pastAppointments" :key="appointments._id">
+                        <tr>
+                            <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString()
+                            }}</th>
+                            <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
+                            <th class="has-text-black-ter">{{ appointments.hospital }}</th>
+                            <th class="has-text-black-ter">{{ appointments.doctorName }}</th>
+                            <td class="has-text-black-ter">{{ appointments.firstName }}</td>
+                            <td class="has-text-black-ter">{{ appointments.lastName }}</td>
+                            <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
+                            <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
+                            <td class="has-text-black-ter">{{ appointments.comments }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="container" v-else>
+                <div class="notification is-info">You do not have any past appointments.</div>
+            </div>
         </div>
     </section>
 </template>

@@ -10,6 +10,26 @@ const getAppointments = (async (req, res) => {
     }
 });
 
+const getAppointmentsforDoctor = (async (req,res) => {
+    try {
+        const appointmentList = await AppointmentList.find({doctorID: req.body.id})
+        if (!appointmentList) throw new Error('no items')
+        res.status(200).send(appointmentList)
+    } catch (error) {
+        res.status(500).send(err)
+    }
+});
+
+const getAppointmentsforPatient = (async (req,res) => {
+    try {
+        const appointmentList = await AppointmentList.find({patientID: req.body.id})
+        if (!appointmentList) throw new Error('no items')
+        res.status(200).send(appointmentList)
+    } catch (error) {
+        res.status(500).send(err)
+    }
+});
+
 const pushAppointment = (async (req, res) => {
     const newAppointment = new AppointmentList(req.body)
     try {
@@ -51,5 +71,7 @@ module.exports = {
     getAppointments,
     pushAppointment,
     updateAppointment,
-    deleteAppointment
+    deleteAppointment,
+    getAppointmentsforDoctor,
+    getAppointmentsforPatient
 }

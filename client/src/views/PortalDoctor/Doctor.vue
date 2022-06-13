@@ -7,13 +7,13 @@
       <div class="column" style="background-color: whitesmoke;">
         <section class="section" style="background-color: whitesmoke;">
           <h1 class="title">APPOINTMENTS</h1>
-          <div class="container is-widescreen is-fullhd" v-if="Object.keys(appointmentSchedules).length !== 0">
-            <div class="field">
-              <div class="control">
-                <input class="input" type="text" style="width: 50% !important" v-model="searchBar"
-                  placeholder="Search..." />
-              </div>
+          <div class="field">
+            <div class="control">
+              <input class="input" type="text" style="width: 50% !important" v-model="searchBar"
+                placeholder="Search..." />
             </div>
+          </div>
+          <div class="container is-widescreen is-fullhd" v-if="Object.keys(appointmentSchedules).length !== 0">
             <div class="box" v-for="(appointmentList, index) in appointmentSchedules" :key="index"
               :style="new Date(index).toDateString() == new Date().toDateString() ? 'box-shadow: rgb(10 10 10 / 10%) 0px 0.5em 1em -0.125em, #485fc7 0px 0px 0px 1px !important;' : ''">
               <h1 class="subtitle" v-if="new Date(index).toDateString() == new Date().toDateString()">
@@ -25,6 +25,7 @@
                   <thead>
                     <tr>
                       <th class="has-text-black-ter">Controls</th>
+                      <th class="has-text-black-ter">Reference ID</th>
                       <th class="has-text-black-ter">Priority No.</th>
                       <th class="has-text-black-ter">Hospital Appointed</th>
                       <th class="has-text-black-ter">First Name</th>
@@ -73,6 +74,7 @@
                         </div>
                         <button class="modal-close is-large" aria-label="close" @click="toggleModal"></button>
                       </div>
+                      <th class="has-text-black-ter">{{ appointments.referenceID }}</th>
                       <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
                       <th class="has-text-black-ter">{{ appointments.hospital }}</th>
                       <td class="has-text-black-ter">{{ appointments.firstName }}</td>
@@ -130,7 +132,8 @@ export default {
           this.appointmentSched.filter((x) => {
             return (
               x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
-              x.lastName.toLowerCase().includes(this.searchBar.toLowerCase())
+              x.lastName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
+              x.referenceID.toLowerCase().includes(this.searchBar.toLowerCase())
             );
           }).sort((a, b) => {
             return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
@@ -144,14 +147,7 @@ export default {
     },
   },
   async mounted() {
-    await axios
-      .get("/api/appointmentList")
-      .then(
-        (response) =>
-        (this.appointmentSched = response.data.filter(
-          (x) => x.doctorID === store.state.doctorID
-        ))
-      );
+    await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID }).then(response => this.appointmentSched = response.data);
   },
   methods: {
     async updateData() {
