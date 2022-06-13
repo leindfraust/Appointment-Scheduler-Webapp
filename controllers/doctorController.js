@@ -246,7 +246,47 @@ const pushMessages = ((req, res) => {
             res.status(200).send(success.messageHistory)
         }
     }))
-})
+});
+
+//delete a copy of a doctor's message to a patient
+const pullMessage = ((req, res) => {
+    Doctor.findOneAndUpdate({
+        _id: req.body.id
+    }, {
+        $pull: {
+            messageHistory: req.body.message
+        },
+    }, {
+        returnOriginal: false
+    }, ((err, success) => {
+        if (err) {
+            console.log(err)
+        } else {
+            console.log(success)
+            res.status(200).send(success.messageHistory)
+        }
+    }))
+});
+
+//delete all copies of a doctor's message to a patient
+const clearMessages = ((req, res) => {
+    Doctor.findOneAndUpdate({
+        _id: req.body.id
+    }, {
+        $set: {
+            messageHistory: Array
+        },
+    }, {
+        returnOriginal: false
+    }, ((err, success) => {
+        if (err) {
+            console.log(err)
+        } else {
+            console.log(success)
+            res.status(200).send(success.messageHistory)
+        }
+    }))
+});
 
 module.exports = {
     check_registrationCode,
@@ -260,5 +300,7 @@ module.exports = {
     deleteDoctor,
     pullDoctorHospital,
     pushPatientDoctor,
-    pushMessages
+    pushMessages,
+    pullMessage,
+    clearMessages
 }
