@@ -9,7 +9,6 @@
         </div>
         <div class="column">
             <section class="section">
-                <h1 class="title">PROFILE</h1>
                 <div class="notification is-light is-info" v-if="hospitalStatus == 'Inactive'">To get started, upload a
                     <b>photo</b> of your hospital and fill in the details of your <b>description</b> and
                     <b>contacts</b>. Activation of the
@@ -87,11 +86,11 @@
                                 <input type="radio" @click="activateAccount" />
                                 Activate this account.
                             </label>
+                            <p class="help" v-if="activate">Please make sure you have uploaded a <b>photo</b> of the hospital before activating it. To cancel this, just click <b>"Cancel Editing"</b>.</p>
                         </div>
                         <br />
                         <button class="button is-danger" v-if="editingMode" @click="saveProfileEdit"
-                            :disabled="editDescription == '' || editContacts.length == 0">Save
-                            Changes</button>
+                            :disabled="editDescription == '' || editContacts.length == 0">{{hospitalStatus === "Inactive" && activate ? "Save changes and activate this account" : "Save changes"}}</button>
                     </div>
                 </div>
             </section>
