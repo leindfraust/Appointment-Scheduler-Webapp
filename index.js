@@ -54,9 +54,7 @@ app.use(session({
         mongoUrl: encodeURI(mongoUri),
         crypto: {
             secret: 'leindfraust'
-        },
-        autoRemove: 'native',
-        ttl: 14 * 24 * 60 * 60
+        }
     })
 }));
 const sessDoctor = require('./sessions/doctor')
