@@ -55,15 +55,25 @@
                 A message has been sent to
                 <b>{{ messageSuccessSelectedPatient }}</b>.
               </p>
+              <a class="button is-size-6 has-text-danger is-pulled-right" @click="clearMsgPrompt = true">Clear message
+                history</a>
               <p class="subtitle">Messaging History</p>
+              <div class="container" v-if="clearMsgPrompt">
+                <p class="subtitle is-size-6 has-text-right">Are you sure you want to delete all messages?</p>
+                <div class="buttons is-right">
+                  <button class="button" @click="clearNotif">Yes</button>
+                  <button class="button" @click="clearMsgPrompt = false">No</button>
+                </div>
+              </div>
               <div v-if="Object.keys(messageHistory).length !== 0">
                 <div class="container" v-for="(message, index) in messageHistory" :key="index">
                   <div class="notification" style="margin: 5%">
                     <div class="content">
                       <p>To: {{ message.to }}</p>
                       <p>Message: {{ message.message }}</p>
-                      <p>Date: {{ new Date(message.date).toString() }}</p>
+                      <p>Date: {{ new Date(message.date).toLocaleString() }}</p>
                     </div>
+                    <button class="delete" @click="deleteNotif(message)"></button>
                   </div>
                 </div>
               </div>
@@ -94,7 +104,7 @@
                   <table class="table is-striped is-narrow is-fullwidth is-bordered">
                     <thead>
                       <tr>
-                        <th class="has-text-black-ter">Controls</th>
+                        <th class="has-text-black-ter">Reference ID</th>
                         <th class="has-text-black-ter">Priority No.</th>
                         <th class="has-text-black-ter">Hospital Appointed</th>
                         <th class="has-text-black-ter">First Name</th>
@@ -106,9 +116,7 @@
                     </thead>
                     <tbody v-for="appointments in appointmentList" :key="appointments._id">
                       <tr>
-                        <button class="dropdown-item button has-text-danger" type="button"
-                          @click="deleteData(appointments._id)">Delete</button>
-                        <br />
+                        <th class="has-text-black-ter">{{ appointments.referenceID }}</th>
                         <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
                         <th class="has-text-black-ter">{{ appointments.hospital }}</th>
                         <td class="has-text-black-ter">{{ appointments.firstName }}</td>
@@ -141,20 +149,14 @@ export default {
     DoctorMenu
   },
   async mounted() {
-    await axios
-      .get("/api/appointmentList")
-      .then(
-        (response) =>
-        (this.appointmentSched = response.data.filter(
-          (x) => x.doctorID === this.$store.state.doctorID
-        ))
-      );
+    await axios.post('/api/appointmentList/doctors', { id: this.$store.state.doctorID }).then(response => this.appointmentSched = response.data);
     await axios.get('/api/doctor').then(response => this.patients = response.data.find(x => x.alias == this.alias))
     await axios.get('/session/doctor').then(response => this.doctorName = response.data.fullname)
     await axios.get('/session/doctor').then(response => this.messageHistory = response.data.messageHistory.reverse())
   },
   data() {
     return {
+      clearMsgPrompt: false,
       searchBar: "",
       appointmentSched: [],
       alias: this.$store.state.alias,
@@ -176,7 +178,8 @@ export default {
           this.appointmentSched.filter((x) => {
             return (
               x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
-              x.lastName.toLowerCase().includes(this.searchBar.toLowerCase())
+              x.lastName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
+              x.referenceID.toLowerCase().includes(this.searchBar.toLowerCase())
             );
           }).sort((a, b) => {
             return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
@@ -190,17 +193,6 @@ export default {
     },
   },
   methods: {
-    async deleteData(_id) {
-      await axios.delete(`/api/appointmentList/${_id}`);
-      await axios
-        .get("/api/appointmentList")
-        .then(
-          (response) =>
-          (this.appointmentSched = response.data.filter(
-            (x) => x.doctorID === this.$store.state.doctorID
-          ))
-        );
-    },
     selectPatient(id, name) {
       this.selectedPatient = name
       this.isActiveDropdown = false
@@ -220,7 +212,7 @@ export default {
       socket.disconnect()
     },
     async sendNotif() {
-      console.log(this.$store.state.doctorID)
+      let resMsg
       this.messageSuccessSelectedPatient = this.selectedPatient
       socket.emit('message', this.noticeMsg, this.doctorName, new Date())
       await axios.post('/api/pushMsg', {
@@ -230,17 +222,34 @@ export default {
           message: this.noticeMsg,
           date: new Date(),
         }
-      }).then(response => this.messageHistory = response.data.reverse()).catch(err => { console.log(err) })
+      }).then(response => resMsg = response.data).catch(err => { console.log(err) })
       await axios.put('/session/doctor', {
-        messageHistory: {
-          to: this.selectedPatient,
-          message: this.noticeMsg,
-          date: new Date(),
-        }
-      })
+        messageHistory: resMsg
+      });
+      this.messageHistory = resMsg.reverse()
       this.noticeMsg = ''
       this.selectedPatient = ''
       this.notificationSent = true
+    },
+    async deleteNotif(msg) {
+      let resMsg
+      await axios.post('/api/pullMsg', {
+        id: this.$store.state.doctorID,
+        message: msg
+      }).then(response => resMsg = response.data).catch(err => { console.log(err) })
+      await axios.put('/session/doctor', {
+        messageHistory: resMsg
+      });
+      this.messageHistory = resMsg.reverse()
+    },
+    async clearNotif() {
+      await axios.post('/api/clearMsg', {
+        id: this.$store.state.doctorID
+      }).then(response => this.messageHistory = response.data).catch(err => console.log(err))
+      await axios.put('/session/doctor', {
+        messageHistory: this.messageHistory
+      });
+      this.clearMsgPrompt = false
     }
   }
 }
