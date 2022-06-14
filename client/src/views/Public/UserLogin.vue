@@ -64,10 +64,12 @@ export default {
         (response) =>
           (this.userPatient = response.data)
       );
-    if (await this.userPatient.username) {
+    if (typeof this.userPatient.username !== 'undefined') {
       this.$store.commit("patientUsername", this.userPatient.username)
       this.$store.commit("patientID", this.userPatient._id)
       await this.$router.push(`/user/${this.userPatient.username}`);
+    } else {
+      await axios.delete("/session/patient");
     }
   },
   methods: {

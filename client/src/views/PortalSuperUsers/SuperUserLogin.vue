@@ -42,9 +42,11 @@ export default {
     async mounted() {
         await axios.get('/session/superuser').then(response => this.superUserConfirmEmail = response.data)
 
-        if (this.superUserConfirmEmail.superuser) {
+        if (typeof this.superUserConfirmEmail.superuser !== 'undefined') {
             this.$store.commit('superUserAuth', true)
             await this.$router.push('/user/superuser')
+        } else {
+            await axios.delete("/session/superuser");
         }
     },
     data() {

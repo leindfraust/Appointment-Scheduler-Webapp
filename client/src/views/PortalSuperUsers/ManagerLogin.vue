@@ -61,9 +61,11 @@ export default {
         await axios
             .get("/session/manager")
             .then((response) => (this.userManager = response.data));
-        if (await this.userManager) {
+        if (typeof this.userManager.hospital !== 'undefined') {
             this.$store.commit("managerHospital", this.userManager.hospital);
             await this.$router.push(`/user/manager/${this.userManager.hospital}`);
+        } else {
+            await axios.delete("/session/manager");
         }
     },
     methods: {
