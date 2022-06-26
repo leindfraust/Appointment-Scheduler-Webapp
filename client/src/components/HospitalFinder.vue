@@ -1,5 +1,5 @@
 <template>
-    <h1 class="title">Find and make an appointment on hospitals near you.</h1>
+    <h1 class="title">Find and make an appointment on hospitals or clinics near you.</h1>
     <div class="modal" :class="{ 'is-active': isHospitalLoading }">
         <div class="modal-background"></div>
         <div class="modal-content" style="overflow: hidden">
@@ -53,6 +53,14 @@
                                 placeholder="Search Hospital..." />
                         </div>
                     </div>
+                    <div class="select">
+                        <select v-model="filterSpecialist">
+                            <option value="">Any</option>
+                            <option v-for="specialist in specializations" :key="specialist" :value="specialist">{{
+                                    specialist
+                            }}</option>
+                        </select>
+                    </div>
                     <hr />
                     <li>
                         <a @click="filterAll">
@@ -102,7 +110,9 @@
                         <br />
                         <p class="subtitle">Contacts:</p>
                         <ul class="block" v-if="typeof geoHospital.details[0].contacts !== 'undefined'">
-                            <li v-for="(contacts, index) in geoHospital.details[0].contacts" :key="index">{{ contacts.contact }}</li>
+                            <li v-for="(contacts, index) in geoHospital.details[0].contacts" :key="index">{{
+                                    contacts.contact
+                            }}</li>
                         </ul>
                         <p class="subtitle">{{ parseInt(geoHospital.distance) / 1000 }} km away from you.</p>
                         <button class="button is-link" @click="bookAppointment(geoHospital)" v-if="checkUser">Book an
@@ -110,8 +120,8 @@
                     </div>
                 </div>
             </div>
-            <div class="container box notification is-danger has-text-centered" v-else-if="!isHospitalLoading">
-                <h1 class="title" style="margin-top: 12.5%">Hospitals unavailable. Coming soon...</h1>
+            <div class="container box notification is-danger has-text-centered" v-else-if="!isHospitalLoading">Hospitals/Clinics
+                unavailable. Coming soon...
             </div>
         </div>
     </div>
@@ -160,6 +170,8 @@ export default {
             userLongitude: '',
             isActiveDropdown: false,
             geoHospitalNearestUser: '',
+            specializations: this.$store.getters.getSpecializationList,
+            filterSpecialist: ''
         }
     },
     methods: {
