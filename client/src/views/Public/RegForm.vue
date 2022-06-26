@@ -67,9 +67,9 @@
         <br />
         <div v-if="basicDetailsDone">
           <form class="field">
-            <h1 class="subtitle has-text-black has-text-weight-bold">Pick your preferred schedule:</h1>
+            <h1 class="subtitle has-text-black has-text-weight-bold">Pick your preferred schedule: </h1>
             <div
-              v-for="(schedules, index) in doctorSched.filter(x => new Date(x.date).getTime() > new Date().getTime()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())"
+              v-for="(schedules, index) in doctorSched.filter(x => new Date(x.date).getTime() > new Date().getTime() && x.hospital === hospital).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())"
               :key="schedules.id" style="width: 75%; margin:auto">
               <hr />
               <div class="controls">

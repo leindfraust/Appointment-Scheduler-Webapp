@@ -19,6 +19,13 @@
                       <input class="input" type="text" v-model="prefix" style="width: 33%;"
                         placeholder="e.g. ROOM305" />
                     </div>
+                    <div class="select block">
+                      <select v-model="selectedHospital">
+                        <option v-for="hospital in hospitalList" :key="hospital" :value="hospital.hospital">{{
+                            hospital.hospital
+                        }}</option>
+                      </select>
+                    </div>
                     <label class="label">Time start:</label>
                     <v-date-picker v-model="timeStart" mode="time" :timezone="timezone" class="block" />
                     <br />
@@ -69,6 +76,7 @@
                               </span>
                             </span></p>
                           <p class="has-text-black">Prefix: {{ schedules.prefix }}</p>
+                          <p class="has-text-black">Hospital: {{ schedules.hospital }}</p>
                           <p class="has-text-black">{{ schedules.timeStart }} - {{ schedules.timeEnd }}</p>
                           <p class="has-text-black">Appointment limit: {{ schedules.appointmentLimit }}</p>
                         </div>
@@ -113,7 +121,9 @@ export default {
       checkServer: null,
       isActive: false,
       uploadSchedSuccess: false,
-      loading: false
+      loading: false,
+      hospitalList: [],
+      selectedHospital: ''
     };
   },
   async mounted() {
@@ -123,6 +133,8 @@ export default {
     await axios
       .get("/session/doctor")
       .then((response) => (this.userID = response.data._id));
+    await axios.get("/session/doctor").then(response => this.hospitalList = response.data.hospitalOrigin)
+    this.selectedHospital = await this.hospitalList[0].hospital
   },
   computed: {
     dates() {
@@ -158,7 +170,8 @@ export default {
         timeStart: this.timeStart.toLocaleTimeString(),
         timeEnd: this.timeEnd.toLocaleTimeString(),
         appointmentLimit: this.appointmentLimits,
-        prefix: this.prefix
+        prefix: this.prefix,
+        hospital: this.selectedHospital
       });
 
       await axios.put(`/api/doctor/${this.userID}`, {

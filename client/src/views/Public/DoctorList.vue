@@ -146,7 +146,7 @@ export default {
       await axios.post("/api/checkDoctorAvailability", {
         hospital: this.hospitalDetails.hospital,
         specialist: specialization
-      }).then(response => response ? this.doctorList = response.data.filter(x => x.schedule.find(x => new Date(x.date).getTime() > new Date().getTime())) : this.doctorList = '').catch(err => console.log(err))
+      }).then(response => response ? this.doctorList = response.data.filter(x => x.schedule.find(x => new Date(x.date).getTime() > new Date().getTime() && x.hospital === this.hospitalDetails.hospital)) : this.doctorList = '').catch(err => console.log(err))
       this.isDoctorLoading = false
     },
     viewSpecializations() {
