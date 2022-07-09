@@ -87,9 +87,9 @@
                     </div>
                     <div class="field">
                         <div class="control">
-                            <label class="label">Longtitude</label>
-                            <input class="input" type="number" placeholder="Longtitude of the hospital location"
-                                v-model="longtitude" />
+                            <label class="label">Longitude</label>
+                            <input class="input" type="number" placeholder="Longitude of the hospital location"
+                                v-model="longitude" />
                         </div>
                     </div>
                 </div>
@@ -218,7 +218,7 @@
                 </div>
             </div>
             <button class="button is-primary" @click="create"
-                :disabled="pricing == '' || hospital == '' || email == '' || hospitalType == '' || latitude == '' || longtitude == '' || barangayORStreet == '' || city == '' || province == '' || specializationsSelected == []">Create
+                :disabled="pricing == '' || hospital == '' || email == '' || hospitalType == '' || latitude == '' || longitude == '' || barangayORStreet == '' || city == '' || province == '' || specializationsSelected == []">Create
                 Account</button>
         </div>
     </section>
@@ -247,7 +247,7 @@ export default {
             email: '',
             hospitalType: '',
             latitude: '',
-            longtitude: '',
+            longitude: '',
             barangayORStreet: '',
             postalCode: '',
             city: '',
@@ -358,7 +358,7 @@ export default {
                         postalCode: this.postalCode,
                         location: {
                             type: 'Point',
-                            coordinates: [this.longtitude, this.latitude]
+                            coordinates: [this.longitude, this.latitude]
                         },
                         specializations: this.specializationsSelected,
                         username: this.username,
