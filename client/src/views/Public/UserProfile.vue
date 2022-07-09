@@ -38,13 +38,13 @@ const pastAppointments = computed(() => {
 function sortPastAppointments() {
     return appointmentList.value.sort((a, b) => {
         return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
-    }).filter(x => { return new Date(x.schedule[0].date).getTime() < new Date().getTime() })
+    }).filter(x => { return new Date(x.schedule[0].date).getTime() < new Date().getTime() || x.ifPatientVisited == true })
 
 }
 function sortOngoingAppointments() {
     return appointmentList.value.sort((a, b) => {
         new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
-    }).filter(x => { return new Date(x.schedule[0].date).getTime() >= new Date().getTime() && new Date(x.schedule[0].date).getMonth() >= new Date().getMonth() })
+    }).filter(x => { return new Date(x.schedule[0].date).getTime() >= new Date().getTime() && new Date(x.schedule[0].date).getMonth() >= new Date().getMonth() && x.ifPatientVisited == false })
 }
 //methods
 async function selectProvince(province) {
@@ -212,6 +212,7 @@ async function cancelAppointment(id) {
                     <thead>
                         <tr>
                             <th class="has-text-black-ter">Controls</th>
+                            <th class="has-text-black-ter">Reference ID</th>
                             <th class="has-text-black-ter">Schedule</th>
                             <th class="has-text-black-ter">Priority No.</th>
                             <th class="has-text-black-ter">Hospital Appointed</th>
@@ -228,6 +229,7 @@ async function cancelAppointment(id) {
                             <button class="dropdown-item button has-text-danger" type="button"
                                 @click="cancelAppointment(appointments._id)">Cancel</button>
                             <br />
+                            <th class="has-text-black-ter">{{ appointments.referenceID }}</th>
                             <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString()
                             }}</th>
                             <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
