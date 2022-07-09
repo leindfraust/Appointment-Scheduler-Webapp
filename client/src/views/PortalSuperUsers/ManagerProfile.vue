@@ -14,84 +14,140 @@
                     <b>contacts</b>. Activation of the
                     account is available when clicking <b>"Edit"</b>.
                 </div>
-                <div class="columns box">
-                    <div class="column">
-                        <figure class="image is-16by9" v-if="hospitalStatus !== 'Inactive'">
-                            <img
-                                :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/managers/${managerHospital}.jpg`" />
-                        </figure>
-                        <!--Hospital picture & upload -->
-                        <form id="formUpload" action="/api/imgUploadManager" method="post" enctype="multipart/form-data"
-                            style="margin: auto; width: 50%" class="field">
-                            <div class="control">
-                                <input type="hidden" name="hospital" :value="(managerHospital)" />
-                                <input class="input" type="file" name="imgFile" @click="imgSuccess" required />
-                                <div class="has-text-centered">
-                                    <button type="submit" value="Upload" class="button is-primary">Upload Photo</button>
-                                </div>
+                <div class="box">
+                    <figure class="image is-16by9" v-if="hospitalStatus !== 'Inactive'">
+                        <img
+                            :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/managers/${managerHospital}.jpg`" />
+                    </figure>
+                    <!--Hospital picture & upload -->
+                    <form id="formUpload" action="/api/imgUploadManager" method="post" enctype="multipart/form-data"
+                        style="margin: auto; width: 50%" class="field">
+                        <div class="control">
+                            <input type="hidden" name="hospital" :value="(managerHospital)" />
+                            <input class="input" type="file" name="imgFile" @click="imgSuccess" required />
+                            <div class="has-text-centered">
+                                <button type="submit" value="Upload" class="button is-primary">Upload Photo</button>
                             </div>
-                        </form>
-                        <br />
-                        <div class="container has-text-centered">
-                            <iframe v-if="hospitalData !== ''" width="300" height="300"
-                                :src="`https://maps.google.com/maps?q=${hospitalData.location.coordinates[1]},${hospitalData.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"></iframe>
                         </div>
-                    </div>
-                    <div class="column">
-                        <a class="has-text-info" v-if="!editingMode" @click="editMode">[Edit]</a>
-                        <a class="has-text-danger" v-else @click="editModeCancel">[Cancel Editing]</a>
-                        <div class="container">
-                            <div class="block">
-                                <h1 class="title">Description:</h1>
-                                <p class="subtitle" v-if="!editingMode">{{ description }}</p>
-                                <form class="form" v-if="editingMode">
-                                    <div class="control">
-                                        <textarea class="textarea" v-model="editDescription"
-                                            placeholder="Edit description..."></textarea>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="block">
-                                <h1 class="title">Contacts:</h1>
-                                <ul v-if="!editingMode">
-                                    <li v-for="(contact, index) in contacts" :key="index">
-                                        <p class="subtitle">{{ contact.contact }}</p>
-                                    </li>
-                                </ul>
-                                <ul v-else>
-                                    <li v-for="(contactEdit, index) in editContacts" :key="index">
-                                        <p class="subtitle">
-                                            {{ contactEdit.contact }}
-                                            <a v-if="editingMode" class="has-text-danger"
-                                                @click="removeContact(contactEdit.contact)">Remove</a>
-                                        </p>
-                                    </li>
-                                </ul>
-                                <br />
-                                <div class="field has-addons" v-if="editingMode">
-                                    <div class="control">
-                                        <input class="input" type="number" v-model="contact"
-                                            placeholder="Add contacts..." />
-                                    </div>
-                                    <div class="control">
-                                        <button type="submit" class="button is-light" @click="addContact"
-                                            :disabled="contact == ''">+</button>
-                                    </div>
+                    </form>
+                    <br />
+                    <a class="has-text-info" v-if="!editingMode" @click="editMode">[Edit]</a>
+                    <a class="has-text-danger" v-else @click="editModeCancel">[Cancel Editing]</a>
+                    <div class="container is-max-desktop">
+                        <div class="block">
+                            <h1 class="title">Description:</h1>
+                            <p class="subtitle" v-if="!editingMode">{{ description }}</p>
+                            <form class="form" v-if="editingMode">
+                                <div class="control">
+                                    <textarea class="textarea" v-model="editDescription"
+                                        placeholder="Edit description..."></textarea>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="block">
+                            <h1 class="title">Contacts:</h1>
+                            <ul v-if="!editingMode">
+                                <li v-for="(contact, index) in contacts" :key="index">
+                                    <p class="subtitle">{{ contact.contact }}</p>
+                                </li>
+                            </ul>
+                            <ul v-else>
+                                <li v-for="(contactEdit, index) in editContacts" :key="index">
+                                    <p class="subtitle">
+                                        {{ contactEdit.contact }}
+                                        <a v-if="editingMode" class="has-text-danger"
+                                            @click="removeContact(contactEdit.contact)">Remove</a>
+                                    </p>
+                                </li>
+                            </ul>
+                            <br />
+                            <div class="field has-addons" v-if="editingMode">
+                                <div class="control">
+                                    <input class="input" type="number" v-model="contact"
+                                        placeholder="Add contacts..." />
+                                </div>
+                                <div class="control">
+                                    <button type="submit" class="button is-light" @click="addContact"
+                                        :disabled="contact == ''">+</button>
                                 </div>
                             </div>
                         </div>
-                        <br />
-                        <div class="control" v-if="hospitalStatus == 'Inactive' && editingMode">
-                            <label class="radio">
-                                <input type="radio" @click="activateAccount" />
-                                Activate this account.
-                            </label>
-                            <p class="help" v-if="activate">Please make sure you have uploaded a <b>photo</b> of the hospital before activating it. To cancel this, just click <b>"Cancel Editing"</b>.</p>
+                        <div class="columns">
+                            <div class="column">
+                                <h1 class="title">Latitude N</h1>
+                                <p class="subtitle" v-if="!editingMode">
+                                    {{ latitude }}</p>
+                                <div class="field" v-if="editingMode">
+                                    <input class="input" type="text" v-model="editLatitude" />
+                                </div>
+                                <h1 class="title">Longitude E</h1>
+                                <p class="subtitle" v-if="!editingMode">
+                                    {{ longitude }}</p>
+                                <div class="field" v-if="editingMode">
+                                    <input class="input" type="text" v-model="editLongitude" />
+                                </div>
+                            </div>
+                            <div class="column">
+                                <iframe v-if="hospitalData !== ''" width="500" height="500"
+                                    :src="`https://maps.google.com/maps?q=${hospitalData.location.coordinates[1]},${hospitalData.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"></iframe>
+                            </div>
                         </div>
-                        <br />
-                        <button class="button is-danger" v-if="editingMode" @click="saveProfileEdit"
-                            :disabled="editDescription == '' || editContacts.length == 0">{{hospitalStatus === "Inactive" && activate ? "Save changes and activate this account" : "Save changes"}}</button>
                     </div>
+                    <br />
+
+                    <h1 class="title">Specializations offered</h1>
+                    <div class="columns is-multiline" v-if="!editingMode">
+                        <div class="column" id="selectedSpecializations">
+                            <button v-for="(specialist, index) in hospitalSpecializations" :key="index" class="button"
+                                style="margin: 5px">
+                                {{ specialist.specialist }}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="columns" v-if="editingMode">
+                        <div class="column">
+                            <label class="label">Selected Specializations</label>
+                            <div class="columns is-multiline">
+                                <div class="column" id="selectedSpecializations">
+                                    <button v-for="(specialist, index) in editHospitalSpecializations" :key="index"
+                                        class="button is-light" style="margin: 5px">
+                                        {{ specialist.specialist }}&nbsp;
+                                        <span class="has-text-danger"
+                                            @click="undoSpecialization(specialist.specialist)">X</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <label class="label">Select Specializations</label>
+                            <nav class="panel">
+                                <div class="panel-block">
+                                    <input class="input" type="text" v-model="searchBar" placeholder="Search" />
+                                </div>
+                                <div style="max-height: 20em; overflow: auto">
+                                    <div class="panel-block"
+                                        v-for="(specializations, index) in specializationListIndexed" :key="index"
+                                        :value="specializations">
+                                        <a @click="selectSpecialization(specializations)">{{ specializations }}</a>
+                                    </div>
+                                </div>
+                            </nav>
+                        </div>
+                    </div>
+                    <div class="control" v-if="hospitalStatus == 'Inactive' && editingMode">
+                        <label class="radio">
+                            <input type="radio" @click="activateAccount" />
+                            Activate this account.
+                        </label>
+                        <p class="help" v-if="activate">Please make sure you have uploaded a <b>photo</b> of the
+                            hospital before activating it. To cancel this, just click <b>"Cancel Editing"</b>.</p>
+                    </div>
+                    <br />
+                    <button class="button is-danger" v-if="editingMode" @click="saveProfileEdit"
+                        :disabled="editDescription == '' || editContacts.length == 0 || editLatitude == '' || editLongitude == ''">
+                        {{ hospitalStatus === "Inactive" && activate ? "Save changes and activate this account" :
+                                "Save changes"
+                        }}</button>
                 </div>
             </section>
         </div>
@@ -112,14 +168,28 @@ export default {
         await axios.get('/session/manager').then(response => this.managerHospitalID = response.data._id)
         await axios.get('/api/manager').then(response => this.hospitalData = response.data.find(x => x._id == this.managerHospitalID))
         this.hospitalStatus = await this.hospitalData.status
+        this.latitude = await this.hospitalData.location.coordinates[1]
+        this.longitude = await this.hospitalData.location.coordinates[0]
+        this.hospitalSpecializations = await this.hospitalData.specializations
+        console.log(this.hospitalSpecializations)
         if (this.hospitalStatus !== "Inactive") {
             this.description = await this.hospitalData.details[0].description
             this.contacts = await this.hospitalData.details[0].contacts
+            this.latitude = await this.hospitalData.location.coordinates[1]
+            this.longitude = await this.hospitalData.location.coordinates[0]
+            this.hospitalSpecializations = await this.hospitalData.specializations
         }
         this.loading = false
     },
+    computed: {
+        specializationListIndexed() {
+            return this.specializationList.filter(x => x.toLowerCase().includes(this.searchBar.toLowerCase()))
+        }
+    },
     data() {
         return {
+            searchBar: '',
+            specializationList: this.$store.getters.getSpecializationList,
             loading: false,
             hospitalStatus: '',
             activate: false,
@@ -128,11 +198,18 @@ export default {
             editingMode: false,
             editDescription: '',
             editContacts: [],
+            editLatitude: '',
+            editLongitude: '',
+            hospitalSpecializations: [],
+            editHospitalSpecializations: [],
+            latitude: '',
+            longitude: '',
             description: '',
             contact: '',
             contacts: [],
             hospitalData: '',
-            details: []
+            details: [],
+            coordinates: []
         }
     },
     methods: {
@@ -143,11 +220,20 @@ export default {
             this.editingMode = true
             this.editDescription = this.description
             this.editContacts = [...this.contacts]
+            this.editLatitude = this.latitude
+            this.editLongitude = this.longitude
+            this.editHospitalSpecializations = [...this.hospitalSpecializations]
         },
         editModeCancel() {
             this.editingMode = false
             this.editDescription = ''
             this.editContacts = []
+            this.editLatitude = ''
+            this.editLongitude = ''
+            this.editHospitalSpecializations = []
+            if (this.hospitalStatus == 'Inactive') {
+                this.activate = false
+            }
         },
         addContact() {
             this.editContacts.push({
@@ -162,37 +248,69 @@ export default {
         activateAccount() {
             this.activate = true
         },
+        selectSpecialization(specialization) {
+            if (!this.editHospitalSpecializations.find(x => x.specialist === specialization)) {
+                this.editHospitalSpecializations.push({
+                    specialist: specialization
+                });
+            }
+        },
+        undoSpecialization(specialization) {
+            this.editHospitalSpecializations = this.editHospitalSpecializations.filter(x => x.specialist !== specialization)
+        },
         async saveProfileEdit() {
-            if (this.editDescription !== '' && this.editContacts.length !== 0) {
+            if (this.editDescription !== '' && this.editContacts.length !== 0 && this.editLongitude !== '' && this.editLongitude !== '' && this.editHospitalSpecializations) {
                 this.details.push({
                     description: this.editDescription,
                     contacts: this.editContacts
                 });
+                this.coordinates.push(this.editLongitude, this.editLatitude);
                 if (this.activate) {
                     await axios.put(`/api/manager/${this.managerHospitalID}`, {
                         details: this.details,
+                        specializations: this.editHospitalSpecializations,
+                        location: {
+                            type: 'Point',
+                            coordinates: this.coordinates
+                        },
                         status: 'Active'
-                    });
+                    }).catch(err => console.log(err));
                 } else {
                     await axios.put(`/api/manager/${this.managerHospitalID}`, {
-                        details: this.details
-                    });
+                        details: this.details,
+                        specializations: this.editHospitalSpecializations,
+                        location: {
+                            type: 'Point',
+                            coordinates: this.coordinates
+                        }
+                    }).catch(err => console.log(err));
                 }
 
                 await axios.get('/api/manager').then(response => this.hospitalData = response.data.find(x => x._id == this.managerHospitalID))
                 this.description = await this.hospitalData.details[0].description
                 this.contacts = await this.hospitalData.details[0].contacts
                 this.hospitalStatus = await this.hospitalData.status
+                this.latitude = await this.hospitalData.location.coordinates[1]
+                this.longitude = await this.hospitalData.location.coordinates[0]
+                this.hospitalSpecializations = await this.hospitalData.specializations
 
                 this.editingMode = false
                 this.editDescription = ''
                 this.editContacts = []
+                this.editLongitude = ''
+                this.editLatitude = ''
+                this.editHospitalSpecializations = []
                 this.details = []
+                this.coordinates = []
                 this.activate = false
             }
         }
     }
 }
 </script>
-<style>
+<style scoped>
+#selectedSpecializations {
+    max-height: 26em;
+    overflow: auto;
+}
 </style>
