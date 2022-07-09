@@ -21,6 +21,10 @@ const appointmentSchema = new Schema({
         type: String,
         required: true
     },
+    doctorSpecialization: {
+        type: String,
+        required: true
+    },
     patientID: {
         type: String,
         required: true
@@ -46,6 +50,10 @@ const appointmentSchema = new Schema({
     priorityNum: {
         type: String,
         required: true,
+    },
+    ifPatientVisited: {
+        type: Boolean,
+        default: false
     }
 });
 
