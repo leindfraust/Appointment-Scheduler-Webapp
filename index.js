@@ -136,13 +136,15 @@ io.on('connection', (socket) => {
     console.log('Client connected');
     socket.on('connect', () => console.log('Client connected'))
     socket.on('disconnect', () => console.log('Client disconnected'));
-    socket.on('message', (msg, user, date) => {
+    socket.on('message', (refID, title, msg, user, date) => {
         Patient.findOneAndUpdate({
             _id: roomNo
         }, {
             $push: {
                 messages: {
+                    id: refID,
                     from: user,
+                    subject: title,
                     message: msg,
                     date: date,
                     new: true
@@ -177,7 +179,9 @@ io.on('connection', (socket) => {
         }, {
             $pull: {
                 messages: {
+                    id: notif.refID,
                     from: notif.user,
+                    subject: notif.title,
                     message: notif.message,
                     date: notif.date,
                     new: notif.new
