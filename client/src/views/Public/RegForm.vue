@@ -128,6 +128,7 @@ export default {
       priorityNum: null,
       patientsAppointed: null,
       doctorDetails: store.state.doctorDetails,
+      pickedSpecialization: store.state.pickedSpecialization,
       basicDetailsDone: false,
       isActiveTabOne: true,
       isActiveTabTwo: false,
@@ -192,6 +193,7 @@ export default {
               hospital: this.hospital,
               doctorID: this.doctorDetails._id,
               doctorName: this.doctorDetails.name,
+              doctorSpecialization: this.pickedSpecialization,
               patientID: this.patient._id,
               firstName: this.firstName,
               lastName: this.lastName,
@@ -205,6 +207,7 @@ export default {
               referenceID: this.refID,
               hospital: this.hospital,
               doctor: this.doctorDetails.name,
+              specialization: this.pickedSpecialization,
               firstName: this.firstName,
               lastName: this.lastName,
               contactNum: this.contactNum,
@@ -214,7 +217,8 @@ export default {
               priorityNum: this.prefix + "-" + this.priorityNum,
             };
             store.commit("patientDetails", patientDetails);
-            await this.$router.push("/success");
+            store.commit("appointed", true)
+            await this.$router.push("/success").catch(err => console.log(err));
           } catch (err) { this.errMsg = err }
         } else {
           try {
@@ -225,6 +229,7 @@ export default {
               hospital: this.hospital,
               doctorID: this.doctorDetails._id,
               doctorName: this.doctorDetails.name,
+              doctorSpecialization: this.pickedSpecialization,
               patientID: this.patient._id,
               firstName: this.firstName,
               lastName: this.lastName,
@@ -238,6 +243,7 @@ export default {
               referenceID: this.refID,
               hospital: this.hospital,
               doctor: this.doctorDetails.name,
+              specialization: this.pickedSpecialization,
               firstName: this.firstName,
               lastName: this.lastName,
               contactNum: this.contactNum,
@@ -248,7 +254,8 @@ export default {
             };
             this.isLoading = false
             store.commit("patientDetails", patientDetails);
-            await this.$router.push("/success");
+            store.commit("appointed", true)
+            await this.$router.push("/success").catch(err => console.log(err));
           } catch (err) {
             this.errMsg = err
           }

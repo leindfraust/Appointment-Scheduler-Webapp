@@ -2,7 +2,7 @@
   <NavigationTab />
   <section class="section is-medium">
     <h1 class="subtitle has-text-centered">
-      You have been successfuly appointed to <b>{{ patient.doctor }}</b> at
+      You have been successfuly appointed to <b>{{ patient.doctor }}, {{ patient.specialization }}</b> at
       <b>{{ new Date(patient.schedule.date).toDateString() }}</b>, <b>{{ patient.schedule.timeStart }}</b> -
       <b>{{ patient.schedule.timeEnd }}</b> in <b>{{ patient.hospital }}</b>.
     </h1>
