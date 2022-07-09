@@ -84,7 +84,7 @@
                       <div class="media-content">
                         <p class="title is-4">{{ doctors.name }}</p>
                         <p class="subtitle is-6">{{ pickedSpecialist }}</p>
-                        <button class="button" @click="pickDoctor(doctors)">Appoint</button>
+                        <button class="button" @click="pickDoctor(doctors, pickedSpecialist)">Appoint</button>
                       </div>
                     </div>
                   </div>
@@ -152,7 +152,8 @@ export default {
     viewSpecializations() {
       this.specializationClicked = false
     },
-    async pickDoctor(details) {
+    async pickDoctor(details, specialization) {
+      store.commit("pickedSpecialization", specialization)
       store.commit("doctorDetails", details);
       store.commit("statusAvailability", true);
       store.commit("hospitalName", this.hospitalDetails.hospital);
