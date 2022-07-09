@@ -1,9 +1,9 @@
 <template>
   <section class="hero is-fullheight">
-    <NavigationTabVue/>
+    <NavigationTabVue />
     <div class="hero-body">
       <div class="container has-text-centered">
-        <HospitalFinderVue />
+        <ProviderFinder />
         <div class="container box" id="covidAPI" style="width: 70%;">
           <h1 class="title has-text-left">Latest COVID-19 Data</h1>
           <hr>
@@ -50,14 +50,14 @@
 </template>
 
 <script>
-import HospitalFinderVue from "../../components/HospitalFinder.vue";
+import ProviderFinder from "../../components/ProviderFinder.vue";
 import NavigationTabVue from "../../components/NavigationTab.vue";
 import axios from 'axios'
 export default {
   name: "HomePage",
   components: {
     NavigationTabVue,
-    HospitalFinderVue
+    ProviderFinder
   },
   data() {
     return {
@@ -67,17 +67,6 @@ export default {
     }
   },
   async mounted() {
-    await axios
-      .get("/session/patient")
-      .then(
-        (response) =>
-          (this.userPatient = response.data)
-      );
-    if (await this.userPatient.username) {
-      this.$store.commit("patientUsername", this.userPatient.username)
-      this.$store.commit("patientID", this.userPatient._id)
-      await this.$router.push(`/user/${this.userPatient.username}`);
-    }
     await axios.get('https://disease.sh/v3/covid-19/countries/philippines').then(response => this.covidAPIPh = response.data)
     await axios.get('https://disease.sh/v3/covid-19/all').then(response => this.covidAPIWorldWide = response.data)
   },
