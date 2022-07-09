@@ -59,24 +59,30 @@
                         <iframe
                             style="background: #21313C;border: none;border-radius: 2px;box-shadow: 0 2px 10px 0 rgba(70, 76, 79, .2);"
                             width="530" height="480"
+                            src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=62c6c3c7-7e6a-4eef-8d99-26c53d88bbf2&maxDataAge=3600&theme=dark&autoRefresh=true"></iframe>
+                    </div>
+                    <div class="column">
+                        <iframe
+                            style="background: #21313C;border: none;border-radius: 2px;box-shadow: 0 2px 10px 0 rgba(70, 76, 79, .2);"
+                            width="530" height="480"
                             src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=6241b58b-377f-452d-8971-c364718db3ff&maxDataAge=86400&theme=dark&autoRefresh=true"></iframe>
                     </div>
                     <div class="column">
                         <iframe
                             style="background: #21313C;border: none;border-radius: 2px;box-shadow: 0 2px 10px 0 rgba(70, 76, 79, .2);"
-                            width="340" height="240"
+                            width="530" height="480"
                             src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=6241b7a6-a205-4291-8c3b-da5132939df6&maxDataAge=86400&theme=dark&autoRefresh=true"></iframe>
                     </div>
                     <div class="column">
                         <iframe
                             style="background: #21313C;border: none;border-radius: 2px;box-shadow: 0 2px 10px 0 rgba(70, 76, 79, .2);"
-                            width="320" height="240"
+                            width="530" height="480"
                             src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=6241b45e-220b-4919-8476-84eb27f87521&maxDataAge=86400&theme=dark&autoRefresh=true"></iframe>
                     </div>
                     <div class="column">
                         <iframe
                             style="background: #21313C;border: none;border-radius: 2px;box-shadow: 0 2px 10px 0 rgba(70, 76, 79, .2);"
-                            width="320" height="240"
+                            width="530" height="480"
                             src="https://charts.mongodb.com/charts-project-0-pxqjj/embed/charts?id=6241a5a0-797a-4051-869a-5157a21251ca&maxDataAge=86400&theme=dark&autoRefresh=true"></iframe>
                     </div>
                     <div class="column">
@@ -213,7 +219,8 @@
                                 <td class="has-text-black-ter">{{ doctor.specialist.toString() }}</td>
                                 <td class="has-text-black-ter">{{ doctor.gmail }}</td>
                                 <td class="has-text-black-ter" v-for="doctorSchedule in doctor.schedule"
-                                    :key="doctorSchedule.id">{{ new Date(doctorSchedule.date).toLocaleDateString() }}</td>
+                                    :key="doctorSchedule.id">{{ new Date(doctorSchedule.date).toLocaleDateString() }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>
