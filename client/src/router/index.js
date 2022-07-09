@@ -32,7 +32,6 @@ import ManagerSecurity from '../views/PortalSuperUsers/ManagerSecurity.vue'
 import ContactSupport from '../views/Public/ContactSupport.vue'
 import PageNotExist from '../views/Public/PageNotExist.vue'
 
-
 const routes = [{
         path: '/',
         component: Home,
@@ -210,6 +209,11 @@ const router = createRouter({
     routes
 });
 
+import axios from 'axios'
+import cld from "../cloudinary"
+import socket from '../socket'
+
+//route guards
 router.beforeEach((to, from, next) => {
     if (to.matched.some(route => route.meta.requireProcess)) {
         if (store.state.statusAvailability) {
@@ -245,7 +249,7 @@ router.beforeEach((to, from, next) => {
 
 router.beforeEach((to, from, next) => {
     if (to.matched.some(route => route.meta.requireSuccessPickDoctor)) {
-        if (store.state.doctorID) {
+        if (store.state.appointed) {
             return next();
         } else {
             return next('/user/:user/registration');
@@ -254,8 +258,20 @@ router.beforeEach((to, from, next) => {
     next();
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     if (to.matched.some(route => route.meta.requiresAuth)) {
+        //check doctor session
+        await axios.get("/session/doctor").then(async response => {
+            if (typeof response.data.alias !== 'undefined') {
+                console.log(response.data.alias)
+                store.commit("alias", response.data.alias);
+                store.commit("doctorID", response.data._id);
+                store.commit("profileImg", cld.imageTag(`assets/doctors/${response.data.alias}.jpg`).toHtml());
+            } else {
+                store.commit("alias", null);
+                await axios.delete("/session/doctor");
+            }
+        });
         if (store.state.alias) {
             return next();
         } else {
@@ -265,8 +281,22 @@ router.beforeEach((to, from, next) => {
     next();
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     if (to.matched.some(route => route.meta.requiresAuthPatient)) {
+
+        //check patient session
+        await axios.get("/session/patient").then(async response => {
+            if (typeof response.data.username !== 'undefined') {
+                store.commit("patientUsername", response.data.username)
+                store.commit("patientID", response.data._id)
+            } else {
+                store.commit("patientID", null);
+                store.commit("patientUsername", '');
+                await axios.delete("/session/patient");
+                socket.disconnect();
+            }
+        });
+
         if (store.state.patientUsername) {
             return next();
         } else {
@@ -287,8 +317,17 @@ router.beforeEach((to, from, next) => {
     next();
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     if (to.matched.some(route => route.meta.requiresManagerAuth)) {
+        //check provider/manager session
+        await axios.get("/session/manager").then(async response => {
+            if (typeof response.data.hospital !== 'undefined') {
+                store.commit("managerHospital", response.data.hospital);
+            } else {
+                store.commit("managerHospital", null);
+                await axios.delete('/session/manager');
+            }
+        });
         if (store.state.managerHospital) {
             return next();
         } else {
@@ -304,17 +343,6 @@ router.beforeEach((to, from, next) => {
             return next();
         } else {
             return next('/user/:user/doctors');
-        }
-    }
-    next();
-});
-
-router.beforeEach((to, from, next) => {
-    if (to.matched.some(route => route.meta.requiresAuthUsers)) {
-        if (store.state.patientUsername || store.state.alias) {
-            return next();
-        } else {
-            return next('/');
         }
     }
     next();

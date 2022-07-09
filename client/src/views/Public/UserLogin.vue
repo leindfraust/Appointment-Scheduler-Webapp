@@ -58,18 +58,8 @@ export default {
       this.newAccount = true
       await this.$store.commit('accountCreated', false)
     }
-    await axios
-      .get("/session/patient")
-      .then(
-        (response) =>
-          (this.userPatient = response.data)
-      );
-    if (typeof this.userPatient.username !== 'undefined') {
-      this.$store.commit("patientUsername", this.userPatient.username)
-      this.$store.commit("patientID", this.userPatient._id)
-      await this.$router.push(`/user/${this.userPatient.username}`);
-    } else {
-      await axios.delete("/session/patient");
+    if (this.$store.state.patientUsername !== null && this.$store.state.patientID !== null) {
+      await this.$router.push(`/user/${this.$store.state.patientUsername}`);
     }
   },
   methods: {
@@ -91,9 +81,6 @@ export default {
           );
         // if username and password matched to a user
         if (await this.userPatient) {
-          store.commit("patientUsername", this.userPatient.username)
-          store.commit("patientID", this.userPatient._id)
-          await this.$router.push(`/user/${this.userPatient.username}`);
           await axios.post("/session/patient", {
             _id: this.userPatient._id,
             name: this.userPatient.name,
@@ -103,6 +90,9 @@ export default {
             city: this.userPatient.city,
             currentAddress: this.userPatient.currentAddress
           });
+          store.commit("patientUsername", this.userPatient.username)
+          store.commit("patientID", this.userPatient._id)
+          await this.$router.push(`/user/${this.userPatient.username}`);
         } else {
           this.validateMessage = "Incorrect username or password";
           this.incorrectUserPass = true;

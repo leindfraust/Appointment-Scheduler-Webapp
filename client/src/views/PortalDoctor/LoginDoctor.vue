@@ -51,13 +51,8 @@ export default {
     await axios
       .get("/session/doctor")
       .then((response) => (this.userDoctor = response.data));
-    if (typeof this.userDoctor.alias !== 'undefined') {
-      store.commit("alias", this.userDoctor.alias);
-      store.commit("doctorID", this.userDoctor._id);
-      store.commit("profileImg", cld.imageTag(`assets/doctors/${this.userDoctor.alias}.jpg`).toHtml());
-      await this.$router.push(`/doctor/user/${this.userDoctor.alias}`);
-    } else {
-      await axios.delete("/session/doctor");
+    if (store.state.alias !== null) {
+      await this.$router.push(`/doctor/user/${store.state.alias}`);
     }
   },
   methods: {

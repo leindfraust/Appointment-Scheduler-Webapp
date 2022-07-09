@@ -58,14 +58,8 @@ export default {
             this.newAccount = true;
             await this.$store.commit("accountCreated", false);
         }
-        await axios
-            .get("/session/manager")
-            .then((response) => (this.userManager = response.data));
-        if (typeof this.userManager.hospital !== 'undefined') {
-            this.$store.commit("managerHospital", this.userManager.hospital);
-            await this.$router.push(`/user/manager/${this.userManager.hospital}`);
-        } else {
-            await axios.delete("/session/manager");
+        if (this.$store.state.managerHospital !== null) {
+            await this.$router.push(`/user/manager/${this.$store.state.managerHospital}`);
         }
     },
     methods: {
