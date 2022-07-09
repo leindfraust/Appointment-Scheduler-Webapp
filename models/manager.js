@@ -65,7 +65,15 @@ const managerSchema = new Schema({
         type: String,
         required: true
     },
-    details: Array
+    details: Array,
+    ratings: {
+        type: Number,
+        default: 0
+    },
+    engagements: {
+        type: Number,
+        default: 0
+    }
 });
 
 managerSchema.index({
