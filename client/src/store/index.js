@@ -16,7 +16,9 @@ const store = createStore({
         patientUsername: '',
         patientID: null,
         doctorID: null,
+        appointed: null,
         specialistList: [],
+        pickedSpecialization: null,
         patientDetails: [],
         profileImg: null,
         imgSuccess: false,
@@ -36,7 +38,7 @@ const store = createStore({
         getSpecializationList: state => state.specializationList
     },
     mutations: {
-        notificationClicked(state, notificationClicked){
+        notificationClicked(state, notificationClicked) {
             state.notificationClicked = notificationClicked
         },
         accountCreated(state, accountCreated) {
@@ -51,17 +53,23 @@ const store = createStore({
         patientUsername(state, patientUsername) {
             state.patientUsername = patientUsername
         },
+        doctorID(state, doctorID) {
+            state.doctorID = doctorID
+        },
         patientID(state, patientID) {
             state.patientID = patientID
         },
-        doctorID(state, doctorID) {
-            state.doctorID = doctorID
+        appointed(state, appointed) {
+            state.appointed = appointed
         },
         statusTrue(state) {
             state.statusAvailability = true;
         },
         specialistList(state, specialistList) {
             state.specialistList = specialistList
+        },
+        pickedSpecialization(state, specialization) {
+            state.pickedSpecialization = specialization
         },
         patientDetails(state, patientDetails) {
             state.patientDetails = patientDetails
@@ -72,7 +80,7 @@ const store = createStore({
         imgSuccess(state, imgSuccess) {
             state.imgSuccess = imgSuccess
         },
-        imgSuccessManager(state, imgSuccessManager){
+        imgSuccessManager(state, imgSuccessManager) {
             state.imgSuccessManager = imgSuccessManager
         },
         userType(state, userType) {
@@ -87,7 +95,7 @@ const store = createStore({
         hospitalDetails(state, hospitalDetails) {
             state.hospitalDetails = hospitalDetails
         },
-        hospitalName(state, hospitalName){
+        hospitalName(state, hospitalName) {
             state.hospitalName = hospitalName
         },
         statusAvailability(state, statusAvailability) {
