@@ -57,7 +57,7 @@ export default {
   },
   methods: {
     async login() {
-      if (await this.username == null || this.password == null) {
+      if (this.username == null || this.password == null) {
         this.incorrectUserPass = false;
         this.validateMessage = "empty username or password";
         this.username = null
