@@ -20,34 +20,32 @@
                   <div class="field">
                     <div class="control">
                       <div class="label">To(Patient):</div>
-                      <div class="dropdown" :class="{ 'is-active': isActiveDropdown }">
-                        <div class="dropdown-trigger">
-                          <button class="button" @click="openPatients">
-                            <span v-if="selectedPatient == ''">Select</span>
-                            <span v-else>{{ selectedPatient }}</span>
-                          </button>
-                        </div>
-                        <div class="dropdown-menu">
-                          <div class="dropdown-content" v-for="patient in patients.patients" :key="patient._id">
-                            <a class="dropdown-item" @click="selectPatient(patient.patient, patient.patientName)">{{
-                                patient.patientName
-                            }}</a>
-                          </div>
-                        </div>
-                      </div>
+                      <input class="input" type="text" :value="selectedPatient" disabled />
                     </div>
                   </div>
                 </div>
               </div>
               <div class="field">
                 <div class="control">
+                  <label class="label">Attach an image(optional):</label>
+                  <input class="input" type="file" @change="handleFile($event)" />
+                </div>
+              </div>
+              <div class="field">
+                <div class="control">
+                  <label class="label">Subject: </label>
+                  <input class="input" type="text" placeholder="Subject" v-model="titleMsg" />
+                </div>
+              </div>
+              <div class="field">
+                <div class="control">
                   <label class="label">Message:</label>
-                  <textarea class="textarea" placeholder="Message" v-model="noticeMsg"></textarea>
+                  <textarea class="textarea" placeholder="Message" v-model="noticeMsg">default value</textarea>
                 </div>
               </div>
               <div class="field">
                 <div class="control has-text-right">
-                  <button class="button is-primary" @click="sendNotif"
+                  <button class="button is-primary" :class="{ 'is-loading': loadingButton }" @click="sendNotif"
                     :disabled="selectedPatient == '' || noticeMsg == ''">Send</button>
                 </div>
               </div>
@@ -70,7 +68,19 @@
                   <div class="notification" style="margin: 5%">
                     <div class="content">
                       <p>To: {{ message.to }}</p>
+                      <p>Subject: {{ message.subject }}</p>
                       <p>Message: {{ message.message }}</p>
+                      <div v-if="message.id">
+                        <figure class="image is-square">
+                          <img loading="lazy"
+                            :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/patientimgmsg/doctorCopy/${$store.state.doctorID + message.id}.jpg`" />
+                        </figure>
+                        <div class="has-text-centered">
+                          <a :href="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/patientimgmsg/doctorCopy/${$store.state.doctorID + message.id}.jpg`"
+                            class="button" download>Download File</a>
+                        </div>
+                      </div>
+                      <br />
                       <p>Date: {{ new Date(message.date).toLocaleString() }}</p>
                     </div>
                     <button class="delete" @click="deleteNotif(message)"></button>
@@ -82,13 +92,12 @@
               </div>
             </div>
           </div>
-          <button class="modal-close is-large" aria-label="close" @click="modalInactive"></button>
+          <button class="modal-close is-large" aria-label="close" @click="sendNotifInactive"></button>
         </div>
         <section class="section" style="background-color: whitesmoke;">
           <div class="container is-widescreen is-fullhd" style="padding: 15">
             <h1 class="title">
               APPOINTMENT HISTORY
-              <button class="button is-info" @click="modalActive">Send a message to a patient</button>
             </h1>
             <div class="field">
               <div class="control">
@@ -104,6 +113,7 @@
                   <table class="table is-striped is-narrow is-fullwidth is-bordered">
                     <thead>
                       <tr>
+                        <th class="has-text-black-ter">Controls</th>
                         <th class="has-text-black-ter">Reference ID</th>
                         <th class="has-text-black-ter">Priority No.</th>
                         <th class="has-text-black-ter">Hospital Appointed</th>
@@ -116,6 +126,9 @@
                     </thead>
                     <tbody v-for="appointments in appointmentList" :key="appointments._id">
                       <tr>
+                        <button class="button is-info"
+                          @click="sendNotifActive(appointments.patientID, appointments.firstName, appointments.lastName)">Send
+                          a notification</button>
                         <th class="has-text-black-ter">{{ appointments.referenceID }}</th>
                         <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
                         <th class="has-text-black-ter">{{ appointments.hospital }}</th>
@@ -157,16 +170,19 @@ export default {
   data() {
     return {
       clearMsgPrompt: false,
+      loadingButton: false,
       searchBar: "",
       appointmentSched: [],
       alias: this.$store.state.alias,
+      file: null,
       patients: [],
-      isActiveDropdown: false,
       isActiveModal: false,
       selectedPatient: '',
       messageSuccessSelectedPatient: '',
+      refID: '',
       doctorName: '',
-      noticeMsg: '',
+      titleMsg: '',
+      noticeMsg: 'Dear',
       notificationSent: false,
       messageHistory: []
     }
@@ -181,9 +197,10 @@ export default {
               x.lastName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
               x.referenceID.toLowerCase().includes(this.searchBar.toLowerCase())
             );
-          }).sort((a, b) => {
-            return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
-          }).filter(x => { return new Date(x.schedule[0].date).getTime() < new Date().getTime() })
+          })
+            .sort((a, b) => {
+              return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
+            }).filter(x => new Date(x.schedule[0].date).getTime() < new Date().getTime() || x.ifPatientVisited == true)
           ,
           "schedule[0].date"
         );
@@ -193,32 +210,54 @@ export default {
     },
   },
   methods: {
-    selectPatient(id, name) {
-      this.selectedPatient = name
-      this.isActiveDropdown = false
+    sendNotifActive(id, firstName, lastName) {
+      this.isActiveModal = true
+      this.selectedPatient = firstName + " " + lastName
+      this.noticeMsg = `Dear Ms/Mr. ${this.selectedPatient},`
+      socket.connect()
       socket.emit('join room', id)
     },
-    openPatients() {
-      this.isActiveDropdown = !this.isActiveDropdown
-      this.notificationSent = false
-    },
-    modalActive() {
-      this.isActiveModal = true
-      socket.connect()
-    },
-    modalInactive() {
+    sendNotifInactive() {
       this.isActiveModal = false
       this.selectedPatient = ''
       socket.disconnect()
     },
+    generateRefID() {
+      let result = '';
+      let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let charactersLength = characters.length;
+      for (let i = 0; i < 12; i++) {
+        result += characters.charAt(Math.floor(Math.random() *
+          charactersLength));
+      }
+      this.refID = result
+    },
     async sendNotif() {
+      this.loadingButton = true
+      if (this.file) {
+        this.generateRefID()
+        const formData = new FormData()
+        formData.append('id', this.refID)
+        formData.append('doctorID', this.$store.state.doctorID)
+        formData.append('imgFile', this.file)
+
+        await axios.post("/api/imgUploadImgMsg", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        });
+      } else {
+        this.refID = null
+      }
       let resMsg
       this.messageSuccessSelectedPatient = this.selectedPatient
-      socket.emit('message', this.noticeMsg, this.doctorName, new Date())
+      socket.emit('message', this.refID, this.titleMsg, this.noticeMsg, this.doctorName, new Date())
       await axios.post('/api/pushMsg', {
         id: this.$store.state.doctorID,
         message: {
+          id: this.refID,
           to: this.selectedPatient,
+          subject: this.titleMsg,
           message: this.noticeMsg,
           date: new Date(),
         }
@@ -228,28 +267,46 @@ export default {
       });
       this.messageHistory = resMsg.reverse()
       this.noticeMsg = ''
-      this.selectedPatient = ''
       this.notificationSent = true
+      this.loadingButton = false
     },
     async deleteNotif(msg) {
       let resMsg
-      await axios.post('/api/pullMsg', {
-        id: this.$store.state.doctorID,
-        message: msg
-      }).then(response => resMsg = response.data).catch(err => { console.log(err) })
-      await axios.put('/session/doctor', {
-        messageHistory: resMsg
-      });
+      try {
+        await axios.post('/api/imgUploadImgMsgDeleteDoctor', {
+          doctorID: 'assets/patientimgmsg/doctorCopy/' + this.$store.state.doctorID,
+          id: msg.id
+        });
+        await axios.post('/api/pullMsg', {
+          id: this.$store.state.doctorID,
+          message: msg
+        }).then(response => resMsg = response.data).catch(err => { console.log(err) })
+        await axios.put('/session/doctor', {
+          messageHistory: resMsg
+        });
+      } catch (err) {
+        console.log(err)
+      }
       this.messageHistory = resMsg.reverse()
     },
     async clearNotif() {
-      await axios.post('/api/clearMsg', {
-        id: this.$store.state.doctorID
-      }).then(response => this.messageHistory = response.data).catch(err => console.log(err))
-      await axios.put('/session/doctor', {
-        messageHistory: this.messageHistory
-      });
+      try {
+        await axios.post('/api/imgUploadImgMsgClearDoctor', {
+          doctorID: this.$store.state.doctorID
+        });
+        await axios.post('/api/clearMsg', {
+          id: this.$store.state.doctorID
+        }).then(response => this.messageHistory = response.data).catch(err => console.log(err))
+        await axios.put('/session/doctor', {
+          messageHistory: this.messageHistory
+        });
+      } catch (err) {
+        console.log(err)
+      }
       this.clearMsgPrompt = false
+    },
+    handleFile(e) {
+      this.file = e.target.files[0]
     }
   }
 }

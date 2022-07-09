@@ -32,10 +32,12 @@
                             return new Date(b.date).getTime() - new Date(a.date).getTime()
                         })" :key="index">
                             <div class="notification is-info" :class="{ 'is-light': !notifs.new }">
-                                <a style="text-decoration: none;" @click="openNotif(notifs, index)">From Dr. {{
-                                    notifs.from
-                            }}</a>
-                            <button class="delete" @click="deleteNotif(notifs)"></button>
+                                <a style="text-decoration: none;" @click="openNotif(notifs, index)">{{ notifs.subject }}
+                                    <p class="help">{{ notifs.from == 'Med Search' ? `From ${notifs.from}` : `From
+                                                                            Dr. ${notifs.from}`
+                                    }}</p>
+                                </a>
+                                <button class="delete" @click="deleteNotif(notifs)"></button>
                             </div>
                         </div>
                     </div>
@@ -75,9 +77,21 @@
         <div class="modal-background"></div>
         <div class="modal-content box">
             <section class="section">
-                <p class="title">From Dr. {{ viewNotif.from }}</p>
+                <p class="title">{{ viewNotif.from == 'Med Search' ? `From ${viewNotif.from}` : `From
+                                    Dr. ${viewNotif.from}`
+                }}</p>
                 <p class="subtitle">{{ new Date(viewNotif.date).toDateString() }}</p>
                 <p class="subtitle">{{ viewNotif.message }}</p>
+                <div v-if="viewNotif.id">
+                    <figure class="image is-square">
+                        <img loading="lazy"
+                            :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/patientimgmsg/patientCopy/${viewNotif.id}.jpg`" />
+                    </figure>
+                    <div class="has-text-centered">
+                        <a :href="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/patientimgmsg/patientCopy/${viewNotif.id}.jpg`"
+                            class="button" download>Download File</a>
+                    </div>
+                </div>
             </section>
         </div>
         <button class="modal-close is-large" aria-label="close" @click="closeNotificationModal"></button>
@@ -130,7 +144,10 @@ export default {
         notification() {
             this.isActiveNotifications = !this.isActiveNotifications
         },
-        deleteNotif(notif) {
+        async deleteNotif(notif) {
+            await axios.post('/api/imgUploadImgMsgDeletePatient', {
+                id: 'assets/patientimgmsg/patientCopy/' + notif.id
+            });
             socket.emit('delete message', this.$store.state.patientID, notif)
         },
         openNotif(notif, index) {
