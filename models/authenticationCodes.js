@@ -18,7 +18,7 @@ const authenticationCodeSchema = new Schema({
         type: Date,
         default: Date.now,
         index: {
-            expires: 600
+            expires: 600 //10 minutes
         }
     }
 });
