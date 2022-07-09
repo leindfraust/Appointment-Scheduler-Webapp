@@ -12,9 +12,23 @@
                 <div class="notification is-light is-danger" v-if="hospitalStatus.status == 'Inactive'">The account is
                     not activated yet and will not be displayed on hospital searches, complete the hospital's
                     <router-link :to="`/user/manager/${this.managerHospital.hospital}/profile`" class="has-text-link">
-                        profile</router-link> to activate the account.</div>
+                        profile</router-link> to activate the account.
+                </div>
                 <h1 class="title">{{ managerHospital.hospital }}</h1>
-                <div class="field">
+                <div class="container" v-if="!loading && hospitalStatus.status == 'Active'">
+                    <h1 class="title is-4">Insights</h1>
+                    <div class="columns">
+                        <div class="column">
+                            <LineChart :chartData="lineChartData" :options="lineChartOptions" />
+                        </div>
+                        <div class="column">
+                            <BarChart :chartData="barChartData" :options="barChartOptions" />
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <h1 class="title is-4">Doctors Registered</h1>
+                <div class="field" v-if="Object.keys(doctorAccountsIndexed).length !== 0">
                     <div class="control" style="width: 33%;">
                         <label class="label">Search:</label>
                         <input class="input" type="text" v-model="searchBar" placeholder="Search..." />
@@ -29,8 +43,7 @@
                                 <th class="has-text-black-ter">Alias</th>
                                 <th class="has-text-black-ter">Full Name</th>
                                 <th class="has-text-black-ter">Specialist</th>
-                                <th class="has-text-black-ter">Gmail</th>
-                                <th class="has-text-black-ter">Schedules</th>
+                                <th class="has-text-black-ter">Email</th>
                             </tr>
                         </thead>
                         <tbody v-for="(doctor, index) in doctorAccountsIndexed" :key="doctor._id">
@@ -44,16 +57,14 @@
                                 <td class="has-text-black-ter">{{ doctor.name }}</td>
                                 <td class="has-text-black-ter">{{ doctor.specialist.toString() }}</td>
                                 <td class="has-text-black-ter">{{ doctor.gmail }}</td>
-                                <td class="has-text-black-ter" v-for="doctorSchedule in doctor.schedule"
-                                    :key="doctorSchedule.id">{{ new Date(doctorSchedule.date).toLocaleDateString() }}
-                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="notification is-warning" v-else>
-                    No doctors as of yet, generate a security code in <b>Registration and Password</b> for your doctors to use in
-                        registering to their account.
+                    No doctors as of yet, generate a security code in <b>Registration and Password</b> for your doctors
+                    to use in
+                    registering to their account.
                 </div>
                 <div class="modal" :class="{ 'is-active': isActiveModal }">
                     <div class="modal-background"></div>
@@ -76,11 +87,17 @@
 <script>
 import axios from 'axios'
 import ManagerMenuVue from '../../components/ManagerMenu.vue'
+import { Chart, registerables } from 'chart.js'
+import { LineChart, BarChart } from 'vue-chart-3'
+
+Chart.register(...registerables)
 
 export default {
     name: "ManagerDashboard",
     components: {
-        ManagerMenuVue
+        ManagerMenuVue,
+        LineChart,
+        BarChart
     },
     computed: {
         doctorAccountsIndexed() {
@@ -92,6 +109,36 @@ export default {
         await axios.get('/session/manager').then(response => this.managerHospital = response.data)
         await axios.get('/api/manager').then(response => this.hospitalStatus = response.data.find(x => x._id == this.managerHospital._id))
         await axios.get('/api/doctor').then(response => this.doctorAccounts = response.data.filter(x => x.hospitalOrigin.find(x => x.hospital === this.managerHospital.hospital)))
+        await axios.get('/api/appointmentList').then(response => this.hospitalAppointments = response.data.filter(x => x.hospital == this.managerHospital.hospital));
+
+        //line chart variables
+        let schedules = []
+        let dataArrLine = []
+        this.hospitalAppointments.forEach(x => schedules.push(x.schedule[0].id))
+        let lineChartLabel = [...new Set(schedules)]
+        lineChartLabel.forEach(e => dataArrLine.push(this.hospitalAppointments.filter(x => x.schedule[0].id == e).length))
+        this.lineChartData = {
+            labels: lineChartLabel,
+            datasets: [{
+                data: dataArrLine,
+                backgroundColor: ['#77CEFF'],
+            }]
+        }
+
+        //bar chart variables
+        let doctors = []
+        let dataArrBar = []
+        this.hospitalAppointments.forEach(x => doctors.push(x.doctorName))
+        let barChartLabel = [...new Set(doctors)]
+        barChartLabel.forEach(e => dataArrBar.push(this.hospitalAppointments.filter(x => x.doctorName == e).length))
+        this.barChartData = {
+            labels: barChartLabel,
+            datasets: [{
+                data: dataArrBar,
+                backgroundColor: ['#77CEFF']
+            }]
+        }
+        console.log(this.doctorAccounts)
         this.loading = false
     },
     data() {
@@ -103,7 +150,34 @@ export default {
             isActiveModal: false,
             doctorAccounts: [],
             email: '',
-            id: ''
+            id: '',
+            lineChartData: [],
+            lineChartOptions: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    title: {
+                        display: true,
+                        text: 'Appointments counts throughout schedules of doctors registered on your hospital',
+                    },
+                },
+            },
+            barChartData: [],
+            barChartOptions: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    title: {
+                        display: true,
+                        text: 'Top performing doctors counted via in their successful appointments',
+                    },
+                },
+            },
+            hospitalAppointments: []
         }
     },
     methods: {
