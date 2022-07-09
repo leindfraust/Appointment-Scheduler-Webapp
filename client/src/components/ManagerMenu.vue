@@ -24,7 +24,7 @@
         <p class="menu-label">General</p>
         <ul class="menu-list">
             <li>
-                <a @click="navDoctors">Home</a>
+                <a @click="navDoctors">Dashboard</a>
             </li>
             <li>
                 <a @click="navProfile">Profile</a>
