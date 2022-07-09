@@ -1,5 +1,5 @@
 <template>
-    <h1 class="title">Find and make an appointment on hospitals or clinics near you.</h1>
+    <h1 class="title">Find and make an appointment on hospitals or clinics </h1>
     <div class="modal" :class="{ 'is-active': isHospitalLoading }">
         <div class="modal-background"></div>
         <div class="modal-content" style="overflow: hidden">
@@ -25,6 +25,7 @@
                         <a class="dropdown-item" v-for="geodata in geolocationIndexed" :key="geodata._id"
                             @click="selectRegion(geodata.province)">{{ geodata.province }}</a>
                     </div>
+
                     <div class="dropdown-content has-text-left" v-else>
                         <p class="dropdown-item has-text-danger">
                             Region not found or supported, please try again.
@@ -32,6 +33,7 @@
                     </div>
                 </div>
             </div>
+            <button class="button" @click="loadProvider" :disabled="province == ''">Search</button>
         </div>
     </div>
     <div class="container block" v-if="citiesOrMunicipalities != ''">
@@ -115,12 +117,16 @@
                             }}</li>
                         </ul>
                         <p class="subtitle">{{ parseInt(geoHospital.distance) / 1000 }} km away from you.</p>
+                        <p class="subtitle">Formula test: {{parseInt((geoHospital.engagements + Math.pow(geoHospital.ratings, 2)/100) * geoHospital.distance)}}</p>
                         <button class="button is-link" @click="bookAppointment(geoHospital)" v-if="checkUser">Book an
                             Appointment</button>
+                        <router-link :to="'/user/login'" class="button is-link" v-else>Book an
+                            Appointment</router-link>
                     </div>
                 </div>
             </div>
-            <div class="container box notification is-danger has-text-centered" v-else-if="!isHospitalLoading">Hospitals/Clinics
+            <div class="container box notification is-danger has-text-centered" v-else-if="!isHospitalLoading">
+                Hospitals/Clinics
                 unavailable. Coming soon...
             </div>
         </div>
@@ -204,11 +210,13 @@ export default {
                 this.isActiveDropdown = true
             }
         },
-        async selectRegion(province) {
-            this.isHospitalLoading = true
+        selectRegion(province) {
             this.province = province
-            this.citiesOrMunicipalities = this.geolocation.find(x => x.province === province)
             this.isActiveDropdown = false
+        },
+        async loadProvider() {
+            this.isHospitalLoading = true
+            this.citiesOrMunicipalities = this.geolocation.find(x => x.province === this.province)
             await axios.post('/api/geoFindHospitalNearestUser', {
                 province: this.province,
                 latitude: this.userLatitude,
