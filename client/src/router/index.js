@@ -263,7 +263,6 @@ router.beforeEach(async (to, from, next) => {
         //check doctor session
         await axios.get("/session/doctor").then(async response => {
             if (typeof response.data.alias !== 'undefined') {
-                console.log(response.data.alias)
                 store.commit("alias", response.data.alias);
                 store.commit("doctorID", response.data._id);
                 store.commit("profileImg", cld.imageTag(`assets/doctors/${response.data.alias}.jpg`).toHtml());
