@@ -48,9 +48,6 @@ export default {
     };
   },
   async mounted() {
-    await axios
-      .get("/session/doctor")
-      .then((response) => (this.userDoctor = response.data));
     if (store.state.alias !== null) {
       await this.$router.push(`/doctor/user/${store.state.alias}`);
     }
@@ -74,8 +71,6 @@ export default {
           );
         // if username and password matched to a user
         if (await this.userDoctor) {
-          store.commit("alias", this.userDoctor.alias);
-          store.commit("doctorID", this.userDoctor._id);
           await axios.post("/session/doctor", {
             verified: this.userDoctor.verified,
             _id: this.userDoctor._id,
@@ -89,6 +84,8 @@ export default {
             username: this.userDoctor.username,
             messageHistory: this.userDoctor.messageHistory
           });
+          store.commit("alias", this.userDoctor.alias);
+          store.commit("doctorID", this.userDoctor._id);
           store.commit("profileImg", cld.imageTag(`assets/doctors/${this.userDoctor.alias}.jpg`).toHtml());
           await this.$router.push(`/doctor/user/${this.userDoctor.alias}`);
         }
