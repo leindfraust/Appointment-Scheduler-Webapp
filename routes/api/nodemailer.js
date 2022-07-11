@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const {
-    sendMail,
+    loginReqMail,
     OTPMail,
     supportMail
 } = require('../../controllers/nodemailController')
 
-router.post('/sendMail', sendMail);
+router.post('/loginReqMail', loginReqMail);
 
 //OTP
 router.post('/OTPMail', OTPMail);

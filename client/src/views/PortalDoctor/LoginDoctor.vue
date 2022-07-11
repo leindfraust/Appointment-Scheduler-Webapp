@@ -66,35 +66,36 @@ export default {
             password: this.password
           })
           .then(
-            (response) =>
-              (this.userDoctor = response.data)
+            async (response) => {
+              this.userDoctor = response.data
+              // if username and password matched to a user
+              if (await this.userDoctor) {
+                await axios.post("/session/doctor", {
+                  verified: this.userDoctor.verified,
+                  _id: this.userDoctor._id,
+                  licenseNo: this.userDoctor.licenseNo,
+                  alias: this.userDoctor.alias,
+                  fullname: this.userDoctor.name,
+                  specialist: this.userDoctor.specialist,
+                  gmail: this.userDoctor.gmail,
+                  hospitalOrigin: this.userDoctor.hospitalOrigin,
+                  schedule: this.userDoctor.schedule,
+                  username: this.userDoctor.username,
+                  messageHistory: this.userDoctor.messageHistory
+                });
+                store.commit("alias", this.userDoctor.alias);
+                store.commit("doctorID", this.userDoctor._id);
+                store.commit("profileImg", cld.imageTag(`assets/doctors/${this.userDoctor.alias}.jpg`).toHtml());
+                await this.$router.push(`/doctor/user/${this.userDoctor.alias}`);
+              }
+              else {
+                this.validateMessage = "Incorrect username or password";
+                this.incorrectUserPass = true;
+                this.username = null;
+                this.password = null;
+              }
+            }
           );
-        // if username and password matched to a user
-        if (await this.userDoctor) {
-          await axios.post("/session/doctor", {
-            verified: this.userDoctor.verified,
-            _id: this.userDoctor._id,
-            licenseNo: this.userDoctor.licenseNo,
-            alias: this.userDoctor.alias,
-            fullname: this.userDoctor.name,
-            specialist: this.userDoctor.specialist,
-            gmail: this.userDoctor.gmail,
-            hospitalOrigin: this.userDoctor.hospitalOrigin,
-            schedule: this.userDoctor.schedule,
-            username: this.userDoctor.username,
-            messageHistory: this.userDoctor.messageHistory
-          });
-          store.commit("alias", this.userDoctor.alias);
-          store.commit("doctorID", this.userDoctor._id);
-          store.commit("profileImg", cld.imageTag(`assets/doctors/${this.userDoctor.alias}.jpg`).toHtml());
-          await this.$router.push(`/doctor/user/${this.userDoctor.alias}`);
-        }
-        else {
-          this.validateMessage = "Incorrect username or password";
-          this.incorrectUserPass = true;
-          this.username = null;
-          this.password = null;
-        }
       }
     },
     async signup() {

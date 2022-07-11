@@ -76,29 +76,30 @@ export default {
             password: this.password
           })
           .then(
-            (response) =>
-              (this.userPatient = response.data)
+            async (response) => {
+              this.userPatient = response.data
+              // if username and password matched to a user
+              if (await this.userPatient) {
+                await axios.post("/session/patient", {
+                  _id: this.userPatient._id,
+                  name: this.userPatient.name,
+                  email: this.userPatient.gmail,
+                  username: this.username,
+                  province: this.userPatient.province,
+                  city: this.userPatient.city,
+                  currentAddress: this.userPatient.currentAddress
+                });
+                store.commit("patientUsername", this.userPatient.username)
+                store.commit("patientID", this.userPatient._id)
+                await this.$router.push(`/user/${this.userPatient.username}`);
+              } else {
+                this.validateMessage = "Incorrect username or password";
+                this.incorrectUserPass = true;
+                this.username = null;
+                this.password = null;
+              }
+            }
           );
-        // if username and password matched to a user
-        if (await this.userPatient) {
-          await axios.post("/session/patient", {
-            _id: this.userPatient._id,
-            name: this.userPatient.name,
-            email: this.userPatient.gmail,
-            username: this.username,
-            province: this.userPatient.province,
-            city: this.userPatient.city,
-            currentAddress: this.userPatient.currentAddress
-          });
-          store.commit("patientUsername", this.userPatient.username)
-          store.commit("patientID", this.userPatient._id)
-          await this.$router.push(`/user/${this.userPatient.username}`);
-        } else {
-          this.validateMessage = "Incorrect username or password";
-          this.incorrectUserPass = true;
-          this.username = null;
-          this.password = null;
-        }
       }
     },
   }

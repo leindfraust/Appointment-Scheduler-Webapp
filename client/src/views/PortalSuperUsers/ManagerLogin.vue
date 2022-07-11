@@ -76,23 +76,25 @@ export default {
                         username: this.username,
                         password: this.password
                     })
-                    .then((response) => (this.userManager = response.data));
-                // if username and password matched to a user
-                if (await this.userManager) {
-                    this.$store.commit("managerHospital", this.userManager.hospital);
-                    await axios.post("/session/manager", {
-                        _id: this.userManager._id,
-                        registrationCode: this.userManager.registrationCode,
-                        hospital: this.userManager.hospital
+                    .then(async (response) => {
+                        this.userManager = response.data
+                        // if username and password matched to a user
+                        if (await this.userManager) {
+                            await axios.post("/session/manager", {
+                                _id: this.userManager._id,
+                                registrationCode: this.userManager.registrationCode,
+                                hospital: this.userManager.hospital
+                            });
+                            this.$store.commit("managerHospital", this.userManager.hospital);
+                            await this.$router.push(`/user/manager/${this.userManager.hospital}`);
+                        }
+                        else {
+                            this.validateMessage = "Incorrect username or password";
+                            this.incorrectUserPass = true;
+                            this.username = null;
+                            this.password = null;
+                        }
                     });
-                    await this.$router.push(`/user/manager/${this.userManager.hospital}`);
-                }
-                else {
-                    this.validateMessage = "Incorrect username or password";
-                    this.incorrectUserPass = true;
-                    this.username = null;
-                    this.password = null;
-                }
             }
         },
         async signup() {

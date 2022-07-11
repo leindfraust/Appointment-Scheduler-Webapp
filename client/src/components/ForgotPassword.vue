@@ -27,7 +27,6 @@ async function forgotPasswordOTP() {
     if (usernameHandler.value != null || emailHandler.value != null) {
         isLoading.value = true
         let confirmEmail
-        let randomCode = Math.floor(1000 + Math.random() * 9000);
         await axios.post('/api/code/email', {
             email: emailHandler.value
         }).then(response => confirmEmail = response.data)
@@ -42,14 +41,9 @@ async function forgotPasswordOTP() {
                 if (userData.value) {
                     noUserFound.value = false
                     try {
-                        await axios.post('/api/code', {
-                            email: emailHandler.value,
-                            code: randomCode
-                        });
                         await axios.post('/api/OTPMail', {
-                            email: emailHandler.value,
-                            code: randomCode
-                        });
+                            email: emailHandler.value
+                        }).then(codeSent.value = true)
                         codeSent.value = true
                     } catch (err) {
                         errMsg.value = err
@@ -65,14 +59,9 @@ async function forgotPasswordOTP() {
                 if (userData.value) {
                     noUserFound.value = false
                     try {
-                        await axios.post('/api/code', {
-                            email: emailHandler.value,
-                            code: randomCode
-                        });
                         await axios.post('/api/OTPMail', {
-                            email: emailHandler.value,
-                            code: randomCode
-                        });
+                            email: emailHandler.value
+                        }).then(codeSent.value = true)
                         codeSent.value = true
                     } catch (err) {
                         errMsg.value = err
@@ -88,14 +77,9 @@ async function forgotPasswordOTP() {
                 if (userData.value) {
                     noUserFound.value = false
                     try {
-                        await axios.post('/api/code', {
-                            email: emailHandler.value,
-                            code: randomCode
-                        });
                         await axios.post('/api/OTPMail', {
-                            email: emailHandler.value,
-                            code: randomCode
-                        });
+                            email: emailHandler.value
+                        }).then(codeSent.value = true)
                         codeSent.value = true
                     } catch (err) {
                         errMsg.value = err

@@ -58,7 +58,6 @@ export default {
             superUserConfirmEmail: '',
             superUserCode: '',
             superUserConfirmCode: '',
-            codes: [],
             gmails: []
         }
     },
@@ -67,22 +66,14 @@ export default {
             await axios.post('/api/code/superuser', {
                 email: this.superUserEmail
             }).then(response => this.superUserConfirmEmail = response.data)
-            if (await this.superUserConfirmEmail) {
-                let randomCode = Math.floor(1000 + Math.random() * 9000);
-                if (this.codes.length === 0) {
-                    this.modalActive = true
-                    await axios.post("/api/code", {
-                        email: this.superUserEmail,
-                        code: randomCode
-                    });
-                    await axios.post('/api/sendMail', {
-                        email: this.superUserEmail,
-                        code: randomCode
-                    });
-                } else {
-                    this.statusMessage = 'invalid developer'
-                    this.superUserEmail = ''
-                }
+            if (this.superUserConfirmEmail) {
+                await axios.post('/api/loginReqMail', {
+                    email: this.superUserEmail
+                }).then(this.modalActive = true).catch(err => {
+                    if (err) {
+                        this.statusMessage = err
+                    }
+                });
             } else {
                 this.statusMessage = 'invalid developer'
                 this.superUserEmail = ''
@@ -92,7 +83,7 @@ export default {
             await axios.post('/api/code/verify', {
                 code: this.superUserCode
             }).then(response => this.superUserConfirmCode = response.data)
-            if (await this.superUserConfirmCode) {
+            if (this.superUserConfirmCode) {
                 await axios.post('/session/superuser', {
                     superuser: this.superUserEmail
                 });

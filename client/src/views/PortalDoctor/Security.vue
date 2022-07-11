@@ -20,7 +20,7 @@
                         <div class="columns">
                             <div class="column">
                                 <h1 class="title">Change password:</h1>
-                                <ForgotPassword v-if="gmail != null"  :userType="'doctor'" :email='gmail' />
+                                <ForgotPassword v-if="gmail != null" :userType="'doctor'" :email='gmail' />
                                 <div class="block"></div>
                                 <div class="field">
                                     <div class="control">
@@ -279,19 +279,16 @@ export default {
             }
         },
         async modalUpEditInfo() {
-            let randomCode = Math.floor(1000 + Math.random() * 9000);
             await axios.post("/api/code/email", {
                 email: this.gmail
             }).then(async response => {
                 if (!response.data) {
-                    this.isActiveModal = true
-                    await axios.post("/api/code", {
-                        email: this.gmail,
-                        code: randomCode
-                    });
                     await axios.post('/api/OTPMail', {
-                        email: this.gmail,
-                        code: randomCode
+                        email: this.gmail
+                    }).then(this.isActiveModal = true).catch(err => {
+                        if (err) {
+                            this.codeError = true
+                        }
                     });
                 } else {
                     this.isActiveModal = true
@@ -304,7 +301,6 @@ export default {
         },
         async sendVerificationEmail() {
             let existingEmail = []
-            let randomCode = Math.floor(1000 + Math.random() * 9000);
 
             await axios.get("/api/doctor").then(response => existingEmail = response.data.find(x => x.gmail === this.gmail))
             if (typeof existingEmail !== 'undefined') {
@@ -312,13 +308,12 @@ export default {
                     email: this.gmail
                 }).then(async response => {
                     if (!response.data) {
-                        await axios.post("/api/code", {
-                            email: this.gmail,
-                            code: randomCode
-                        });
                         await axios.post('/api/OTPMail', {
-                            email: this.gmail,
-                            code: randomCode
+                            email: this.gmail
+                        }).catch(err => {
+                            if (err) {
+                                this.codeError = true
+                            }
                         });
                         this.verifyEmailSent = true
                     } else {

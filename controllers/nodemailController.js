@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer')
+const authenticationCode = require('../models/authenticationCodes');
 
 //nodemailer config
 let transporter = nodemailer.createTransport({
@@ -13,9 +14,9 @@ let transporter = nodemailer.createTransport({
 });
 
 //nodemailer smtp@gmail
-const sendMail = ((req, res) => {
+const loginReqMail = ((req, res) => {
     let email = req.body.email
-    let code = req.body.code
+    let code = Math.floor(1000 + Math.random() * 9000);
     let mailOptions = {
         from: process.env.nodemaileruser,
         to: email,
@@ -23,13 +24,25 @@ const sendMail = ((req, res) => {
         text: `Your login request code is: ${code}. \nIf you did not request this, please reply to this email. \n\nBest Regards,\nMed Search`
     };
 
-    transporter.sendMail(mailOptions, function (error, info) {
+    transporter.sendMail(mailOptions, async (error, info) => {
         if (error) {
             console.log(error);
             res.status(400).end();
         } else {
             console.log('Email sent: ' + info.response);
-            res.status(200).end();
+            const newAuthenticationCode = new authenticationCode({
+                email: email,
+                code: code
+            });
+            try {
+                const authCode = await newAuthenticationCode.save()
+                if (!authCode) throw new Error('Cannot save')
+                res.status(200).end()
+            } catch (err) {
+                res.status(500).send({
+                    message: err.message
+                })
+            }
         }
     });
 });
@@ -37,7 +50,7 @@ const sendMail = ((req, res) => {
 //OTP
 const OTPMail = ((req, res) => {
     let email = req.body.email
-    let code = req.body.code
+    let code = Math.floor(1000 + Math.random() * 9000);
     let mailOptions = {
         from: process.env.nodemaileruser,
         to: email,
@@ -45,13 +58,25 @@ const OTPMail = ((req, res) => {
         text: `Your verification code is: ${code}. \nIf you did not request this, please reply to this email. \n\nBest Regards,\nMed Search`
     };
 
-    transporter.sendMail(mailOptions, function (error, info) {
+    transporter.sendMail(mailOptions, async (error, info) => {
         if (error) {
             console.log(error);
             res.status(400).end();
         } else {
             console.log('Email sent: ' + info.response);
-            res.status(200).end();
+            const newAuthenticationCode = new authenticationCode({
+                email: email,
+                code: code
+            });
+            try {
+                const authCode = await newAuthenticationCode.save()
+                if (!authCode) throw new Error('Cannot save')
+                res.status(200).end()
+            } catch (err) {
+                res.status(500).send({
+                    message: err.message
+                })
+            }
         }
     });
 });
@@ -81,7 +106,7 @@ const supportMail = ((req, res) => {
 });
 
 module.exports = {
-    sendMail,
+    loginReqMail,
     OTPMail,
     supportMail
 }
