@@ -3,8 +3,10 @@ import NavigationTab from '../../components/NavigationTab.vue';
 import axios from 'axios'
 import { ref, onMounted, computed } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 const store = useStore()
+const router = useRouter()
 let appointmentList = ref([])
 let patient = ref([]);
 let geolocationData = ref([])
@@ -15,8 +17,11 @@ let dropDownProvince = ref(false)
 let dropDownCity = ref(false)
 let errMsg = ref('')
 let successMsg = ref(false)
+let appointmentModal = ref(false)
 let navOngoingAppointments = ref(true)
 let navPastAppointments = ref(false)
+let file = ref()
+let uploadProfileButton = ref(false)
 onMounted(async () => {
     await axios.post('/api/appointmentList/patients', { id: store.state.patientID }).then(response => appointmentList.value = response.data);
     await axios.get("/session/patient").then(response => patient.value = response.data);
@@ -44,7 +49,7 @@ function sortPastAppointments() {
 function sortOngoingAppointments() {
     return appointmentList.value.sort((a, b) => {
         new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
-    }).filter(x => { return new Date(x.schedule[0].date).getTime() >= new Date().getTime() && new Date(x.schedule[0].date).getMonth() >= new Date().getMonth() && x.ifPatientVisited == false })
+    }).filter(x => { return new Date(x.schedule[0].date).toLocaleDateString() >= new Date().toLocaleDateString() && x.ifPatientVisited == false })
 }
 //methods
 async function selectProvince(province) {
@@ -57,6 +62,10 @@ async function selectProvince(province) {
 function selectCity(city) {
     dropDownCity.value = false
     userCity.value = city
+}
+function fileHandleInput(e) {
+    file.value = e.target.files[0]
+    uploadProfileButton.value = true
 }
 async function updatePatient() {
     try {
@@ -96,200 +105,272 @@ async function cancelAppointment(id) {
         errMsg.value = err
     }
 }
+async function uploadProfilePhotoClient() {
+    const formData = new FormData()
+    formData.append('username', store.state.patientUsername)
+    formData.append('imgFile', file.value)
+
+    try {
+        await axios.post("/api/imgUploadPatient", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data"
+            }
+        }).then(async response => {
+            if (response) {
+                store.commit("imgSuccess", true)
+                await router.push('/imgUploadSuccessPatient')
+            }
+        });
+        store.commit("imgSucces", true)
+    } catch (err) {
+        errMsg.value = err
+        console.log(err)
+    }
+}
 </script>
 <template>
     <NavigationTab />
-    <section class="section" style="width: 75%; margin: auto;">
-        <div class="container" v-if="patient.length !== 0">
-            <h1 class="title">Profile</h1>
-            <div class="notification is-danger" v-if="errMsg">
-                Oops, something went wrong. Try again later or
-                <router-link :to="'/contactus'">contact us</router-link>
-            </div>
-            <div class="notification is-success" v-if="successMsg">Changes have been pushed.</div>
-            <div class="field is-horizontal">
-                <div class="field-body">
-                    <div class="field">
-                        <label class="label">Username:</label>
-                        <div class="controls">
-                            <input type="text" class="input" v-model="patient.username" disabled />
+    <section class="section">
+        <div id="wrapper-container" style="width: 75%; margin: auto;">
+            <div class="container" v-if="patient.length !== 0">
+                <div class="columns is-vcentered">
+                    <div class="column is-4">
+                        <figure class="image is-square image-outer">
+                            <img class="is-rounded image-inner"
+                                :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/patients/${store.state.patientUsername}.jpg`">
+                        </figure>
+                        <div class="field">
+                            <div class="control">
+                                <input @change="fileHandleInput($event)" class="input" type="file" />
+                            </div>
+                        </div>
+                        <div class="field has-text-centered">
+                            <div class="control">
+                                <button class="button is-info" v-if="uploadProfileButton"
+                                    @click="uploadProfilePhotoClient">Upload Photo</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="field">
-                        <label class="label">Email:</label>
-                        <div class="controls">
-                            <input type="text" class="input" v-model="patient.email" />
+                    <div class="column">
+                        <div class="notification is-danger" v-if="errMsg">
+                            Oops, something went wrong. Try again later or
+                            <router-link :to="'/contactus'">contact us</router-link>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="field is-horizontal">
-                <div class="field-body">
-                    <div class="field">
-                        <label class="label">First Name:</label>
-                        <div class="controls">
-                            <input type="text" class="input" v-model="patient.name[0]" />
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">Last Name:</label>
-                        <div class="controls">
-                            <input type="text" class="input" v-model="patient.name[1]" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="field is-horizontal">
-                <div class="field-body">
-                    <div class="field">
-                        <div class="control">
-                            <label class="label">Province:</label>
-                            <div class="dropdown" :class="{ 'is-active': dropDownProvince }">
-                                <div class="dropdown-trigger">
-                                    <button class="button" @click="dropDownProvince = !dropDownProvince">
-                                        <span v-if="userProvince == ''">Select</span>
-                                        <span v-else>{{ userProvince }}</span>
-                                    </button>
+                        <div class="notification is-success" v-if="successMsg">Changes have been pushed.</div>
+                        <div class="field is-horizontal">
+                            <div class="field-body">
+                                <div class="field">
+                                    <label class="label">Username:</label>
+                                    <div class="controls">
+                                        <input type="text" class="input" v-model="patient.username" disabled />
+                                    </div>
                                 </div>
-                                <div class="dropdown-menu">
-                                    <div class="dropdown-content" v-for="provinces in geolocationData"
-                                        :key="provinces._id">
-                                        <a class="dropdown-item" @click="selectProvince(provinces.province)">{{
-                                                provinces.province
-                                        }}</a>
+                                <div class="field">
+                                    <label class="label">Email:</label>
+                                    <div class="controls">
+                                        <input type="text" class="input" v-model="patient.email" />
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        <div class="field is-horizontal">
+                            <div class="field-body">
+                                <div class="field">
+                                    <label class="label">First Name:</label>
+                                    <div class="controls">
+                                        <input type="text" class="input" v-model="patient.name[0]" />
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label class="label">Last Name:</label>
+                                    <div class="controls">
+                                        <input type="text" class="input" v-model="patient.name[1]" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field is-horizontal">
+                            <div class="field-body">
+                                <div class="field">
+                                    <div class="control">
+                                        <label class="label">Province:</label>
+                                        <div class="dropdown" :class="{ 'is-active': dropDownProvince }">
+                                            <div class="dropdown-trigger">
+                                                <button class="button" @click="dropDownProvince = !dropDownProvince">
+                                                    <span v-if="userProvince == ''">Select</span>
+                                                    <span v-else>{{ userProvince }}</span>
+                                                </button>
+                                            </div>
+                                            <div class="dropdown-menu">
+                                                <div class="dropdown-content" v-for="provinces in geolocationData"
+                                                    :key="provinces._id">
+                                                    <a class="dropdown-item"
+                                                        @click="selectProvince(provinces.province)">{{
+                                                                provinces.province
+                                                        }}</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                    <div class="field">
-                        <div class="control">
-                            <div class="label">City/Municipality:</div>
-                            <div class="dropdown" :class="{ 'is-active': dropDownCity }">
-                                <div class="dropdown-trigger">
-                                    <button class="button" aria-haspopup="true" @click="dropDownCity = !dropDownCity"
-                                        :disabled="userProvince == ''">
-                                        <span v-if="userCity == ''">Select</span>
-                                        <span v-else>{{ userCity }}</span>
-                                    </button>
+                                <div class="field">
+                                    <div class="control">
+                                        <div class="label">City/Municipality:</div>
+                                        <div class="dropdown" :class="{ 'is-active': dropDownCity }">
+                                            <div class="dropdown-trigger">
+                                                <button class="button" aria-haspopup="true"
+                                                    @click="dropDownCity = !dropDownCity"
+                                                    :disabled="userProvince == ''">
+                                                    <span v-if="userCity == ''">Select</span>
+                                                    <span v-else>{{ userCity }}</span>
+                                                </button>
+                                            </div>
+                                            <div class="dropdown-menu" v-if="userProvince">
+                                                <div class="dropdown-content" v-for="cities in citiesData"
+                                                    :key="cities.name">
+                                                    <a class="dropdown-item" @click="selectCity(cities.name)">{{
+                                                            cities.name
+                                                    }}</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="dropdown-menu" v-if="userProvince">
-                                    <div class="dropdown-content" v-for="cities in citiesData" :key="cities.name">
-                                        <a class="dropdown-item" @click="selectCity(cities.name)">{{ cities.name }}</a>
+                                <div class="field">
+                                    <label class="label">Current Address:</label>
+                                    <div class="controls">
+                                        <input type="text" class="input" v-model="patient.currentAddress" />
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">Current Address:</label>
-                        <div class="controls">
-                            <input type="text" class="input" v-model="patient.currentAddress" />
+                        <div class="field is-grouped is-grouped-right">
+                            <p class="control">
+                                <a class="button is-info" @click="updatePatient">Save changes</a>
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="field is-grouped is-grouped-right">
-                <p class="control">
-                    <a class="button is-primary" @click="updatePatient">Save changes</a>
-                </p>
+            <br />
+            <div class="dropdown" :class="{ 'is-active': appointmentModal }">
+                <div class="dropdown-trigger">
+                    <button class="button" @click="appointmentModal = !appointmentModal"><span>{{ navOngoingAppointments
+                            ? 'Ongoing Appointments' : 'Past Appointments'
+                    }}</span><span class="icon is-small">
+                            <i class="fas fa-angle-down" aria-hidden="true"></i>
+                        </span>
+                    </button>
+                </div>
+                <div class="dropdown-menu">
+                    <div class="dropdown-content">
+                        <a class="dropdown-item"
+                            @click="navOngoingAppointments = !navOngoingAppointments, navPastAppointments = !navPastAppointments, appointmentModal = !appointmentModal">{{
+                                    navOngoingAppointments ? 'Past Appointments' : 'Ongoing Appointments'
+                            }}</a>
+                    </div>
+                </div>
             </div>
-        </div>
-        <br />
-        <nav class="breadcrumb" aria-label="breadcrumbs">
-            <ul>
-                <li :class="{ 'is-active': navOngoingAppointments }"><a
-                        @click="navOngoingAppointments = true, navPastAppointments = false">Ongoing Appointments</a>
-                </li>
-                <li :class="{ 'is-active': navPastAppointments }"><a
-                        @click="navOngoingAppointments = false, navPastAppointments = true">Past Appointments</a></li>
-            </ul>
-        </nav>
-        <div class="container" v-if="navOngoingAppointments">
-            <div class="table-container" v-if="Object.keys(ongoingAppointments).length !== 0">
-                <table class="table is-striped is-narrow is-fullwidth is-bordered">
-                    <thead>
-                        <tr>
-                            <th class="has-text-black-ter">Controls</th>
-                            <th class="has-text-black-ter">Reference ID</th>
-                            <th class="has-text-black-ter">Schedule</th>
-                            <th class="has-text-black-ter">Priority No.</th>
-                            <th class="has-text-black-ter">Hospital Appointed</th>
-                            <th class="has-text-black-ter">Doctor Appointed</th>
-                            <th class="has-text-black-ter">First Name</th>
-                            <th class="has-text-black-ter">Last Name</th>
-                            <th class="has-text-black-ter">Contact Number</th>
-                            <th class="has-text-black-ter">Birthday</th>
-                            <th class="has-text-black-ter">Symptoms/Comments</th>
-                        </tr>
-                    </thead>
-                    <tbody v-for="appointments in ongoingAppointments" :key="appointments._id">
-                        <tr>
-                            <button class="dropdown-item button has-text-danger" type="button"
-                                @click="cancelAppointment(appointments._id)">Cancel</button>
-                            <br />
-                            <th class="has-text-black-ter">{{ appointments.referenceID }}</th>
-                            <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString()
-                            }}</th>
-                            <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
-                            <th class="has-text-black-ter">{{ appointments.hospital }}</th>
-                            <th class="has-text-black-ter">{{ appointments.doctorName }}</th>
-                            <td class="has-text-black-ter">{{ appointments.firstName }}</td>
-                            <td class="has-text-black-ter">{{ appointments.lastName }}</td>
-                            <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
-                            <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
-                            <td class="has-text-black-ter">{{ appointments.comments }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="container" v-if="navOngoingAppointments">
+                <div class="table-container" v-if="Object.keys(ongoingAppointments).length !== 0">
+                    <table class="table is-striped is-narrow is-fullwidth is-bordered">
+                        <thead>
+                            <tr>
+                                <th class="has-text-black-ter">Controls</th>
+                                <th class="has-text-black-ter">Reference ID</th>
+                                <th class="has-text-black-ter">Schedule</th>
+                                <th class="has-text-black-ter">Priority No.</th>
+                                <th class="has-text-black-ter">Hospital Appointed</th>
+                                <th class="has-text-black-ter">Doctor Appointed</th>
+                                <th class="has-text-black-ter">First Name</th>
+                                <th class="has-text-black-ter">Last Name</th>
+                                <th class="has-text-black-ter">Contact Number</th>
+                                <th class="has-text-black-ter">Birthday</th>
+                                <th class="has-text-black-ter">Symptoms/Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody v-for="appointments in ongoingAppointments" :key="appointments._id">
+                            <tr>
+                                <button class="dropdown-item button has-text-danger" type="button"
+                                    @click="cancelAppointment(appointments._id)">Cancel</button>
+                                <br />
+                                <th class="has-text-black-ter">{{ appointments.referenceID }}</th>
+                                <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString()
+                                }}</th>
+                                <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
+                                <th class="has-text-black-ter">{{ appointments.hospital }}</th>
+                                <th class="has-text-black-ter">{{ appointments.doctorName }}</th>
+                                <td class="has-text-black-ter">{{ appointments.firstName }}</td>
+                                <td class="has-text-black-ter">{{ appointments.lastName }}</td>
+                                <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
+                                <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
+                                <td class="has-text-black-ter">{{ appointments.comments }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="container" v-else>
+                    <div class="notification is-info">You do not have any ongoing appointments.</div>
+                </div>
             </div>
-            <div class="container" v-else>
-                <div class="notification is-info">You do not have any ongoing appointments.</div>
-            </div>
-        </div>
-        <div class="container" v-if="navPastAppointments">
-            <div class="table-container" v-if="Object.keys(pastAppointments).length !== 0">
-                <table class="table is-striped is-narrow is-fullwidth is-bordered">
-                    <thead>
-                        <tr>
-                            <th class="has-text-black-ter">Schedule</th>
-                            <th class="has-text-black-ter">Priority No.</th>
-                            <th class="has-text-black-ter">Hospital Appointed</th>
-                            <th class="has-text-black-ter">Doctor Appointed</th>
-                            <th class="has-text-black-ter">First Name</th>
-                            <th class="has-text-black-ter">Last Name</th>
-                            <th class="has-text-black-ter">Contact Number</th>
-                            <th class="has-text-black-ter">Birthday</th>
-                            <th class="has-text-black-ter">Symptoms/Comments</th>
-                        </tr>
-                    </thead>
-                    <tbody v-for="appointments in pastAppointments" :key="appointments._id">
-                        <tr>
-                            <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString()
-                            }}</th>
-                            <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
-                            <th class="has-text-black-ter">{{ appointments.hospital }}</th>
-                            <th class="has-text-black-ter">{{ appointments.doctorName }}</th>
-                            <td class="has-text-black-ter">{{ appointments.firstName }}</td>
-                            <td class="has-text-black-ter">{{ appointments.lastName }}</td>
-                            <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
-                            <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
-                            <td class="has-text-black-ter">{{ appointments.comments }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="container" v-else>
-                <div class="notification is-info">You do not have any past appointments.</div>
+            <div class="container" v-if="navPastAppointments">
+                <div class="table-container" v-if="Object.keys(pastAppointments).length !== 0">
+                    <table class="table is-striped is-narrow is-fullwidth is-bordered">
+                        <thead>
+                            <tr>
+                                <th class="has-text-black-ter">Schedule</th>
+                                <th class="has-text-black-ter">Priority No.</th>
+                                <th class="has-text-black-ter">Hospital Appointed</th>
+                                <th class="has-text-black-ter">Doctor Appointed</th>
+                                <th class="has-text-black-ter">First Name</th>
+                                <th class="has-text-black-ter">Last Name</th>
+                                <th class="has-text-black-ter">Contact Number</th>
+                                <th class="has-text-black-ter">Birthday</th>
+                                <th class="has-text-black-ter">Symptoms/Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody v-for="appointments in pastAppointments" :key="appointments._id">
+                            <tr>
+                                <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString()
+                                }}</th>
+                                <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
+                                <th class="has-text-black-ter">{{ appointments.hospital }}</th>
+                                <th class="has-text-black-ter">{{ appointments.doctorName }}</th>
+                                <td class="has-text-black-ter">{{ appointments.firstName }}</td>
+                                <td class="has-text-black-ter">{{ appointments.lastName }}</td>
+                                <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
+                                <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
+                                <td class="has-text-black-ter">{{ appointments.comments }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="container" v-else>
+                    <div class="notification is-info">You do not have any past appointments.</div>
+                </div>
             </div>
         </div>
     </section>
 </template>
 <style scoped>
 @media (max-width: 991.98px) {
-    .section {
+    #wrapper-container {
         width: 100% !important
     }
+}
+
+.image-outer {
+    background: center center no-repeat url('../../assets/images/background-figure-style.png');
+    background-size: contain;
+}
+
+.image-inner {
+    padding: 25px
+}
+
+.section {
+    background: center center no-repeat url('../../assets/images/background-client-profile.png');
+    background-size: cover;
 }
 </style>

@@ -1,9 +1,6 @@
 <template>
-  <section class="hero is-fullheight">
-    <NavigationTabVue />
-    <div class="hero-body">
-      <div class="container has-text-centered">
         <ProviderFinder />
+        <!--
         <div class="container box" id="covidAPI" style="width: 70%;">
           <h1 class="title has-text-left">Latest COVID-19 Data</h1>
           <hr>
@@ -43,20 +40,15 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </section>
+        </div> -->
 </template>
 
 <script>
 import ProviderFinder from "../../components/ProviderFinder.vue";
-import NavigationTabVue from "../../components/NavigationTab.vue";
 import axios from 'axios'
 export default {
   name: "HomePage",
   components: {
-    NavigationTabVue,
     ProviderFinder
   },
   data() {
@@ -74,9 +66,6 @@ export default {
 </script>
 
 <style scoped>
-.hero {
-  background-color: whitesmoke !important;
-}
 
 @media (max-width: 991.98px) {
   #covidAPI {

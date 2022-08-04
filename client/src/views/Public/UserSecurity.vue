@@ -75,60 +75,75 @@ async function changePassword() {
 <template>
     <Navigation />
 
-    <section class="section" style="width: 75%; margin: auto">
-        <div class="container">
-            <h1 class="title">Security</h1>
-            <div class="notification is-danger" v-if="errMsg">Oops, something went wrong. Try again later or
-                <router-link :to="'/contactus'">contact us</router-link>
-            </div>
-            <div class="notification is-success" v-if="passwordChanged">Password changed successfully.</div>
-            <div class="field">
-                <div class="control">
-                    <label class="label">Current Password:</label>
-                    <input class="input password" v-model="currentPassword" type="password"
-                        placeholder="Current password" />
-                    <p class="help is-danger" v-if="currentPasswordIncorrect">Current password is incorrect.</p>
+    <section class="hero is-info is-fullheight">
+        <div class="hero-body">
+            <div class="container">
+                <div class="box">
+                    <div class="notification is-danger" v-if="errMsg">Oops, something went wrong. Try again later or
+                        <router-link :to="'/contactus'">contact us</router-link>
+                    </div>
+                    <div class="notification is-success" v-if="passwordChanged">Password changed successfully.</div>
+                    <div class="field">
+                        <div class="control">
+                            <label class="label">Current Password:</label>
+                            <input class="input password is-rounded" v-model="currentPassword" type="password"
+                                placeholder="Current password" />
+                            <p class="help is-danger" v-if="currentPasswordIncorrect">Current password is incorrect.</p>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <label class="label">New Password:</label>
+                            <input class="input password is-rounded" v-model="newPassword" type="password"
+                                placeholder="New password" />
+                        </div>
+                        <p class="help is-danger" v-if="newPasswordNotMatch">Password do not match.</p>
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <label class="label">Confirm Password:</label>
+                            <input class="input password is-rounded" v-model="confirmPassword" type="password"
+                                placeholder="Confirm password" />
+                        </div>
+                        <p class="help is-danger" v-if="newPasswordNotMatch">Password do not match.</p>
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <label class="checkbox">
+                                <input type="checkbox" @click="showPassword" />
+                                Show password
+                            </label>
+                        </div>
+                    </div>
+                    <div class="field has-text-right">
+                        <div class="control">
+                            <button class="button is-danger" @click="changePassword"
+                                :disabled="currentPassword === '' || newPassword === '' || confirmPassword === ''">Change
+                                password</button>
+                        </div>
+                    </div>
+                    <ForgotPassword v-if="username != '' && email != ''" :userType="'patient'" :username="username"
+                        :email="email" />
                 </div>
             </div>
-            <div class="field">
-                <div class="control">
-                    <label class="label">New Password:</label>
-                    <input class="input password" v-model="newPassword" type="password" placeholder="New password" />
-                </div>
-                <p class="help is-danger" v-if="newPasswordNotMatch">Password do not match.</p>
-            </div>
-            <div class="field">
-                <div class="control">
-                    <label class="label">Confirm Password:</label>
-                    <input class="input password" v-model="confirmPassword" type="password"
-                        placeholder="Confirm password" />
-                </div>
-                <p class="help is-danger" v-if="newPasswordNotMatch">Password do not match.</p>
-            </div>
-            <div class="field">
-                <div class="control">
-                    <label class="checkbox">
-                        <input type="checkbox" @click="showPassword" />
-                        Show password
-                    </label>
-                </div>
-            </div>
-            <div class="field has-text-right">
-                <div class="control">
-                    <button class="button is-danger" @click="changePassword"
-                        :disabled="currentPassword === '' || newPassword === '' || confirmPassword === ''">Change
-                        password</button>
-                </div>
-            </div>
-            <ForgotPassword v-if="username != '' && email != ''" :userType="'patient'" :username="username"
-                :email="email" />
         </div>
     </section>
 </template>
 <style scoped>
 @media (max-width: 991.98px) {
-    .section {
+    #wrapper-container {
         width: 100% !important;
     }
+}
+
+.hero {
+    background: center center no-repeat url('../../assets/images/background-client-security.png');
+    background-size: cover;
+}
+
+.box {
+    width: 35% !important;
+    margin: auto;
+    padding: 30px
 }
 </style>

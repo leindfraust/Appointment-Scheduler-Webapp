@@ -1,32 +1,36 @@
 <template>
-  <NavigationTabVue />
-  <section class="section" style="height: 92vh;">
-    <div class="container has-text-centered animate__animated animate__fadeInLeft">
-      <div class="box" style="width: 40%; margin: auto">
-        <div class="notification is-success" v-if="newAccount">Your account has been successfully created.</div>
-        <div class="notification is-info has-text-left">
-          Are you one of our doctors? Click
-          <a href="/doctor/login">here</a>.
-        </div>
-        <br />
-        <p class="subtitle has-text-info has-text-left">Login to make an appointment.</p>
-        <div class="field">
-          <div class="control">
-            <input class="input" type="text" v-model="username" placeholder="username" @keyup.enter="login" required />
+  <section class="hero is-fullheight">
+    <div class="hero-body">
+      <div class="container">
+        <div class="container has-text-centered animate__animated animate__fadeInLeft">
+          <div class="box" style="width: 35%; margin: auto">
+            <div class="notification is-success" v-if="newAccount">Your account has been successfully created.</div>
+            <!--<div class="notification is-info has-text-left">
+              Are you one of our doctors? Click
+              <a href="/doctor/login">here</a>.
+            </div> -->
+            <br />
+            <h1 class="title has-text-info has-text-centered">MEDIC SEARCH</h1>
+            <div class="field">
+              <div class="control">
+                <input class="input is-rounded" type="text" v-model="username" placeholder="username" @keyup.enter="login"
+                  required />
+              </div>
+              <div class="control" style="margin-top: 2%">
+                <input class="input is-rounded" type="password" v-model="password" placeholder="password" @keyup.enter="login"
+                  required />
+              </div>
+              <h1 v-if="incorrectUserPass" class="subtitle has-text-danger">{{ validateMessage }}</h1>
+              <h1 v-else-if="incorrectUserPass == false" class="subtitle has-text-danger">{{ validateMessage }}</h1>
+              <button type="button" class="button is-info is-rounded" @click="login">Login</button>
+              <br />
+              <br />
+              <h1 class="subtitle">OR</h1>
+              <a href="/user/signup">Create an account</a>
+            </div>
+            <ForgotPassword :userType="'patient'" />
           </div>
-          <div class="control" style="margin-top: 2%">
-            <input class="input" type="password" v-model="password" placeholder="password" @keyup.enter="login"
-              required />
-          </div>
-          <h1 v-if="incorrectUserPass" class="subtitle has-text-danger">{{ validateMessage }}</h1>
-          <h1 v-else-if="incorrectUserPass == false" class="subtitle has-text-danger">{{ validateMessage }}</h1>
-          <button type="button" class="button is-primary" @click="login">Login</button>
-          <br />
-          <br />
-          <h1 class="subtitle">OR</h1>
-          <a href="/user/signup">Create an account</a>
         </div>
-        <ForgotPassword :userType="'patient'" />
       </div>
     </div>
   </section>
@@ -34,13 +38,11 @@
 <script>
 import axios from 'axios'
 import store from '../../store'
-import NavigationTabVue from '../../components/NavigationTab.vue'
 import ForgotPassword from '../../components/ForgotPassword.vue'
 
 export default {
   username: "UserLogin",
   components: {
-    NavigationTabVue,
     ForgotPassword
   },
   data() {
@@ -106,8 +108,9 @@ export default {
 }
 </script>
 <style scoped>
-.section {
-  background-color: whitesmoke;
+.hero {
+  background: no-repeat center url('../../assets/images/background-login.png');
+  background-size: cover;
 }
 
 @media (max-width: 991.98px) {
