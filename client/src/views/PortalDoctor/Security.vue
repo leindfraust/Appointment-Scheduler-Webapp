@@ -1,11 +1,11 @@
 <template>
-    <div style="overflow-x: hidden; height: 100vh; background-color: whitesmoke;">
+    <div class="main-doctor">
         <div class="columns">
             <div class="column is-2">
                 <DoctorMenu />
             </div>
-            <div class="column" style="background-color: whitesmoke;">
-                <section class="section" style="background-color: whitesmoke;">
+            <div class="column">
+                <section class="section">
                     <h1 class="title">SECURITY</h1>
                     <div class="container box">
                         <article class="message is-danger" v-if="!verified">

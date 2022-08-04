@@ -1,12 +1,12 @@
 <template>
-  <div style="overflow-x: hidden; height: 100vh; background-color: whitesmoke;">
+  <div class="main-doctor">
     <div class="columns">
       <div class="column is-2">
         <DoctorMenu />
       </div>
-      <div class="column" style="background-color: whitesmoke;">
+      <div class="column">
         <section class="section">
-          <h1 class="title">SETUP SCHEDULES</h1>
+          <h1 class="title">SET SCHEDULES</h1>
           <!--modal date input-->
           <div class="modal" :class="{ 'is-active': isActive }">
             <div class="modal-background"></div>
@@ -225,7 +225,4 @@ export default {
 };
 </script>
 <style scoped>
-.hero {
-  background-color: whitesmoke;
-}
 </style>

@@ -1,11 +1,11 @@
 <template>
-  <div style="overflow-x: hidden; height: 100vh; background-color: whitesmoke;">
+  <div class="main-doctor">
     <div class="columns">
       <div class="column is-2">
         <DoctorMenu />
       </div>
-      <div class="column" style="background-color: whitesmoke;">
-        <section class="section" style="background-color: whitesmoke;">
+      <div class="column">
+        <section class="section">
           <h1 class="title">APPOINTMENTS</h1>
           <div class="field">
             <div class="control">
@@ -83,7 +83,8 @@
                               </div>
                               <button class="is-hidden" type="submit" value="submit">Submit</button>
                             </div>
-                            <button class="button is-success" @click="confirmVisitation()">Submit</button>
+                            <button class="button is-info" :class="{ 'is-loading': confirmLoadingButton }"
+                              @click="confirmVisitation()">Submit</button>
                           </div>
                         </div>
                         <button class="modal-close is-large" aria-label="close" @click="cancelModalConfirm"></button>
@@ -159,7 +160,8 @@ export default {
       searchBar: "",
       schedule: null,
       appointmentSched: [],
-      file: null
+      file: null,
+      confirmLoadingButton: false
     };
   },
   computed: {
@@ -174,7 +176,7 @@ export default {
             );
           }).sort((a, b) => {
             return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
-          }).filter(x => { return new Date(x.schedule[0].date).getTime() >= new Date().getTime() && new Date(x.schedule[0].date).getMonth() >= new Date().getMonth() && x.ifPatientVisited == false })
+          }).filter(x => { return new Date(x.schedule[0].date).toLocaleDateString() >= new Date().toLocaleDateString() && x.ifPatientVisited == false })
           ,
           "schedule[0].date"
         );
@@ -187,24 +189,27 @@ export default {
     await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID }).then(response => this.appointmentSched = response.data);
   },
   methods: {
-    //need to fix
     async confirmVisitation() {
+      this.confirmLoadingButton = true
       this.generateRefID()
 
       let titleMsg = 'Appointment visitation confirmed'
       let noticeMsg = `Your appointment visitation has been confirmed by your doctor Ms/Mr. ${this.doctorName}, reference ID: ${this.refIDPatient}, a digital prescription will be displayed below if your doctor has uploaded one. We hope you well!`
-      socket.emit('message', this.refID, titleMsg, noticeMsg, "Med Search", new Date())
+      socket.emit('message', this.file ? this.refID : null, titleMsg, noticeMsg, "Med Search", new Date())
 
-      const formData = new FormData()
-      formData.append('id', this.refID)
-      formData.append('imgFile', this.file)
+      if (this.file) {
+        const formData = new FormData()
+        formData.append('id', this.refID)
+        formData.append('imgFile', this.file)
 
-      try {
-        await axios.post("/api/imgUploadImgMsg", formData, {
+        await axios.post("/api/imgUploadVisitation", formData, {
           headers: {
             "Content-Type": "multipart/form-data"
           }
-        });
+        }).catch(err => console.log(err));
+      }
+
+      try {
         await axios.put(`/api/appointmentList/${this.id}`, {
           firstName: this.firstName,
           lastName: this.lastName,
@@ -212,10 +217,14 @@ export default {
           birthDay: this.birthDay,
           ifPatientVisited: true
         });
+        await axios.put(`/api/doctor/${store.state.doctorID}`, {
+          visits: this.appointmentSched.filter(x => x.ifPatientVisited == true).length + 1
+        });
         await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID }).then(response => this.appointmentSched = response.data);
       } catch (err) {
         console.log(err)
       }
+      this.confirmLoadingButton = false
       this.isActiveModalConfirm = false
     },
     async cancelAppointment() {
@@ -311,5 +320,14 @@ th {
   #titleBox {
     width: 100% !important;
   }
+}
+</style>
+<style>
+.main-doctor::-webkit-scrollbar {
+  display: none
+}
+
+.main-doctor {
+  background: linear-gradient(180deg, #DAE6FE 0%, #FFFFFF 43.56%);
 }
 </style>
