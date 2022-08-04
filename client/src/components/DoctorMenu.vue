@@ -4,32 +4,24 @@
             <a class="navbar-item">
                 <label class="label">{{ alias }}</label>
             </a>
-            <a
-                role="button"
-                class="navbar-burger"
-                :class="{ 'is-active': !isActive }"
-                aria-label="menu"
-                aria-expanded="false"
-                data-target="navbar"
-                @click="menuNav"
-            >
+            <a role="button" class="navbar-burger" :class="{ 'is-active': !isActive }" aria-label="menu"
+                aria-expanded="false" data-target="navbar" @click="menuNav">
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
             </a>
         </div>
     </nav>
-    <aside
-        class="menu"
-        :class="{ 'is-hidden-mobile': isActive, 'fixedMenu': isActive }"
-        style="background-color: white; padding: 20px; box-shadow: 5px 10px rgba(240, 240, 240, 0.966);"
-    >
+    <aside class="menu box" :class="{ 'is-hidden-mobile': isActive, 'fixedMenu': isActive }"
+        style="background-color: #D8E5FF; padding: 20px;">
         <div class="has-text-centered block" style="padding: 5px;">
-            <figure class="is-hidden-mobile is-hidden-touch image is-square" style="margin: auto; ">
-                <span v-html="profileImg"></span>
+            <figure class="is-hidden-mobile is-hidden-touch image image-outer is-square" style="margin: auto; ">
+                <img class="is-rounded image-inner"
+                    :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${alias}.jpg`">
             </figure>
             <figure class="is-hidden-desktop image is-128x128" style="margin: auto; ">
-                <span v-html="profileImg"></span>
+                <img class="is-rounded"
+                    :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${alias}.jpg`">
             </figure>
             <h5 class="title is-5" v-if="isActive">{{ alias }}</h5>
         </div>
@@ -59,8 +51,9 @@
                 <a @click="this.$router.push('/contactus')">Contact Us</a>
             </li>
         </ul>
-        <hr />
-        <button @click="logout" class="button is-danger" type="button">Logout</button>
+        <div class="block has-text-centered">
+            <button @click="logout" class="button is-link is-rounded" type="button">Logout</button>
+        </div>
     </aside>
 </template>
 <script>
@@ -71,7 +64,6 @@ export default {
     data() {
         return {
             alias: store.state.alias,
-            profileImg: store.state.profileImg,
             isActive: true
         }
     },
@@ -106,5 +98,15 @@ export default {
 .fixedMenu {
     position: fixed;
     height: 100vh;
+}
+</style>
+<style>
+.image-outer {
+    background: center center no-repeat url('../assets/images/background-figure-style.png');
+    background-size: contain;
+}
+
+.image-inner {
+    padding: 15px
 }
 </style>

@@ -2,7 +2,7 @@
     <nav class="navbar" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
             <a class="navbar-item" href="/">
-                <img src="https://bulma.io/images/bulma-logo.png" width="112" />
+                <img src="../assets/images/logos/medi-search-horizontal.png" />
             </a>
 
             <a role="button" class="navbar-burger" :class="{ 'is-active': isActive }" aria-label="menu"
@@ -14,7 +14,7 @@
         </div>
 
         <div id="navbar" class="navbar-menu" :class="{ 'is-active': isActive }">
-            <div class="navbar-start">
+            <div class="navbar-start is-hidden-desktop">
                 <a class="navbar-item">About</a>
                 <a class="navbar-item" @click="this.$router.push('/contactus')">Contact Us</a>
             </div>
@@ -45,11 +45,15 @@
                         <div class="navbar-item">No new notifications.</div>
                     </div>
                 </div>
-                <div class="navbar-item has-dropdown" :class="{ 'is-active': isActiveMenuDropdown }"
-                    @click="isActiveMenuDropdown = !isActiveMenuDropdown">
-                    <a class="navbar-link"><img :src="imgPreUrl + patient + svgExtUrl" />
-                        {{ patient }}</a>
-                    <div class="navbar-dropdown">
+                <div class="navbar-item has-dropdown" :class="{ 'is-active': isActiveProfileDropdown }"
+                    @click="isActiveProfileDropdown = !isActiveProfileDropdown">
+                    <a class="navbar-item">
+                        <figure class="image">
+                            <img class="is-rounded"
+                                :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/patients/${$store.state.patientUsername}.jpg`">
+                        </figure>
+                    </a>
+                    <div class="navbar-dropdown is-right">
                         <router-link :to="`/user/${patient}/profile`" class="navbar-item">Profile</router-link>
                         <router-link :to="`/user/${patient}/security`" class="navbar-item">Security</router-link>
                         <hr class="navbar-divider">
@@ -57,16 +61,32 @@
                             <strong>Logout</strong>
                         </a>
                     </div>
-
+                </div>
+                <div class="navbar-item has-dropdown is-hidden-mobile" :class="{ 'is-active': isActiveMenuDropdown }">
+                    <a class="navbar-item" @click="isActiveMenuDropdown = !isActiveMenuDropdown"><i
+                            class="fa-solid fa-bars"></i></a>
+                    <div class="navbar-dropdown is-right">
+                        <a class="navbar-item">About</a>
+                        <a class="navbar-item" @click="this.$router.push('/contactus')">Contact Us</a>
+                    </div>
                 </div>
             </div>
             <div class="navbar-end" v-else>
                 <div class="navbar-item">
                     <div class="buttons">
-                        <router-link :to="'/user/login'" class="button is-light">Log in</router-link>
-                        <router-link :to="'/user/signup'" class="button is-primary">
+                        <router-link :to="'/user/login'" class="button is-dark is-inverted"
+                            style="background-color: transparent">Log in</router-link>
+                        <router-link :to="'/user/signup'" class="button is-info">
                             <strong>Sign up</strong>
                         </router-link>
+                    </div>
+                </div>
+                <div class="navbar-item has-dropdown is-hidden-mobile" :class="{ 'is-active': isActiveMenuDropdown }">
+                    <a class="navbar-item" @click="isActiveMenuDropdown = !isActiveMenuDropdown"><i
+                            class="fa-solid fa-bars"></i></a>
+                    <div class="navbar-dropdown is-right">
+                        <a class="navbar-item">About</a>
+                        <a class="navbar-item" @click="this.$router.push('/contactus')">Contact Us</a>
                     </div>
                 </div>
             </div>
@@ -121,13 +141,14 @@ export default {
         return {
             isActiveNotifications: false,
             isActiveModal: false,
+            isActiveProfileDropdown: false,
             isActiveMenuDropdown: false,
             isActive: false,
             patient: this.$store.state.patientUsername,
             imgPreUrl: "https://avatars.dicebear.com/api/micah/",
             svgExtUrl: ".svg",
             notifications: [],
-            viewNotif: []
+            viewNotif: [],
         }
     },
     methods: {
