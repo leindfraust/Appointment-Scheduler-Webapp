@@ -5,7 +5,7 @@ const getAppointments = (async (req, res) => {
         const appointmentList = await AppointmentList.find()
         if (!appointmentList) throw new Error('no items')
         res.status(200).send(appointmentList)
-    } catch (error) {
+    } catch (err) {
         res.status(500).send(err)
     }
 });
@@ -15,7 +15,7 @@ const getAppointmentsforDoctor = (async (req,res) => {
         const appointmentList = await AppointmentList.find({doctorID: req.body.id})
         if (!appointmentList) throw new Error('no items')
         res.status(200).send(appointmentList)
-    } catch (error) {
+    } catch (err) {
         res.status(500).send(err)
     }
 });
@@ -25,7 +25,7 @@ const getAppointmentsforPatient = (async (req,res) => {
         const appointmentList = await AppointmentList.find({patientID: req.body.id})
         if (!appointmentList) throw new Error('no items')
         res.status(200).send(appointmentList)
-    } catch (error) {
+    } catch (err) {
         res.status(500).send(err)
     }
 });
