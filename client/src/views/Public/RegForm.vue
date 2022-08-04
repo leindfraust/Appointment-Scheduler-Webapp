@@ -1,105 +1,100 @@
 <template>
   <NavigationTab />
-  <section class="section" style="background-color: whitesmoke;">
+  <section class="section">
     <div class="modal" :class="{ 'is-active': isLoading }">
       <div class="modal-background"></div>
       <div class="modal-content" style="overflow: hidden">
         <div class="loader" style="margin: auto;"></div>
       </div>
     </div>
-    <div class="notification is-danger" v-if="errMsg">Something went wrong, please try again later or <a
-        href="/contactus">Contact us</a></div>
-    <div class="container">
-      <div class="tabs is-centered">
-        <ul>
-          <li :class="{ 'is-active': isActiveTabOne }">
-            <a style="pointer-events: none;">Basic Details</a>
-          </li>
-          <li :class="{ 'is-active': isActiveTabTwo }">
-            <a style="pointer-events: none;">Schedules</a>
-          </li>
-        </ul>
-      </div>
-      <section class="section animate__animated animate__fadeInLeft"
-        style="width: 40%; margin: auto; background-color: white; border-radius: 5px; box-shadow: 5px 10px rgb(221, 221, 221);">
-        <form class="field">
-          <div v-if="!basicDetailsDone">
-            <div class="has-text-danger">All fields are required.*</div>
-            <label class="label">First name</label>
+    <!-- New -->
+    <div class="columns" style="width: 75%; margin: auto">
+      <div class="column">
+        <form>
+          <div class="block">To book your appointment, we have to verify a few details.</div>
+          <div class="field is-horizontal">
+            <div class="field-body">
+              <div class="field">
+                <label class="label">First name</label>
+                <div class="control">
+                  <input class="input" type="text" :value="firstName" placeholder="First Name" required />
+                </div>
+              </div>
+              <div class="field">
+                <label class="label">Last Name</label>
+                <div class="control">
+                  <input class="input" type="text" v-model="lastName" placeholder="Last Name" required />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field is-horizontal">
+            <div class="field-body">
+              <div class="field">
+                <label class="label">Contact Number:</label>
+                <div class="control">
+                  <input class="input" type="number" v-model="contactNum" placeholder="Contact Number" required />
+                </div>
+              </div>
+              <div class="field">
+                <label class="label">Birthday</label>
+                <div class="control">
+                  <v-date-picker class="block" v-model="birthDay">
+                    <template v-slot="{ inputValue, togglePopover }">
+                      <div class="is-block">
+                        <a style="margin: auto" @click="togglePopover()">
+                          <input style="cursor: pointer;" :value="inputValue" class="input" readonly />
+                        </a>
+                      </div>
+                    </template>
+                  </v-date-picker>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field">
             <div class="control">
-              <input class="input" type="text" :value="firstName" placeholder="First Name" required />
-            </div>
-            <label class="label">Last Name</label>
-            <div class="control">
-              <input class="input" type="text" v-model="lastName" placeholder="Last Name" required />
-            </div>
-            <label class="label">Contact Number:</label>
-            <div class="block control">
-              <input class="input" type="number" v-model="contactNum" placeholder="Contact Number" required />
-            </div>
-            <label class="label">What are you feeling?</label>
-            <textarea class="textarea" v-model="comments" placeholder="Your symptoms, general well being etc..."
-              required></textarea>
-            <label class="label">Birthday</label>
-            <div class="control">
-              <v-date-picker class="block" v-model="birthDay">
-                <template v-slot="{ inputValue, togglePopover }">
-                  <div class="is-block">
-                    <a style="margin: auto" @click="togglePopover()">
-                      <input style="cursor: pointer;" :value="inputValue" class="input" readonly />
-                    </a>
-                  </div>
-                </template>
-              </v-date-picker>
-            </div>
-            <div class="block control">
               <label class="label">Current Address</label>
               <input class="input" type="text" :value="currentAddress" />
             </div>
-            <br />
-            <div class="block has-text-centered">
-              <button type="button" class="button is-success"
-                :disabled="firstName == '' || lastName == '' || birthDay == null || contactNum == '' || comments == '' || currentAddress == ''"
-                @click="proceedSched">Proceed</button>
+          </div>
+          <div class="field">
+            <label class="label">Reason for your visit:</label>
+            <textarea class="textarea" v-model="comments" placeholder="Your symptoms, general well being etc..."
+              required></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="column" style="position: relative;">
+        <form class="field">
+          <h1 class="subtitle is-5 has-text-black has-text-weight-bold">Pick your preferred schedule: </h1>
+          <div
+            v-for="(schedules, index) in doctorSched.filter(x => new Date(x.date).getTime() > new Date().getTime() && x.hospital === hospital).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())"
+            :key="schedules.id" style="width: 75%; margin:auto">
+            <div class="block"></div>
+            <div class="controls">
+              <label class="radio">
+                <input type="radio" class="radioSched" name="schedule"
+                  @click="pickSched(index, schedules, schedules.prefix)" />
+                <span class="subtitle is-6 has-text-weight-semibold">&nbsp;{{ new Date(schedules.date).toDateString() }}</span>
+                <br />
+                <span class="has-text-black">{{ schedules.timeStart }} - {{ schedules.timeEnd }}</span>
+              </label>
+              <a style="pointer-events: none;" class="button statusSched">
+                <span v-if="schedAvailability" class="has-text-success">Available</span>
+                <span v-else class="has-text-danger">Unavailable</span>
+              </a>
             </div>
           </div>
         </form>
-        <br />
-        <div v-if="basicDetailsDone">
-          <form class="field">
-            <h1 class="subtitle has-text-black has-text-weight-bold">Pick your preferred schedule: </h1>
-            <div
-              v-for="(schedules, index) in doctorSched.filter(x => new Date(x.date).getTime() > new Date().getTime() && x.hospital === hospital).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())"
-              :key="schedules.id" style="width: 75%; margin:auto">
-              <hr />
-              <div class="controls">
-                <label class="radio">
-                  <input type="radio" class="radioSched" name="schedule"
-                    @click="pickSched(index, schedules, schedules.prefix)" />
-                  <span class="subtitle has-text-black">{{ new Date(schedules.date).toDateString() }}</span>
-                  <br />
-                  <span class="has-text-black">{{ schedules.timeStart }} - {{ schedules.timeEnd }}</span>
-                </label>
-                <a style="pointer-events: none;" class="button statusSched">
-                  <span v-if="schedAvailability" class="has-text-success">Available</span>
-                  <span v-else class="has-text-danger">Unavailable</span>
-                </a>
-              </div>
-              <br />
-            </div>
-            <br />
-            <br />
-            <div class="block has-text-centered">
-              <span>
-                <button class="button is-danger" type="button" style="margin-right: 5%" @click="goBack">Go Back</button>
-                <button type="button" class="button is-primary" :disabled="schedule == null" @click="appoint">Submit
-                  appointment</button>
-              </span>
-            </div>
-          </form>
+        <div class="block has-text-centered">
+          <button type="button" class="button is-info" :disabled="comments == null || schedule == null || firstName == '' || lastName == '' || birthDay == null || contactNum == '' || comments == '' || currentAddress == ''"
+            @click="appoint">Submit
+            appointment</button>
         </div>
-      </section>
+      </div>
     </div>
+    <!-- New -->
   </section>
 </template>
 
@@ -129,9 +124,6 @@ export default {
       patientsAppointed: null,
       doctorDetails: store.state.doctorDetails,
       pickedSpecialization: store.state.pickedSpecialization,
-      basicDetailsDone: false,
-      isActiveTabOne: true,
-      isActiveTabTwo: false,
       isLoading: false,
       schedAvailability: false,
       radioIndex: null,
@@ -203,6 +195,9 @@ export default {
               schedule: this.schedule,
               priorityNum: this.prefix + "-" + this.priorityNum,
             });
+            await axios.put(`/api/manager/${store.state.hospitalDetails._id}`, {
+              ratings: store.state.hospitalDetails.ratings + 5
+            });
             let patientDetails = {
               referenceID: this.refID,
               hospital: this.hospital,
@@ -239,6 +234,9 @@ export default {
               schedule: this.schedule,
               priorityNum: this.prefix + "-" + this.priorityNum,
             });
+            await axios.put(`/api/manager/${store.state.hospitalDetails._id}`, {
+              ratings: store.state.hospitalDetails.ratings + 5
+            });
             let patientDetails = {
               referenceID: this.refID,
               hospital: this.hospital,
@@ -269,16 +267,6 @@ export default {
         radio[this.radioIndex].disabled = true
         statusSched[this.radioIndex].style.display = 'block'
       }
-    },
-    proceedSched() {
-      this.isActiveTabOne = false
-      this.isActiveTabTwo = true
-      this.basicDetailsDone = true
-    },
-    goBack() {
-      this.isActiveTabOne = true
-      this.isActiveTabTwo = false
-      this.basicDetailsDone = false
     },
     async pickSched(e, sched, prefix) {
       this.radioIndex = e

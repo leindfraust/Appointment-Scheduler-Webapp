@@ -1,48 +1,46 @@
 <template>
   <NavigationTab />
+  <div class="block" style="box-shadow: 5px 5px 5px 5px whitesmoke;">&nbsp;</div>
   <div class="modal" :class="{ 'is-active': isDoctorLoading }">
     <div class="modal-background"></div>
     <div class="modal-content" style="overflow: hidden">
       <div class="loader" style="margin: auto;"></div>
     </div>
   </div>
-  <section class="section">
+  <section class="section" v-if="hospitalDetails.length !== 0">
     <div class="columns">
-      <div class="column">
-        <div class="container box" v-if="hospitalDetails">
+      <div class="column" id="hospital-overview" style="border-right: 3px solid whitesmoke;">
+        <div class="container is-fluid">
           <h1 class="title">{{ hospitalDetails.hospital }}</h1>
-          <p class="subtitle">📌 {{ hospitalDetails.barangayORStreet }}, {{ hospitalDetails.city }}, {{
+          <p class="subtitle">{{ hospitalDetails.barangayORStreet }}, {{ hospitalDetails.city }}, {{
               hospitalDetails.province
           }}</p>
           <p class="subtitle is-6">{{ hospitalDetails.details[0].description }}</p>
-          <figure class="image is-16by9">
-            <img
-              :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/managers/${hospitalDetails.hospital}.jpg`" />
-          </figure>
-          <br />
-          <div class="columns">
-            <div class="column">
-              <iframe
-                :src="`https://maps.google.com/maps?q=${hospitalDetails.location.coordinates[1]},${hospitalDetails.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"></iframe>
-            </div>
-            <div class="column">
-              <p class="subtitle">Contacts:</p>
-              <ul class="block" v-if="typeof hospitalDetails.details[0].contacts !== 'undefined'">
-                <li v-for="contacts in hospitalDetails.details[0].contacts" :key="contacts.contact">{{ contacts.contact
-                }}</li>
-              </ul>
-            </div>
+          <div class="content">
+            <b>Type of Facility:</b> {{ hospitalDetails.type }}
+            <span v-if="typeof hospitalDetails.details[0].contacts !== 'undefined'">
+              <p class="subtitle is-6"><b>Contacts:</b> <span
+                  v-for="(contacts, index) in hospitalDetails.details[0].contacts" :key="index">
+                  {{ contacts.contact + ' ' }}</span></p>
+            </span>
           </div>
+          <br />
+          <figure class="image is-16by9">
+            <iframe class="has-ratio"
+              :src="`https://maps.google.com/maps?q=${hospitalDetails.location.coordinates[1]},${hospitalDetails.location.coordinates[0]}&hl=es;z=14&amp;output=embed`"></iframe>
+          </figure>
         </div>
       </div>
       <div class="column">
-        <div class="box container">
+        <div class="container">
           <div class="block">
-            <h1 class="title">Pick a specialist.</h1>
-            <p class="subtitle" v-if="!specializationClicked">
-              Having trouble picking a specialist? Get appointed to a
-              <a class="has-text-link" @click="getDoctors('General Practitioner')">General Practitioner</a>.
-            </p>
+            <div class="block" v-if="!specializationClicked">
+              <h1 class="title">Pick a specialist.</h1>
+              <p class="subtitle">
+                Having trouble picking a specialist? Get appointed to a
+                <a class="has-text-link" @click="getDoctors('General Practitioner')">General Practitioner</a>.
+              </p>
+            </div>
             <div class="columns is-multiline is-mobile" v-if="!specializationClicked">
               <div class="column is-4" v-for="(specialist, index) in specialistList" :key="index">
                 <a @click="getDoctors(specialist.specialist)">
@@ -57,7 +55,8 @@
               </div>
             </div>
             <div class="container" v-else>
-              <button class="button" @click="viewSpecializations">⬅️ Specializations</button>
+              <a class="subtitle has-text-link" @click="viewSpecializations"><i class="fa-solid fa-arrow-left"></i>
+                Back</a>
               <div v-if="doctorList == ''">
                 <br />
                 <p class="subtitle has-text-centered">No doctors are currently available in this specialization.</p>
@@ -71,23 +70,35 @@
                   </div>
                 </div>
               </div>
+              <br />
               <div v-if="specializationClicked">
                 <div v-if="Object.keys(doctorSearch).length !== 0">
-                  <div class="card-content" v-for="doctors in doctorSearch" :key="doctors._id">
-                    <div class="media">
-                      <figure class="media-left">
-                        <p class="image is-64x64">
-                          <img
-                            :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${doctors.alias}.jpg`" />
-                        </p>
+                  <div class="columns" v-for="doctors in doctorSearch" :key="doctors._id">
+                    <div class="column">
+                      <figure class="image is-5by4">
+                        <img
+                          :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${doctors.alias}.jpg`" />
                       </figure>
-                      <div class="media-content">
-                        <p class="title is-4">{{ doctors.name }}</p>
-                        <p class="subtitle is-6">{{ pickedSpecialist }}</p>
-                        <button class="button" @click="pickDoctor(doctors, pickedSpecialist)">Appoint</button>
+                    </div>
+                    <div class="column is-5">
+                      <div class="content">
+                        <h1 class="title is-5">{{ doctors.name }}</h1>
+                        <h3 class="subtitle is-6"><span class="has-text-weight-semibold">{{ pickedSpecialist
+                        }}</span><br />
+                          <span class="subtitle is-6 has-text-info">({{ doctors.visits == null ? '0 visits' :
+                              `${doctors.visits} visits`
+                          }})</span>
+                        </h3>
+                      </div>
+                    </div>
+                    <div class="column" style="margin-top: auto;">
+                      <div class="has-text-right">
+                        <button class="button is-info is-rounded" @click="pickDoctor(doctors, pickedSpecialist)">Book an
+                          Appointment</button>
                       </div>
                     </div>
                   </div>
+                  <hr>
                 </div>
                 <div v-else>
                   <div v-if="doctorList != ''" class="notification is-info">No such doctor is available right now.</div>
@@ -113,10 +124,10 @@ export default {
   },
   data() {
     return {
-      hospitalDetails: this.$store.state.hospitalDetails,
+      hospitalDetails: [],
       patientDetails: null,
       doctorList: null,
-      specialistList: this.$store.state.hospitalDetails.specializations.sort(),
+      specialistList: [],
       pickedSpecialist: null,
       specializationClicked: false,
       doctorSearchBar: '',
@@ -127,6 +138,13 @@ export default {
     await axios
       .get("/session/patient")
       .then(response => this.patientDetails = response.data);
+    await axios.post(`/api/manager/${this.$route.params.hospital}`).then(response => {
+      this.hospitalDetails = response.data
+      this.specialistList = response.data.specializations.sort()
+    });
+    if (this.$route.params.id !== this.patientDetails.username) {
+      await this.$router.push(`/user/${this.$store.state.patientUsername}/${this.hospitalDetails._id}/doctors`);
+    }
   },
   computed: {
     doctorSearch() {
@@ -146,7 +164,7 @@ export default {
       await axios.post("/api/checkDoctorAvailability", {
         hospital: this.hospitalDetails.hospital,
         specialist: specialization
-      }).then(response => response ? this.doctorList = response.data.filter(x => x.schedule.find(x => new Date(x.date).getTime() > new Date().getTime() && x.hospital === this.hospitalDetails.hospital)) : this.doctorList = '').catch(err => console.log(err))
+      }).then(response => response ? this.doctorList = response.data.filter(x => x.schedule.find(x => new Date(x.date) > new Date() && x.hospital === this.hospitalDetails.hospital)) : this.doctorList = '').catch(err => console.log(err))
       this.isDoctorLoading = false
     },
     viewSpecializations() {
@@ -164,6 +182,10 @@ export default {
 </script>
 
 <style scoped>
+.section {
+  background-color: white;
+}
+
 .centered {
   position: absolute;
   top: 50%;
@@ -217,8 +239,8 @@ export default {
     width: 100% !important;
   }
 
-  #hospital {
-    margin-bottom: 15% !important;
+  #hospital-overview {
+    padding: 0px !important;
   }
 }
 </style>

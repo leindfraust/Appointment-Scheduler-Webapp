@@ -1,5 +1,6 @@
 <template>
-  <section class="section" style="background-color: whitesmoke;">
+  <section class="section">
+    <router-link :to="'/doctor/login'"><i class="fa-solid fa-arrow-left"></i> Back to Login</router-link>
     <div class="container box animate__animated animate__fadeInLeft" style="margin: auto; width: 50%">
       <!-- I know it sucks, having a form action for only image upload while separating a post with axios for the document, but shit works so I guess it's okay.-->
       <div class="notification is-danger" v-if="errMsg">
@@ -89,8 +90,19 @@
             </div>
             <div class="field">
               <label class="label">Gmail</label>
+              <div v-if="emailFound !== ''">
+                <p class="help is-danger" v-if="emailFound">
+                  Unavailable
+                  <i class="fas fa-spinner fa-spin" v-if="loadingEmail"></i>
+                </p>
+                <p class="help is-success" v-else>
+                  Available
+                  <i class="fas fa-spinner fa-spin" v-if="loadingEmail"></i>
+                </p>
+              </div>
               <div class="control">
-                <input class="input" type="email" v-model="gmail" placeholder="gmail" required />
+                <input class="input" type="email" v-model="gmail" @input="emailFindTimeout" placeholder="gmail"
+                  required />
               </div>
             </div>
           </div>
@@ -142,7 +154,7 @@
           </div>
         </div>
         <div class="has-text-right">
-          <button type="submit" value="Submit" class="button is-primary" @click="create($event)"
+          <button type="submit" value="Submit" class="button is-info" @click="create($event)"
             :disabled="specializationsSelected == ''">Create account</button>
         </div>
       </form>
@@ -174,16 +186,19 @@ export default {
       aliasFound: '',
       usernameFound: '',
       registrationCodeFound: '',
+      emailFound: '',
       loadingUsername: false,
       loadingAlias: false,
       loadingRegistrationCode: false,
+      loadingEmail: false,
       specializationsSelected: [],
       specializationList: this.$store.getters.getSpecializationList,
       searchBarSpecialization: '',
       errMsg: '',
       searchTimeoutUsername: null,
       searchTimeoutAlias: null,
-      searchTimeoutRegistrationCode: null
+      searchTimeoutRegistrationCode: null,
+      searchTimeoutEmail: null
     };
   },
   methods: {
@@ -193,6 +208,13 @@ export default {
         this.searchTimeoutRegistrationCode = null
       }
       this.searchTimeoutRegistrationCode = setTimeout(this.registrationCodeFinder, 500)
+    },
+    async emailFindTimeout() {
+      if (this.searchTimeoutEmail) {
+        clearTimeout(this.searchTimeoutEmail)
+        this.searchTimeoutEmail = null
+      }
+      this.searchTimeoutEmail = setTimeout(this.emailFinder, 500)
     },
     async usernameFindTimeout() {
       if (this.searchTimeoutUsername) {
@@ -214,11 +236,23 @@ export default {
         registrationCode: this.registrationCode
       }).then(response => {
         this.registrationCodeFound = response.data
-      })
+      });
       if (this.registrationCode == '') {
         this.registrationCodeFound = ''
       }
       this.loadingRegistrationCode = false
+    },
+    async emailFinder() {
+      this.loadingEmail = true
+      await axios.post('/api/doctor/check_email', {
+        email: this.gmail
+      }).then(response => {
+        this.emailFound = response.data
+      })
+      if (this.gmail == '') {
+        this.emailFound = ''
+      }
+      this.loadingEmail = false
     },
     async usernameFinder() {
       this.loadingUsername = true
@@ -287,7 +321,8 @@ export default {
       if (this.password === this.passwordRepeat &&
         !this.aliasFound &&
         !this.usernameFound &&
-        this.registrationCodeFound
+        !this.emailFound &&
+        this.registrationCodeFound // only passes when a registration code is found
       ) {
         await axios.post("/api/doctor", {
           alias: this.alias,
@@ -297,6 +332,7 @@ export default {
           specialist: this.specializationsSelected,
           username: this.username,
           password: this.password,
+          hospitalOrigin: [this.registrationCodeFound]
         }).catch(err => this.errMsg = err);
         await this.$store.commit("imgSuccess", true)
       }
@@ -318,5 +354,10 @@ export default {
   .container {
     width: 100% !important;
   }
+}
+
+.section {
+  background: center center no-repeat url('../../assets/images/background-client-signup.png');
+  background-size: cover
 }
 </style>

@@ -6,7 +6,6 @@
         Oops, something went wrong. Try again later or
         <router-link :to="'/contactus'">contact us</router-link>
       </div>
-      <h1 class="title has-text-primary">You're almost there...</h1>
       <div class="box">
         <div class="field is-horizontal">
           <div class="field-body">
@@ -53,17 +52,24 @@
           <br />
           <div class="field-body">
             <div class="field">
-              <p class="control">
+              <div class="control">
                 <label class="label">Contact Number:</label>
                 <input class="input" type="number" placeholder="contact number" v-model="contactNum" required />
-              </p>
+              </div>
             </div>
 
             <div class="field">
-              <p class="control">
+              <div class="control">
                 <label class="label">Gmail(Optional):</label>
-                <input class="input" type="email" placeholder="gmail" v-model="gmail" required />
-              </p>
+                <div v-if="emailFound !== ''">
+                  <p class="help is-danger" v-if="emailFound">Unavailable<i class="fas fa-spinner fa-spin"
+                      v-if="loadingEmail"></i></p>
+                  <p class="help is-success" v-else>Available<i class="fas fa-spinner fa-spin" v-if="loadingEmail"></i>
+                  </p>
+                </div>
+                <input class="input" type="email" placeholder="gmail" v-model="gmail" @input="emailFindTimeout"
+                  required />
+              </div>
             </div>
           </div>
         </div>
@@ -188,6 +194,8 @@ export default {
       errMsg: '',
       usernameFound: '',
       loadingUsername: false,
+      emailFound: '',
+      loadingEmail: false,
       searchTimeout: null
     }
   },
@@ -211,6 +219,23 @@ export default {
         this.usernameFound = ''
       }
       this.loadingUsername = false
+    },
+    async emailFindTimeout() {
+      if (this.searchTimeout) {
+        clearTimeout(this.searchTimeout)
+        this.searchTimeout = null
+      }
+      this.searchTimeout = setTimeout(this.emailFinder, 500)
+    },
+    async emailFinder() {
+      this.loadingEmail = true
+      await axios.post('/api/user/check_email', {
+        email: this.gmail
+      }).then(response => { this.emailFound = response.data })
+      if (await this.gmail == '') {
+        this.emailFound = ''
+      }
+      this.loadingEmail = false
     },
     agreeTermsAndConditions() {
       this.termsAndConditionsAgreed = true
@@ -245,7 +270,7 @@ export default {
         this.passwordMatch = null;
       }
       if (this.password === this.passwordRepeat &&
-        !this.usernameFound
+        !this.usernameFound && !this.emailFound
       ) {
         try {
           await axios.post("/api/user", {
@@ -272,7 +297,8 @@ export default {
 </script>
 <style scoped>
 .section {
-  background-color: whitesmoke;
+  background: center center no-repeat url('../../assets/images/background-client-signup.png');
+  background-size: cover
 }
 
 .dropdown-menu {

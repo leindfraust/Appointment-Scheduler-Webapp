@@ -86,8 +86,36 @@ const imgUploadImgMsg = ((req, res, next) => {
     });
 });
 
+//for uploading digital prescription when confirming visitation
+const imgUploadVisitation = ((req, res, next) => {
+
+    const form = formidable({
+        multiples: true
+    })
+    form.parse(req, (err, fields, files) => {
+        if (err) {
+            next(err);
+            return;
+        }
+        cloudinary.v2.uploader.upload(files.imgFile.filepath, {
+            public_id: fields.id,
+            folder: "assets/patientimgmsg/patientCopy/",
+            overwrite: true,
+            invalidate: true,
+            format: "jpg"
+        }, function (error, result) {
+            if (error) {
+                console.log(error)
+            } else {
+                console.log(result)
+                res.status(200).end()
+            }
+        });
+    });
+});
+
 //delete an image of the patient
-const imgUploadImgMsgDeletePatient = ((req, res, next) => {
+const imgUploadImgMsgDeletePatient = ((req, res) => {
 
     cloudinary.v2.api.delete_resources([req.body.id], {
         invalidate: true
@@ -103,7 +131,7 @@ const imgUploadImgMsgDeletePatient = ((req, res, next) => {
 });
 
 //delete an image of the doctor
-const imgUploadImgMsgDeleteDoctor = ((req, res, next) => {
+const imgUploadImgMsgDeleteDoctor = ((req, res) => {
 
     cloudinary.v2.api.delete_resources([req.body.doctorID + req.body.id], {
         invalidate: true
@@ -119,7 +147,7 @@ const imgUploadImgMsgDeleteDoctor = ((req, res, next) => {
 });
 
 //clear images in a folder due to clearing of messages
-const imgUploadImgMsgClearDoctor = ((req, res, next) => {
+const imgUploadImgMsgClearDoctor = ((req, res) => {
 
     cloudinary.v2.api.delete_resources_by_tag(req.body.doctorID, {
         invalidate: true
@@ -132,6 +160,32 @@ const imgUploadImgMsgClearDoctor = ((req, res, next) => {
             res.status(200).end()
         }
     })
+});
+
+//patient profile image upload
+const imgUploadPatient = ((req, res, next) => {
+
+    const form = formidable({
+        multiples: true
+    })
+    form.parse(req, (err, fields, files) => {
+        if (err) {
+            next(err);
+            return;
+        }
+        cloudinary.v2.uploader.upload(files.imgFile.filepath, {
+            public_id: fields.username,
+            folder: "assets/patients/",
+            overwrite: true,
+            invalidate: true,
+            format: "jpg"
+        }, function (error, result) {
+            console.log(result, error);
+        });
+    });
+    setTimeout(() => {
+        res.status(200).send(true)
+    }, 5000)
 });
 
 //doctor signup image upload
@@ -189,9 +243,11 @@ const imgUploadManager = ((req, res, next) => {
 module.exports = {
     imgUpload,
     imgUploadImgMsg,
+    imgUploadVisitation,
     imgUploadImgMsgDeleteDoctor,
     imgUploadImgMsgDeletePatient,
     imgUploadImgMsgClearDoctor,
+    imgUploadPatient,
     imgUploadDoctor,
     imgUploadManager,
 }

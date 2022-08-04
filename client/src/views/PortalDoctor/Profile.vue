@@ -1,11 +1,11 @@
 <template>
-  <div style="overflow-x: hidden; height: 100vh; background-color: whitesmoke;">
+  <div class="main-doctor">
     <div class="columns">
       <div class="column is-2">
         <DoctorMenu />
       </div>
-      <div class="column" style="background-color: whitesmoke;">
-        <section class="section" style="background-color: whitesmoke;">
+      <div class="column">
+        <section class="section">
           <h1 class="title">PROFILE</h1>
           <div class="container box is-fluid">
             <article class="message is-danger" v-if="!verified">
@@ -28,27 +28,30 @@
                 <b>Security</b> tab.
               </div>
             </article>
-            <div class="columns is-gapless">
-              <div class="column is-6">
-                <span id="profile-img" v-html="profileImg"></span>
+            <div class="columns">
+              <div class="column is-4">
+                <figure class="image image-outer is-square">
+                  <img class="is-rounded image-inner"
+                    :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${alias}.jpg`">
+                </figure>
                 <form id="formUpload" action="/api/imgUpload" method="post" enctype="multipart/form-data"
                   style="margin: auto; width: 50%" class="field">
                   <div class="control">
                     <input type="hidden" name="alias" :value="(alias)" />
-                    <input class="input" type="file" name="imgFile" @click="imgSuccess" required />
+                    <input class="input" type="file" name="imgFile" @change="imgSuccess" required />
                     <div class="has-text-centered">
-                      <button type="submit" value="Upload" class="button is-primary">Change profile picture</button>
+                      <button type="submit" value="Upload" class="button is-primary" v-if="fileReady">Change profile
+                        picture</button>
                     </div>
                   </div>
                 </form>
               </div>
-              <br />
               <div class="column">
                 <div class="field">
+                  <label class="label">
+                    <b>License No.</b>
+                  </label>
                   <div class="control">
-                    <label class="label">
-                      <b>License No.</b>
-                    </label>
                     <input class="input" type="text" v-model="licenseNo" style="width: 33%"
                       :disabled="verified == true" />
                   </div>
@@ -56,18 +59,18 @@
                 <div class="field is-horizontal">
                   <div class="field-body">
                     <div class="field">
+                      <label class="label">
+                        <b>Full Name:</b>
+                      </label>
                       <div class="control">
-                        <label class="label">
-                          <b>Full Name:</b>
-                        </label>
                         <input class="input" size="5" type="text" v-model="fullname" :disabled="verified == true" />
                       </div>
                     </div>
                     <div class="field">
+                      <label class="label">
+                        <b>Gmail:</b>
+                      </label>
                       <div class="control">
-                        <label class="label">
-                          <b>Gmail:</b>
-                        </label>
                         <input class="input" size="5" type="text" v-model="gmail" :disabled="verified == true" />
                       </div>
                     </div>
@@ -81,33 +84,24 @@
                   </div>
                 </div>
                 <div class="field">
+                  <label class="label">
+                    <b>Managed Hospitals:</b>
+                  </label>
                   <div class="control">
-                    <label class="label">
-                      <b>Managed Hospitals:</b>
-                    </label>
-                    <button class="button" v-for="hospitals in hospitalOrigin" :key="hospitals.hospital">
-                      {{ hospitals.hospital }}&nbsp;
-                      <span class="has-text-danger" @click="pullHospital(hospitals.hospital)">x</span>
-                    </button>&nbsp;
-                    <div class="dropdown" :class="{ 'is-active': isActiveDropdownHospital }">
-                      <div class="dropdown-trigger">
-                        <button @click="dropdownHospital" class="button">+</button>
-                      </div>
-                      <div class="dropdown-menu">
-                        <div class="dropdown-content" v-for="(hospitals, index) in hospitalList" :key="index">
-                          <a class="dropdown-item" @click="promptVerificationHospital(hospitals.hospital)">{{
-                              hospitals.hospital
-                          }}</a>
-                        </div>
-                      </div>
+                    <div class="buttons">
+                      <button class="button" v-for="hospitals in hospitalOrigin" :key="hospitals.hospital">
+                        {{ hospitals.hospital }}&nbsp;
+                        <span class="has-text-danger" @click="pullHospital(hospitals.hospital)">x</span>
+                      </button>&nbsp;
+                      <button @click="modalActive = !modalActive" class="button">+</button>
                     </div>
                   </div>
                 </div>
                 <div class="field">
+                  <label class="label">
+                    <b>Specializations:</b>
+                  </label>
                   <div class="control">
-                    <label class="label">
-                      <b>Specializations:</b>
-                    </label>
                     <button class="button" style="margin: 5px" v-for="(specializations, index) in specialist"
                       :key="index">
                       {{ specializations }}&nbsp;
@@ -131,21 +125,21 @@
           <div class="modal" :class="{ 'is-active': modalActive }">
             <div class="modal-background"></div>
             <div class="modal-content">
-              <div class="field box" v-if="!codeSent">
-                <label class="label">Please check your email for the verification code.</label>
-                <div class="control">
-                  <input class="input" v-model="verificationCode" type="text" placeholder="code" />
+              <section class="section box">
+                <div v-if="errorCode" class="notification is-danger">Invalid registration code.</div>
+                <div v-if="duplicateHospital" class="notification is-warning">Hospital has already been registered</div>
+                <div class="field">
+                  <label class="label">Input the hospital's registration code.</label>
+                  <div class="control">
+                    <input class="input" v-model="registrationCode" type="text" placeholder="registration code" />
+                  </div>
+                  <br />
+                  <div class="has-text-centered">
+                    <button class="button is-info" @click="addHospital"
+                      :disabled="registrationCode == ''">Confirm</button>
+                  </div>
                 </div>
-                <br />
-                <div class="has-text-centered">
-                  <button class="button is-primary" @click="addHospital"
-                    :disabled="verificationCode == ''">Confirm</button>
-                </div>
-                <div v-if="errorCode" class="notification is-danger">Invalid login code, please check your email
-                  thoroughly.</div>
-              </div>
-              <div class="notification is-danger" v-else>You can only request a verification code once, please try again
-                in 10 minutes.</div>
+              </section>
             </div>
             <button class="modal-close is-large" aria-label="close" @click="modalClose"></button>
           </div>
@@ -180,14 +174,15 @@ export default {
       specializationList: this.$store.getters.getSpecializationList,
       hospitalList: [],
       isActiveDropdownSpecialist: false,
-      isActiveDropdownHospital: false,
       licenseNo: null,
       verified: null,
       modalActive: false,
-      verificationCode: '',
+      registrationCode: '',
       errorCode: false,
+      duplicateHospital: false,
       codeSent: false,
-      selectedHospital: ''
+      selectedHospital: '',
+      fileReady: false
     };
   },
   components: {
@@ -226,6 +221,7 @@ export default {
       }
     },
     imgSuccess() {
+      this.fileReady = true
       store.commit('imgSuccess', true)
     },
     showPass() {
@@ -241,9 +237,6 @@ export default {
     dropdownSpecialist() {
       this.isActiveDropdownSpecialist = !this.isActiveDropdownSpecialist
     },
-    dropdownHospital() {
-      this.isActiveDropdownHospital = !this.isActiveDropdownHospital
-    },
     async addSpecialization(specialist) {
       if (!this.specialist.find(x => x === specialist)) {
         this.specialist.push(specialist)
@@ -257,54 +250,29 @@ export default {
         await axios.get('/session/doctor').then(response => this.specialist = response.data.specialist)
       }
     },
-    async promptVerificationHospital(hospital) {
-      if (!this.hospitalOrigin.find(x => x.hospital === hospital)) {
-        this.selectedHospital = hospital
-        this.modalActive = true
-        let randomCode = Math.floor(1000 + Math.random() * 9000);
-        await axios.post('/api/code/email', {
-          email: this.gmail
-        }).then(async response => {
-          if (!response.data) {
-            await axios.post("/api/code", {
-              email: this.gmail,
-              code: randomCode
-            });
-            await axios.post('/api/OTPMail', {
-              email: this.gmail,
-              code: randomCode
-            });
-          } else {
-            this.codeSent = true
-          }
-        })
-      }
-    },
     async addHospital() {
-      await axios.post('/api/code/verify', {
-        code: this.verificationCode
-      }).then(async response => {
-        if (response.data) {
-          if (!this.errorCode) {
-            this.hospitalOrigin.push({
-              hospital: this.selectedHospital
-            });
-            await axios.put(`/api/doctor/${this.id}`, {
-              hospitalOrigin: this.hospitalOrigin
-            });
-            await axios.put('/session/doctor', {
-              hospitalOrigin: this.hospitalOrigin
-            });
-            await axios.get('/session/doctor').then(response => this.hospitalOrigin = response.data.hospitalOrigin)
-            this.selectedHospital = ''
-            this.modalActive = false
-          } else {
-            this.errorCode = true
-          }
+      this.errorCode = false
+      this.duplicateHospital = false
+      await axios.post('/api/doctor/check_registrationCode', {
+        registrationCode: this.registrationCode
+      }).then(response => this.hospital = response.data)
+      if (this.hospital) {
+        if (this.hospitalOrigin.find(x => x.hospital == this.hospital.hospital)) {
+          this.duplicateHospital = true
         } else {
-          this.errorCode = true
+          this.hospitalOrigin.push({ hospital: this.hospital.hospital })
+          await axios.put(`/api/doctor/${this.id}`, {
+            hospitalOrigin: this.hospitalOrigin
+          });
+          await axios.put('/session/doctor', {
+            hospitalOrigin: this.hospitalOrigin
+          });
+          await axios.get('/session/doctor').then(response => this.hospitalOrigin = response.data.hospitalOrigin)
+          this.modalActive = false
         }
-      });
+      } else {
+        this.errorCode = true
+      }
     },
     async pullSpecialization(specialization) {
       this.specialist = this.specialist.filter(x => x !== specialization)

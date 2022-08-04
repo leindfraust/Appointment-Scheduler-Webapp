@@ -21,9 +21,21 @@ const getDoctors = (async (req, res) => {
     }
 });
 
+const getDoctorsForFilter = (async (req, res) => {
+    try {
+        const doctorList = await Doctor.find().select('-password -username -licenseNo -verified -messageHistory -_id -gmail -__v -patients -alias -gmail')
+        if (!doctorList) throw new Error('no items')
+        res.status(200).send(doctorList)
+    } catch (error) {
+        res.status(500).send({
+            message: error.message
+        })
+    }
+});
+
 const checkAvailabilityDoctors = (async (req, res) => {
-    hospital = req.body.hospital
-    specialist = req.body.specialist
+    let hospital = req.body.hospital
+    let specialist = req.body.specialist
     try {
         const availableDoctors = await Doctor.find({
             verified: true,
@@ -50,11 +62,11 @@ const checkAvailabilityDoctors = (async (req, res) => {
 const check_registrationCode = (async (req, res) => {
     let registrationCode = await req.body.registrationCode
     try {
-        const codeExist = await Manager.findOne({
+        const hospital = await Manager.findOne({
             registrationCode: registrationCode
-        });
-        if (await codeExist) {
-            res.status(200).send(true)
+        }).select('-password -username');
+        if (hospital) {
+            res.status(200).send(hospital)
         } else {
             res.status(200).send(false)
         }
@@ -69,7 +81,23 @@ const check_alias = (async (req, res) => {
         const userAccount = await Doctor.findOne({
             alias: new RegExp(`^${alias.trim()}$`, 'i')
         });
-        if (await userAccount) {
+        if (userAccount) {
+            res.status(200).send(true)
+        } else {
+            res.status(200).send(false)
+        }
+    } catch (err) {
+        res.status(500).send(err)
+    }
+});
+
+const check_email = (async (req, res) => {
+    let email = await req.body.email
+    try {
+        const userAccount = await Doctor.findOne({
+            gmail: new RegExp(`^${email.trim()}$`, 'i')
+        });
+        if (userAccount) {
             res.status(200).send(true)
         } else {
             res.status(200).send(false)
@@ -85,7 +113,7 @@ const check_username = (async (req, res) => {
         const userAccount = await Doctor.findOne({
             username: new RegExp(`^${username.trim()}$`, 'i')
         });
-        if (await userAccount) {
+        if (userAccount) {
             res.status(200).send(true)
         } else {
             res.status(200).send(false)
@@ -102,7 +130,7 @@ const verify_username = (async (req, res) => {
         const userAccount = await Doctor.findOne({
             username: username.trim()
         });
-        if (await userAccount) {
+        if (userAccount) {
             if (userAccount.gmail === email) {
                 res.status(200).send(true)
             } else {
@@ -291,10 +319,12 @@ const clearMessages = ((req, res) => {
 module.exports = {
     check_registrationCode,
     check_alias,
+    check_email,
     check_username,
     checkAvailabilityDoctors,
     verify_username,
     getDoctors,
+    getDoctorsForFilter,
     pushDoctor,
     updateDoctor,
     deleteDoctor,

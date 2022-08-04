@@ -1,10 +1,10 @@
 <template>
-  <div style="overflow-x: hidden; height: 100vh; background-color: whitesmoke;">
+  <div class="main-doctor">
     <div class="columns">
       <div class="column is-2">
         <DoctorMenu />
       </div>
-      <div class="column" style="background-color: whitesmoke;">
+      <div class="column">
         <div class="modal" :class="{ 'is-active': isActiveModal }">
           <div class="modal-background"></div>
           <div class="modal-content">
@@ -94,7 +94,7 @@
           </div>
           <button class="modal-close is-large" aria-label="close" @click="sendNotifInactive"></button>
         </div>
-        <section class="section" style="background-color: whitesmoke;">
+        <section class="section">
           <div class="container is-widescreen is-fullhd" style="padding: 15">
             <h1 class="title">
               APPOINTMENT HISTORY
@@ -311,5 +311,5 @@ export default {
   }
 }
 </script>
-<style>
+<style scoped>
 </style>

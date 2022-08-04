@@ -24,7 +24,7 @@ const store = createStore({
         imgSuccess: false,
         imgSuccessManager: false,
         managerHospital: '',
-        hospitalDetails: '',
+        hospitalDetails: [],
         hospitalName: '',
         specializationList: ["Allergists", "Anesthesiologists", "Cardiologists", "Colon and Rectal Surgeons", "Critical Care Medicine Specialists", " Dermatologists", "Endocrinologists", "Emergency Medicine Specialists", "Family Physicians",
             "Gastroenterologists", "Geriatric Medicine Specialists", "Hematologists", "Hospice and Palliative Medicine Specialists", "Infectious Disease Specialists",

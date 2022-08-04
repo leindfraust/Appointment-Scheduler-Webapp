@@ -19,7 +19,7 @@ router.post('/', (req, res) => {
     req.session.messageHistory = req.body.messageHistory
     req.session.save((err) => {
         if (err) {
-            return next(err);
+            console.log(err);
         }
     });
     res.status(200).send('OK');
@@ -38,7 +38,7 @@ router.put('/', (req, res) => {
     req.session.messageHistory = req.body.messageHistory || req.session.messageHistory
     req.session.save((err) => {
         if (err) {
-            return next(err);
+            console.log(err);
         }
     });
     res.status(200).send('OK');

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     getManagers,
+    getManager,
     pushManager,
     updateManager,
     deleteManager,
@@ -14,6 +15,8 @@ router.post('/check_username', check_username)
 router.post('/verify_username', verify_username)
 
 router.get('/', getManagers);
+
+router.post('/:id', getManager);
 
 router.post('/', pushManager);
 

@@ -15,7 +15,7 @@ router.post('/', (req, res) => {
     req.session.currentAddress = req.body.currentAddress
     req.session.save((err) => {
         if (err) {
-            return next(err);
+            console.log(err);
         }
     });
     res.status(200).send('OK');
@@ -31,7 +31,7 @@ router.put('/', (req, res) => {
     req.session.currentAddress = req.body.currentAddress || req.session.currentAddress
     req.session.save((err) => {
         if (err) {
-            return next(err);
+            console.log(err);
         }
     });
     res.status(200).send('OK');
