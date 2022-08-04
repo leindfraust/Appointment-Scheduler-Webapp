@@ -6,10 +6,13 @@ const {
     getUsers,
     pushUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    check_email
 } = require('../../controllers/userController')
 
 router.post('/check_username', check_username);
+
+router.post('/check_email', check_email)
 
 router.post('/verify_username', verify_username)
 
