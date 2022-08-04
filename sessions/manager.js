@@ -11,7 +11,7 @@ router.post('/', (req, res) => {
     req.session.hospital = req.body.hospital
     req.session.save((err) => {
         if (err) {
-            return next(err);
+            console.log(err);
         }
     });
     res.status(200).send('OK');
@@ -22,7 +22,7 @@ router.put('/', (req, res) => {
     req.session.registrationCode = req.body.registrationCode || req.session.registrationCode
     req.session.save((err) => {
         if (err) {
-            return next(err);
+            console.log(err);
         }
     });
     res.status(200).send('OK');

@@ -9,7 +9,7 @@ router.post('/', (req, res) => {
     req.session.superuser = req.body.superuser
     req.session.save((err) => {
         if (err) {
-            return next(err);
+            console.log(err);
         }
     });
     res.status(200).send('OK');
