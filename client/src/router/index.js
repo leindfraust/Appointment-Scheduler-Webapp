@@ -15,6 +15,7 @@ import PatientLogs from '../views/PortalDoctor/PatientLogs.vue'
 import DoctorSecurity from '../views/PortalDoctor/Security.vue'
 import DoctorPickSuccess from '../views/PortalSuccessConfirmations/DoctorPickSuccess.vue'
 import ImageUploadSuccess from '../views/PortalSuccessConfirmations/ImageUploadSuccess'
+import imageUploadSuccessPatientProfile from '../views/PortalSuccessConfirmations/imageUploadSuccessPatientProfile.vue'
 import ImageUploadSuccessDoctor from '../views/PortalSuccessConfirmations/ImageUploadSuccessDoctor.vue'
 import ImageUploadSuccessManager from '../views/PortalSuccessConfirmations/imageUploadSuccessManager.vue'
 import UserSignUp from '../views/Public/UserSignUp.vue'
@@ -131,6 +132,13 @@ const routes = [{
         }
     },
     {
+        path: '/imgUploadSuccessPatient',
+        component: imageUploadSuccessPatientProfile,
+        meta: {
+            requireImgUploadSuccess: true
+        }
+    },
+    {
         path: '/imgUploadSuccessDoctor',
         component: ImageUploadSuccessDoctor,
         meta: {
@@ -161,7 +169,7 @@ const routes = [{
         }
     },
     {
-        path: '/user/:user/doctors',
+        path: '/user/:user/:hospital/doctors',
         component: DoctorList,
         meta: {
             requiresAuthPatient: true
@@ -170,6 +178,7 @@ const routes = [{
     {
         path: '/user/:user/profile',
         component: UserProfile,
+        name: UserProfile,
         meta: {
             requiresAuthPatient: true
         }
