@@ -7,13 +7,18 @@ const {
     imgUploadImgMsg,
     imgUploadImgMsgDeleteDoctor,
     imgUploadImgMsgDeletePatient,
-    imgUploadImgMsgClearDoctor
+    imgUploadImgMsgClearDoctor,
+    imgUploadPatient,
+    imgUploadVisitation
 } = require('../../controllers/imgController')
 //doctor image change profile picture upload
 router.post('/imgUpload', imgUpload);
 
 //upload a patient's prescription
 router.post('/imgUploadImgMsg', imgUploadImgMsg);
+
+//upload a digital prescription upon confirming from the doctor
+router.post('/imgUploadVisitation', imgUploadVisitation)
 
 //delete img from a doctor
 router.post('/imgUploadImgMsgDeleteDoctor', imgUploadImgMsgDeleteDoctor);
@@ -23,6 +28,9 @@ router.post('/imgUploadImgMsgDeletePatient', imgUploadImgMsgDeletePatient);
 
 //delete img clear doctor side
 router.post('/imgUploadImgMsgClearDoctor', imgUploadImgMsgClearDoctor);
+
+//patient profile image upload
+router.post('/imgUploadPatient', imgUploadPatient)
 
 //doctor signup image upload
 router.post('/imgUploadDoctor', imgUploadDoctor);
