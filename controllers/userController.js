@@ -7,7 +7,23 @@ const check_username = (async (req, res) => {
         const userAccount = await user.findOne({
             username: new RegExp(`^${username.trim()}$`, 'i')
         });
-        if (await userAccount) {
+        if (userAccount) {
+            await res.status(200).send(true)
+        } else {
+            await res.status(200).send(false)
+        }
+    } catch (err) {
+        res.status(500).send(err)
+    }
+});
+
+const check_email = (async (req, res) => {
+    let email = await req.body.email
+    try {
+        const userAccount = await user.findOne({
+            gmail: new RegExp(`^${email.trim()}$`, 'i')
+        });
+        if (userAccount) {
             await res.status(200).send(true)
         } else {
             await res.status(200).send(false)
@@ -24,8 +40,8 @@ const verify_username = (async (req, res) => {
         const userAccount = await user.findOne({
             username: username.trim()
         });
-        if (await userAccount) {
-            if (await userAccount.gmail === email) {
+        if (userAccount) {
+            if (userAccount.gmail === email) {
                 res.status(200).send(true)
             } else {
                 res.status(200).send(false)
@@ -104,6 +120,7 @@ const deleteUser = (async (req, res) => {
 
 module.exports = {
     check_username,
+    check_email,
     verify_username,
     getUsers,
     pushUser,
