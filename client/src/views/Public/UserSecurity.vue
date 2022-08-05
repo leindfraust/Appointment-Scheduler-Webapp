@@ -131,7 +131,7 @@ async function changePassword() {
 </template>
 <style scoped>
 @media (max-width: 991.98px) {
-    #wrapper-container {
+    .box {
         width: 100% !important;
     }
 }
@@ -142,7 +142,7 @@ async function changePassword() {
 }
 
 .box {
-    width: 35% !important;
+    width: 35%;
     margin: auto;
     padding: 30px
 }
