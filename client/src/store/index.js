@@ -7,6 +7,7 @@ const store = createStore({
     plugins: [createPersistedState()],
     state: {
         notificationClicked: false,
+        checkProfileImg: false,
         accountCreated: false,
         userAuth: false,
         superUserAuth: false,
@@ -16,6 +17,7 @@ const store = createStore({
         patientUsername: '',
         patientID: null,
         doctorID: null,
+        doctorName: null,
         appointed: null,
         specialistList: [],
         pickedSpecialization: null,
@@ -38,6 +40,9 @@ const store = createStore({
         getSpecializationList: state => state.specializationList
     },
     mutations: {
+        checkProfileImg(state, checkProfileImg) {
+            state.checkProfileImg = checkProfileImg
+        },
         notificationClicked(state, notificationClicked) {
             state.notificationClicked = notificationClicked
         },
@@ -55,6 +60,9 @@ const store = createStore({
         },
         doctorID(state, doctorID) {
             state.doctorID = doctorID
+        },
+        doctorName(state, doctorName) {
+            state.doctorName = doctorName
         },
         patientID(state, patientID) {
             state.patientID = patientID
