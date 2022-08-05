@@ -1,5 +1,6 @@
 <template>
         <ProviderFinder />
+        <FooterBlock/>
         <!--
         <div class="container box" id="covidAPI" style="width: 70%;">
           <h1 class="title has-text-left">Latest COVID-19 Data</h1>
@@ -46,11 +47,13 @@
 <script>
 import ProviderFinder from "../../components/ProviderFinder.vue";
 import axios from 'axios'
+import FooterBlock from "../../components/FooterBlock.vue";
 export default {
   name: "HomePage",
   components: {
-    ProviderFinder
-  },
+    ProviderFinder,
+    FooterBlock
+},
   data() {
     return {
       userPatient: null,
