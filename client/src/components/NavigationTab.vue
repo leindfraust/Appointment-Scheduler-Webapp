@@ -47,10 +47,14 @@
                 </div>
                 <div class="navbar-item has-dropdown" :class="{ 'is-active': isActiveProfileDropdown }"
                     @click="isActiveProfileDropdown = !isActiveProfileDropdown">
-                    <a class="navbar-item">
-                        <figure class="image">
+                    <a class="navbar-item is-hidden-mobile" v-if="checkImgState">
+                        <figure class="image" v-if="$store.state.checkProfileImg">
                             <img class="is-rounded"
                                 :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/patients/${$store.state.patientUsername}.jpg`">
+                        </figure>
+                        <figure class="image" v-else>
+                            <img class="is-rounded"
+                                :src="`https://ui-avatars.com/api/?name=${this.$store.state.patientUsername}`">
                         </figure>
                     </a>
                     <div class="navbar-dropdown is-right">
@@ -122,7 +126,10 @@ import axios from 'axios'
 import socket from '../socket'
 export default {
     name: 'NavigationTab',
-    mounted() {
+    async mounted() {
+        await axios.get(`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/patients/${this.$store.state.patientUsername}.jpg`).then(response => response.status == 200 ? this.$store.commit('checkProfileImg', true) : this.$store.commit('checkProfileImg', false)).catch(err => err ? this.$store.commit('checkProfileImg', false) : this.$store.commit('checkProfileImg', true))
+        this.checkImgState = true
+
         if (this.$store.state.patientID) {
             socket.connect()
             socket.emit('join room', this.$store.state.patientID)
@@ -145,10 +152,9 @@ export default {
             isActiveMenuDropdown: false,
             isActive: false,
             patient: this.$store.state.patientUsername,
-            imgPreUrl: "https://avatars.dicebear.com/api/micah/",
-            svgExtUrl: ".svg",
             notifications: [],
             viewNotif: [],
+            checkImgState: false
         }
     },
     methods: {

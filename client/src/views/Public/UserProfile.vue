@@ -135,10 +135,13 @@ async function uploadProfilePhotoClient() {
             <div class="container" v-if="patient.length !== 0">
                 <div class="columns is-vcentered">
                     <div class="column is-4">
-                        <figure class="image is-square image-outer">
+                        <figure class="image is-square image-outer" v-if="store.state.checkProfileImg">
                             <img class="is-rounded image-inner"
                                 :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/patients/${store.state.patientUsername}.jpg`">
                         </figure>
+                        <div class="notification is-info" v-else>
+                            You do not have any profile picture. Upload one.
+                        </div>
                         <div class="field">
                             <div class="control">
                                 <input @change="fileHandleInput($event)" class="input" type="file" />
@@ -160,15 +163,12 @@ async function uploadProfilePhotoClient() {
                         <div class="field is-horizontal">
                             <div class="field-body">
                                 <div class="field">
-                                    <label class="label">Username:</label>
-                                    <div class="controls">
-                                        <input type="text" class="input" v-model="patient.username" disabled />
-                                    </div>
-                                </div>
-                                <div class="field">
                                     <label class="label">Email:</label>
-                                    <div class="controls">
+                                    <div class="controls" v-if="patient.email !== 'dummyemail@email.com'">
                                         <input type="text" class="input" v-model="patient.email" />
+                                    </div>
+                                    <div class="controls" v-else>
+                                        <input type="text" class="input" placeholder="Register an email for this account." />
                                     </div>
                                 </div>
                             </div>
