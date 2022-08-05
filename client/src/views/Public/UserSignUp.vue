@@ -280,7 +280,7 @@ export default {
             age: this.age,
             sex: this.sex,
             contactNum: this.contactNum,
-            gmail: this.gmail,
+            gmail: this.gmail == '' ? 'dummyemail@email.com' : this.gmail,
             province: this.province,
             city: this.city,
             currentAddress: this.currentAddress
