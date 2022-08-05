@@ -196,7 +196,8 @@ export default {
       loadingUsername: false,
       emailFound: '',
       loadingEmail: false,
-      searchTimeout: null
+      searchTimeout: null,
+      randomChar: ''
     }
   },
   async mounted() {
@@ -263,6 +264,16 @@ export default {
     cityDropdown() {
       this.isActiveDropdownCity = !this.isActiveDropdownCity
     },
+    generateRandomChar() {
+      let result = '';
+      let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let charactersLength = characters.length;
+      for (let i = 0; i < 12; i++) {
+        result += characters.charAt(Math.floor(Math.random() *
+          charactersLength));
+      }
+      this.randomChar = result
+    },
     async signup() {
       if ((this.password) !== this.passwordRepeat) {
         this.passwordMatch = "password do not match";
@@ -273,6 +284,9 @@ export default {
         !this.usernameFound && !this.emailFound
       ) {
         try {
+          if (this.gmail == '') {
+            this.generateRandomChar()
+          }
           await axios.post("/api/user", {
             username: this.username,
             password: this.password,
@@ -280,7 +294,7 @@ export default {
             age: this.age,
             sex: this.sex,
             contactNum: this.contactNum,
-            gmail: this.gmail == '' ? 'dummyemail@email.com' : this.gmail,
+            gmail: this.gmail == '' ? `${this.randomChar}dummyemail@email.com` : this.gmail,
             province: this.province,
             city: this.city,
             currentAddress: this.currentAddress

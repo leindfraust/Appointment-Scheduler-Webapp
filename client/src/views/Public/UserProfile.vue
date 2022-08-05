@@ -164,11 +164,12 @@ async function uploadProfilePhotoClient() {
                             <div class="field-body">
                                 <div class="field">
                                     <label class="label">Email:</label>
-                                    <div class="controls" v-if="patient.email !== 'dummyemail@email.com'">
+                                    <div class="controls" v-if="!patient.email.includes('dummyemail@email.com')">
                                         <input type="text" class="input" v-model="patient.email" />
                                     </div>
                                     <div class="controls" v-else>
-                                        <input type="text" class="input" placeholder="Register an email for this account." />
+                                        <input type="text" class="input"
+                                            placeholder="Register an email for this account." />
                                     </div>
                                 </div>
                             </div>
