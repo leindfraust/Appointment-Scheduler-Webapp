@@ -8,6 +8,11 @@
             </div>
         </div>
         <section class="section is-medium has-text-centered" v-if="citiesOrMunicipalities == ''">
+            <div class="notification is-info" v-if="locationPermissionDenied" id="location-prompt">
+                <a class="has-text-weight-bold" @click="getUserLocation">Enable</a> location to start
+                booking an
+                <b>appointment</b>.
+            </div>
             <h1 class="title">Find and make an appointment on hospitals or clinics
             </h1>
             <div class="container" v-if="citiesOrMunicipalities == ''">
@@ -25,11 +30,6 @@
                             <div class="control">
                                 <button class="button is-info is-rounded" @click="loadProvider('')"
                                     :disabled="province == ''">Search</button>
-                            </div>
-                            <div class="notification is-light is-danger" v-if="locationPermissionDenied">
-                                <a class="has-text-success" @click="getUserLocation">Enable</a> location to start
-                                booking an
-                                <b>appointment</b>.
                             </div>
                         </div>
                         <div class="dropdown-menu">
@@ -49,47 +49,47 @@
                 </div>
                 <div class="block">&nbsp;</div>
                 <div>
-                    <div class="notification is-info" style="width: 50%; margin: auto"
+                    <div class="notification is-info" style="width: 50%; margin: auto" id="notification-region"
                         v-if="provincePrompt && this.province == ''">You must
                         select a region first.</div>
-                    <div class="columns" style="width: 80%; margin:auto">
-                        <div class="column " id="mental-health">
+                    <div class="columns is-mobile is-multiline" style="width: 80%; margin:auto">
+                        <div class="column is-4-mobile " id="mental-health">
                             <a @click="loadProvider('Psychiatrists')">
                                 <img src="../assets/images/symptoms/mental-health.png" />
                                 <p class="subtitle is-5">Mental Health</p>
                             </a>
                         </div>
-                        <div class="column" id="UTI">
+                        <div class="column is-4-mobile" id="UTI">
                             <a @click="loadProvider('Nephrologists')">
                                 <img src="../assets/images/symptoms/UTI.png" />
                                 <p class="subtitle is-5">UTI</p>
                             </a>
                         </div>
-                        <div class="column" id="stomach-pain">
+                        <div class="column is-4-mobile" id="stomach-pain">
                             <a @click="loadProvider('Gastroenterologists')">
                                 <img src="../assets/images/symptoms/stomach-pain.png" />
                                 <p class="subtitle is-5">Stomach Pain</p>
                             </a>
                         </div>
-                        <div class="column" id="eye-health">
+                        <div class="column is-4-mobile" id="eye-health">
                             <a @click="loadProvider('Ophthalmologists')">
                                 <img src="../assets/images/symptoms/eye-health.png" />
                                 <p class="subtitle is-5">Eye Health</p>
                             </a>
                         </div>
-                        <div class="column" id="dental-health">
+                        <div class="column is-4-mobile" id="dental-health">
                             <a @click="loadProvider('')">
                                 <img src="../assets/images/symptoms/dental-health.png" />
                                 <p class="subtitle is-5">Dental Health</p>
                             </a>
                         </div>
-                        <div class="column" id="fever">
+                        <div class="column is-4-mobile" id="fever">
                             <a @click="loadProvider('')">
                                 <img src="../assets/images/symptoms/fever.png" />
                                 <p class="subtitle is-5">Fever</p>
                             </a>
                         </div>
-                        <div class="column" id="sore-throat">
+                        <div class="column is-4-mobile" id="sore-throat">
                             <a @click="loadProvider('Pediatricians')">
                                 <img src="../assets/images/symptoms/sore-throat.png" />
                                 <p class="subtitle is-5">Sore Throat</p>
@@ -99,10 +99,11 @@
                 </div>
             </div>
         </section>
+        <div class="block is-hidden-desktop"></div>
         <div v-if="citiesOrMunicipalities != ''">
             <!--filter-->
             <!--implementation new-->
-            <div class="columns">
+            <div class="columns is-mobile" style="overflow: auto;">
                 <div class="column is-narrow">
                     <div class="dropdown" :class="{ 'is-active': cityMunicipalityFilter }">
                         <div class="doprdown-trigger">
@@ -180,12 +181,6 @@
                                 <div class="control">
                                     <button class="button is-info is-rounded" @click="loadProvider('')"
                                         :disabled="province == ''">Search</button>
-                                </div>
-                                <div class="notification is-light is-danger" v-if="locationPermissionDenied">
-                                    <a class="has-text-success" @click="getUserLocation">Enable</a> location to
-                                    start
-                                    booking an
-                                    <b>appointment</b>.
                                 </div>
                             </div>
                             <div class="dropdown-menu">
@@ -431,12 +426,29 @@ export default {
         width: 75vw;
         height: 200px;
     }
+
+    #background {
+        height: auto !important;
+    }
+
+    #notification-region {
+        width: 100% !important;
+    }
+
+    #location-prompt {
+        width: 100% !important;
+    }
 }
 
 #geoIframe {
     position: relative;
     height: 100%;
     width: 100%;
+}
+
+#location-prompt {
+    width: 50%;
+    margin: auto;
 }
 
 #background {
