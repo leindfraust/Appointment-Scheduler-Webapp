@@ -2,7 +2,7 @@
     <nav class="navbar is-hidden-desktop">
         <div class="navbar-brand">
             <a class="navbar-item">
-                <label class="label">{{ alias }}</label>
+                <label class="label">Dr. {{ $store.state.doctorName }}</label>
             </a>
             <a role="button" class="navbar-burger" :class="{ 'is-active': !isActive }" aria-label="menu"
                 aria-expanded="false" data-target="navbar" @click="menuNav">
@@ -19,11 +19,7 @@
                 <img class="is-rounded image-inner"
                     :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${alias}.jpg`">
             </figure>
-            <figure class="is-hidden-desktop image is-128x128" style="margin: auto; ">
-                <img class="is-rounded"
-                    :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${alias}.jpg`">
-            </figure>
-            <h5 class="title is-5" v-if="isActive">{{ alias }}</h5>
+            <h5 class="title is-6" v-if="isActive">Dr. {{ $store.state.doctorName }}</h5>
         </div>
         <ul class="menu-list block">
             <p class="menu-label">General</p>
