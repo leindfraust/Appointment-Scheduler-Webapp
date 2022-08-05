@@ -87,6 +87,7 @@ export default {
                 });
                 store.commit("alias", this.userDoctor.alias);
                 store.commit("doctorID", this.userDoctor._id);
+                store.commit("doctorName", this.userDoctor.name);
                 await this.$router.push(`/doctor/user/${this.userDoctor.alias}`);
               }
               else {

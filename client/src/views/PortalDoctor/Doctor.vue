@@ -7,13 +7,13 @@
       <div class="column">
         <section class="section">
           <h1 class="title">APPOINTMENTS</h1>
-          <div class="field">
-            <div class="control">
-              <input class="input" type="text" style="width: 50% !important" v-model="searchBar"
-                placeholder="Search..." />
-            </div>
-          </div>
           <div class="container is-widescreen is-fullhd" v-if="Object.keys(appointmentSchedules).length !== 0">
+            <div class="field">
+              <div class="control">
+                <input class="input" type="text" style="width: 50% !important" v-model="searchBar"
+                  placeholder="Search..." />
+              </div>
+            </div>
             <div class="box" v-for="(appointmentList, index) in appointmentSchedules" :key="index"
               :style="new Date(index).toDateString() == new Date().toDateString() ? 'box-shadow: rgb(10 10 10 / 10%) 0px 0.5em 1em -0.125em, #485fc7 0px 0px 0px 1px !important;' : ''">
               <h1 class="subtitle" v-if="new Date(index).toDateString() == new Date().toDateString()">

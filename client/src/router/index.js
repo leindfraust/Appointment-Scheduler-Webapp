@@ -219,7 +219,6 @@ const router = createRouter({
 });
 
 import axios from 'axios'
-import cld from "../cloudinary"
 import socket from '../socket'
 
 //route guards
@@ -274,7 +273,7 @@ router.beforeEach(async (to, from, next) => {
             if (typeof response.data.alias !== 'undefined') {
                 store.commit("alias", response.data.alias);
                 store.commit("doctorID", response.data._id);
-                store.commit("profileImg", cld.imageTag(`assets/doctors/${response.data.alias}.jpg`).toHtml());
+                store.commit("doctorName", response.data.fullname);
             } else {
                 store.commit("alias", null);
                 await axios.delete("/session/doctor");
