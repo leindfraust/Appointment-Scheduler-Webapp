@@ -37,6 +37,10 @@ const routes = [{
         path: '/',
         component: Home,
     },
+    {
+        path: '/provider',
+        component: () => import('../views/Public/ProviderLoader.vue')
+    },
     //Manager/Hospital account routes
     {
         path: '/user/manager/:user',
