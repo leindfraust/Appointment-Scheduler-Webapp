@@ -30,19 +30,31 @@
             </article>
             <div class="columns">
               <div class="column is-4">
-                <figure class="image image-outer is-square">
-                  <img class="is-rounded image-inner"
-                    :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${alias}.jpg`">
-                </figure>
-                <form id="formUpload" action="/api/imgUpload" method="post" enctype="multipart/form-data"
-                  style="margin: auto; width: 50%" class="field">
+                <form id="formUpload" action="/api/imgUpload" method="post" enctype="multipart/form-data">
+                  <figure class="image image-outer is-square">
+                    <img class="is-rounded image-inner" v-if="imgPreviewFile" :src="imgPreviewFile" />
+                    <img class="is-rounded image-inner" v-else
+                      :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${alias}.jpg`">
+                    <div class="buttons is-hidden-mobile" style="bottom: 5%; right: 10%; position: absolute">
+                      <label for="file-input" style="cursor: pointer"><a class="button is-medium is-responsive"><i
+                            class="fa-solid fa-camera"></i>
+                        </a></label>
+                    </div>
+                    <div class="buttons is-hidden-desktop" style="bottom: 15%; left:75%; position: absolute">
+                      <label for="file-input" style="cursor: pointer"><a class="button is-medium is-responsive"><i
+                            class="fa-solid fa-camera"></i>
+                        </a></label>
+                    </div>
+                  </figure>
                   <div class="control">
                     <input type="hidden" name="alias" :value="(alias)" />
-                    <input class="input" type="file" name="imgFile" @change="imgSuccess" required />
-                    <div class="has-text-centered">
-                      <button type="submit" value="Upload" class="button is-primary" v-if="fileReady">Change profile
-                        picture</button>
-                    </div>
+                    <input class="input is-hidden" id="file-input" type="file" name="imgFile"
+                      @change="handleFile($event)" required />
+                  </div>
+                  <div class="buttons is-centered" v-if="fileReady">
+                    <button type="button" class="button"
+                      @click="fileReady = false, imgPreviewFile = null">Cancel</button>
+                    <button type="submit" value="Upload" class="button is-info">Upload Picture</button>
                   </div>
                 </form>
               </div>
@@ -182,7 +194,8 @@ export default {
       duplicateHospital: false,
       codeSent: false,
       selectedHospital: '',
-      fileReady: false
+      fileReady: false,
+      imgPreviewFile: null
     };
   },
   components: {
@@ -220,7 +233,8 @@ export default {
         this.infoValidateMessage = "changes saved successfully"
       }
     },
-    imgSuccess() {
+    handleFile(e) {
+      this.imgPreviewFile = URL.createObjectURL(e.target.files[0])
       this.fileReady = true
       store.commit('imgSuccess', true)
     },
@@ -302,28 +316,8 @@ export default {
 </script>
 
 <style scoped>
-#profile-img {
-  display: block;
-  margin: auto;
-  width: 50%;
-}
-
 .dropdown-menu {
   max-height: 12em;
   overflow: auto;
-}
-
-@media (max-width: 991.98px) {
-  #profile-image {
-    width: 100% !important;
-  }
-
-  form {
-    width: 100% !important;
-  }
-
-  .input {
-    width: 100% !important;
-  }
 }
 </style>
