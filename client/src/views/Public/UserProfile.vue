@@ -22,6 +22,8 @@ let navOngoingAppointments = ref(true)
 let navPastAppointments = ref(false)
 let file = ref()
 let uploadProfileButton = ref(false)
+let imgPreviewFile = ref()
+let searchRefID = ref('')
 onMounted(async () => {
     await axios.post('/api/appointmentList/patients', { id: store.state.patientID }).then(response => appointmentList.value = response.data);
     await axios.get("/session/patient").then(response => patient.value = response.data);
@@ -43,13 +45,13 @@ const pastAppointments = computed(() => {
 function sortPastAppointments() {
     return appointmentList.value.sort((a, b) => {
         return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
-    }).filter(x => { return new Date(x.schedule[0].date).getTime() < new Date().getTime() || x.ifPatientVisited == true })
+    }).filter(x => { return new Date(x.schedule[0].date).getTime() < new Date().getTime() || x.ifPatientVisited == true }).filter(x => x.referenceID.toLowerCase().includes(searchRefID.value.toLowerCase()))
 
 }
 function sortOngoingAppointments() {
     return appointmentList.value.sort((a, b) => {
         new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
-    }).filter(x => { return new Date(x.schedule[0].date).toLocaleDateString() >= new Date().toLocaleDateString() && x.ifPatientVisited == false })
+    }).filter(x => { return new Date(x.schedule[0].date).toLocaleDateString() >= new Date().toLocaleDateString() && x.ifPatientVisited == false }).filter(x => x.referenceID.toLowerCase().includes(searchRefID.value.toLowerCase()))
 }
 //methods
 async function selectProvince(province) {
@@ -65,6 +67,7 @@ function selectCity(city) {
 }
 function fileHandleInput(e) {
     file.value = e.target.files[0]
+    imgPreviewFile.value = URL.createObjectURL(file.value)
     uploadProfileButton.value = true
 }
 async function updatePatient() {
@@ -121,7 +124,6 @@ async function uploadProfilePhotoClient() {
                 await router.push('/imgUploadSuccessPatient')
             }
         });
-        store.commit("imgSucces", true)
     } catch (err) {
         errMsg.value = err
         console.log(err)
@@ -135,23 +137,48 @@ async function uploadProfilePhotoClient() {
             <div class="container" v-if="patient.length !== 0">
                 <div class="columns is-vcentered">
                     <div class="column is-4">
-                        <figure class="image is-square image-outer" v-if="store.state.checkProfileImg">
-                            <img class="is-rounded image-inner"
-                                :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/patients/${store.state.patientUsername}.jpg`">
-                        </figure>
-                        <div class="notification is-info" v-else>
-                            You do not have any profile picture. Upload one.
-                        </div>
-                        <div class="field">
-                            <div class="control">
-                                <input @change="fileHandleInput($event)" class="input" type="file" />
+                        <div class="field" id="file-img">
+                            <figure class="image is-square image-outer" v-if="store.state.checkProfileImg">
+                                <img class="is-rounded image-inner" v-if="imgPreviewFile" :Src="imgPreviewFile" />
+                                <img class="is-rounded image-inner" v-else
+                                    :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/patients/${store.state.patientUsername}.jpg`">
+                                <div class="buttons is-hidden-mobile" style="bottom:5%; right:10%; position: absolute">
+                                    <label for="file-input" style="cursor: pointer"><a
+                                            class="button is-responsive" style="border-radius: 50%; height: 50px; width: 50px"><i class="fa-solid fa-camera"></i>
+                                        </a></label>
+                                </div>
+                                <div class="buttons is-hidden-desktop"
+                                    style="bottom: 15%; left:75%; position: absolute">
+                                    <label for="file-input" style="cursor: pointer"><a
+                                            class="button is-large is-responsive" style="border-radius: 50%; height: 35px; width: 35px"><i class="fa-solid fa-camera"></i>
+                                        </a></label>
+                                </div>
+                            </figure>
+                            <figure class="image is-square image-outer" v-else>
+                                <img class="is-rounded image-inner" v-if="imgPreviewFile" :Src="imgPreviewFile" />
+                                <img class="is-rounded image-inner" v-else
+                                    :src="`https://ui-avatars.com/api/?name=${store.state.patientUsername}`">
+                                <div class="buttons is-hidden-mobile" style="bottom:5%; right:10%; position: absolute">
+                                    <label for="file-input" style="cursor: pointer"><a
+                                            class="button is-medium is-responsive"><i class="fa-solid fa-camera"></i>
+                                        </a></label>
+                                </div>
+                                <div class="buttons is-hidden-desktop"
+                                    style="bottom: 15%; left:75%; position: absolute">
+                                    <label for="file-input" style="cursor: pointer"><a
+                                            class="button is-medium is-responsive"><i class="fa-solid fa-camera"></i>
+                                        </a></label>
+                                </div>
+                            </figure>
+                            <div class="control is-hidden">
+                                <input id="file-input" @change="fileHandleInput($event)" class="input" type="file" />
                             </div>
                         </div>
-                        <div class="field has-text-centered">
-                            <div class="control">
-                                <button class="button is-info" v-if="uploadProfileButton"
-                                    @click="uploadProfilePhotoClient">Upload Photo</button>
-                            </div>
+                        <div class="buttons is-centered">
+                            <button class="button" v-if="uploadProfileButton"
+                                @click="imgPreviewFile = null, uploadProfileButton = false">Cancel</button>
+                            <button class="button is-info" v-if="uploadProfileButton"
+                                @click="uploadProfilePhotoClient">Upload Photo</button>
                         </div>
                     </div>
                     <div class="column">
@@ -273,6 +300,15 @@ async function uploadProfilePhotoClient() {
                     </div>
                 </div>
             </div>
+            <div class="block"></div>
+            <div class="field has-addons">
+                <div class="control">
+                    <button class="button is-static fa fa-search"></button>
+                </div>
+                <div class="control">
+                    <input type="text" class="input" placeholder="Search Reference ID" v-model="searchRefID" />
+                </div>
+            </div>
             <div class="container" v-if="navOngoingAppointments">
                 <div class="table-container" v-if="Object.keys(ongoingAppointments).length !== 0">
                     <table class="table is-striped is-narrow is-fullwidth is-bordered">
@@ -320,6 +356,7 @@ async function uploadProfilePhotoClient() {
                     <table class="table is-striped is-narrow is-fullwidth is-bordered">
                         <thead>
                             <tr>
+                                <th class="has-text-black-ter">Reference ID</th>
                                 <th class="has-text-black-ter">Schedule</th>
                                 <th class="has-text-black-ter">Priority No.</th>
                                 <th class="has-text-black-ter">Hospital Appointed</th>
@@ -333,6 +370,7 @@ async function uploadProfilePhotoClient() {
                         </thead>
                         <tbody v-for="appointments in pastAppointments" :key="appointments._id">
                             <tr>
+                                <th class="has-text-black-ter">{{ appointments.referenceID }}</th>
                                 <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString()
                                 }}</th>
                                 <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
