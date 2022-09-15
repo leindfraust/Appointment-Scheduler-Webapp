@@ -36,7 +36,10 @@ const doctorSchema = new Schema({
         type: String,
         required: true,
     },
-    visits: Number,
+    visits: {
+        type: Number,
+        default: 0
+    },
     specialist: Array,
     schedule: Array,
     patients: Array,
