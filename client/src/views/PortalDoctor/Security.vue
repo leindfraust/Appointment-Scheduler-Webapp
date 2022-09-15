@@ -29,7 +29,7 @@
                                             required />
                                     </div>
                                     <div v-if="incorrectPasswordValidate" class="notification is-warning">{{
-                                            currentPasswordValidateMessage
+                                    currentPasswordValidateMessage
                                     }}</div>
                                 </div>
                                 <div class="field">
@@ -39,7 +39,7 @@
                                             required :class="{ 'is-danger': passwordValidate }" />
                                     </div>
                                     <div v-if="passwordValidate" class="notification is-danger">{{
-                                            passwordValidateMessage
+                                    passwordValidateMessage
                                     }}</div>
                                 </div>
                                 <div class="field">
@@ -49,7 +49,7 @@
                                             required :class="{ 'is-danger': passwordValidate }" />
                                     </div>
                                     <div v-if="passwordValidate" class="notification is-danger">{{
-                                            passwordValidateMessage
+                                    passwordValidateMessage
                                     }}</div>
                                 </div>
                                 <div class="field">
@@ -279,6 +279,8 @@ export default {
             }
         },
         async modalUpEditInfo() {
+            this.codeError = false
+
             await axios.post("/api/code/email", {
                 email: this.gmail
             }).then(async response => {
@@ -301,7 +303,9 @@ export default {
         },
         async sendVerificationEmail() {
             let existingEmail = []
-
+            this.verifyEmailSent = false
+            this.codeError = false
+            this.emailTaken = false
             await axios.get("/api/doctor").then(response => existingEmail = response.data.find(x => x.gmail === this.gmail))
             if (typeof existingEmail !== 'undefined') {
                 await axios.post("/api/code/email", {
@@ -329,6 +333,7 @@ export default {
 
         },
         async confirmOTPEditInfo() {
+            this.incorrectCode = false
             await axios.post("/api/code/verify", {
                 code: this.OTP
             }).then(response => {
@@ -343,6 +348,7 @@ export default {
             })
         },
         async verifyEmail() {
+            this.incorrectCode = false
             await axios.post("/api/code/verify", {
                 code: this.OTP
             }).then(async response => {
@@ -370,6 +376,7 @@ export default {
             });
         },
         async updateInfo() {
+            this.updateInfoSuccess = false
             if (this.verified) {
                 await axios.put(`/api/doctor/${this.id}`, {
                     licenseNo: this.licenseNo,

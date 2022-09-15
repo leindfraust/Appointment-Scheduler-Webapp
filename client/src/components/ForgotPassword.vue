@@ -33,6 +33,7 @@ async function forgotPasswordOTP() {
         if (confirmEmail) {
             emailExists.value = true
         } else {
+            emailExists.value = false
             if (props.userType == 'patient') {
                 await axios.post('/api/user/verify_username', {
                     username: usernameHandler.value,
@@ -94,6 +95,7 @@ async function forgotPasswordOTP() {
 }
 async function verifyCode() {
     let confirmCode
+    codeVerified.value = false
     await axios.post('/api/code/verify', {
         code: code.value
     }).then(response => confirmCode = response.data)
