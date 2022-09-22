@@ -42,7 +42,7 @@
               </p>
             </div>
             <div class="columns is-multiline is-mobile" v-if="!specializationClicked">
-              <div class="column is-4" v-for="(specialist, index) in specialistList" :key="index">
+              <div class="column is-6-mobile is-4-desktop" v-for="(specialist, index) in specialistList" :key="index">
                 <a @click="getDoctors(specialist.specialist)">
                   <figure class="image is-4by3" v-if="specialist.specialist !== 'General Practitioner'">
                     <img :src="`https://ui-avatars.com/api/?name=${specialist.specialist}`
