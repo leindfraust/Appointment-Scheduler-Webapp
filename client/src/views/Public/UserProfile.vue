@@ -24,6 +24,8 @@ let file = ref()
 let uploadProfileButton = ref(false)
 let imgPreviewFile = ref()
 let searchRefID = ref('')
+let buttonProfileImgSubmitLoading = ref(false)
+
 onMounted(async () => {
     await axios.post('/api/appointmentList/patients', { id: store.state.patientID }).then(response => appointmentList.value = response.data);
     await axios.get("/session/patient").then(response => patient.value = response.data);
@@ -109,6 +111,7 @@ async function cancelAppointment(id) {
     }
 }
 async function uploadProfilePhotoClient() {
+    buttonProfileImgSubmitLoading.value = true
     const formData = new FormData()
     formData.append('username', store.state.patientUsername)
     formData.append('imgFile', file.value)
@@ -128,6 +131,7 @@ async function uploadProfilePhotoClient() {
         errMsg.value = err
         console.log(err)
     }
+    buttonProfileImgSubmitLoading.value = false
 }
 </script>
 <template>
@@ -141,16 +145,19 @@ async function uploadProfilePhotoClient() {
                             <figure class="image is-square image-outer" v-if="store.state.checkProfileImg">
                                 <img class="is-rounded image-inner" v-if="imgPreviewFile" :Src="imgPreviewFile" />
                                 <img class="is-rounded image-inner" v-else
-                                    :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/patients/${store.state.patientUsername}.jpg`">
+                                    :src="`https://res.cloudinary.com/leindfraust/image/v${new Date().getMonth()}${new Date().getDate()}${new Date().getMilliseconds()}/upload/assets/patients/${store.state.patientUsername}.jpg`">
                                 <div class="buttons is-hidden-mobile" style="bottom:5%; right:10%; position: absolute">
-                                    <label for="file-input" style="cursor: pointer"><a
-                                            class="button is-responsive" style="border-radius: 50%; height: 50px; width: 50px"><i class="fa-solid fa-camera"></i>
+                                    <label for="file-input" style="cursor: pointer"><a class="button is-responsive"
+                                            style="border-radius: 50%; height: 50px; width: 50px"><i
+                                                class="fa-solid fa-camera"></i>
                                         </a></label>
                                 </div>
                                 <div class="buttons is-hidden-desktop"
                                     style="bottom: 15%; left:75%; position: absolute">
                                     <label for="file-input" style="cursor: pointer"><a
-                                            class="button is-large is-responsive" style="border-radius: 50%; height: 35px; width: 35px"><i class="fa-solid fa-camera"></i>
+                                            class="button is-large is-responsive"
+                                            style="border-radius: 50%; height: 35px; width: 35px"><i
+                                                class="fa-solid fa-camera"></i>
                                         </a></label>
                                 </div>
                             </figure>
@@ -177,8 +184,8 @@ async function uploadProfilePhotoClient() {
                         <div class="buttons is-centered">
                             <button class="button" v-if="uploadProfileButton"
                                 @click="imgPreviewFile = null, uploadProfileButton = false">Cancel</button>
-                            <button class="button is-info" v-if="uploadProfileButton"
-                                @click="uploadProfilePhotoClient">Upload Photo</button>
+                            <button class="button is-info" :class="{'is-loading': buttonProfileImgSubmitLoading}"
+                                v-if="uploadProfileButton" @click="uploadProfilePhotoClient">Upload Photo</button>
                         </div>
                     </div>
                     <div class="column">
@@ -234,7 +241,7 @@ async function uploadProfilePhotoClient() {
                                                     :key="provinces._id">
                                                     <a class="dropdown-item"
                                                         @click="selectProvince(provinces.province)">{{
-                                                                provinces.province
+                                                        provinces.province
                                                         }}</a>
                                                 </div>
                                             </div>
@@ -258,7 +265,7 @@ async function uploadProfilePhotoClient() {
                                                 <div class="dropdown-content" v-for="cities in citiesData"
                                                     :key="cities.name">
                                                     <a class="dropdown-item" @click="selectCity(cities.name)">{{
-                                                            cities.name
+                                                    cities.name
                                                     }}</a>
                                                 </div>
                                             </div>
@@ -285,7 +292,7 @@ async function uploadProfilePhotoClient() {
             <div class="dropdown" :class="{ 'is-active': appointmentModal }">
                 <div class="dropdown-trigger">
                     <button class="button" @click="appointmentModal = !appointmentModal"><span>{{ navOngoingAppointments
-                            ? 'Ongoing Appointments' : 'Past Appointments'
+                    ? 'Ongoing Appointments' : 'Past Appointments'
                     }}</span><span class="icon is-small">
                             <i class="fas fa-angle-down" aria-hidden="true"></i>
                         </span>
@@ -295,7 +302,7 @@ async function uploadProfilePhotoClient() {
                     <div class="dropdown-content">
                         <a class="dropdown-item"
                             @click="navOngoingAppointments = !navOngoingAppointments, navPastAppointments = !navPastAppointments, appointmentModal = !appointmentModal">{{
-                                    navOngoingAppointments ? 'Past Appointments' : 'Ongoing Appointments'
+                            navOngoingAppointments ? 'Past Appointments' : 'Ongoing Appointments'
                             }}</a>
                     </div>
                 </div>
