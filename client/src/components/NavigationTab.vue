@@ -24,7 +24,7 @@
                             v-if="notifications.find(x => x.new === true)"><i
                                 class="fa-solid fa-bell animate__animated animate__heartBeat animate__infinite"><span
                                     class="is-size-7">{{ notifications.filter(x =>
-                                            x.new).length
+                                    x.new).length
                                     }}</span></i></span><span class="has-text-info" v-else><i
                                 class="fa-solid fa-bell"></i></span></a>
                     <div class="navbar-dropdown is-right notif-list" v-if="notifications.length !== 0">
@@ -34,7 +34,7 @@
                             <div class="notification is-info" :class="{ 'is-light': !notifs.new }">
                                 <a style="text-decoration: none;" @click="openNotif(notifs, index)">{{ notifs.subject }}
                                     <p class="help">{{ notifs.from == 'Med Search' ? `From ${notifs.from}` : `From
-                                                                            Dr. ${notifs.from}`
+                                    Dr. ${notifs.from}`
                                     }}</p>
                                 </a>
                                 <button class="delete" @click="deleteNotif(notifs)"></button>
@@ -50,7 +50,7 @@
                     <a class="navbar-item is-hidden-mobile" v-if="checkImgState">
                         <figure class="image" v-if="$store.state.checkProfileImg">
                             <img class="is-rounded"
-                                :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/patients/${$store.state.patientUsername}.jpg`">
+                                :src="`https://res.cloudinary.com/leindfraust/image/upload/v${new Date().getMonth()}${new Date().getDate()}/assets/patients/${$store.state.patientUsername}.jpg`">
                         </figure>
                         <figure class="image" v-else>
                             <img class="is-rounded"
@@ -102,7 +102,7 @@
         <div class="modal-content box">
             <section class="section">
                 <p class="title">{{ viewNotif.from == 'Med Search' ? `From ${viewNotif.from}` : `From
-                                    Dr. ${viewNotif.from}`
+                Dr. ${viewNotif.from}`
                 }}</p>
                 <p class="subtitle">{{ new Date(viewNotif.date).toDateString() }}</p>
                 <p class="subtitle">{{ viewNotif.message }}</p>

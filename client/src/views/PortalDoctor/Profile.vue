@@ -34,7 +34,7 @@
                   <figure class="image image-outer is-square">
                     <img class="is-rounded image-inner" v-if="imgPreviewFile" :src="imgPreviewFile" />
                     <img class="is-rounded image-inner" v-else
-                      :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${alias}.jpg`">
+                      :src="`http://res.cloudinary.com/leindfraust/image/upload/v${new Date().getMonth()}${new Date().getDate()}/assets/doctors/${alias}.jpg`">
                     <div class="buttons is-hidden-mobile" style="bottom: 5%; right: 10%; position: absolute">
                       <label for="file-input" style="cursor: pointer"><a class="button is-medium is-responsive"><i
                             class="fa-solid fa-camera"></i>

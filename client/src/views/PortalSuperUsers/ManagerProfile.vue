@@ -17,7 +17,7 @@
                 <div class="box">
                     <figure class="image is-16by9" v-if="hospitalStatus !== 'Inactive'">
                         <img
-                            :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/managers/${managerHospital}.jpg`" />
+                            :src="`https://res.cloudinary.com/leindfraust/image/upload/v${new Date().getMonth()}${new Date().getDate()}/assets/managers/${managerHospital}.jpg`" />
                     </figure>
                     <!--Hospital picture & upload -->
                     <form id="formUpload" action="/api/imgUploadManager" method="post" enctype="multipart/form-data"

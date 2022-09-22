@@ -17,7 +17,7 @@
         <div class="has-text-centered block" style="padding: 5px;">
             <figure class="is-hidden-mobile is-hidden-touch image image-outer is-square" style="margin: auto; ">
                 <img class="is-rounded image-inner"
-                    :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${alias}.jpg`">
+                    :src="`http://res.cloudinary.com/leindfraust/image/upload/v${new Date().getMonth()}${new Date().getDate()}/assets/doctors/${alias}.jpg`">
             </figure>
             <h5 class="title is-6" v-if="isActive">Dr. {{ $store.state.doctorName }}</h5>
         </div>
