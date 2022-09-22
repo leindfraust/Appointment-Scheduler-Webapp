@@ -9,7 +9,7 @@
         </div>
         <div class="block is-hidden-desktop"></div>
         <div v-if="citiesOrMunicipalities != ''">
-            <div class="columns is-multiline">
+            <div class="columns is-mobile" style="overflow: auto;">
                 <div class="column is-narrow">
                     <div class="dropdown" :class="{ 'is-active': cityMunicipalityFilter }">
                         <div class="doprdown-trigger">
@@ -125,7 +125,7 @@
                                 <a @click="checkUser ? bookAppointment(geoHospital) : $router.push('/user/login')">
                                     <figure class="image is-3by2 is-rounded">
                                         <img loading="lazy" style="border-radius: 10px"
-                                            :src="`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/managers/${geoHospital.hospital}.jpg`" />
+                                            :src="`https://res.cloudinary.com/leindfraust/image/upload/v${new Date().getMonth()}${new Date().getDate()}/assets/managers/${geoHospital.hospital}.jpg`" />
                                     </figure>
                                 </a>
                             </div>
@@ -388,5 +388,25 @@ export default {
     #hospital {
         margin-bottom: 15% !important;
     }
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar {
+    width: 20px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #d6dee1;
+    border-radius: 20px;
+    border: 6px solid transparent;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #a8bbbf;
 }
 </style>
