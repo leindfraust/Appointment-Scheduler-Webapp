@@ -3,219 +3,219 @@ import {
     createWebHistory
 } from 'vue-router'
 import store from '../store'
-import Home from '../views/Public/Home.vue'
-import DoctorList from '../views/Public/DoctorList.vue'
-import RegForm from '../views/Public/RegForm.vue'
-import LoginDoctor from '../views/PortalDoctor/LoginDoctor.vue'
-import Doctor from '../views/PortalDoctor/Doctor.vue'
-import SignUpDoctor from '../views/PortalDoctor/SignUpDoctor.vue'
-import Scheduler from '../views/PortalDoctor/Scheduler.vue'
-import DoctorProfile from '../views/PortalDoctor/Profile.vue'
-import PatientLogs from '../views/PortalDoctor/PatientLogs.vue'
-import DoctorSecurity from '../views/PortalDoctor/Security.vue'
-import DoctorPickSuccess from '../views/PortalSuccessConfirmations/DoctorPickSuccess.vue'
-import ImageUploadSuccess from '../views/PortalSuccessConfirmations/ImageUploadSuccess'
-import imageUploadSuccessPatientProfile from '../views/PortalSuccessConfirmations/imageUploadSuccessPatientProfile.vue'
-import ImageUploadSuccessDoctor from '../views/PortalSuccessConfirmations/ImageUploadSuccessDoctor.vue'
-import ImageUploadSuccessManager from '../views/PortalSuccessConfirmations/imageUploadSuccessManager.vue'
-import UserSignUp from '../views/Public/UserSignUp.vue'
-import UserLogin from '../views/Public/UserLogin.vue'
-import User from '../views/Public/UserView.vue'
-import UserProfile from '../views/Public/UserProfile.vue'
-import UserSecurity from '../views/Public/UserSecurity.vue'
-import SuperUser from '../views/PortalSuperUsers/SuperUser.vue'
-import SuperUserLogin from '../views/PortalSuperUsers/SuperUserLogin.vue'
-import Manager from '../views/PortalSuperUsers/Manager.vue'
-import ManagerLogin from '../views/PortalSuperUsers/ManagerLogin.vue'
-import ManagerSignup from '../views/PortalSuperUsers/ManagerSignup.vue'
-import ManagerProfile from '../views/PortalSuperUsers/ManagerProfile.vue'
-import ManagerSecurity from '../views/PortalSuperUsers/ManagerSecurity.vue'
-import ContactSupport from '../views/Public/ContactSupport.vue'
-import PageNotExist from '../views/Public/PageNotExist.vue'
+const Home = () => import('../views/Public/Home.vue')
+const DoctorList = () => import('../views/Public/DoctorList.vue')
+const RegForm = () => import('../views/Public/RegForm.vue')
+const LoginDoctor = () => import('../views/PortalDoctor/LoginDoctor.vue')
+const Doctor = () => import('../views/PortalDoctor/Doctor.vue')
+const SignUpDoctor = () => import('../views/PortalDoctor/SignUpDoctor.vue')
+const Scheduler = () => import('../views/PortalDoctor/Scheduler.vue')
+const DoctorProfile = () => import('../views/PortalDoctor/Profile.vue')
+const PatientLogs = () => import('../views/PortalDoctor/PatientLogs.vue')
+const DoctorSecurity = () => import('../views/PortalDoctor/Security.vue')
+const DoctorPickSuccess = () => import('../views/PortalSuccessConfirmations/DoctorPickSuccess.vue')
+const ImageUploadSuccess = () => import('../views/PortalSuccessConfirmations/ImageUploadSuccess')
+const imageUploadSuccessPatientProfile = () => import('../views/PortalSuccessConfirmations/imageUploadSuccessPatientProfile.vue')
+const ImageUploadSuccessDoctor = () => import('../views/PortalSuccessConfirmations/ImageUploadSuccessDoctor.vue')
+const ImageUploadSuccessManager = () => import('../views/PortalSuccessConfirmations/imageUploadSuccessManager.vue')
+const UserSignUp = () => import('../views/Public/UserSignUp.vue')
+const UserLogin = () => import('../views/Public/UserLogin.vue')
+const User = () => import('../views/Public/UserView.vue')
+const UserProfile = () => import('../views/Public/UserProfile.vue')
+const UserSecurity = () => import('../views/Public/UserSecurity.vue')
+const SuperUser = () => import('../views/PortalSuperUsers/SuperUser.vue')
+const SuperUserLogin = () => import('../views/PortalSuperUsers/SuperUserLogin.vue')
+const Manager = () => import('../views/PortalSuperUsers/Manager.vue')
+const ManagerLogin = () => import('../views/PortalSuperUsers/ManagerLogin.vue')
+const ManagerSignup = () => import('../views/PortalSuperUsers/ManagerSignup.vue')
+const ManagerProfile = () => import('../views/PortalSuperUsers/ManagerProfile.vue')
+const ManagerSecurity = () => import('../views/PortalSuperUsers/ManagerSecurity.vue')
+const ContactSupport = () => import('../views/Public/ContactSupport.vue')
+const PageNotExist = () => import('../views/Public/PageNotExist.vue')
 
 const routes = [{
-        path: '/',
-        component: Home,
-    },
-    {
-        path: '/provider',
-        component: () => import('../views/Public/ProviderLoader.vue')
-    },
-    //Manager/Hospital account routes
-    {
-        path: '/user/manager/:user',
-        component: Manager,
-        meta: {
-            requiresManagerAuth: true
-        }
-    },
-    {
-        path: '/user/manager/signup',
-        component: ManagerSignup
-    },
-    {
-        path: '/user/manager/login',
-        component: ManagerLogin,
-    },
-    {
-        path: '/user/manager/:user/profile',
-        component: ManagerProfile,
-        meta: {
-            requiresManagerAuth: true
-        }
-    },
-    {
-        path: '/user/manager/:user/security',
-        component: ManagerSecurity,
-        meta: {
-            requiresManagerAuth: true
-        }
-    },
-    //Superuser account routes
-    {
-        path: '/user/superuser',
-        component: SuperUser,
-        meta: {
-            requiresSuperUserAuth: true
-        }
-    },
-    {
-        path: '/user/superuser/login',
-        component: SuperUserLogin,
-    },
-    //doctor account routes
-    {
-        path: '/doctor/login',
-        component: LoginDoctor,
-    },
-    {
-        path: '/doctor/signup',
-        component: SignUpDoctor,
-    },
-    {
-        path: '/doctor/user/:user',
-        component: Doctor,
-        meta: {
-            requiresAuth: true
-        },
-    },
-    {
-        path: '/doctor/user/:user/schedule',
-        component: Scheduler,
-        meta: {
-            requiresAuth: true
-        },
-    },
-    {
-        path: '/doctor/user/:user/profile',
-        component: DoctorProfile,
-        meta: {
-            requiresAuth: true
-        },
-    },
-    {
-        path: '/doctor/user/:user/security',
-        component: DoctorSecurity,
-        meta: {
-            requiresAuth: true
-        },
-    },
-    {
-        path: '/doctor/user/:user/patients',
-        component: PatientLogs,
-        meta: {
-            requiresAuth: true
-        }
-    },
-    //Confirmation routes
-    {
-        path: '/imgUploadSuccess',
-        component: ImageUploadSuccess,
-        meta: {
-            requireImgUploadSuccess: true
-        }
-    },
-    {
-        path: '/imgUploadSuccessPatient',
-        component: imageUploadSuccessPatientProfile,
-        meta: {
-            requireImgUploadSuccess: true
-        }
-    },
-    {
-        path: '/imgUploadSuccessDoctor',
-        component: ImageUploadSuccessDoctor,
-        meta: {
-            requireImgUploadSuccess: true
-        }
-    },
-    {
-        path: '/imgUploadSuccessManager',
-        component: ImageUploadSuccessManager,
-        meta: {
-            requireImgUploadSuccessManager: true
-        }
-    },
-    //User routes
-    {
-        path: '/user/signup',
-        component: UserSignUp
-    },
-    {
-        path: '/user/login',
-        component: UserLogin
-    },
-    {
-        path: '/user/:user/',
-        component: User,
-        meta: {
-            requiresAuthPatient: true
-        }
-    },
-    {
-        path: '/user/:user/:hospital/doctors',
-        component: DoctorList,
-        meta: {
-            requiresAuthPatient: true
-        }
-    },
-    {
-        path: '/user/:user/profile',
-        component: UserProfile,
-        name: UserProfile,
-        meta: {
-            requiresAuthPatient: true
-        }
-    },
-    {
-        path: '/user/:user/security',
-        component: UserSecurity,
-        meta: {
-            requiresAuthPatient: true
-        }
-    },
-    {
-        path: '/success',
-        component: DoctorPickSuccess,
-        meta: {
-            requireSuccessPickDoctor: true
-        },
-    },
-    {
-        path: '/user/:user/registration',
-        component: RegForm,
-        meta: {
-            requireProcess: true
-        },
-    },
-    {
-        path: '/contactus',
-        component: ContactSupport
-    },
-    {
-        path: '/:catchAll404(.*)*',
-        component: PageNotExist
+    path: '/',
+    component: Home,
+},
+{
+    path: '/provider',
+    component: () => import('../views/Public/ProviderLoader.vue')
+},
+//Manager/Hospital account routes
+{
+    path: '/user/manager/:user',
+    component: Manager,
+    meta: {
+        requiresManagerAuth: true
     }
+},
+{
+    path: '/user/manager/signup',
+    component: ManagerSignup
+},
+{
+    path: '/user/manager/login',
+    component: ManagerLogin,
+},
+{
+    path: '/user/manager/:user/profile',
+    component: ManagerProfile,
+    meta: {
+        requiresManagerAuth: true
+    }
+},
+{
+    path: '/user/manager/:user/security',
+    component: ManagerSecurity,
+    meta: {
+        requiresManagerAuth: true
+    }
+},
+//Superuser account routes
+{
+    path: '/user/superuser',
+    component: SuperUser,
+    meta: {
+        requiresSuperUserAuth: true
+    }
+},
+{
+    path: '/user/superuser/login',
+    component: SuperUserLogin,
+},
+//doctor account routes
+{
+    path: '/doctor/login',
+    component: LoginDoctor,
+},
+{
+    path: '/doctor/signup',
+    component: SignUpDoctor,
+},
+{
+    path: '/doctor/user/:user',
+    component: Doctor,
+    meta: {
+        requiresAuth: true
+    },
+},
+{
+    path: '/doctor/user/:user/schedule',
+    component: Scheduler,
+    meta: {
+        requiresAuth: true
+    },
+},
+{
+    path: '/doctor/user/:user/profile',
+    component: DoctorProfile,
+    meta: {
+        requiresAuth: true
+    },
+},
+{
+    path: '/doctor/user/:user/security',
+    component: DoctorSecurity,
+    meta: {
+        requiresAuth: true
+    },
+},
+{
+    path: '/doctor/user/:user/patients',
+    component: PatientLogs,
+    meta: {
+        requiresAuth: true
+    }
+},
+//Confirmation routes
+{
+    path: '/imgUploadSuccess',
+    component: ImageUploadSuccess,
+    meta: {
+        requireImgUploadSuccess: true
+    }
+},
+{
+    path: '/imgUploadSuccessPatient',
+    component: imageUploadSuccessPatientProfile,
+    meta: {
+        requireImgUploadSuccess: true
+    }
+},
+{
+    path: '/imgUploadSuccessDoctor',
+    component: ImageUploadSuccessDoctor,
+    meta: {
+        requireImgUploadSuccess: true
+    }
+},
+{
+    path: '/imgUploadSuccessManager',
+    component: ImageUploadSuccessManager,
+    meta: {
+        requireImgUploadSuccessManager: true
+    }
+},
+//User routes
+{
+    path: '/user/signup',
+    component: UserSignUp
+},
+{
+    path: '/user/login',
+    component: UserLogin
+},
+{
+    path: '/user/:user/',
+    component: User,
+    meta: {
+        requiresAuthPatient: true
+    }
+},
+{
+    path: '/user/:user/:hospital/doctors',
+    component: DoctorList,
+    meta: {
+        requiresAuthPatient: true
+    }
+},
+{
+    path: '/user/:user/profile',
+    component: UserProfile,
+    name: UserProfile,
+    meta: {
+        requiresAuthPatient: true
+    }
+},
+{
+    path: '/user/:user/security',
+    component: UserSecurity,
+    meta: {
+        requiresAuthPatient: true
+    }
+},
+{
+    path: '/success',
+    component: DoctorPickSuccess,
+    meta: {
+        requireSuccessPickDoctor: true
+    },
+},
+{
+    path: '/user/:user/registration',
+    component: RegForm,
+    meta: {
+        requireProcess: true
+    },
+},
+{
+    path: '/contactus',
+    component: ContactSupport
+},
+{
+    path: '/:catchAll404(.*)*',
+    component: PageNotExist
+}
 ]
 const router = createRouter({
     history: createWebHistory(process.env.BASE_URL),
