@@ -183,14 +183,14 @@ export default {
             this.province = province;
             this.isActiveDropdown = false;
         },
-        searchProvider(filterSymptom){
-            if(this.province){
+        searchProvider(filterSymptom) {
+            if (this.province) {
                 this.provincePrompt = false
-            router.push({path: '/provider', query: {name: this.province, symptom: filterSymptom, userLat: this.userLatitude, userLong: this.userLongitude} })
+                router.push({ path: '/provider', query: { name: this.province, symptom: filterSymptom, userLat: this.userLatitude, userLong: this.userLongitude } })
             } else {
                 this.provincePrompt = true
             }
-        },  
+        },
         getUserLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(this.geoUserPosition, this.geoUserPositionError);
