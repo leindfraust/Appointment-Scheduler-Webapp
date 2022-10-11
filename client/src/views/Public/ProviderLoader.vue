@@ -11,47 +11,27 @@
         <div v-if="citiesOrMunicipalities != ''">
             <div class="columns is-mobile" style="overflow: auto;">
                 <div class="column is-narrow">
-                    <div class="dropdown" :class="{ 'is-active': cityMunicipalityFilter }">
-                        <div class="doprdown-trigger">
-                            <button class="button is-rounded"
-                                @click="cityMunicipalityFilter = !cityMunicipalityFilter"><span>{{ city == '' ?
-                                'City/Municipality' : city
-                                }}</span>
-                                <span class="icon is-small">
-                                    <i class="fas fa-angle-down" aria-hidden="true"></i>
-                                </span></button>
-                        </div>
-                        <div class="dropdown-menu">
-                            <div class="dropdown-content" style="overflow: hidden">
-                                <div class="dropdown-item"><a @click="filterByCity('')">Any</a></div>
-                                <div class="dropdown-item"
-                                    v-for="(cityorMunicipality, index) in citiesOrMunicipalities.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
-                                    :key="index"><a @click="filterByCity(cityorMunicipality.name)">{{
-                                    cityorMunicipality.name
-                                    }}</a></div>
-                            </div>
-                        </div>
+                    <div class="select is-rounded">
+                        <select v-model="city">
+                            <option value="" disabled>City/Municipality</option>
+                            <option value="">Any</option>
+                            <option
+                                v-for="(cityorMunicipality, index) in citiesOrMunicipalities.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
+                                :key="index">{{
+                                cityorMunicipality.name
+                                }}</option>
+                        </select>
                     </div>
                 </div>
                 <div class="column is-narrow">
-                    <div class="dropdown" :class="{ 'is-active': facilityTypeFilter }">
-                        <div class="doprdown-trigger">
-                            <button class="button is-rounded" @click="facilityTypeFilter = !facilityTypeFilter">
-                                <span>{{ typeFilter == null ? 'Type of Facility' : typeFilter }}</span>
-                                <span class="icon is-small">
-                                    <i class="fas fa-angle-down" aria-hidden="true"></i>
-                                </span></button>
-                        </div>
-                        <div class="dropdown-menu">
-                            <div class="dropdown-content">
-                                <div class="dropdown-item"><a @click="filterAll">All
-                                    </a></div>
-                                <div class="dropdown-item"><a @click="filterPublic">Public
-                                    </a></div>
-                                <div class="dropdown-item"><a @click="filterPrivate">Private
-                                    </a></div>
-                            </div>
-                        </div>
+                    <div class="select is-rounded">
+                        <select v-model="typeFilter">
+                            <option :value="''" disabled>Type of Facility</option>
+                            <option :value="''">Any</option>
+                            <option value="Public">Public Hospital</option>
+                            <option value="Private">Private Hospital</option>
+                            <option value="Clinic">Clinic</option>
+                        </select>
                     </div>
                 </div>
                 <div class="column is-narrow">
@@ -72,47 +52,26 @@
                         </select>
                     </div>
                 </div>
-                <div class="column has-text-right">
-                    <div class="dropdown" :class="{ 'is-active': isActiveDropdown }">
-                        <div class="dropdown-trigger">
-                            <div class="field has-addons">
-                                <div class="control has-icons-left">
-                                    <input class="input" type="text" v-model="province" style="width: 300px;"
-                                        placeholder="What region are you located?" @input="regionSelect" />
-                                    <span class="icon is-small is-left">
-                                        <i class="fa-solid fa-location-dot"></i>
-                                    </span>
-                                </div>
-                                <div class="control">
-                                    <button class="button is-info is-rounded" @click="loadProvider()"
-                                        :disabled="province == ''">Search</button>
-                                </div>
+                <div class="column">
+                    <div class="is-pulled-right">
+                        <div class="field has-addons">
+                            <div class="control has-icons-left">
+                                <input class="input" type="text" v-model="province" style="width: 300px;"
+                                    placeholder="What region are you located?" list="provinces" />
+                                <span class="icon is-small is-left">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </span>
                             </div>
-                            <div class="dropdown-menu">
-                                <div class="dropdown-content has-text-left"
-                                    v-if="Object.keys(geolocationIndexed).length !== 0">
-                                    <a class="dropdown-item" v-for="geodata in geolocationIndexed" :key="geodata._id"
-                                        @click="selectRegion(geodata.province)">{{
-                                        geodata.province
-                                        }}</a>
-                                </div>
-
-                                <div class="dropdown-content has-text-left" v-else>
-                                    <p class="dropdown-item has-text-danger">
-                                        Region not found or supported, please try again.
-                                    </p>
-                                </div>
+                            <datalist id="provinces">
+                                <option v-for="geodata in geolocationIndexed" :key="geodata._id">
+                                    {{geodata.province}}</option>
+                            </datalist>
+                            <div class="control">
+                                <button class="button is-info is-rounded" @click="loadProvider()"
+                                    :disabled="province == ''">Search</button>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="block" v-if="this.checkUser == false">
-                <div class="notification box" id="notification"
-                    style="width: 50%; margin: auto; background-color: white;">
-                    You must
-                    <a class="has-text-success" href="/user/login">login</a>. or
-                    <a class="has-text-danger" href="/user/signup">create an account</a>. to make an appointment.
                 </div>
             </div>
             <div class="columns">
@@ -122,7 +81,7 @@
                         <div class="columns has-text-left" id="hospital" style="margin-bottom: 5%"
                             v-for="(geoHospital, index) in geoHospitalNearestUserIndexed" :key="index">
                             <div class="column is-5">
-                                <a @click="checkUser ? bookAppointment(geoHospital) : $router.push('/user/login')">
+                                <a @click="bookAppointment(geoHospital)">
                                     <figure class="image is-3by2 is-rounded">
                                         <img loading="lazy" style="border-radius: 10px"
                                             :src="`https://res.cloudinary.com/leindfraust/image/upload/v${new Date().getMonth()}${new Date().getDate()}/assets/managers/${geoHospital.hospital}.jpg`" />
@@ -134,7 +93,7 @@
                                     v-if="filterSpecialist && geoHospital?.specialistArrFilter !== 0">{{
                                     geoHospital?.specialistArrFilter
                                     }} available {{ filterSpecialist }}</div>
-                                <a @click="checkUser ? bookAppointment(geoHospital) : $router.push('/user/login')">
+                                <a @click="bookAppointment(geoHospital)">
                                     <h1 class="title is-4">{{ geoHospital.hospital }}</h1>
                                     <p class="subtitle is-6">{{ geoHospital.barangayORStreet }}, {{ geoHospital.city }},
                                         {{
@@ -183,9 +142,9 @@ export default {
         },
         geoHospitalNearestUserIndexed() {
             if (this.geoHospitalNearestUser && this.filterSpecialist) {
-                return this.geoHospitalNearestUser.filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => x?.specialistArrFilter > 0).filter(x => this.typeFilter == null ? x.type == 'Private' || x.type == 'Public' : x.type == this.typeFilter).filter(x => x.city.includes(this.city));
+                return this.geoHospitalNearestUser.filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => x?.specialistArrFilter > 0).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city));
             } else if (this.geoHospitalNearestUser) {
-                return this.geoHospitalNearestUser.filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => this.typeFilter == null ? x.type == 'Private' || x.type == 'Public' : x.type == this.typeFilter).filter(x => x.city.includes(this.city))
+                return this.geoHospitalNearestUser.filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city))
             }
             else {
                 return false;
@@ -194,12 +153,6 @@ export default {
     },
     async mounted() {
         await axios.get("/api/geolocation").then(response => this.geolocation = response.data);
-        if (this.$store.state.patientID !== null) {
-            this.checkUser = true;
-        }
-        else {
-            this.checkUser = false;
-        }
         await this.loadProvider()
     },
     data() {
@@ -209,18 +162,15 @@ export default {
             checkUser: "",
             hospital: "",
             geolocation: [],
-            typeFilter: null,
+            typeFilter: '',
             citiesOrMunicipalities: [],
             province: this.$route.query.name,
             userLatitude: this.$route.query.userLat,
             userLongitude: this.$route.query.userLong,
-            isActiveDropdown: false,
             geoHospitalNearestUser: "",
             specializations: this.$store.getters.getSpecializationList,
             filterSpecialist: this.$route.query.symptom,
             distanceFilter: false,
-            cityMunicipalityFilter: false,
-            facilityTypeFilter: false,
             doctorSpecialistFilter: [],
             provincePrompt: false
         };
@@ -231,32 +181,13 @@ export default {
             await axios.put(`/api/manager/${hospitalDetails._id}`, {
                 engagements: hospitalDetails.engagements + 1
             });
-            await this.$router.push(`/user/${this.$store.state.patientUsername}/${hospitalDetails._id}/doctors`);
-        },
-        regionSelect() {
-            this.isActiveDropdown = true;
-        },
-        filterByCity(city) {
-            this.city = city;
-        },
-        filterAll() {
-            this.typeFilter = null;
-        },
-        filterPrivate() {
-            this.typeFilter = "Private";
-        },
-        filterPublic() {
-            this.typeFilter = 'Public'
+            await this.$router.push(`/${hospitalDetails._id}/doctors`)
         },
         filterDistanceToggle() {
             this.isHospitalLoading = true;
             this.geoHospitalNearestUser.sort((a, b) => this.distanceFilter ? b.distance - a.distance : a.distance - b.distance);
             this.distanceFilter = !this.distanceFilter
             this.isHospitalLoading = false;
-        },
-        selectRegion(province) {
-            this.province = province;
-            this.isActiveDropdown = false;
         },
         async loadProvider() {
             this.isHospitalLoading = true;
@@ -408,5 +339,9 @@ export default {
 
 ::-webkit-scrollbar-thumb:hover {
     background-color: #a8bbbf;
+}
+
+[list]::-webkit-calendar-picker-indicator {
+    opacity: 0 !important;
 }
 </style>
