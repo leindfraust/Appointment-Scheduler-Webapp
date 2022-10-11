@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.send(req.session)
+    req.session.reload((err) => {
+        if (err) console.log(err)
+        res.status(200).send(req.session)
+    });
 });
 
 router.post('/', (req, res) => {
