@@ -21,7 +21,7 @@
               </h1>
               <h1 class="subtitle has-text-black">Schedule: {{ new Date(index).toDateString() }}</h1>
               <div class="table-container">
-                <table class="table is-striped is-narrow is-fullwidth is-bordered">
+                <table class="table is-striped is-fullwidth">
                   <thead>
                     <tr>
                       <th class="has-text-black-ter">Controls</th>
@@ -176,7 +176,7 @@ export default {
             );
           }).sort((a, b) => {
             return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
-          }).filter(x => { return new Date(x.schedule[0].date).toLocaleDateString() >= new Date().toLocaleDateString() && x.ifPatientVisited == false })
+          }).filter(x => { return new Date(x.schedule[0].id) >= new Date() && x.ifPatientVisited == false })
           ,
           "schedule[0].date"
         );

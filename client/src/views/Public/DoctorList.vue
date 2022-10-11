@@ -13,7 +13,7 @@
         <div class="container is-fluid">
           <h1 class="title">{{ hospitalDetails.hospital }}</h1>
           <p class="subtitle">{{ hospitalDetails.barangayORStreet }}, {{ hospitalDetails.city }}, {{
-              hospitalDetails.province
+          hospitalDetails.province
           }}</p>
           <p class="subtitle is-6">{{ hospitalDetails.details[0].description }}</p>
           <div class="content">
@@ -49,7 +49,7 @@
                     " />
                   </figure>
                   <p class="subtitle has-text-centered" v-if="specialist.specialist !== 'General Practitioner'">{{
-                      specialist.specialist
+                  specialist.specialist
                   }}</p>
                 </a>
               </div>
@@ -86,17 +86,19 @@
                         <h3 class="subtitle is-6"><span class="has-text-weight-semibold">{{ pickedSpecialist
                         }}</span><br />
                           <span class="subtitle is-6 has-text-info">({{ doctors.visits == null ? '0 visits' :
-                              `${doctors.visits} visits`
+                          `${doctors.visits} visits`
                           }})</span>
                         </h3>
                       </div>
                     </div>
                     <div class="column" style="margin-top: auto;">
-                      <div class="has-text-right">
-                        <button class="button is-info is-rounded" @click="pickDoctor(doctors, pickedSpecialist)">Book an
-                          Appointment</button>
-                      </div>
+                      <button class="button is-info is-rounded" @click="pickDoctor(doctors, pickedSpecialist)"
+                        v-if="$store.state.patientID !== null">Book an
+                        Appointment</button>
                     </div>
+                  </div>
+                  <div class="notification" v-if="$store.state.patientID == null"><router-link :to="'/user/login'" class="has-text-weight-bold">Login</router-link> or <router-link :to="'/user/signup'" class="has-text-weight-bold">create an
+                    account</router-link> to make an appointment.
                   </div>
                   <hr>
                 </div>
@@ -135,16 +137,15 @@ export default {
     };
   },
   async mounted() {
-    await axios
-      .get("/session/patient")
-      .then(response => this.patientDetails = response.data);
+    if (this.$store.state.patientID !== null) {
+      await axios
+        .get("/session/patient")
+        .then(response => this.patientDetails = response.data);
+    }
     await axios.post(`/api/manager/${this.$route.params.hospital}`).then(response => {
       this.hospitalDetails = response.data
       this.specialistList = response.data.specializations.sort()
     });
-    if (this.$route.params.id !== this.patientDetails.username) {
-      await this.$router.push(`/user/${this.$store.state.patientUsername}/${this.hospitalDetails._id}/doctors`);
-    }
   },
   computed: {
     doctorSearch() {
@@ -164,7 +165,7 @@ export default {
       await axios.post("/api/checkDoctorAvailability", {
         hospital: this.hospitalDetails.hospital,
         specialist: specialization
-      }).then(response => response ? this.doctorList = response.data.filter(x => x.schedule.find(x => new Date(x.date) > new Date() && x.hospital === this.hospitalDetails.hospital)) : this.doctorList = '').catch(err => console.log(err))
+      }).then(response => response ? this.doctorList = response.data.filter(x => x.schedule.find(x => new Date(x.id) > new Date() && x.hospital === this.hospitalDetails.hospital)) : this.doctorList = '').catch(err => console.log(err))
       this.isDoctorLoading = false
     },
     viewSpecializations() {
@@ -175,7 +176,11 @@ export default {
       store.commit("doctorDetails", details);
       store.commit("statusAvailability", true);
       store.commit("hospitalName", this.hospitalDetails.hospital);
-      await this.$router.push(`/user/${this.patientDetails.username}/registration`);
+      if (this.$store.state.patientID !== null) {
+        await this.$router.push(`/user/${this.patientDetails.username}/registration`);
+      } else {
+        await this.$router.push('/user/signup')
+      }
     },
   },
 };

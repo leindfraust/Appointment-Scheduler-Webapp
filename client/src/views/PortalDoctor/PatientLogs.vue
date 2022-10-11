@@ -110,7 +110,7 @@
                 :class="{ 'is-hidden': new Date(index).toDateString() == new Date().toDateString() }">
                 <h1 class="subtitle has-text-black">Schedule: {{ new Date(index).toDateString() }}</h1>
                 <div class="table-container">
-                  <table class="table is-striped is-narrow is-fullwidth is-bordered">
+                  <table class="table is-striped is-fullwidth">
                     <thead>
                       <tr>
                         <th class="has-text-black-ter">Controls</th>
@@ -126,7 +126,7 @@
                     </thead>
                     <tbody v-for="appointments in appointmentList" :key="appointments._id">
                       <tr>
-                        <button class="button is-info"
+                        <button class="button is-info is-light"
                           @click="sendNotifActive(appointments.patientID, appointments.firstName, appointments.lastName)">Send
                           a notification</button>
                         <th class="has-text-black-ter">{{ appointments.referenceID }}</th>
@@ -200,7 +200,7 @@ export default {
           })
             .sort((a, b) => {
               return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
-            }).filter(x => new Date(x.schedule[0].date).getTime() < new Date().getTime() || x.ifPatientVisited == true)
+            }).filter(x => new Date(x.schedule[0].id) < new Date() || x.ifPatientVisited == true)
           ,
           "schedule[0].date"
         );
@@ -312,4 +312,5 @@ export default {
 }
 </script>
 <style scoped>
+
 </style>

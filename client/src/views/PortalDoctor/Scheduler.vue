@@ -22,7 +22,7 @@
                     <div class="select block">
                       <select v-model="selectedHospital">
                         <option v-for="hospital in hospitalList" :key="hospital" :value="hospital.hospital">{{
-                            hospital.hospital
+                        hospital.hospital
                         }}</option>
                       </select>
                     </div>
@@ -173,17 +173,20 @@ export default {
         prefix: this.prefix,
         hospital: this.selectedHospital
       });
-
-      await axios.put(`/api/doctor/${this.userID}`, {
-        schedule: this.days,
-      });
-      await axios.put("/session/doctor", {
-        schedule: this.days,
-      });
-      await axios
-        .get("/session/doctor")
-        .then((response) => (this.days = response.data.schedule));
-
+      try {
+        await axios.put(`/api/doctor/${this.userID}`, {
+          schedule: this.days,
+        });
+        await axios.put("/session/doctor", {
+          schedule: this.days,
+        });
+        await axios
+          .get("/session/doctor")
+          .then((response) => (this.days = response.data.schedule));
+      }
+      catch (err) {
+        console.log(err)
+      }
       this.uploadSchedSuccess = true
       this.loading = false
     },
@@ -195,16 +198,19 @@ export default {
           this.loading = true
           this.days.splice(idx, 1);
           this.isActive = false;
-          await axios.put(`/api/doctor/${this.userID}`, {
-            schedule: this.days,
-          });
-          await axios.put("/session/doctor", {
-            schedule: this.days,
-          });
-          await axios
-            .get("/session/doctor")
-            .then((response) => (this.days = response.data.schedule));
-
+          try {
+            await axios.put(`/api/doctor/${this.userID}`, {
+              schedule: this.days,
+            });
+            await axios.put("/session/doctor", {
+              schedule: this.days,
+            });
+            await axios
+              .get("/session/doctor")
+              .then((response) => (this.days = response.data.schedule));
+          } catch (err) {
+            console.log(err)
+          }
           this.uploadSchedSuccess = true
           this.loading = false
         }
@@ -225,4 +231,5 @@ export default {
 };
 </script>
 <style scoped>
+
 </style>

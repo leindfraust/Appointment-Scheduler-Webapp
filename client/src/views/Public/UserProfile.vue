@@ -47,13 +47,13 @@ const pastAppointments = computed(() => {
 function sortPastAppointments() {
     return appointmentList.value.sort((a, b) => {
         return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
-    }).filter(x => { return new Date(x.schedule[0].date).getTime() < new Date().getTime() || x.ifPatientVisited == true }).filter(x => x.referenceID.toLowerCase().includes(searchRefID.value.toLowerCase()))
+    }).filter(x => { return new Date(x.schedule[0].id) < new Date() || x.ifPatientVisited == true }).filter(x => x.referenceID.toLowerCase().includes(searchRefID.value.toLowerCase()))
 
 }
 function sortOngoingAppointments() {
     return appointmentList.value.sort((a, b) => {
         new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
-    }).filter(x => { return new Date(x.schedule[0].date).toLocaleDateString() >= new Date().toLocaleDateString() && x.ifPatientVisited == false }).filter(x => x.referenceID.toLowerCase().includes(searchRefID.value.toLowerCase()))
+    }).filter(x => { return new Date(x.schedule[0].id) >= new Date() && x.ifPatientVisited == false }).filter(x => x.referenceID.toLowerCase().includes(searchRefID.value.toLowerCase()))
 }
 //methods
 async function selectProvince(province) {
@@ -145,7 +145,7 @@ async function uploadProfilePhotoClient() {
                             <figure class="image is-square image-outer" v-if="store.state.checkProfileImg">
                                 <img class="is-rounded image-inner" v-if="imgPreviewFile" :Src="imgPreviewFile" />
                                 <img class="is-rounded image-inner" v-else
-                                    :src="`https://res.cloudinary.com/leindfraust/image/v${new Date().getMonth()}${new Date().getDate()}${new Date().getMilliseconds()}/upload/assets/patients/${store.state.patientUsername}.jpg`">
+                                    :src="`https://res.cloudinary.com/leindfraust/image/v${new Date().getMonth()}${new Date().getDate()}/upload/assets/patients/${store.state.patientUsername}.jpg`">
                                 <div class="buttons is-hidden-mobile" style="bottom:5%; right:10%; position: absolute">
                                     <label for="file-input" style="cursor: pointer"><a class="button is-responsive"
                                             style="border-radius: 50%; height: 50px; width: 50px"><i
