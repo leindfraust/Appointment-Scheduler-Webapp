@@ -59,7 +59,7 @@ export default {
             await this.$store.commit("accountCreated", false);
         }
         if (this.$store.state.managerHospital !== null) {
-            await this.$router.push(`/user/manager/${this.$store.state.managerHospital}`);
+            await this.$router.push(`/manager/${this.$store.state.managerHospital}`);
         }
     },
     methods: {
@@ -86,7 +86,7 @@ export default {
                                 hospital: this.userManager.hospital
                             });
                             this.$store.commit("managerHospital", this.userManager.hospital);
-                            await this.$router.push(`/user/manager/${this.userManager.hospital}`);
+                            await this.$router.push(`/manager/${this.userManager.hospital}`);
                         }
                         else {
                             this.validateMessage = "Incorrect username or password";
@@ -98,7 +98,7 @@ export default {
             }
         },
         async signup() {
-            await this.$router.push("/user/manager/signup");
+            await this.$router.push("/manager/signup");
         }
     },
     components: { ForgotPassword }

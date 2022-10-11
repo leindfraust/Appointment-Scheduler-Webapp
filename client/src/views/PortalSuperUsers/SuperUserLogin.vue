@@ -44,7 +44,7 @@ export default {
 
         if (typeof this.superUserConfirmEmail.superuser !== 'undefined') {
             this.$store.commit('superUserAuth', true)
-            await this.$router.push('/user/superuser')
+            await this.$router.push('/superuser')
         } else {
             await axios.delete("/session/superuser");
         }
@@ -88,7 +88,7 @@ export default {
                     superuser: this.superUserEmail
                 });
                 await this.$store.commit('superUserAuth', true)
-                await this.$router.push('/user/superuser')
+                await this.$router.push('/superuser')
             } else {
                 this.statusMessage = 'invalid code'
                 this.superUserCode = ''

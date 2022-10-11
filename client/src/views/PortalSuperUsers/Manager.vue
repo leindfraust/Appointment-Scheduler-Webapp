@@ -11,7 +11,7 @@
             <section class="section">
                 <div class="notification is-light is-danger" v-if="hospitalStatus.status == 'Inactive'">The account is
                     not activated yet and will not be displayed on hospital searches, complete the hospital's
-                    <router-link :to="`/user/manager/${this.managerHospital.hospital}/profile`" class="has-text-link">
+                    <router-link :to="`/manager/${this.managerHospital.hospital}/profile`" class="has-text-link">
                         profile</router-link> to activate the account.
                 </div>
                 <h1 class="title">{{ managerHospital.hospital }}</h1>

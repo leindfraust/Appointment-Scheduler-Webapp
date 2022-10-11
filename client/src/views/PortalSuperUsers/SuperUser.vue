@@ -672,7 +672,7 @@ export default {
         async logout() {
             await axios.delete("/session/superuser");
             await this.$store.commit("superUserAuth", false)
-            await this.$router.push("/user/superuser/login")
+            await this.$router.push("/superuser/login")
         }
     }
 }

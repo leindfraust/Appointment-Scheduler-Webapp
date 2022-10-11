@@ -43,29 +43,29 @@ const routes = [{
 },
 //Manager/Hospital account routes
 {
-    path: '/user/manager/:user',
+    path: '/manager/:user',
     component: Manager,
     meta: {
         requiresManagerAuth: true
     }
 },
 {
-    path: '/user/manager/signup',
+    path: '/manager/signup',
     component: ManagerSignup
 },
 {
-    path: '/user/manager/login',
+    path: '/manager/login',
     component: ManagerLogin,
 },
 {
-    path: '/user/manager/:user/profile',
+    path: '/manager/:user/profile',
     component: ManagerProfile,
     meta: {
         requiresManagerAuth: true
     }
 },
 {
-    path: '/user/manager/:user/security',
+    path: '/manager/:user/security',
     component: ManagerSecurity,
     meta: {
         requiresManagerAuth: true
@@ -73,14 +73,14 @@ const routes = [{
 },
 //Superuser account routes
 {
-    path: '/user/superuser',
+    path: '/superuser',
     component: SuperUser,
     meta: {
         requiresSuperUserAuth: true
     }
 },
 {
-    path: '/user/superuser/login',
+    path: '/superuser/login',
     component: SuperUserLogin,
 },
 //doctor account routes
@@ -166,15 +166,12 @@ const routes = [{
     component: UserLogin
 },
 {
-    path: '/user/:user/',
-    component: User,
-    meta: {
-        requiresAuthPatient: true
-    }
+    path: '/:hospital/doctors',
+    component: DoctorList,
 },
 {
-    path: '/user/:user/:hospital/doctors',
-    component: DoctorList,
+    path: '/user/:user/',
+    component: User,
     meta: {
         requiresAuthPatient: true
     }
@@ -253,7 +250,7 @@ router.beforeEach((to, from, next) => {
         if (store.state.imgSuccessManager) {
             return next();
         } else {
-            return next('/user/manager/login');
+            return next('/manager/login');
         }
     }
     next();
@@ -322,7 +319,7 @@ router.beforeEach((to, from, next) => {
         if (store.state.superUserAuth) {
             return next();
         } else {
-            return next('/user/superuser/login');
+            return next('/superuser/login');
         }
     }
     next();
@@ -342,7 +339,7 @@ router.beforeEach(async (to, from, next) => {
         if (store.state.managerHospital) {
             return next();
         } else {
-            return next('/user/manager/login');
+            return next('/manager/login');
         }
     }
     next();
