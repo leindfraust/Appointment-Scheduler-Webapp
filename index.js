@@ -45,18 +45,27 @@ app.use(history())
 app.use(express.static(path.join(__dirname, 'client/dist')))
 
 //use sessions
-app.use(session({
+const sess = {
     secret: 'leindfraust',
     resave: false,
     saveUninitialized: false,
-    maxAge: 14 * 24 * 60 * 60,
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
+    },
     store: MongoStore.create({
         mongoUrl: encodeURI(mongoUri),
         crypto: {
             secret: 'leindfraust'
-        }
+        },
     })
-}));
+}
+
+if (app.get('env') === 'production') {
+    app.set('trust proxy', 1)
+    sess.cookie.secure = true
+}
+
+app.use(session(sess));
 const sessDoctor = require('./sessions/doctor')
 const sessPatient = require('./sessions/user')
 const sessManager = require('./sessions/manager')
