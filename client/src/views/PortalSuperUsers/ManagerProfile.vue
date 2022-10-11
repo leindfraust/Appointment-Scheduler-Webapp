@@ -15,18 +15,24 @@
                     account is available when clicking <b>"Edit"</b>.
                 </div>
                 <div class="box">
-                    <figure class="image is-16by9" v-if="hospitalStatus !== 'Inactive'">
+                    <h1 class="title">Display Picture</h1>
+                    <figure class="image is-16by9" v-if="hospitalStatus !== 'Inactive' && !imgPreview">
                         <img
                             :src="`https://res.cloudinary.com/leindfraust/image/upload/v${new Date().getMonth()}${new Date().getDate()}/assets/managers/${managerHospital}.jpg`" />
+                    </figure>
+                    <figure class="image is-16by9" v-if="imgPreview">
+                        <img :src="imgPreview" />
                     </figure>
                     <!--Hospital picture & upload -->
                     <form id="formUpload" action="/api/imgUploadManager" method="post" enctype="multipart/form-data"
                         style="margin: auto; width: 50%" class="field">
                         <div class="control">
                             <input type="hidden" name="hospital" :value="(managerHospital)" />
-                            <input class="input" type="file" name="imgFile" @click="imgSuccess" required />
-                            <div class="has-text-centered">
-                                <button type="submit" value="Upload" class="button is-primary">Upload Photo</button>
+                            <input class="input" type="file" name="imgFile" @change="fileHandlerInput($event)"
+                                required />
+                            <div class="buttons is-centered" v-if="imgPreview">
+                                <button class="button" type="button" @click="imgPreview = ''">Cancel Upload</button>
+                                <button type="submit" value="Upload" class="button is-info">Upload Photo</button>
                             </div>
                         </div>
                     </form>
@@ -146,7 +152,7 @@
                     <button class="button is-danger" v-if="editingMode" @click="saveProfileEdit"
                         :disabled="editDescription == '' || editContacts.length == 0 || editLatitude == '' || editLongitude == ''">
                         {{ hospitalStatus === "Inactive" && activate ? "Save changes and activate this account" :
-                                "Save changes"
+                        "Save changes"
                         }}</button>
                 </div>
             </section>
@@ -171,7 +177,6 @@ export default {
         this.latitude = await this.hospitalData.location.coordinates[1]
         this.longitude = await this.hospitalData.location.coordinates[0]
         this.hospitalSpecializations = await this.hospitalData.specializations
-        console.log(this.hospitalSpecializations)
         if (this.hospitalStatus !== "Inactive") {
             this.description = await this.hospitalData.details[0].description
             this.contacts = await this.hospitalData.details[0].contacts
@@ -209,11 +214,15 @@ export default {
             contacts: [],
             hospitalData: '',
             details: [],
-            coordinates: []
+            coordinates: [],
+            imgPreview: '',
+            fileHandler: ''
         }
     },
     methods: {
-        async imgSuccess() {
+        fileHandlerInput(e) {
+            this.fileHandler = e.target.files[0]
+            this.imgPreview = URL.createObjectURL(this.fileHandler)
             this.$store.commit('imgSuccessManager', true);
         },
         editMode() {

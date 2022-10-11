@@ -6,11 +6,16 @@
                 <router-link :to="'/contactus'">contact us</router-link>
             </div>
             <div class="field">
-                <label class="label">Hospital Name</label>
-                <input class="input" type="text" placeholder="Hospital name" v-model="hospital" />
-
-                <label class="label">E-mail</label>
-                <input class="input" type="email" placeholder="Official hospital email" v-model="email" />
+                <label class="label">Provider Name</label>
+                <div class="control">
+                    <input class="input" type="text" placeholder="Hospital/Clinic name" v-model="hospital" />
+                </div>
+                <div class="field">
+                    <label class="label">E-mail</label>
+                    <div class="control">
+                        <input class="input" type="email" placeholder="Official hospital email" v-model="email" />
+                    </div>
+                </div>
             </div>
             <div class="field is-horizontal">
                 <div class="field-body">
@@ -26,7 +31,7 @@
                             <div class="dropdown-menu">
                                 <div class="dropdown-content" v-for="provinces in geolocationData" :key="provinces._id">
                                     <a class="dropdown-item" @click="selectProvince(provinces.province)">{{
-                                            provinces.province
+                                    provinces.province
                                     }}</a>
                                 </div>
                             </div>
@@ -62,10 +67,13 @@
                 <div class="control">
                     <label class="label">Type:</label>
                     <label class="radio">
-                        <input type="radio" name="type" @click="selectPublicType" />Public
+                        <input type="radio" name="type" @click="hospitalType = 'Public'" />Public
                     </label>
                     <label class="radio">
-                        <input type="radio" name="type" @click="selectPrivateType" />Private
+                        <input type="radio" name="type" @click="hospitalType = 'Private'" />Private
+                    </label>
+                    <label class="radio">
+                        <input type="radio" name="type" @click="hospitalType = 'Clinic'" />Clinic
                     </label>
                 </div>
             </div>
@@ -305,12 +313,6 @@ export default {
             this.city = city
             this.isActiveDropdownCity = false
         },
-        selectPublicType() {
-            this.hospitalType = 'Public'
-        },
-        selectPrivateType() {
-            this.hospitalType = 'Private'
-        },
         selectStandardPlan() {
             this.pricing = 'Standard'
         },
@@ -365,7 +367,7 @@ export default {
                         password: this.password
                     });
                     await this.$store.commit('accountCreated', true)
-                    await this.$router.push('/user/manager/login')
+                    await this.$router.push('/manager/login')
                 } catch (err) {
                     this.errMsg = err
                 }
