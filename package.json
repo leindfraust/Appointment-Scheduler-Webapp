@@ -25,6 +25,7 @@
     "express-session": "^1.17.3",
     "filter-obj": "^5.1.0",
     "formidable": "^2.0.1",
+    "helmet": "^6.0.0",
     "http-server": "^14.1.1",
     "mongoose": "^6.6.3",
     "morgan": "^1.10.0",
