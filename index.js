@@ -2,7 +2,7 @@ require("dotenv").config()
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
-const helmet = require('helmet')
+const helmet = require('helmet');
 const morgan = require('morgan');
 const MongoStore = require('connect-mongo');
 const history = require('connect-history-api-fallback');
@@ -43,7 +43,13 @@ app.use(cors(corsOptionsDelegate));
 app.use(morgan('tiny'));
 app.use(express.json({ limit: '50mb' }));
 app.use(history())
-app.use(helmet())
+app.use(helmet({
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: {
+        policy: "same-origin"
+    }
+}));
 app.use(express.static(path.join(__dirname, 'client/dist')))
 app.use((req, res, next) => {
     if (app.get('env') === 'production' && !req.secure) {
