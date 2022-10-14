@@ -45,11 +45,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(history())
 app.use(helmet({
     crossOriginEmbedderPolicy: false,
-    contentSecurityPolicy: {
-        useDefaults: true,
-        "img-src": ["'self", "*.https://res.cloudinary.com/", "data: maps.gstatic.com", "*.googleapis.com", "*.ggpht.com"],
-        "script-src": ["'self'", "https://use.fontawesome.com", "maps.googleapis.com"]
-    },
+    contentSecurityPolicy: false,
     crossOriginResourcePolicy: {
         policy: "same-origin"
     }
