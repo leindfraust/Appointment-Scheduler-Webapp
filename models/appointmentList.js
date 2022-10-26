@@ -21,10 +21,7 @@ const appointmentSchema = new Schema({
         type: String,
         required: true
     },
-    doctorSpecialization: {
-        type: String,
-        required: true
-    },
+    doctorSpecialization: String,
     patientID: {
         type: String,
         required: true
@@ -52,6 +49,10 @@ const appointmentSchema = new Schema({
         required: true,
     },
     ifPatientVisited: {
+        type: Boolean,
+        default: false
+    },
+    ifPatientCancelled: {
         type: Boolean,
         default: false
     }
