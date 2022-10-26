@@ -13,12 +13,12 @@
             <h1 class="title has-text-info has-text-centered">MEDIC SEARCH</h1>
             <div class="field">
               <div class="control">
-                <input class="input is-rounded" type="text" v-model="username" placeholder="username" @keyup.enter="login"
-                  required />
+                <input class="input is-rounded" type="text" v-model="username" placeholder="username"
+                  @keyup.enter="login" required />
               </div>
               <div class="control" style="margin-top: 2%">
-                <input class="input is-rounded" type="password" v-model="password" placeholder="password" @keyup.enter="login"
-                  required />
+                <input class="input is-rounded" type="password" v-model="password" placeholder="password"
+                  @keyup.enter="login" required />
               </div>
               <h1 v-if="incorrectUserPass" class="subtitle has-text-danger">{{ validateMessage }}</h1>
               <h1 v-else-if="incorrectUserPass == false" class="subtitle has-text-danger">{{ validateMessage }}</h1>
@@ -60,9 +60,15 @@ export default {
       this.newAccount = true
       await this.$store.commit('accountCreated', false)
     }
-    if (this.$store.state.patientUsername !== null && this.$store.state.patientID !== null) {
-      await this.$router.push(`/user/${this.$store.state.patientUsername}`);
-    }
+  },
+  async beforeCreate() {
+    await axios.get("/session/patient").then(async response => {
+      if (typeof response.data.username !== 'undefined') {
+        this.$store.commit("patientUsername", response.data.username)
+        this.$store.commit("patientID", response.data._id)
+        await this.$router.push(`/user/${this.$store.state.patientUsername}`);
+      }
+    })
   },
   methods: {
     async login() {
@@ -79,7 +85,7 @@ export default {
           })
           .then(
             async (response) => {
-              this.userPatient = response.data
+              this.userPatient = await response.data
               // if username and password matched to a user
               if (await this.userPatient) {
                 await axios.post("/session/patient", {
