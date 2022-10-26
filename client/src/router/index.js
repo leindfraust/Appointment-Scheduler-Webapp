@@ -4,15 +4,18 @@ import {
 } from 'vue-router'
 import store from '../store'
 const Home = () => import('../views/Public/Home.vue')
+const AboutMedicSearch = () => import('../views/Public/AboutMedicSearch.vue')
+const TermsAndConditions = () => import('../views/Public/TermsAndConditions.vue')
 const DoctorList = () => import('../views/Public/DoctorList.vue')
 const RegForm = () => import('../views/Public/RegForm.vue')
-const LoginDoctor = () => import('../views/PortalDoctor/LoginDoctor.vue')
+const DoctorLogin = () => import('../views/PortalDoctor/DoctorLogin.vue')
+const DoctorSignup = () => import('../views/PortalDoctor/DoctorSignup.vue')
 const Doctor = () => import('../views/PortalDoctor/Doctor.vue')
-const SignUpDoctor = () => import('../views/PortalDoctor/SignUpDoctor.vue')
-const Scheduler = () => import('../views/PortalDoctor/Scheduler.vue')
-const DoctorProfile = () => import('../views/PortalDoctor/Profile.vue')
-const PatientLogs = () => import('../views/PortalDoctor/PatientLogs.vue')
-const DoctorSecurity = () => import('../views/PortalDoctor/Security.vue')
+const DoctorScheduler = () => import('../views/PortalDoctor/DoctorScheduler.vue')
+const DoctorProfile = () => import('../views/PortalDoctor/DoctorProfile.vue')
+const DoctorCancelledAppointments = () => import('../views/PortalDoctor/DoctorCancelledAppointments.vue')
+const DoctorPatientHistory = () => import('../views/PortalDoctor/DoctorPatientHistory.vue')
+const DoctorSecurity = () => import('../views/PortalDoctor/DoctorSecurity.vue')
 const DoctorPickSuccess = () => import('../views/PortalSuccessConfirmations/DoctorPickSuccess.vue')
 const ImageUploadSuccess = () => import('../views/PortalSuccessConfirmations/ImageUploadSuccess')
 const imageUploadSuccessPatientProfile = () => import('../views/PortalSuccessConfirmations/imageUploadSuccessPatientProfile.vue')
@@ -36,6 +39,14 @@ const PageNotExist = () => import('../views/Public/PageNotExist.vue')
 const routes = [{
     path: '/',
     component: Home,
+},
+{
+    path: '/about',
+    component: AboutMedicSearch
+},
+{
+    path: '/terms-and-conditions',
+    component: TermsAndConditions
 },
 {
     path: '/provider',
@@ -86,46 +97,53 @@ const routes = [{
 //doctor account routes
 {
     path: '/doctor/login',
-    component: LoginDoctor,
+    component: DoctorLogin,
 },
 {
     path: '/doctor/signup',
-    component: SignUpDoctor,
+    component: DoctorSignup,
 },
 {
-    path: '/doctor/user/:user',
+    path: '/doctor/:user/appointments',
     component: Doctor,
     meta: {
         requiresAuth: true
     },
 },
 {
-    path: '/doctor/user/:user/schedule',
-    component: Scheduler,
+    path: '/doctor/:user/appointments/history',
+    component: DoctorPatientHistory,
+    meta: {
+        requiresAuth: true
+    }
+},
+{
+    path: '/doctor/:user/appointments/cancelled',
+    component: DoctorCancelledAppointments,
+    meta: {
+        requiresAuth: true
+    }
+},
+{
+    path: '/doctor/:user/schedule',
+    component: DoctorScheduler,
     meta: {
         requiresAuth: true
     },
 },
 {
-    path: '/doctor/user/:user/profile',
+    path: '/doctor/:user/profile',
     component: DoctorProfile,
     meta: {
         requiresAuth: true
     },
 },
 {
-    path: '/doctor/user/:user/security',
+    path: '/doctor/:user/security',
     component: DoctorSecurity,
     meta: {
         requiresAuth: true
     },
-},
-{
-    path: '/doctor/user/:user/patients',
-    component: PatientLogs,
-    meta: {
-        requiresAuth: true
-    }
 },
 //Confirmation routes
 {
