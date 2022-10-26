@@ -19,6 +19,7 @@ const managerSchema = new Schema({
     },
     hospital: {
         type: String,
+        unique: true,
         required: true
     },
     type: {
