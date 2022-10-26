@@ -12,7 +12,7 @@
                     </a>
                 </div>
             </nav>
-            <aside class="menu box" style="background-color: white; padding: 20px; height: 100vh"
+            <aside class="menu box" style="background-color: white; padding: 20px; height: 100vh; "
                 :class="{ 'is-hidden-mobile': isActiveMenu, 'fixedMenu': isActiveMenu }">
                 <p class="subtitle is-6 is-hidden-mobile">Hello {{ superUser }}</p>
                 <p class="menu-label">General</p>
@@ -296,6 +296,11 @@
                         <div class="box" v-for="(geolocation, index) in provinceAndCitiesIndexed" :key="index">
                             <a class="has-text-danger" @click="deleteProvince(geolocation[0]._id)">Delete Province</a>
                             <p class="subtitle has-text-black">Province: {{ index }}</p>
+                            <p class="subtitle is-6 has-text-black">Latitude: {{ geolocation[0].geolocation?.latitude}}
+                            </p>
+                            <p class="subtitle is-6 has-text-black">Longitude: {{ geolocation[0].geolocation?.longitude
+                            }}
+                            </p>
 
                             <table class="table is-striped is-fullwidth is-narrow is-bordered">
                                 <thead>
@@ -328,16 +333,30 @@
                     </div>
                 </div>
                 <section v-if="isActiveGeolocation" class="section" style="width: 50%;">
+                    <h1 class="title">Create a new Province</h1>
                     <div class="field">
-                        <h1 class="title">Create a new Province</h1>
+                        <label class="label">Province</label>
                         <div class="control">
-                            <label class="label">Province</label>
-                            <input class="input" type="text" v-model="province" placeholder="Province" />
-                            <button class="button" type="button" @click="provincePost"
-                                :disabled="province == ''">Confirm</button>
-                            <div v-if="provincePostSuccess" class="has-text-success">Province has been created.</div>
+                            <input class="input" type="text" v-model="province" placeholder="Name of the province" />
                         </div>
                     </div>
+                    <div class="field">
+                        <label class="label">Province Latitude</label>
+                        <div class="control">
+                            <input class="input" type="text" v-model="provinceLatitude"
+                                placeholder="Input the correct latitude" />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Province Longitude</label>
+                        <div class="control">
+                            <input class="input" type="text" v-model="provinceLongitude"
+                                placeholder="Input the correct longitude" />
+                        </div>
+                    </div>
+                    <button class="button" type="button" @click="provincePost"
+                        :disabled="province == '' || provinceLatitude == '' || provinceLongitude == ''">Confirm</button>
+                    <div v-if="provincePostSuccess" class="has-text-success">Province has been created.</div>
                     <div class="field">
                         <h1 class="title">Push City/Municipality into a Province</h1>
                         <div class="control">
@@ -439,6 +458,8 @@ export default {
             status: '',
             type: '',
             province: '',
+            provinceLatitude: '',
+            provinceLongitude: '',
             cityOrMunicipality: '',
             latitude: '',
             longitude: '',
@@ -614,7 +635,11 @@ export default {
         },
         async provincePost() {
             await axios.post('/api/geolocation', {
-                province: this.province
+                province: this.province,
+                geolocation: {
+                    latitude: this.provinceLatitude,
+                    longitude: this.provinceLongitude
+                }
             });
             await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
             this.provincePostSuccess = true
@@ -678,4 +703,5 @@ export default {
 }
 </script>
 <style scoped>
+
 </style>
