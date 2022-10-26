@@ -40,6 +40,22 @@ const check_username = (async (req, res) => {
     }
 });
 
+const check_provider = (async (req, res) => {
+    let provider = await req.body.provider
+    try {
+        const userAccount = await manager.findOne({
+            hospital: new RegExp(`^${provider.trim()}$`, 'i')
+        });
+        if (userAccount) {
+            res.status(200).send(true)
+        } else {
+            res.status(200).send(false)
+        }
+    } catch (err) {
+        res.status(500).send(err)
+    }
+});
+
 const verify_username = (async (req, res) => {
     let username = await req.body.username
     let email = await req.body.email
@@ -107,6 +123,7 @@ const deleteManager = (async (req, res) => {
 
 module.exports = {
     verify_username,
+    check_provider,
     check_username,
     getManagers,
     getManager,

@@ -7,10 +7,13 @@ const {
     updateManager,
     deleteManager,
     verify_username,
-    check_username
+    check_username,
+    check_provider
 } = require('../../controllers/managerController')
 
 router.post('/check_username', check_username)
+
+router.post('/check_provider', check_provider)
 
 router.post('/verify_username', verify_username)
 
