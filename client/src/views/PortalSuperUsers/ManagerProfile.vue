@@ -9,10 +9,14 @@
         </div>
         <div class="column">
             <section class="section">
+                <CatchError :err-msg="errMsg" />
                 <div class="notification is-light is-info" v-if="hospitalStatus == 'Inactive'">To get started, upload a
                     <b>photo</b> of your hospital and fill in the details of your <b>description</b> and
                     <b>contacts</b>. Activation of the
-                    account is available when clicking <b>"Edit"</b>.
+                    account is only available when you have filled up the <b>description</b> and <b>contacts</b>. Get
+                    started by clicking <b>"Edit"</b>.
+                    <div class="block"></div>
+                    Make sure you <b>upload a photo</b> of your hospital before activating the account.
                 </div>
                 <div class="box">
                     <h1 class="title">Display Picture</h1>
@@ -152,7 +156,7 @@
                     <button class="button is-danger" v-if="editingMode" @click="saveProfileEdit"
                         :disabled="editDescription == '' || editContacts.length == 0 || editLatitude == '' || editLongitude == ''">
                         {{ hospitalStatus === "Inactive" && activate ? "Save changes and activate this account" :
-                        "Save changes"
+        "Save changes"
                         }}</button>
                 </div>
             </section>
@@ -161,18 +165,20 @@
 </template>
 <script>
 import axios from 'axios'
+import CatchError from '../../components/CatchError.vue'
 import ManagerMenuVue from '../../components/ManagerMenu.vue'
 
 export default {
     name: 'ManagerProfile',
     components: {
-        ManagerMenuVue
+        ManagerMenuVue,
+        CatchError
     },
     async mounted() {
         this.loading = true
         await axios.get('/session/manager').then(response => this.managerHospital = response.data.hospital)
         await axios.get('/session/manager').then(response => this.managerHospitalID = response.data._id)
-        await axios.get('/api/manager').then(response => this.hospitalData = response.data.find(x => x._id == this.managerHospitalID))
+        await axios.post(`/api/manager/${this.managerHospitalID}`).then(response => this.hospitalData = response.data)
         this.hospitalStatus = await this.hospitalData.status
         this.latitude = await this.hospitalData.location.coordinates[1]
         this.longitude = await this.hospitalData.location.coordinates[0]
@@ -193,6 +199,7 @@ export default {
     },
     data() {
         return {
+            errMsg: '',
             searchBar: '',
             specializationList: this.$store.getters.getSpecializationList,
             loading: false,
@@ -283,7 +290,7 @@ export default {
                             coordinates: this.coordinates
                         },
                         status: 'Active'
-                    }).catch(err => console.log(err));
+                    }).catch(err => this.errMsg = err);
                 } else {
                     await axios.put(`/api/manager/${this.managerHospitalID}`, {
                         details: this.details,
@@ -292,7 +299,7 @@ export default {
                             type: 'Point',
                             coordinates: this.coordinates
                         }
-                    }).catch(err => console.log(err));
+                    }).catch(err => this.errMsg = err);
                 }
 
                 await axios.get('/api/manager').then(response => this.hospitalData = response.data.find(x => x._id == this.managerHospitalID))
