@@ -17,7 +17,6 @@ let registrationCode = ref('')
 onMounted(async () => {
     await axios.get('/session/manager').then(response => managerID.value = response.data._id)
     await axios.get('/session/manager').then(response => registrationCode.value = response.data.registrationCode)
-    console.log(registrationCode.value)
 });
 
 //methods
