@@ -9,6 +9,7 @@ let emailExists = ref(false)
 let code = ref('')
 let codeSent = ref(false)
 let codeVerified = ref(false)
+let codeIncorrect = ref(false)
 let newPassword = ref('')
 let confirmPassword = ref('')
 let passwordNotMatch = ref(false)
@@ -95,12 +96,15 @@ async function forgotPasswordOTP() {
 }
 async function verifyCode() {
     let confirmCode
+    codeIncorrect.value = false
     codeVerified.value = false
     await axios.post('/api/code/verify', {
         code: code.value
     }).then(response => confirmCode = response.data)
     if (confirmCode) {
         codeVerified.value = true
+    } else {
+        codeIncorrect.value = true
     }
 }
 async function pushNewPassword() {
@@ -185,6 +189,7 @@ async function pushNewPassword() {
             </section>
             <section class="section box" v-else>
                 <div class="container" v-if="!codeVerified">
+                <div class="notification is-warning" v-if="codeIncorrect">Incorrect code, please try again.</div>
                     <div class="field">
                         <div class="control">
                             <label class="label">Enter code</label>
