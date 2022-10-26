@@ -21,7 +21,7 @@ const loginReqMail = ((req, res) => {
         from: process.env.nodemaileruser,
         to: email,
         subject: 'Login request code',
-        text: `Your login request code is: ${code}. \nIf you did not request this, please reply to this email. \n\nBest Regards,\nMed Search`
+        text: `Your login request code is: ${code}. \nIf you did not request this, please reply to this email. \n\nBest Regards,\nMedic Search`
     };
 
     transporter.sendMail(mailOptions, async (error, info) => {
@@ -55,7 +55,7 @@ const OTPMail = ((req, res) => {
         from: process.env.nodemaileruser,
         to: email,
         subject: 'Verification',
-        text: `Your verification code is: ${code}. \nIf you did not request this, please reply to this email. \n\nBest Regards,\nMed Search`
+        text: `Your verification code is: ${code}. \nIf you did not request this, please reply to this email. \n\nBest Regards,\nMedic Search`
     };
 
     transporter.sendMail(mailOptions, async (error, info) => {
@@ -91,7 +91,7 @@ const supportMail = ((req, res) => {
         from: process.env.nodemaileruser,
         to: email,
         subject: `Customer Support: ${ticketType}`,
-        text: `Greetings! We have received your complaint about "${ticketTitle}", your ticket ID is ${ticketID}. Expect a follow up after 1-2 working days.   \n\nBest Regards,\nMed Search`
+        text: `Greetings! We have received your complaint about "${ticketTitle}", your ticket ID is ${ticketID}. Expect a follow up after 1-2 working days.   \n\nBest Regards,\nMedic Search`
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
