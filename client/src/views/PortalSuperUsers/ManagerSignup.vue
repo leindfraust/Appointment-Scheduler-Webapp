@@ -6,10 +6,23 @@
                 <router-link :to="'/contactus'">contact us</router-link>
             </div>
             <div class="field">
-                <label class="label">Provider Name</label>
                 <div class="control">
-                    <input class="input" type="text" placeholder="Hospital/Clinic name" v-model="hospital" />
+                    <label class="label">Provider Name</label>
+                    <div v-if="providerFound !== ''">
+                        <p class="help is-danger" v-if="providerFound">
+                            Unavailable
+                            <i class="fas fa-spinner fa-spin" v-if="loadingProvider"></i>
+                        </p>
+                        <p class="help is-success" v-else>
+                            Available
+                            <i class="fas fa-spinner fa-spin" v-if="loadingProvider"></i>
+                        </p>
+                    </div>
+                    <input class="input" type="text" placeholder="Hospital/Clinic name" v-model="hospital"
+                        @input="providerFindTimeout" />
                 </div>
+            </div>
+            <div clas="field">
                 <div class="field">
                     <label class="label">E-mail</label>
                     <div class="control">
@@ -264,7 +277,9 @@ export default {
             password: '',
             confirmPassword: '',
             loadingUsername: false,
+            loadingProvider: false,
             usernameFound: '',
+            providerFound: '',
             passwordNotMatch: false,
             citiesData: [],
             specializationsSelected: [],
@@ -301,6 +316,23 @@ export default {
                 this.usernameFound = ''
             }
             this.loadingUsername = false
+        },
+        async providerFindTimeout() {
+            if (this.searchTimeout) {
+                clearTimeout(this.searchTimeout)
+                this.searchTimeout = null
+            }
+            this.searchTimeout = setTimeout(this.providerFinder, 500)
+        },
+        async providerFinder() {
+            this.loadingProvider = true
+            await axios.post('/api/manager/check_provider', {
+                provider: this.hospital
+            }).then(response => { this.providerFound = response.data })
+            if (this.hospital == '') {
+                this.providerFound = ''
+            }
+            this.loadingProvider = false
         },
         async selectProvince(province) {
             this.city = ''
@@ -345,7 +377,7 @@ export default {
                 this.passwordNotMatch = false
             }
 
-            if (this.password === this.confirmPassword && !this.usernameFound) {
+            if (this.password === this.confirmPassword && !this.usernameFound && !this.providerFound) {
                 try {
                     await axios.post('/api/manager', {
                         registrationCode: this.registrationCode,
