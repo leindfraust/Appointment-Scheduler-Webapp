@@ -1,6 +1,7 @@
 <template>
   <NavigationTab />
   <section class="section">
+    <CatchError :err-msg="errMsg" />
     <div class="modal" :class="{ 'is-active': isLoading }">
       <div class="modal-background"></div>
       <div class="modal-content" style="overflow: hidden">
@@ -17,7 +18,7 @@
               <div class="field">
                 <label class="label">First name</label>
                 <div class="control">
-                  <input class="input" type="text" :value="firstName" placeholder="First Name" required />
+                  <input class="input" type="text" v-model="firstName" placeholder="First Name" required />
                 </div>
               </div>
               <div class="field">
@@ -60,8 +61,8 @@
           </div>
           <div class="field">
             <label class="label">Reason for your visit:</label>
-            <textarea class="textarea" v-model="comments" placeholder="Your symptoms, general well being etc..."
-              required></textarea>
+            <textarea class="textarea" style="white-space: pre-wrap;" v-model="comments"
+              placeholder="Your symptoms, general well being etc..." required></textarea>
           </div>
         </form>
       </div>
@@ -76,7 +77,8 @@
               <label class="radio">
                 <input type="radio" class="radioSched" name="schedule"
                   @click="pickSched(index, schedules, schedules.prefix)" />
-                <span class="subtitle is-6 has-text-weight-semibold">&nbsp;{{ new Date(schedules.date).toDateString() }}</span>
+                <span class="subtitle is-6 has-text-weight-semibold">&nbsp;{{ new Date(schedules.date).toDateString()
+                }}</span>
                 <br />
                 <span class="has-text-black">{{ schedules.timeStart }} - {{ schedules.timeEnd }}</span>
               </label>
@@ -88,7 +90,8 @@
           </div>
         </form>
         <div class="block has-text-centered">
-          <button type="button" class="button is-info" :disabled="comments == null || schedule == null || firstName == '' || lastName == '' || birthDay == null || contactNum == '' || comments == '' || currentAddress == ''"
+          <button type="button" class="button is-info"
+            :disabled="comments == null || schedule == null || firstName == '' || lastName == '' || birthDay == null || contactNum == '' || comments == '' || currentAddress == ''"
             @click="appoint">Submit
             appointment</button>
         </div>
@@ -102,11 +105,13 @@
 import axios from "axios";
 import store from "../../store";
 import NavigationTab from "../../components/NavigationTab.vue";
+import CatchError from "../../components/CatchError.vue";
 
 export default {
   name: "RegForm",
   components: {
-    NavigationTab
+    NavigationTab,
+    CatchError
   },
   data() {
     return {
@@ -130,7 +135,7 @@ export default {
       prefix: null,
       hospital: store.state.hospitalName,
       refID: null,
-      errMsg: false
+      errMsg: ''
     };
   },
   async mounted() {
@@ -147,29 +152,18 @@ export default {
       let statusSched = document.getElementsByClassName('statusSched')
       //check appointed patients in the selected date
       await axios
-        .get("/api/appointmentList")
-        .then(
-          (response) =>
-          (this.patientsAppointed =
-            response.data.filter(
-              (e) =>
-                e.schedule[0].date === this.schedule.date &&
-                e.doctorID == this.doctorDetails._id
-            ).length));
+        .post("/api/appointmentList/doctors/checkPriority", {
+          doctorID: this.doctorDetails._id,
+          schedule: this.schedule.date
+        }).then(response => this.patientsAppointed = response.data);
       //check how many appointed patients in regards to the appointment limit set by the doctor
       if (await this.patientsAppointed < this.schedule.appointmentLimit) {
         //if success
         await axios
-          .get("/api/appointmentList")
-          .then(
-            (response) =>
-            (this.priorityNum =
-              response.data.filter(
-                (e) =>
-                  e.schedule[0].date === this.schedule.date &&
-                  e.doctorID == this.doctorDetails._id
-              ).length + 1)
-          );
+          .post("/api/appointmentList/doctors/checkPriority", {
+            doctorID: this.doctorDetails._id,
+            schedule: this.schedule.date
+          }).then(response => this.priorityNum = response.data + 1);
         //if patient is new to the doctor, patient will be recorded as list of patients in doctor's profile
         if (typeof this.checkPatientRecord === 'undefined' || !this.checkPatientRecord) {
           try {
@@ -193,7 +187,7 @@ export default {
               birthDay: this.birthDay.toDateString(),
               comments: this.comments,
               schedule: this.schedule,
-              priorityNum: this.prefix + "-" + this.priorityNum,
+              priorityNum: this.prefix ? this.prefix + "-" + this.priorityNum : this.priorityNum,
             });
             await axios.put(`/api/manager/${store.state.hospitalDetails._id}`, {
               ratings: store.state.hospitalDetails.ratings + 5
@@ -209,11 +203,11 @@ export default {
               birthDay: this.birthDay.toDateString(),
               comments: this.comments,
               schedule: this.schedule,
-              priorityNum: this.prefix + "-" + this.priorityNum,
+              priorityNum: this.prefix ? this.prefix + "-" + this.priorityNum : this.priorityNum,
             };
             store.commit("patientDetails", patientDetails);
             store.commit("appointed", true)
-            await this.$router.push("/success").catch(err => console.log(err));
+            await this.$router.push("/success");
           } catch (err) { this.errMsg = err }
         } else {
           try {
@@ -232,7 +226,7 @@ export default {
               birthDay: this.birthDay.toDateString(),
               comments: this.comments,
               schedule: this.schedule,
-              priorityNum: this.prefix + "-" + this.priorityNum,
+              priorityNum: this.prefix ? this.prefix + "-" + this.priorityNum : this.priorityNum,
             });
             await axios.put(`/api/manager/${store.state.hospitalDetails._id}`, {
               ratings: store.state.hospitalDetails.ratings + 5
@@ -248,25 +242,24 @@ export default {
               birthDay: this.birthDay.toDateString(),
               comments: this.comments,
               schedule: this.schedule,
-              priorityNum: this.prefix + "-" + this.priorityNum,
+              priorityNum: this.prefix ? this.prefix + "-" + this.priorityNum : this.priorityNum,
             };
-            this.isLoading = false
             store.commit("patientDetails", patientDetails);
             store.commit("appointed", true)
-            await this.$router.push("/success").catch(err => console.log(err));
+            await this.$router.push("/success");
           } catch (err) {
             this.errMsg = err
           }
         }
         //if not
       } else {
-        this.isLoading = false
         this.schedAvailability = false
         this.schedule = null
         radio[this.radioIndex].checked = false
         radio[this.radioIndex].disabled = true
         statusSched[this.radioIndex].style.display = 'block'
       }
+      this.isLoading = false
     },
     async pickSched(e, sched, prefix) {
       this.radioIndex = e
@@ -277,16 +270,10 @@ export default {
         statusSched[i].style.display = 'none'
       }
       this.schedule = await sched;
-      await axios
-        .get("/api/appointmentList")
-        .then(
-          (response) =>
-          (this.patientsAppointed =
-            response.data.filter(
-              (e) =>
-                e.schedule[0].date === this.schedule.date &&
-                e.doctorID == this.doctorDetails._id
-            ).length));
+      await axios.post("/api/appointmentList/doctors/checkPriority", {
+        doctorID: this.doctorDetails._id,
+        schedule: this.schedule.date
+      }).then(response => this.patientsAppointed = response.data);
       //check how many appointed patients in regards to the appointment limit set by the doctor
       //if available
       if (await this.patientsAppointed < this.schedule.appointmentLimit) {
