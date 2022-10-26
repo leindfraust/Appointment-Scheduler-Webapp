@@ -10,9 +10,11 @@ const getAppointments = (async (req, res) => {
     }
 });
 
-const getAppointmentsforDoctor = (async (req,res) => {
+const getAppointmentsforManager = (async (req, res) => {
     try {
-        const appointmentList = await AppointmentList.find({doctorID: req.body.id})
+        const appointmentList = await AppointmentList.find({
+            hospital: req.body.hospital
+        })
         if (!appointmentList) throw new Error('no items')
         res.status(200).send(appointmentList)
     } catch (err) {
@@ -20,9 +22,56 @@ const getAppointmentsforDoctor = (async (req,res) => {
     }
 });
 
-const getAppointmentsforPatient = (async (req,res) => {
+const getAppointmentsforDoctor = (async (req, res) => {
     try {
-        const appointmentList = await AppointmentList.find({patientID: req.body.id})
+        const appointmentList = await AppointmentList.find({
+            doctorID: req.body.id,
+            "schedule.date": req.body.ongoing ? { $gte: new Date().toISOString() } : { $lte: new Date().toISOString() },
+            ifPatientVisited: req.body.ongoing ? false : true,
+            $or: [{ ifPatientCancelled: { $exists: false } }, { ifPatientCancelled: false }] //OR filter method used to support older documents with missing ifPatientCancelled field
+        })
+        if (!appointmentList) throw new Error('no items')
+        res.status(200).send(appointmentList)
+    } catch (err) {
+        res.status(500).send(err)
+    }
+});
+
+const getAppointmentsforDoctorCheckPriority = (async (req, res) => {
+    try {
+        const appointmentList = await AppointmentList.find({
+            doctorID: req.body.doctorID,
+            "schedule.date": req.body.schedule
+        })
+        if (!appointmentList) throw new Error('no items')
+        const priorityLength = appointmentList.length
+        res.status(200).send(priorityLength.toString())
+    } catch (err) {
+        res.status(500).send(err)
+    }
+});
+
+const getAppointmentsforPatient = (async (req, res) => {
+    try {
+        const appointmentList = await AppointmentList.find({
+            patientID: req.body.id,
+            "schedule.date": req.body.ongoing ? { $gte: new Date().toISOString() } : { $lte: new Date().toISOString() },
+            ifPatientCancelled: false
+        })
+        if (!appointmentList) throw new Error('no items')
+        res.status(200).send(appointmentList)
+    } catch (err) {
+        res.status(500).send(err)
+    }
+});
+
+const getCancelledAppointmentsforPatientAndDoctor = (async (req, res) => {
+    try {
+        const appointmentList = await AppointmentList.find({
+            $or: [{ patientID: req.body.id }, { doctorID: req.body.id }],
+            ifPatientVisited: false,
+            ifPatientCancelled: true
+        })
         if (!appointmentList) throw new Error('no items')
         res.status(200).send(appointmentList)
     } catch (err) {
@@ -72,6 +121,9 @@ module.exports = {
     pushAppointment,
     updateAppointment,
     deleteAppointment,
+    getAppointmentsforManager,
     getAppointmentsforDoctor,
+    getAppointmentsforDoctorCheckPriority,
+    getCancelledAppointmentsforPatientAndDoctor,
     getAppointmentsforPatient
 }
