@@ -22,10 +22,7 @@
             </div>
         </div>
         <section class="section is-medium has-text-centered" v-if="citiesOrMunicipalities == ''">
-            <div class="notification is-info" v-if="locationPermissionDenied" id="location-prompt">Location must be
-                enabled to start using our services.
-            </div>
-            <h1 class="title">Find and make an appointment on hospitals or clinics
+            <h1 class="title">Find and make an appointment on best hospitals or clinics near your area.
             </h1>
             <div class="container" v-if="citiesOrMunicipalities == ''">
                 <div class="dropdown" :class="{ 'is-active': isActiveDropdown }">
@@ -33,8 +30,7 @@
                         <div class="field has-addons">
                             <div class="control has-icons-left">
                                 <input class="input" type="text" v-model="province" style="width: 300px;"
-                                    placeholder="What region are you located?" @input="regionSelect"
-                                    :disabled="locationPermissionDenied" />
+                                    placeholder="What province are you located?" @input="isActiveDropdown = true" />
                                 <span class="icon is-small is-left">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </span>
@@ -48,12 +44,12 @@
                     <div class="dropdown-menu">
                         <div class="dropdown-content has-text-left" v-if="Object.keys(geolocationIndexed).length !== 0">
                             <a class="dropdown-item" v-for="geodata in geolocationIndexed" :key="geodata._id"
-                                @click="selectRegion(geodata.province)">{{ geodata.province }}</a>
+                                @click="selectRegion(geodata.province, geodata.geolocation)">{{ geodata.province }}</a>
                         </div>
 
                         <div class="dropdown-content has-text-left" v-else>
                             <p class="dropdown-item has-text-danger">
-                                Region not found or supported, please try again.
+                                Province not found or supported, please try again.
                             </p>
                         </div>
                     </div>
@@ -66,7 +62,7 @@
                     <div class="separator subtitle">Or pick a symptom.</div>
                     <div class="notification is-info" style="width: 50%; margin: auto" id="notification-region"
                         v-if="provincePrompt && this.province == ''">You must
-                        select a region first.</div>
+                        select a province first.</div>
                     <div class="columns is-mobile is-multiline" style="width: 80%; margin:auto">
                         <div class="column is-6-mobile " id="mental-health">
                             <a @click="searchProvider('Psychiatrists')">
@@ -174,13 +170,12 @@ export default {
         };
     },
     methods: {
-        regionSelect() {
-            if (!this.locationPermissionDenied) {
-                this.isActiveDropdown = true;
-            }
-        },
-        selectRegion(province) {
+        selectRegion(province, location) {
             this.province = province;
+            if (this.locationPermissionDenied) {
+                this.userLatitude = location.latitude
+                this.userLongitude = location.longitude
+            }
             this.isActiveDropdown = false;
         },
         searchProvider(filterSymptom) {
