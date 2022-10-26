@@ -1,6 +1,6 @@
 <template>
   <NavigationTab />
-  <section class="section is-medium" id="background">
+  <section class="section is-large" id="background">
     <div class="container">
       <h1 class="subtitle has-text-centered">
         You have been successfuly appointed to <b>{{ patient.doctor }}, {{ patient.specialization }}</b> at
@@ -27,7 +27,7 @@
     <div :class="{ 'is-hidden': pdfHide }">
       <section class="section" id="digitalConfirmation">
         <div class="block">&nbsp;</div>
-        <div class="columns is-vcentered">
+        <div class="columns is-mobile is-vcentered">
           <div class="column is-1">
             <figure class="image">
               <img src="../../assets/images/logos/medic-search-logo.png" />
@@ -56,7 +56,7 @@
         <h1 class="subtitle"><b>Contact Number:</b> {{ patient.contactNum }}</h1>
         <h1 class="subtitle"><b>Birthday:</b> {{ patient.birthDay }}</h1>
         <h1 class="subtitle"><b>Symptoms/Comments:</b> {{ patient.comments }}</h1>
-        <div class="is-pulled-right">
+        <div class="is-pulled-right" style="padding-top: 10%">
           <figure class="image is-128x128">
             <img src="../../assets/images/logos/medi-search-horizontal.png" />
             <p class="subtitle is-6 has-text-info has-text-right">bit.ly/MedSearch</p>
