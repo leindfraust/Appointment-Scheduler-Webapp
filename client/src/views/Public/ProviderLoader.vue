@@ -175,9 +175,11 @@
             </div>
         </div>
     </div>
+    <FooterBlock />
 </template>
 <script>
 import axios from 'axios'
+import FooterBlock from '../../components/FooterBlock.vue';
 import NavigationTab from '../../components/NavigationTab.vue'
 
 export default {
@@ -280,7 +282,7 @@ export default {
             });
         },
     },
-    components: { NavigationTab }
+    components: { NavigationTab, FooterBlock }
 }
 </script>
 <style scoped>
