@@ -27,14 +27,17 @@
                 <a @click="routeHome">Appointments</a>
             </li>
             <li>
-                <a @click="patientLogs">Patient History</a>
+                <a @click="openPatientHistory">Appointment History</a>
+            </li>
+            <li>
+                <a @click="openPatientAppointmentsCancelled">Cancelled Appointments</a>
             </li>
             <li>
                 <a @click="openSchedule">Schedule</a>
             </li>
             <p class="menu-label">Verification and Information</p>
             <li>
-                <a @click="profile">Profile</a>
+                <a @click="openProfile">Profile</a>
             </li>
             <li>
                 <a @click="openSecurity">Security</a>
@@ -70,19 +73,22 @@ export default {
             await this.$router.push("/doctor/login");
         },
         async routeHome() {
-            await this.$router.push(`/doctor/user/${this.alias}`);
+            await this.$router.push(`/doctor/${this.alias}/appointments`);
         },
-        async profile() {
-            await this.$router.push(`/doctor/user/${this.alias}/profile`);
+        async openProfile() {
+            await this.$router.push(`/doctor/${this.alias}/profile`);
         },
-        async patientLogs() {
-            await this.$router.push(`/doctor/user/${this.alias}/patients`)
+        async openPatientHistory() {
+            await this.$router.push(`/doctor/${this.alias}/appointments/history`)
+        },
+        async openPatientAppointmentsCancelled() {
+            await this.$router.push(`/doctor/${this.alias}/appointments/cancelled`)
         },
         async openSecurity() {
-            await this.$router.push(`/doctor/user/${this.alias}/security`)
+            await this.$router.push(`/doctor/${this.alias}/security`)
         },
         async openSchedule() {
-            await this.$router.push(`/doctor/user/${this.alias}/schedule`);
+            await this.$router.push(`/doctor/${this.alias}/schedule`);
         },
         menuNav() {
             this.isActive = !this.isActive
