@@ -1,78 +1,16 @@
 <template>
-        <ProviderFinder />
-        <FooterBlock/>
-        <!--
-        <div class="container box" id="covidAPI" style="width: 70%;">
-          <h1 class="title has-text-left">Latest COVID-19 Data</h1>
-          <hr>
-          <div class="columns">
-            <div class="column">
-              <h4 class="title is-2">Worldwide 🌎</h4>
-              <div class="container is-fluid has-text-left">
-                <p class="subtitle">
-                  <b>Total Active Cases:</b>
-                  {{ covidAPIWorldWide.active }}+
-                </p>
-                <p class="subtitle">
-                  <b>Total Deaths:</b>
-                  {{ covidAPIWorldWide.deaths }}+
-                </p>
-                <p class="subtitle">
-                  <b>Total Recoveries:</b>
-                  {{ covidAPIWorldWide.recovered }}+
-                </p>
-              </div>
-            </div>
-            <div class="column">
-              <h4 class="title is-2">Philippines 🇵🇭</h4>
-              <div class="container is-fluid has-text-left">
-                <p class="subtitle">
-                  <b>Total Active Cases:</b>
-                  {{ covidAPIPh.active }}+
-                </p>
-                <p class="subtitle">
-                  <b>Total Deaths:</b>
-                  {{ covidAPIPh.deaths }}+
-                </p>
-                <p class="subtitle">
-                  <b>Total Recoveries:</b>
-                  {{ covidAPIPh.recovered }}+
-                </p>
-              </div>
-            </div>
-          </div>
-        </div> -->
+  <ProviderFinder />
+  <FooterBlock />
 </template>
 
 <script>
 import ProviderFinder from "../../components/ProviderFinder.vue";
-import axios from 'axios'
 import FooterBlock from "../../components/FooterBlock.vue";
 export default {
   name: "HomePage",
   components: {
     ProviderFinder,
     FooterBlock
-},
-  data() {
-    return {
-      userPatient: null,
-      covidAPIPh: [],
-      covidAPIWorldWide: []
-    }
-  },
-  async mounted() {
-    await axios.get('https://disease.sh/v3/covid-19/countries/philippines').then(response => this.covidAPIPh = response.data)
-    await axios.get('https://disease.sh/v3/covid-19/all').then(response => this.covidAPIWorldWide = response.data)
   },
 };
 </script>
-
-<style scoped>
-
-@media (max-width: 991.98px) {
-  #covidAPI {
-    width: 100% !important;
-  }
-}
-</style>
