@@ -33,7 +33,7 @@
                         })" :key="index">
                             <div class="notification is-info" :class="{ 'is-light': !notifs.new }">
                                 <a style="text-decoration: none;" @click="openNotif(notifs, index)">{{ notifs.subject }}
-                                    <p class="help">{{ notifs.from == 'Med Search' ? `From ${notifs.from}` : `From
+                                    <p class="help">{{ notifs.from == 'Medic Search' ? `From ${notifs.from}` : `From
                                     Dr. ${notifs.from}`
                                     }}</p>
                                 </a>
@@ -70,8 +70,8 @@
                     <a class="navbar-item" @click="isActiveMenuDropdown = !isActiveMenuDropdown"><i
                             class="fa-solid fa-bars"></i></a>
                     <div class="navbar-dropdown is-right">
-                        <a class="navbar-item">About</a>
-                        <a class="navbar-item" @click="this.$router.push('/contactus')">Contact Us</a>
+                        <router-link :to="'/about'" class="navbar-item">About</router-link>
+                        <router-link :to="'/contactus'" class="navbar-item">Contact Us</router-link>
                     </div>
                 </div>
             </div>
@@ -101,7 +101,7 @@
         <div class="modal-background"></div>
         <div class="modal-content box">
             <section class="section">
-                <p class="title">{{ viewNotif.from == 'Med Search' ? `From ${viewNotif.from}` : `From
+                <p class="title">{{ viewNotif.from == 'Medic Search' ? `From ${viewNotif.from}` : `From
                 Dr. ${viewNotif.from}`
                 }}</p>
                 <p class="subtitle">{{ new Date(viewNotif.date).toDateString() }}</p>
