@@ -33,7 +33,6 @@
 </template>
 
 <script>
-import store from "../../store";
 import axios from "axios";
 import ForgotPassword from "../../components/ForgotPassword.vue";
 export default {
@@ -49,10 +48,15 @@ export default {
       specializations: null,
     };
   },
-  async mounted() {
-    if (store.state.alias !== null) {
-      await this.$router.push(`/doctor/user/${store.state.alias}`);
-    }
+  async beforeCreate() {
+    await axios.get("/session/doctor").then(async response => {
+      if (typeof response.data.alias !== 'undefined') {
+        this.$store.commit("alias", response.data.alias);
+        this.$store.commit("doctorID", response.data._id);
+        this.$store.commit("doctorName", response.data.fullname);
+        await this.$router.push(`/doctor/${this.$store.state.alias}/appointments`);
+      }
+    })
   },
   methods: {
     async login() {
@@ -69,7 +73,7 @@ export default {
           })
           .then(
             async (response) => {
-              this.userDoctor = response.data
+              this.userDoctor = await response.data
               // if username and password matched to a user
               if (await this.userDoctor) {
                 await axios.post("/session/doctor", {
@@ -85,10 +89,10 @@ export default {
                   username: this.userDoctor.username,
                   messageHistory: this.userDoctor.messageHistory
                 });
-                store.commit("alias", this.userDoctor.alias);
-                store.commit("doctorID", this.userDoctor._id);
-                store.commit("doctorName", this.userDoctor.name);
-                await this.$router.push(`/doctor/user/${this.userDoctor.alias}`);
+                this.$store.commit("alias", this.userDoctor.alias);
+                this.$store.commit("doctorID", this.userDoctor._id);
+                this.$store.commit("doctorName", this.userDoctor.name);
+                await this.$router.push(`/doctor/${this.userDoctor.alias}/appointments`);
               }
               else {
                 this.validateMessage = "Incorrect username or password";

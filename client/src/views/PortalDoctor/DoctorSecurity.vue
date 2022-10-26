@@ -402,12 +402,13 @@ export default {
 <style scoped>
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
+    appearance: none;
     -webkit-appearance: none;
     margin: 0;
 }
 
 #OTP {
-    border: 0;
+    border-style: outset;
     letter-spacing: 2em;
     width: 50%;
 }

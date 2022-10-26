@@ -6,14 +6,15 @@
       </div>
       <div class="column">
         <section class="section">
+          <CatchError :err-msg="errMsg" />
           <h1 class="title">APPOINTMENTS</h1>
-          <div class="container is-widescreen is-fullhd" v-if="Object.keys(appointmentSchedules).length !== 0">
-            <div class="field">
-              <div class="control">
-                <input class="input" type="text" style="width: 50% !important" v-model="searchBar"
-                  placeholder="Search..." />
-              </div>
+          <div class="field" v-if="appointmentSched.length !== 0">
+            <div class="control">
+              <input class="input" type="text" style="width: 50% !important" v-model="searchBar"
+                placeholder="Search..." />
             </div>
+          </div>
+          <div class="container is-widescreen is-fullhd" v-if="Object.keys(appointmentSchedules).length !== 0">
             <div class="box" v-for="(appointmentList, index) in appointmentSchedules" :key="index"
               :style="new Date(index).toDateString() == new Date().toDateString() ? 'box-shadow: rgb(10 10 10 / 10%) 0px 0.5em 1em -0.125em, #485fc7 0px 0px 0px 1px !important;' : ''">
               <h1 class="subtitle" v-if="new Date(index).toDateString() == new Date().toDateString()">
@@ -21,7 +22,7 @@
               </h1>
               <h1 class="subtitle has-text-black">Schedule: {{ new Date(index).toDateString() }}</h1>
               <div class="table-container">
-                <table class="table is-striped is-fullwidth">
+                <table class="table is-fullwidth">
                   <thead>
                     <tr>
                       <th class="has-text-black-ter">Controls</th>
@@ -35,8 +36,8 @@
                       <th class="has-text-black-ter">Symptoms/Comments</th>
                     </tr>
                   </thead>
-                  <tbody v-for="appointments in appointmentList" :key="appointments._id">
-                    <tr>
+                  <tbody>
+                    <tr v-for="appointments in appointmentList" :key="appointments._id">
                       <button class="button has-text-success" type="button" @click="
                         toggleConfirmModal(
                           appointments.referenceID,
@@ -113,7 +114,7 @@
                       <td class="has-text-black-ter">{{ appointments.lastName }}</td>
                       <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
                       <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
-                      <td class="has-text-black-ter">{{ appointments.comments }}</td>
+                      <td class="has-text-black-ter" style="white-space: pre-wrap;">{{ appointments.comments }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -134,17 +135,20 @@
 <script>
 import axios from "axios";
 import store from "../../store";
-import _ from 'lodash'
+import groupBy from 'lodash/groupBy'
 import DoctorMenu from "../../components/DoctorMenu.vue";
 import socket from '../../socket'
+import CatchError from "../../components/CatchError.vue";
 
 export default {
   name: "DoctorDashboard",
   components: {
-    DoctorMenu
+    DoctorMenu,
+    CatchError
   },
   data() {
     return {
+      errMsg: '',
       alias: store.state.alias,
       profileImg: store.state.profileImg,
       isActiveModalConfirm: false,
@@ -167,7 +171,7 @@ export default {
   computed: {
     appointmentSchedules() {
       if (this.appointmentSched) {
-        return _.groupBy(
+        return groupBy(
           this.appointmentSched.filter((x) => {
             return (
               x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
@@ -176,7 +180,7 @@ export default {
             );
           }).sort((a, b) => {
             return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
-          }).filter(x => { return new Date(x.schedule[0].id) >= new Date() && x.ifPatientVisited == false })
+          })
           ,
           "schedule[0].date"
         );
@@ -186,7 +190,7 @@ export default {
     },
   },
   async mounted() {
-    await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID }).then(response => this.appointmentSched = response.data);
+    await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID, ongoing: true }).then(response => this.appointmentSched = response.data).catch(err => this.errMsg = err);
   },
   methods: {
     async confirmVisitation() {
@@ -195,7 +199,7 @@ export default {
 
       let titleMsg = 'Appointment visitation confirmed'
       let noticeMsg = `Your appointment visitation has been confirmed by your doctor Ms/Mr. ${this.doctorName}, reference ID: ${this.refIDPatient}, a digital prescription will be displayed below if your doctor has uploaded one. We hope you well!`
-      socket.emit('message', this.file ? this.refID : null, titleMsg, noticeMsg, "Med Search", new Date())
+      socket.emit('message', this.file ? this.refID : null, titleMsg, noticeMsg, "Medic Search", new Date())
 
       if (this.file) {
         const formData = new FormData()
@@ -206,7 +210,7 @@ export default {
           headers: {
             "Content-Type": "multipart/form-data"
           }
-        }).catch(err => console.log(err));
+        }).catch(err => this.errMsg = err);
       }
 
       try {
@@ -222,7 +226,7 @@ export default {
         });
         await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID }).then(response => this.appointmentSched = response.data);
       } catch (err) {
-        console.log(err)
+        this.errMsg = err
       }
       this.confirmLoadingButton = false
       this.isActiveModalConfirm = false
@@ -231,11 +235,12 @@ export default {
 
       let titleMsg = 'Your appointment has been cancelled!'
       let noticeMsg = `Your appointment visitation has been cancelled by your doctor Ms/Mr. ${this.doctorName}, reference ID: ${this.refIDPatient}, this is due to some emergencies or problems in their side. We hope you understand.`
-      socket.emit('message', null, titleMsg, noticeMsg, "Med Search", new Date())
+      socket.emit('message', null, titleMsg, noticeMsg, "Medic Search", new Date())
 
-      await axios.delete(`/api/appointmentList/${this.id}`).catch(err => console.log(err))
-      await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID }).then(response => this.appointmentSched = response.data).catch(err => console.log(err));
-
+      await axios.put(`/api/appointmentList/${this.id}`, {
+        ifPatientCancelled: true
+      }).catch(err => this.errMsg = err)
+      await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID, ongoing: true }).then(response => this.appointmentSched = response.data);
       this.isActiveModalCancel = false
     },
     async toggleConfirmModal(

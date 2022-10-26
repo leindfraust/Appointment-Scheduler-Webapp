@@ -95,11 +95,12 @@
           <button class="modal-close is-large" aria-label="close" @click="sendNotifInactive"></button>
         </div>
         <section class="section">
+          <CatchError :err-msg="errMsg" />
           <div class="container is-widescreen is-fullhd" style="padding: 15">
             <h1 class="title">
               APPOINTMENT HISTORY
             </h1>
-            <div class="field">
+            <div class="field" v-if="appointmentSched.length !== 0">
               <div class="control">
                 <input class="input" type="text" style="width: 50% !important" v-model="searchBar"
                   placeholder="Search..." />
@@ -110,7 +111,7 @@
                 :class="{ 'is-hidden': new Date(index).toDateString() == new Date().toDateString() }">
                 <h1 class="subtitle has-text-black">Schedule: {{ new Date(index).toDateString() }}</h1>
                 <div class="table-container">
-                  <table class="table is-striped is-fullwidth">
+                  <table class="table is-fullwidth">
                     <thead>
                       <tr>
                         <th class="has-text-black-ter">Controls</th>
@@ -124,8 +125,8 @@
                         <th class="has-text-black-ter">Symptoms/Comments</th>
                       </tr>
                     </thead>
-                    <tbody v-for="appointments in appointmentList" :key="appointments._id">
-                      <tr>
+                    <tbody>
+                      <tr v-for="appointments in appointmentList" :key="appointments._id">
                         <button class="button is-info is-light"
                           @click="sendNotifActive(appointments.patientID, appointments.firstName, appointments.lastName)">Send
                           a notification</button>
@@ -136,7 +137,7 @@
                         <td class="has-text-black-ter">{{ appointments.lastName }}</td>
                         <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
                         <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
-                        <td class="has-text-black-ter">{{ appointments.comments }}</td>
+                        <td class="has-text-black-ter" style="white-space: pre-wrap;">{{ appointments.comments }}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -152,30 +153,31 @@
 </template>
 <script>
 import axios from 'axios'
-import _ from 'lodash'
+import groupBy from 'lodash/groupBy'
+import CatchError from '../../components/CatchError.vue'
 import DoctorMenu from "../../components/DoctorMenu.vue"
 import socket from '../../socket'
 
 export default {
   name: "PatientLogs",
   components: {
-    DoctorMenu
+    DoctorMenu,
+    CatchError
   },
   async mounted() {
-    await axios.post('/api/appointmentList/doctors', { id: this.$store.state.doctorID }).then(response => this.appointmentSched = response.data);
-    await axios.get('/api/doctor').then(response => this.patients = response.data.find(x => x.alias == this.alias))
+    await axios.post('/api/appointmentList/doctors', { id: this.$store.state.doctorID, ongoing: false }).then(response => this.appointmentSched = response.data);
     await axios.get('/session/doctor').then(response => this.doctorName = response.data.fullname)
     await axios.get('/session/doctor').then(response => this.messageHistory = response.data.messageHistory.reverse())
   },
   data() {
     return {
+      errMsg: '',
       clearMsgPrompt: false,
       loadingButton: false,
       searchBar: "",
       appointmentSched: [],
       alias: this.$store.state.alias,
       file: null,
-      patients: [],
       isActiveModal: false,
       selectedPatient: '',
       messageSuccessSelectedPatient: '',
@@ -190,7 +192,7 @@ export default {
   computed: {
     appointmentSchedules() {
       if (this.appointmentSched) {
-        return _.groupBy(
+        return groupBy(
           this.appointmentSched.filter((x) => {
             return (
               x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
@@ -200,7 +202,7 @@ export default {
           })
             .sort((a, b) => {
               return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
-            }).filter(x => new Date(x.schedule[0].id) < new Date() || x.ifPatientVisited == true)
+            })
           ,
           "schedule[0].date"
         );
@@ -261,7 +263,7 @@ export default {
           message: this.noticeMsg,
           date: new Date(),
         }
-      }).then(response => resMsg = response.data).catch(err => { console.log(err) })
+      }).then(response => resMsg = response.data).catch(err => this.errMsg = err)
       await axios.put('/session/doctor', {
         messageHistory: resMsg
       });
@@ -280,12 +282,12 @@ export default {
         await axios.post('/api/pullMsg', {
           id: this.$store.state.doctorID,
           message: msg
-        }).then(response => resMsg = response.data).catch(err => { console.log(err) })
+        }).then(response => resMsg = response.data).catch(err => { this.errMsg = err })
         await axios.put('/session/doctor', {
           messageHistory: resMsg
         });
       } catch (err) {
-        console.log(err)
+        this.errMsg = err
       }
       this.messageHistory = resMsg.reverse()
     },
@@ -296,12 +298,12 @@ export default {
         });
         await axios.post('/api/clearMsg', {
           id: this.$store.state.doctorID
-        }).then(response => this.messageHistory = response.data).catch(err => console.log(err))
+        }).then(response => this.messageHistory = response.data).catch(err => this.errMsg = err)
         await axios.put('/session/doctor', {
           messageHistory: this.messageHistory
         });
       } catch (err) {
-        console.log(err)
+        this.errMsg = err
       }
       this.clearMsgPrompt = false
     },
