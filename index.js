@@ -18,12 +18,12 @@ const server = app.listen(PORT, () => {
 });
 const io = require("socket.io")(server, {
     cors: {
-        origin: ["http://localhost:8080", "http://192.168.1.11:8080"]
+        origin: ["http://localhost:8080", "http://192.168.1.24:8080"]
     }
 });
 
 //cors option
-let allowlist = ['https://desolate-lowlands-18826.herokuapp.com', 'http://localhost:8080']
+let allowlist = ['https://medic-search-beta.herokuapp.com', 'http://localhost:8080']
 let corsOptionsDelegate = function (req, callback) {
     let corsOptions;
     if (allowlist.indexOf(req.header('Origin')) !== -1) {
@@ -59,13 +59,13 @@ app.use(helmet({
         policy: "same-origin"
     }
 }));
-app.use(express.static(path.join(__dirname, 'client/dist')))
 app.use((req, res, next) => {
     if (app.get('env') === 'production' && !req.secure) {
         return res.redirect("https://" + req.headers.host + req.url);
     }
     next();
-})
+});
+app.use(express.static(path.join(__dirname, 'client/dist')))
 //use sessions
 const sess = {
     secret: 'leindfraust',
@@ -187,7 +187,7 @@ io.on('connection', (socket) => {
             if (error) {
                 console.log(error)
             } else {
-                io.to(roomNo).emit('send messages', success.messages)
+                io.to(roomNo).emit('send messages', success?.messages)
             }
         });
     });
@@ -227,7 +227,7 @@ io.on('connection', (socket) => {
         }).clone().catch((err) => {
             console.log(err)
         }).then(response => {
-            io.to(roomNo).emit('delete messages', response.messages)
+            io.to(roomNo).emit('delete messages', response?.messages)
         });
     });
 });
