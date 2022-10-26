@@ -36,6 +36,8 @@ const getDoctorsForManager = (async (req, res) => {
 });
 
 const getDoctorsForFilter = (async (req, res) => {
+    console.log(req.body.date)
+    console.log(req.body.time)
     const today = new Date(new Date()).toLocaleDateString()
     let querySpecialistOnly = {
         verified: true,
