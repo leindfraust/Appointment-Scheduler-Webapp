@@ -32,10 +32,10 @@
                         <div class="buttons is-centered">
                             <button class="button" @click="dateTimeFilter = false">Cancel</button>
                             <button class="button is-info" :disabled="filterTime == null || filterDate == null"
-                                @click="filterBySpecialization(), dateTimeFilter = false"
+                                @click="filterSpecialistDateTime(), dateTimeFilter = false"
                                 v-if="!clearFilterDateTime">Confirm</button>
                             <button class="button is-info"
-                                @click="filterBySpecialization(), dateTimeFilter = false, clearFilterDateTime = false"
+                                @click="filterSpecialistDateTime(), dateTimeFilter = false, clearFilterDateTime = false"
                                 v-else>Confirm</button>
                         </div>
 
@@ -80,7 +80,7 @@
                 </div>
                 <div class="column is-narrow">
                     <div class="select is-rounded">
-                        <select v-model="filterSpecialist" @change="filterBySpecialization">
+                        <select v-model="filterSpecialist" @change="filterSpecialistDateTime">
                             <option value="" disabled>Specialist</option>
                             <option value="">Any</option>
                             <option v-for="specialist in specializations" :key="specialist" :value="specialist">{{
@@ -132,16 +132,18 @@
                                 </a>
                             </div>
                             <div class="column">
-                                <div class="notification is-info is-light"
-                                    v-if="filterSpecialist && geoHospital?.arrFilter !== 0">{{
-                                            geoHospital?.arrFilter
-                                    }}&nbsp;{{ new Date(filterDate) instanceof Date && !isNaN(new Date(filterDate)) &&
+                                <div class="notification is-info is-light" v-if="geoHospital?.arrFilter !== 0">{{
+                                        geoHospital?.arrFilter
+                                }}&nbsp;{{ new Date(filterDate) instanceof Date && !isNaN(new Date(filterDate))
+        &&
         filterTime != null ? `available ${filterSpecialist} on ${new
-            Date(filterDate).toDateString()}, ${filterTime}` : `available ${filterSpecialist}`
+            Date(filterDate).toDateString()}, ${filterTime}` : `available
+                                    ${filterSpecialist}`
 }}</div>
                                 <a @click="bookAppointment(geoHospital)">
                                     <h1 class="title is-4">{{ geoHospital.hospital }}</h1>
-                                    <p class="subtitle is-6">{{ geoHospital.barangayORStreet }}, {{ geoHospital.city }},
+                                    <p class="subtitle is-6">{{ geoHospital.barangayORStreet }}, {{ geoHospital.city
+                                    }},
                                         {{
                                                 geoHospital.province
                                         }}</p>
@@ -189,7 +191,7 @@ export default {
             return this.geolocation.filter(x => { return x.province.toLowerCase().includes(this.province.toLowerCase()); });
         },
         geoHospitalNearestUserIndexed() {
-            if (this.geoHospitalNearestUser && this.filterSpecialist) {
+            if (this.geoHospitalNearestUser && this.filterSpecialist || new Date(this.filterDate) instanceof Date && !isNaN(new Date(this.filterDate)) && this.filterTime != null) {
                 return this.geoHospitalNearestUser.slice().filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => x?.arrFilter > 0).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city)).slice().sort((a, b) => b.arrFilter - a.arrFilter);
             } else if (this.geoHospitalNearestUser) {
                 return this.geoHospitalNearestUser.slice().filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city)).slice().sort((a, b) => b.arrFilter - a.arrFilter)
@@ -258,13 +260,13 @@ export default {
                     longitude: parseFloat(this.userLongitude)
                 }).then(response => this.geoHospitalNearestUser = response.data);
                 document.getElementById('background').style.background = 'none'
-                if (this.filterSpecialist) {
-                    await this.filterBySpecialization()
+                if (this.filterSpecialist || new Date(this.filterDate) instanceof Date && !isNaN(new Date(this.filterDate)) && this.filterTime != null) {
+                    await this.filterSpecialistDateTime()
                 }
             }
             this.isHospitalLoading = false;
         },
-        async filterBySpecialization() {
+        async filterSpecialistDateTime() {
             this.doctorSpecialistFilter = []
             await this.$router.push({ path: '/provider', query: { name: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude, date: this.filterDate != null ? new Date(this.filterDate).toLocaleDateString() : '', time: this.filterTime } })
             await this.geoHospitalNearestUser.forEach(async (hospital,) => {
@@ -275,7 +277,7 @@ export default {
                     date: this.filterDate,
                     time: this.filterTime
                 }).then(async response => {
-                    this.doctorSpecialistFilter.push({ hospital: hospital.hospital, docLength: response.data.filter((doctor) => hospital.specializations.find(x => x.specialist === this.filterSpecialist) && doctor.hospitalOrigin.filter(x => x === hospital.hospital)).length })
+                    this.doctorSpecialistFilter.push({ hospital: hospital.hospital, docLength: response.data.filter((doctor) => this.filterSpecialist ? hospital.specializations.find(x => x.specialist === this.filterSpecialist) && doctor.hospitalOrigin.filter(x => x === hospital.hospital) : doctor.hospitalOrigin.filter(x => x === hospital.hospital)).length })
                     this.isHospitalLoading = false;
                 });
                 await this.geoHospitalNearestUser.forEach((x) => x["arrFilter"] = this.doctorSpecialistFilter.find(e => x.hospital == e.hospital)?.docLength)
@@ -286,27 +288,6 @@ export default {
 }
 </script>
 <style scoped>
-.separator {
-    display: flex;
-    align-items: center;
-    text-align: center;
-}
-
-.separator::before,
-.separator::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid #000;
-}
-
-.separator:not(:empty)::before {
-    margin-right: .25em;
-}
-
-.separator:not(:empty)::after {
-    margin-left: .25em;
-}
-
 @media (max-width: 991.98px) {
     #geoIframe {
         width: 75vw;
@@ -338,7 +319,6 @@ export default {
 }
 
 #background {
-    height: 100vh;
     background: no-repeat center url('../../assets/images/background-client.png');
     background-size: cover;
 }
