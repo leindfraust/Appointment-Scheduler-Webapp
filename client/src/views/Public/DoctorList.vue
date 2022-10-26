@@ -8,12 +8,13 @@
     </div>
   </div>
   <section class="section" v-if="hospitalDetails.length !== 0">
+    <CatchError :err-msg="errMsg" />
     <div class="columns">
       <div class="column" id="hospital-overview" style="border-right: 3px solid whitesmoke;">
         <div class="container is-fluid">
           <h1 class="title">{{ hospitalDetails.hospital }}</h1>
           <p class="subtitle">{{ hospitalDetails.barangayORStreet }}, {{ hospitalDetails.city }}, {{
-          hospitalDetails.province
+              hospitalDetails.province
           }}</p>
           <p class="subtitle is-6">{{ hospitalDetails.details[0].description }}</p>
           <div class="content">
@@ -49,13 +50,14 @@
                     " />
                   </figure>
                   <p class="subtitle has-text-centered" v-if="specialist.specialist !== 'General Practitioner'">{{
-                  specialist.specialist
+                      specialist.specialist
                   }}</p>
                 </a>
               </div>
             </div>
             <div class="container" v-else>
-              <a class="subtitle has-text-link" @click="viewSpecializations"><i class="fa-solid fa-arrow-left"></i>
+              <a class="subtitle has-text-link" @click="specializationClicked = false" v-if="!typeClinic"><i
+                  class="fa-solid fa-arrow-left"></i>
                 Back</a>
               <div v-if="doctorList == ''">
                 <br />
@@ -82,13 +84,17 @@
                     </div>
                     <div class="column is-5">
                       <div class="content">
-                        <h1 class="title is-5">{{ doctors.name }}</h1>
-                        <h3 class="subtitle is-6"><span class="has-text-weight-semibold">{{ pickedSpecialist
-                        }}</span><br />
+                        <h5>{{ doctors.name }}</h5>
+                        <p><span class="has-text-weight-semibold" v-if="pickedSpecialist">{{
+                            pickedSpecialist
+                        }}</span>
+                          <span class="has-text-weight-semibold" v-else><span v-for="specialist in doctors.specialist"
+                              :key="specialist">{{ specialist }} <br /></span></span>
+                          <br />
                           <span class="subtitle is-6 has-text-info">({{ doctors.visits == null ? '0 visits' :
-                          `${doctors.visits} visits`
+                              `${doctors.visits} visits`
                           }})</span>
-                        </h3>
+                        </p>
                       </div>
                     </div>
                     <div class="column" style="margin-top: auto;">
@@ -97,8 +103,10 @@
                         Appointment</button>
                     </div>
                   </div>
-                  <div class="notification" v-if="$store.state.patientID == null"><router-link :to="'/user/login'" class="has-text-weight-bold">Login</router-link> or <router-link :to="'/user/signup'" class="has-text-weight-bold">create an
-                    account</router-link> to make an appointment.
+                  <div class="notification" v-if="$store.state.patientID == null">
+                    <router-link :to="'/user/login'" class="has-text-weight-bold">Login</router-link> or <router-link
+                      :to="'/user/signup'" class="has-text-weight-bold">create an
+                      account</router-link> to make an appointment.
                   </div>
                   <hr>
                 </div>
@@ -118,14 +126,17 @@
 import axios from "axios";
 import store from "../../store";
 import NavigationTab from "../../components/NavigationTab.vue";
+import CatchError from "../../components/CatchError.vue";
 
 export default {
   name: "DoctorList",
   components: {
-    NavigationTab
+    NavigationTab,
+    CatchError
   },
   data() {
     return {
+      errMsg: '',
       hospitalDetails: [],
       patientDetails: null,
       doctorList: null,
@@ -133,7 +144,8 @@ export default {
       pickedSpecialist: null,
       specializationClicked: false,
       doctorSearchBar: '',
-      isDoctorLoading: false
+      isDoctorLoading: false,
+      typeClinic: false
     };
   },
   async mounted() {
@@ -146,6 +158,10 @@ export default {
       this.hospitalDetails = response.data
       this.specialistList = response.data.specializations.sort()
     });
+    if (this.hospitalDetails.type == 'Clinic') {
+      this.typeClinic = true
+      this.getDoctors(undefined)
+    }
   },
   computed: {
     doctorSearch() {
@@ -165,11 +181,8 @@ export default {
       await axios.post("/api/checkDoctorAvailability", {
         hospital: this.hospitalDetails.hospital,
         specialist: specialization
-      }).then(response => response ? this.doctorList = response.data.filter(x => x.schedule.find(x => new Date(x.id) > new Date() && x.hospital === this.hospitalDetails.hospital)) : this.doctorList = '').catch(err => console.log(err))
+      }).then(response => response ? this.doctorList = response.data : this.doctorList = []).catch(err => this.errMsg = err)
       this.isDoctorLoading = false
-    },
-    viewSpecializations() {
-      this.specializationClicked = false
     },
     async pickDoctor(details, specialization) {
       store.commit("pickedSpecialization", specialization)
