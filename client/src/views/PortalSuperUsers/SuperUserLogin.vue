@@ -39,7 +39,7 @@ import axios from 'axios'
 
 export default {
     name: "SuperUserLogin",
-    async mounted() {
+    async beforeCreate() {
         await axios.get('/session/superuser').then(response => this.superUserConfirmEmail = response.data)
 
         if (typeof this.superUserConfirmEmail.superuser !== 'undefined') {
