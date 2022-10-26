@@ -27,8 +27,44 @@
                     </div>
                 </div>
                 <hr>
+                <div class="container" v-if="Object.keys(doctorAccountsIndexed).length !== 0">
+                    <h2 class="title is-4">Upcoming Ongoing Schedules</h2>
+                    <div class="columns is-multiline is-centered">
+                        <div class="column is-5"
+                            v-for="doctor in doctorAccountsIndexed.slice().filter(x => x.verified && x.schedule.find(x => new Date(x.date).getTime() >= new Date(new Date().toDateString()).getTime() ) && x.schedule.find(x => x.hospital == managerHospital.hospital) ).sort((a, b) => new Date(b?.schedule.find(x => new Date(x.date).getTime() >= new Date(new Date().toDateString()).getTime()).date).getTime() - new Date(a?.schedule.find(x => new Date(x.date).getTime() >= new Date(new Date().toDateString()).getTime()).date).getTime())"
+                            :key="doctor._id">
+                            <div class="box">
+                                <div class="columns">
+                                    <div class="column is-narrow">
+
+                                        <figure class="image is-128x128">
+                                            <img
+                                                :src="`http://res.cloudinary.com/leindfraust/image/upload/v${new Date().getMonth()}${new Date().getDate()}/assets/doctors/${doctor.alias}.jpg`">
+                                        </figure>
+                                    </div>
+                                    <div class="column">
+                                        <p class="subtitle is-5">Dr. {{doctor.name}}</p>
+                                        <p class="subtitle is-6">{{doctor.specialist.toString()}}</p>
+                                        <p class="subtitle is-5">Schedules: </p>
+                                        <span v-for="schedule in doctor.schedule" :key="schedule.id">
+                                            <p class="subtitle is-6"
+                                                v-if="new Date(schedule.date).getTime() >= new Date(new Date().toDateString()).getTime() && schedule.hospital == managerHospital.hospital">
+                                                <strong
+                                                    v-if="new Date(schedule.date).getTime() == new Date(new Date().toDateString()).getTime() && schedule.hospital == managerHospital.hospital"
+                                                    class="has-text-info">TODAY: </strong> {{`${new
+                                                    Date(schedule.date).toDateString()}, ${schedule.timeStart} -
+                                                    ${schedule.timeEnd}`}}
+                                            </p>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
                 <h1 class="title is-4">Doctors Registered</h1>
-                <div class="field" v-if="Object.keys(doctorAccountsIndexed).length !== 0">
+                <div class="field" v-if="doctorAccounts.length !== 0">
                     <div class="control" style="width: 33%;">
                         <label class="label">Search:</label>
                         <input class="input" type="text" v-model="searchBar" placeholder="Search..." />
@@ -61,7 +97,11 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="notification is-warning" v-else>
+                <div class="notification is-warning"
+                    v-else-if="doctorAccountsIndexed.length == 0 && doctorAccounts.length !== 0">
+                    No results found.
+                </div>
+                <div class="notification is-warning" v-if="doctorAccounts.length == 0">
                     No doctors as of yet, generate a security code in <b>Registration and Password</b> for your doctors
                     to use in
                     registering to their account.
@@ -71,11 +111,12 @@
                     <div class="modal-content">
                         <div class="box">
                             <div class="field">
+                                <label class="label">Register new email: </label>
                                 <div class="control">
                                     <input class="input" type="text" v-model="email" />
                                 </div>
-                                <button class="button is-success" type="button" @click="updateData">Confirm</button>
                             </div>
+                            <button class="button is-success" type="button" @click="updateData">Confirm</button>
                         </div>
                         <button class="modal-close is-large" aria-label="close" @click="closeModal"></button>
                     </div>
@@ -101,22 +142,28 @@ export default {
     },
     computed: {
         doctorAccountsIndexed() {
-            return this.doctorAccounts.filter(x => { return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) || x.alias.toLowerCase().includes(this.searchBar.toLowerCase()) })
+            return this.doctorAccounts.filter(x => { return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) || x.alias.toLowerCase().includes(this.searchBar.toLowerCase()) || x.specialist.find(x => x.toLowerCase().includes(this.searchBar.toLowerCase())) })
         },
     },
     async mounted() {
         this.loading = true
         await axios.get('/session/manager').then(response => this.managerHospital = response.data)
-        await axios.get('/api/manager').then(response => this.hospitalStatus = response.data.find(x => x._id == this.managerHospital._id))
-        await axios.get('/api/doctor').then(response => this.doctorAccounts = response.data.filter(x => x.hospitalOrigin.find(x => x.hospital === this.managerHospital.hospital)))
-        await axios.get('/api/appointmentList').then(response => this.hospitalAppointments = response.data.filter(x => x.hospital == this.managerHospital.hospital));
+        await axios.post(`/api/manager/${this.managerHospital._id}`).then(response => this.hospitalStatus = response.data)
+        await axios.post('/api/doctor/manager', { hospital: this.managerHospital.hospital }).then(response => this.doctorAccounts = response.data)
+        await axios.post('/api/appointmentList/managers', { hospital: this.managerHospital.hospital }).then(response => this.hospitalAppointments = response.data);
 
         //line chart variables
+        const monthNames = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
         let schedules = []
         let dataArrLine = []
-        this.hospitalAppointments.forEach(x => schedules.push(x.schedule[0].id))
+        this.hospitalAppointments.forEach(x => {
+            if (new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear()) return schedules.push(monthNames[x.schedule[0].dayDetail.month - 1])
+        })
         let lineChartLabel = [...new Set(schedules)]
-        lineChartLabel.forEach(e => dataArrLine.push(this.hospitalAppointments.filter(x => x.schedule[0].id == e).length))
+
+        lineChartLabel.forEach(e => dataArrLine.push(this.hospitalAppointments.filter(x => new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear() && monthNames[x.schedule[0].dayDetail.month] == e && x.ifPatientVisited).length))
         this.lineChartData = {
             labels: lineChartLabel,
             datasets: [{
@@ -130,7 +177,7 @@ export default {
         let dataArrBar = []
         this.hospitalAppointments.forEach(x => doctors.push(x.doctorName))
         let barChartLabel = [...new Set(doctors)]
-        barChartLabel.forEach(e => dataArrBar.push(this.hospitalAppointments.filter(x => x.doctorName == e).length))
+        barChartLabel.forEach(e => dataArrBar.push(this.hospitalAppointments.filter(x => x.doctorName == e && x.ifPatientVisited).length))
         this.barChartData = {
             labels: barChartLabel,
             datasets: [{
@@ -138,7 +185,6 @@ export default {
                 backgroundColor: ['#77CEFF']
             }]
         }
-        console.log(this.doctorAccounts)
         this.loading = false
     },
     data() {
@@ -160,7 +206,7 @@ export default {
                     },
                     title: {
                         display: true,
-                        text: 'Appointments counts throughout schedules of doctors registered on your hospital',
+                        text: 'Appointment counts throughout this year',
                     },
                 },
             },
@@ -173,7 +219,7 @@ export default {
                     },
                     title: {
                         display: true,
-                        text: 'Top performing doctors counted via in their successful appointments',
+                        text: 'Top performing doctors',
                     },
                 },
             },
@@ -193,11 +239,12 @@ export default {
             await axios.get('/api/doctor').then(response => this.doctorAccounts = response.data)
             this.isActiveModal = !this.isActiveModal
         },
-        async doctorRemove() {
+        async doctorRemove(id) {
             await axios.post('/api/doctorPullHospital', {
-                doctorID: this.id,
+                doctorID: id,
                 hospital: this.managerHospital.hospital
             });
+            await axios.get('/api/doctor').then(response => this.doctorAccounts = response.data)
         },
         closeModal() {
             this.isActiveModal = false
@@ -206,4 +253,5 @@ export default {
 }
 </script>
 <style scoped>
+
 </style>
