@@ -7,7 +7,9 @@ import { useRouter } from 'vue-router';
 
 const store = useStore()
 const router = useRouter()
-let appointmentList = ref([])
+let appointmentListOngoing = ref([])
+let appointmentListDone = ref([])
+let appointmentListCancelled = ref([])
 let patient = ref([]);
 let geolocationData = ref([])
 let citiesData = ref([])
@@ -20,6 +22,7 @@ let successMsg = ref(false)
 let appointmentModal = ref(false)
 let navOngoingAppointments = ref(true)
 let navPastAppointments = ref(false)
+let navCancelledAppointments = ref(false)
 let file = ref()
 let uploadProfileButton = ref(false)
 let imgPreviewFile = ref()
@@ -27,7 +30,9 @@ let searchRefID = ref('')
 let buttonProfileImgSubmitLoading = ref(false)
 
 onMounted(async () => {
-    await axios.post('/api/appointmentList/patients', { id: store.state.patientID }).then(response => appointmentList.value = response.data);
+    await axios.post('/api/appointmentList/patients', { id: store.state.patientID, ongoing: true }).then(response => appointmentListOngoing.value = response.data);
+    await axios.post('/api/appointmentList/patients', { id: store.state.patientID, ongoing: false }).then(response => appointmentListDone.value = response.data);
+    await axios.post('/api/appointmentList/cancelledAppointments', { id: store.state.patientID }).then(response => appointmentListCancelled.value = response.data);
     await axios.get("/session/patient").then(response => patient.value = response.data);
     await axios.get("/api/geolocation").then(response => geolocationData.value = response.data)
     userProvince.value = await patient.value.province
@@ -44,16 +49,26 @@ const pastAppointments = computed(() => {
     return sortPastAppointments()
 });
 
+const cancelledAppointments = computed(() => {
+    return sortCancelledAppointments()
+});
+
 function sortPastAppointments() {
-    return appointmentList.value.sort((a, b) => {
+    return appointmentListDone.value.sort((a, b) => {
         return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
-    }).filter(x => { return new Date(x.schedule[0].id) < new Date() || x.ifPatientVisited == true }).filter(x => x.referenceID.toLowerCase().includes(searchRefID.value.toLowerCase()))
+    }).filter(x => x.referenceID.toLowerCase().includes(searchRefID.value.toLowerCase()))
 
 }
 function sortOngoingAppointments() {
-    return appointmentList.value.sort((a, b) => {
+    return appointmentListOngoing.value.sort((a, b) => {
         new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
-    }).filter(x => { return new Date(x.schedule[0].id) >= new Date() && x.ifPatientVisited == false }).filter(x => x.referenceID.toLowerCase().includes(searchRefID.value.toLowerCase()))
+    }).filter(x => x.referenceID.toLowerCase().includes(searchRefID.value.toLowerCase()))
+}
+
+function sortCancelledAppointments() {
+    return appointmentListCancelled.value.sort((a, b) => {
+        new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
+    }).filter(x => x.referenceID.toLowerCase().includes(searchRefID.value.toLowerCase()))
 }
 //methods
 async function selectProvince(province) {
@@ -76,12 +91,14 @@ async function updatePatient() {
     try {
         await axios.put('/session/patient/', {
             name: [patient.value.name[0], patient.value.name[1]],
+            email: patient.value.email,
             province: userProvince.value,
             city: userCity.value,
             currentAddress: patient.value.currentAddress
         });
         await axios.put(`/api/user/${patient.value._id}`, {
             name: [patient.value.name[0], patient.value.name[1]],
+            gmail: patient.value.email,
             province: userProvince.value,
             city: userCity.value,
             currentAddress: patient.value.currentAddress
@@ -104,12 +121,26 @@ async function updatePatient() {
 }
 async function cancelAppointment(id) {
     try {
-        await axios.delete(`/api/appointmentList/${id}`)
-        await axios.get('/api/appointmentList').then(response => appointmentList.value = response.data.filter(x => x.patientID === store.state.patientID));
+        await axios.put(`/api/appointmentList/${id}`, { ifPatientCancelled: true })
+        await axios.post('/api/appointmentList/patients', { id: store.state.patientID, ongoing: true }).then(response => appointmentListOngoing.value = response.data);
+        await axios.post('/api/appointmentList/patients', { id: store.state.patientID, ongoing: false }).then(response => appointmentListDone.value = response.data);
+        await axios.post('/api/appointmentList/cancelledAppointments', { id: store.state.patientID }).then(response => appointmentListCancelled.value = response.data);
     } catch (err) {
         errMsg.value = err
     }
 }
+
+async function deleteAppointment(id) {
+    try {
+        await axios.delete(`/api/appointmentList/${id}`)
+        await axios.post('/api/appointmentList/patients', { id: store.state.patientID, ongoing: true }).then(response => appointmentListOngoing.value = response.data);
+        await axios.post('/api/appointmentList/patients', { id: store.state.patientID, ongoing: false }).then(response => appointmentListDone.value = response.data);
+        await axios.post('/api/appointmentList/cancelledAppointments', { id: store.state.patientID }).then(response => appointmentListCancelled.value = response.data);
+    } catch (err) {
+        errMsg.value = err
+    }
+}
+
 async function uploadProfilePhotoClient() {
     buttonProfileImgSubmitLoading.value = true
     const formData = new FormData()
@@ -129,7 +160,6 @@ async function uploadProfilePhotoClient() {
         });
     } catch (err) {
         errMsg.value = err
-        console.log(err)
     }
     buttonProfileImgSubmitLoading.value = false
 }
@@ -184,7 +214,7 @@ async function uploadProfilePhotoClient() {
                         <div class="buttons is-centered">
                             <button class="button" v-if="uploadProfileButton"
                                 @click="imgPreviewFile = null, uploadProfileButton = false">Cancel</button>
-                            <button class="button is-info" :class="{'is-loading': buttonProfileImgSubmitLoading}"
+                            <button class="button is-info" :class="{ 'is-loading': buttonProfileImgSubmitLoading }"
                                 v-if="uploadProfileButton" @click="uploadProfilePhotoClient">Upload Photo</button>
                         </div>
                     </div>
@@ -202,7 +232,7 @@ async function uploadProfilePhotoClient() {
                                         <input type="text" class="input" v-model="patient.email" />
                                     </div>
                                     <div class="controls" v-else>
-                                        <input type="text" class="input"
+                                        <input type="text" class="input" v-model="patient.email"
                                             placeholder="Register an email for this account." />
                                     </div>
                                 </div>
@@ -241,7 +271,7 @@ async function uploadProfilePhotoClient() {
                                                     :key="provinces._id">
                                                     <a class="dropdown-item"
                                                         @click="selectProvince(provinces.province)">{{
-                                                        provinces.province
+                                                                provinces.province
                                                         }}</a>
                                                 </div>
                                             </div>
@@ -265,7 +295,7 @@ async function uploadProfilePhotoClient() {
                                                 <div class="dropdown-content" v-for="cities in citiesData"
                                                     :key="cities.name">
                                                     <a class="dropdown-item" @click="selectCity(cities.name)">{{
-                                                    cities.name
+                                                            cities.name
                                                     }}</a>
                                                 </div>
                                             </div>
@@ -291,9 +321,10 @@ async function uploadProfilePhotoClient() {
             <br />
             <div class="dropdown" :class="{ 'is-active': appointmentModal }">
                 <div class="dropdown-trigger">
-                    <button class="button" @click="appointmentModal = !appointmentModal"><span>{{ navOngoingAppointments
-                    ? 'Ongoing Appointments' : 'Past Appointments'
-                    }}</span><span class="icon is-small">
+                    <button class="button" @click="appointmentModal = !appointmentModal"><span>
+                            {{ navOngoingAppointments ? 'Ongoing Appointments' : navPastAppointments ?
+                                    'Past Appointments' : 'Cancelled Appointments'
+                            }}</span><span class="icon is-small">
                             <i class="fas fa-angle-down" aria-hidden="true"></i>
                         </span>
                     </button>
@@ -301,9 +332,18 @@ async function uploadProfilePhotoClient() {
                 <div class="dropdown-menu">
                     <div class="dropdown-content">
                         <a class="dropdown-item"
-                            @click="navOngoingAppointments = !navOngoingAppointments, navPastAppointments = !navPastAppointments, appointmentModal = !appointmentModal">{{
-                            navOngoingAppointments ? 'Past Appointments' : 'Ongoing Appointments'
-                            }}</a>
+                            @click="navOngoingAppointments = true, navPastAppointments = false, navCancelledAppointments = false, appointmentModal = !appointmentModal">
+                            Ongoing Appointments
+                        </a>
+                        <a class="dropdown-item"
+                            @click="navPastAppointments = true, navOngoingAppointments = false, navCancelledAppointments = false, appointmentModal = !appointmentModal">
+                            Past Appointments
+                        </a>
+                        <a class="dropdown-item"
+                            @click="navCancelledAppointments = true, navOngoingAppointments = false, navPastAppointments = false, appointmentModal = !appointmentModal">
+                            Cancelled Appointments
+                        </a>
+
                     </div>
                 </div>
             </div>
@@ -316,9 +356,9 @@ async function uploadProfilePhotoClient() {
                     <input type="text" class="input" placeholder="Search Reference ID" v-model="searchRefID" />
                 </div>
             </div>
-            <div class="container" v-if="navOngoingAppointments">
+            <div class="container box" v-if="navOngoingAppointments">
                 <div class="table-container" v-if="Object.keys(ongoingAppointments).length !== 0">
-                    <table class="table is-striped is-narrow is-fullwidth is-bordered">
+                    <table class="table is-fullwidth">
                         <thead>
                             <tr>
                                 <th class="has-text-black-ter">Controls</th>
@@ -334,8 +374,8 @@ async function uploadProfilePhotoClient() {
                                 <th class="has-text-black-ter">Symptoms/Comments</th>
                             </tr>
                         </thead>
-                        <tbody v-for="appointments in ongoingAppointments" :key="appointments._id">
-                            <tr>
+                        <tbody>
+                            <tr v-for="appointments in ongoingAppointments" :key="appointments._id">
                                 <button class="dropdown-item button has-text-danger" type="button"
                                     @click="cancelAppointment(appointments._id)">Cancel</button>
                                 <br />
@@ -358,11 +398,12 @@ async function uploadProfilePhotoClient() {
                     <div class="notification is-info">You do not have any ongoing appointments.</div>
                 </div>
             </div>
-            <div class="container" v-if="navPastAppointments">
+            <div class="container box" v-if="navPastAppointments">
                 <div class="table-container" v-if="Object.keys(pastAppointments).length !== 0">
-                    <table class="table is-striped is-narrow is-fullwidth is-bordered">
+                    <table class="table is-fullwidth">
                         <thead>
                             <tr>
+                                <th class="has-text-black-ter">Visited</th>
                                 <th class="has-text-black-ter">Reference ID</th>
                                 <th class="has-text-black-ter">Schedule</th>
                                 <th class="has-text-black-ter">Priority No.</th>
@@ -377,6 +418,7 @@ async function uploadProfilePhotoClient() {
                         </thead>
                         <tbody v-for="appointments in pastAppointments" :key="appointments._id">
                             <tr>
+                                <th class="has-text-black-ter">{{ appointments.ifPatientVisited ? 'Yes' : 'No' }}</th>
                                 <th class="has-text-black-ter">{{ appointments.referenceID }}</th>
                                 <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString()
                                 }}</th>
@@ -394,6 +436,48 @@ async function uploadProfilePhotoClient() {
                 </div>
                 <div class="container" v-else>
                     <div class="notification is-info">You do not have any past appointments.</div>
+                </div>
+            </div>
+            <div class="container box" v-if="navCancelledAppointments">
+                <div class="table-container" v-if="Object.keys(cancelledAppointments).length !== 0">
+                    <table class="table is-fullwidth">
+                        <thead>
+                            <tr>
+                                <th class="has-text-black-ter">Controls</th>
+                                <th class="has-text-black-ter">Reference ID</th>
+                                <th class="has-text-black-ter">Schedule</th>
+                                <th class="has-text-black-ter">Priority No.</th>
+                                <th class="has-text-black-ter">Hospital Appointed</th>
+                                <th class="has-text-black-ter">Doctor Appointed</th>
+                                <th class="has-text-black-ter">First Name</th>
+                                <th class="has-text-black-ter">Last Name</th>
+                                <th class="has-text-black-ter">Contact Number</th>
+                                <th class="has-text-black-ter">Birthday</th>
+                                <th class="has-text-black-ter">Symptoms/Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="appointments in cancelledAppointments" :key="appointments._id">
+                                <button class="dropdown-item button has-text-danger" type="button"
+                                    @click="deleteAppointment(appointments._id)">Delete</button>
+                                <br />
+                                <th class="has-text-black-ter">{{ appointments.referenceID }}</th>
+                                <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString()
+                                }}</th>
+                                <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
+                                <th class="has-text-black-ter">{{ appointments.hospital }}</th>
+                                <th class="has-text-black-ter">{{ appointments.doctorName }}</th>
+                                <td class="has-text-black-ter">{{ appointments.firstName }}</td>
+                                <td class="has-text-black-ter">{{ appointments.lastName }}</td>
+                                <td class="has-text-black-ter">{{ appointments.contactNum }}</td>
+                                <td class="has-text-black-ter">{{ appointments.birthDay }}</td>
+                                <td class="has-text-black-ter">{{ appointments.comments }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="container" v-else>
+                    <div class="notification is-info">You do not have any cancelled appointments.</div>
                 </div>
             </div>
         </div>
