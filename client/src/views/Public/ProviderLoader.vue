@@ -132,7 +132,7 @@
                                 </a>
                             </div>
                             <div class="column">
-                                <div class="notification is-info is-light" v-if="geoHospital?.arrFilter !== 0">{{
+                                <div class="notification is-info is-light" v-if="geoHospital?.arrFilter > 0">{{
                                         geoHospital?.arrFilter
                                 }}&nbsp;{{ new Date(filterDate) instanceof Date && !isNaN(new Date(filterDate))
         &&
@@ -269,7 +269,8 @@ export default {
         async filterSpecialistDateTime() {
             this.doctorSpecialistFilter = []
             await this.$router.push({ path: '/provider', query: { name: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude, date: this.filterDate != null ? new Date(this.filterDate).toLocaleDateString() : '', time: this.filterTime } })
-            await this.geoHospitalNearestUser.forEach(async (hospital,) => {
+            const hospitals = this.geoHospitalNearestUser
+            for await (const hospital of hospitals) {
                 this.isHospitalLoading = true;
                 await axios.post("/api/doctor/filteration", {
                     hospital: hospital.hospital,
@@ -280,8 +281,8 @@ export default {
                     this.doctorSpecialistFilter.push({ hospital: hospital.hospital, docLength: response.data.filter((doctor) => this.filterSpecialist ? hospital.specializations.find(x => x.specialist === this.filterSpecialist) && doctor.hospitalOrigin.filter(x => x === hospital.hospital) : doctor.hospitalOrigin.filter(x => x === hospital.hospital)).length })
                     this.isHospitalLoading = false;
                 });
-                await this.geoHospitalNearestUser.forEach((x) => x["arrFilter"] = this.doctorSpecialistFilter.find(e => x.hospital == e.hospital)?.docLength)
-            });
+            }
+            await this.geoHospitalNearestUser.forEach((x) => x["arrFilter"] = this.doctorSpecialistFilter.find(e => x.hospital == e.hospital)?.docLength)
         },
     },
     components: { NavigationTab, FooterBlock }
