@@ -37,6 +37,7 @@ const getDoctorsForManager = (async (req, res) => {
 
 const getDoctorsForFilter = (async (req, res) => {
     const today = new Date(new Date()).toLocaleDateString()
+    const customDate = new Date(req.body.date).toLocaleDateString()
     let querySpecialistOnly = {
         verified: true,
         "hospitalOrigin.hospital": req.body.hospital,
@@ -44,12 +45,11 @@ const getDoctorsForFilter = (async (req, res) => {
         schedule: { $elemMatch: { date: { $gt: new Date(today).toISOString() }, hospital: req.body.hospital } }
     }
     let querySpecialistWithDateTime;
-    if (new Date(await req.body.date) instanceof Date && !isNaN(new Date(await req.body.date)) && await req.body.time) {
-        console.log('I worked')
+    if (new Date(req.body.date) instanceof Date && !isNaN(new Date(req.body.date)) && req.body.time) {
         querySpecialistWithDateTime = {
             verified: true,
-            "hospitalOrigin.hospital": await req.body.hospital,
-            schedule: { $elemMatch: { date: new Date(new Date(await req.body.date).toLocaleDateString()).toISOString(), timeStart: { $regex: `.*${await req.body.time}*.` }, hospital: await req.body.hospital } }
+            "hospitalOrigin.hospital": req.body.hospital,
+            schedule: { $elemMatch: { date: new Date(customDate).toISOString(), timeStart: { $regex: `.*${req.body.time}*.` }, hospital: req.body.hospital } }
         }
         if (req.body.filterSpecialist) {
             querySpecialistWithDateTime.specialist = req.body.filterSpecialist
