@@ -1,166 +1,174 @@
 <template>
-  <section class="section">
-    <router-link :to="'/user/login'"><i class="fa-solid fa-arrow-left"></i> Back to Login</router-link>
-    <div class="container" style="width: 50%; margin: auto">
-      <div class="notification is-danger" v-if="errMsg">
-        Oops, something went wrong. Try again later or
-        <router-link :to="'/contactus'">contact us</router-link>
-      </div>
-      <div class="box">
-        <div class="field is-horizontal">
-          <div class="field-body">
-            <div class="field">
-              <p class="control">
-                <label class="label">First name:</label>
-                <input class="input" type="text" placeholder="First name" v-model="firstName" required />
-              </p>
-            </div>
-            <div class="field">
-              <p class="control">
-                <label class="label">Last name:</label>
-                <input class="input" type="text" placeholder="Last name" v-model="lastName" required />
-              </p>
-            </div>
+  <section class="hero is-fullheight">
+    <div class="hero-body">
+      <div class="container">
+        <router-link :to="'/user/login'"><i class="fa-solid fa-arrow-left"></i> Back to Login</router-link>
+        <div class="container" style="width: 50%; margin: auto">
+          <div class="notification is-danger" v-if="errMsg">
+            Oops, something went wrong. Try again later or
+            <router-link :to="'/contactus'">contact us</router-link>
           </div>
-        </div>
-        <div class="field is-horizontal">
-          <div class="field-body">
-            <div class="field">
-              <p class="control">
-                <label class="label">Age:</label>
-                <input class="input" type="number" placeholder="age" v-model="age" required />
-              </p>
+          <div class="box">
+            <div class="field is-horizontal">
+              <div class="field-body">
+                <div class="field">
+                  <p class="control">
+                    <label class="label">First name:</label>
+                    <input class="input" type="text" placeholder="First name" v-model="firstName" required />
+                  </p>
+                </div>
+                <div class="field">
+                  <p class="control">
+                    <label class="label">Last name:</label>
+                    <input class="input" type="text" placeholder="Last name" v-model="lastName" required />
+                  </p>
+                </div>
+              </div>
             </div>
+            <div class="field is-horizontal">
+              <div class="field-body">
+                <div class="field">
+                  <p class="control">
+                    <label class="label">Age:</label>
+                    <input class="input" type="number" placeholder="age" v-model="age" required />
+                  </p>
+                </div>
 
-            <br />
-            <div class="field">
-              <p class="control">
-                <label class="label">Gender:</label>
-                <label class="radio">
-                  <input type="radio" name="sex" @click="sexMale" />
-                  Male
-                </label>
-                <label class="radio">
-                  <input type="radio" name="sex" @click="sexFemale" />
-                  Female
-                </label>
-              </p>
+                <br />
+                <div class="field">
+                  <p class="control">
+                    <label class="label">Gender:</label>
+                    <label class="radio">
+                      <input type="radio" name="sex" @click="sexMale" />
+                      Male
+                    </label>
+                    <label class="radio">
+                      <input type="radio" name="sex" @click="sexFemale" />
+                      Female
+                    </label>
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div class="field is-horizontal">
-          <br />
-          <div class="field-body">
-            <div class="field">
-              <div class="control">
-                <label class="label">Contact Number:</label>
-                <input class="input" type="number" placeholder="contact number" v-model="contactNum" required />
+            <div class="field is-horizontal">
+              <br />
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <label class="label">Contact Number:</label>
+                    <input class="input" type="number" placeholder="contact number" v-model="contactNum" required />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <div class="control">
+                    <label class="label">Gmail(Optional):</label>
+                    <div v-if="emailFound !== ''">
+                      <p class="help is-danger" v-if="emailFound">Unavailable<i class="fas fa-spinner fa-spin"
+                          v-if="loadingEmail"></i></p>
+                      <p class="help is-success" v-else>Available<i class="fas fa-spinner fa-spin"
+                          v-if="loadingEmail"></i>
+                      </p>
+                    </div>
+                    <input class="input" type="email" placeholder="gmail" v-model="gmail" @input="emailFindTimeout"
+                      required />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="field is-horizontal">
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <label class="label">Province:</label>
+                    <div class="dropdown" :class="{ 'is-active': isActiveDropdownProvince }">
+                      <div class="dropdown-trigger">
+                        <button class="button" aria-haspopup="true" @click="provinceDropdown">
+                          <span v-if="province == ''">Select</span>
+                          <span v-else>{{ province }}</span>
+                        </button>
+                      </div>
+                      <div class="dropdown-menu">
+                        <div class="dropdown-content" v-for="provinces in geolocationData" :key="provinces._id">
+                          <a class="dropdown-item" @click="selectProvince(provinces.province)">{{ provinces.province
+                          }}</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <div class="control">
+                    <div class="label">City/Municipality:</div>
+                    <div class="dropdown" :class="{ 'is-active': isActiveDropdownCity }">
+                      <div class="dropdown-trigger">
+                        <button class="button" aria-haspopup="true" @click="cityDropdown" :disabled="province == ''">
+                          <span v-if="city == ''">Select</span>
+                          <span v-else>{{ city }}</span>
+                        </button>
+                      </div>
+                      <div class="dropdown-menu" v-if="province">
+                        <div class="dropdown-content" v-for="cities in citiesData" :key="cities.name">
+                          <a class="dropdown-item" @click="selectCity(cities.name)">{{ cities.name }}</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
             <div class="field">
+              <p class="control">
+                <label class="label">Current Address</label>
+                <input class="input" type="text" placeholder="your current address" v-model="currentAddress" required />
+              </p>
+            </div>
+            <div class="field">
               <div class="control">
-                <label class="label">Gmail(Optional):</label>
-                <div v-if="emailFound !== ''">
-                  <p class="help is-danger" v-if="emailFound">Unavailable<i class="fas fa-spinner fa-spin"
-                      v-if="loadingEmail"></i></p>
-                  <p class="help is-success" v-else>Available<i class="fas fa-spinner fa-spin" v-if="loadingEmail"></i>
+                <label class="label">Username:</label>
+                <div v-if="usernameFound !== ''">
+                  <p class="help is-danger" v-if="usernameFound">Unavailable<i class="fas fa-spinner fa-spin"
+                      v-if="loadingUsername"></i></p>
+                  <p class="help is-success" v-else>Available<i class="fas fa-spinner fa-spin"
+                      v-if="loadingUsername"></i>
                   </p>
                 </div>
-                <input class="input" type="email" placeholder="gmail" v-model="gmail" @input="emailFindTimeout"
+                <input class="input" type="text" placeholder="username" v-model="username" @input="usernameFindTimeout"
                   required />
               </div>
             </div>
-          </div>
-        </div>
-        <div class="field is-horizontal">
-          <div class="field-body">
-            <div class="field">
-              <div class="control">
-                <label class="label">Province:</label>
-                <div class="dropdown" :class="{ 'is-active': isActiveDropdownProvince }">
-                  <div class="dropdown-trigger">
-                    <button class="button" aria-haspopup="true" @click="provinceDropdown">
-                      <span v-if="province == ''">Select</span>
-                      <span v-else>{{ province }}</span>
-                    </button>
-                  </div>
-                  <div class="dropdown-menu">
-                    <div class="dropdown-content" v-for="provinces in geolocationData" :key="provinces._id">
-                      <a class="dropdown-item" @click="selectProvince(provinces.province)">{{ provinces.province }}</a>
-                    </div>
-                  </div>
+            <div class="field is-horizontal">
+              <div class="field-body">
+                <div class="field">
+                  <p class="control">
+                    <label class="label">Password:</label>
+                    <input class="input" type="password" placeholder="password" v-model="password" required />
+                  </p>
+                  <p class="subtitle has-text-danger">{{ passwordMatch }}</p>
+                </div>
+                <div class="field">
+                  <p class="control">
+                    <label class="label">Repeat Password:</label>
+                    <input class="input" type="password" placeholder="repeat password" v-model="passwordRepeat"
+                      required />
+                  </p>
+                  <p class="subtitle has-text-danger">{{ passwordMatch }}</p>
                 </div>
               </div>
             </div>
-
-            <div class="field">
-              <div class="control">
-                <div class="label">City/Municipality:</div>
-                <div class="dropdown" :class="{ 'is-active': isActiveDropdownCity }">
-                  <div class="dropdown-trigger">
-                    <button class="button" aria-haspopup="true" @click="cityDropdown" :disabled="province == ''">
-                      <span v-if="city == ''">Select</span>
-                      <span v-else>{{ city }}</span>
-                    </button>
-                  </div>
-                  <div class="dropdown-menu" v-if="province">
-                    <div class="dropdown-content" v-for="cities in citiesData" :key="cities.name">
-                      <a class="dropdown-item" @click="selectCity(cities.name)">{{ cities.name }}</a>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <label class="checkbox">
+              <input type="checkbox" @click="agreeTermsAndConditions" />
+              I agree to the
+              <router-link :to="'/terms-and-conditions'">terms and conditions</router-link>
+            </label>
+            <br />
+            <div class="has-text-right">
+              <button class="button is-primary" @click="signup($event)"
+                :disabled="firstName == null || lastName == null || age == null || sex == null || contactNum == null || province == null || city == null || currentAddress == null || username == null || password == null || termsAndConditionsAgreed == false">Confirm</button>
             </div>
           </div>
-        </div>
-
-        <div class="field">
-          <p class="control">
-            <label class="label">Current Address</label>
-            <input class="input" type="text" placeholder="your current address" v-model="currentAddress" required />
-          </p>
-        </div>
-        <div class="field">
-          <div class="control">
-            <label class="label">Username:</label>
-            <div v-if="usernameFound !== ''">
-              <p class="help is-danger" v-if="usernameFound">Unavailable<i class="fas fa-spinner fa-spin"
-                  v-if="loadingUsername"></i></p>
-              <p class="help is-success" v-else>Available<i class="fas fa-spinner fa-spin" v-if="loadingUsername"></i>
-              </p>
-            </div>
-            <input class="input" type="text" placeholder="username" v-model="username" @input="usernameFindTimeout"
-              required />
-          </div>
-        </div>
-        <div class="field is-horizontal">
-          <div class="field-body">
-            <div class="field">
-              <p class="control">
-                <label class="label">Password:</label>
-                <input class="input" type="password" placeholder="password" v-model="password" required />
-              </p>
-              <p class="subtitle has-text-danger">{{ passwordMatch }}</p>
-            </div>
-            <div class="field">
-              <p class="control">
-                <label class="label">Repeat Password:</label>
-                <input class="input" type="password" placeholder="repeat password" v-model="passwordRepeat" required />
-              </p>
-              <p class="subtitle has-text-danger">{{ passwordMatch }}</p>
-            </div>
-          </div>
-        </div>
-        <label class="checkbox">
-          <input type="checkbox" @click="agreeTermsAndConditions" />
-          I agree to the
-          <a href="#">terms and conditions</a>
-        </label>
-        <br />
-        <div class="has-text-right">
-          <button class="button is-primary" @click="signup($event)"
-            :disabled="firstName == null || lastName == null || age == null || sex == null || contactNum == null || province == null || city == null || currentAddress == null || username == null || password == null || termsAndConditionsAgreed == false">Confirm</button>
         </div>
       </div>
     </div>
@@ -216,7 +224,7 @@ export default {
       await axios.post('/api/user/check_username', {
         username: this.username
       }).then(response => { this.usernameFound = response.data })
-      if (await this.username == '') {
+      if (this.username == '') {
         this.usernameFound = ''
       }
       this.loadingUsername = false
@@ -233,7 +241,7 @@ export default {
       await axios.post('/api/user/check_email', {
         email: this.gmail
       }).then(response => { this.emailFound = response.data })
-      if (await this.gmail == '') {
+      if (this.gmail == '') {
         this.emailFound = ''
       }
       this.loadingEmail = false
@@ -310,7 +318,7 @@ export default {
 }
 </script>
 <style scoped>
-.section {
+.hero-body {
   background: center center no-repeat url('../../assets/images/background-client-signup.png');
   background-size: cover
 }
