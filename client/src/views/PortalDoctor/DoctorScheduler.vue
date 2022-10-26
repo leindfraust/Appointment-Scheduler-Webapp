@@ -196,7 +196,7 @@ export default {
             await axios.put('/session/doctor', {
               schedule: response.data.schedule
             });
-            this.days = await response.data.schedule
+            this.days = [...response.data.schedule]
           });
         } catch (err) {
           this.errMsg = err
@@ -222,7 +222,7 @@ export default {
             setTimeout(async () => {
               await axios
                 .get("/session/doctor")
-                .then((response) => (this.days = response.data.schedule));
+                .then((response) => (this.days = [...response.data.schedule]));
             }, 500)
           });
         }
@@ -253,7 +253,7 @@ export default {
               setTimeout(async () => {
                 await axios
                   .get("/session/doctor")
-                  .then((response) => (this.days = response.data.schedule));
+                  .then((response) => (this.days = [...response.data.schedule]));
               }, 500)
             });
           } catch (err) {
