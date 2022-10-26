@@ -10,7 +10,9 @@ const {
     check_username,
     check_alias,
     check_registrationCode,
-    check_email
+    check_email,
+    updateDoctorSchedule,
+    getDoctorsForManager
 } = require('../../controllers/doctorController');
 
 router.post('/check_registrationCode', check_registrationCode)
@@ -25,11 +27,15 @@ router.post('/verify_username', verify_username)
 
 router.get('/', getDoctors);
 
-router.get('/filteration', getDoctorsForFilter);
+router.post('/manager', getDoctorsForManager);
+
+router.post('/filteration', getDoctorsForFilter);
 
 router.post('/', pushDoctor);
 
 router.put('/:id', updateDoctor);
+
+router.put('/schedule_update/:id', updateDoctorSchedule);
 
 router.delete('/:id', deleteDoctor);
 

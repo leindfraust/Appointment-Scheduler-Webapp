@@ -21,9 +21,40 @@ const getDoctors = (async (req, res) => {
     }
 });
 
-const getDoctorsForFilter = (async (req, res) => {
+const getDoctorsForManager = (async (req, res) => {
     try {
-        const doctorList = await Doctor.find().select('-password -username -licenseNo -verified -messageHistory -_id -gmail -__v -patients -alias -gmail')
+        const doctorList = await Doctor.find({
+            "hospitalOrigin.hospital": req.body.hospital
+        }).select('-password -username -licenseNo')
+        if (!doctorList) throw new Error('no items')
+        res.status(200).send(doctorList)
+    } catch (error) {
+        res.status(500).send({
+            message: error.message
+        })
+    }
+});
+
+const getDoctorsForFilter = (async (req, res) => {
+    const today = new Date(new Date()).toLocaleDateString()
+    let querySpecialistOnly = {
+        verified: true,
+        "hospitalOrigin.hospital": req.body.hospital,
+        specialist: req.body.filterSpecialist,
+        schedule: { $elemMatch: { date: { $gt: new Date(today).toISOString() }, hospital: req.body.hospital } }
+    }
+    let querySpecialistWithDateTime;
+    if (new Date(req.body.date) instanceof Date && !isNaN(new Date(req.body.date)) && req.body.time) {
+        querySpecialistWithDateTime = {
+            verified: true,
+            "hospitalOrigin.hospital": req.body.hospital,
+            specialist: req.body.filterSpecialist,
+            schedule: { $elemMatch: { date: new Date(new Date(req.body.date).toLocaleDateString()).toISOString(), timeStart: { $regex: `.*${req.body.time}*.` }, hospital: req.body.hospital } }
+        }
+    }
+
+    try {
+        const doctorList = await Doctor.find(querySpecialistWithDateTime ? querySpecialistWithDateTime : querySpecialistOnly).select('-password -username -licenseNo -verified -messageHistory -_id -gmail -__v -patients -alias -gmail')
         if (!doctorList) throw new Error('no items')
         res.status(200).send(doctorList)
     } catch (error) {
@@ -34,20 +65,19 @@ const getDoctorsForFilter = (async (req, res) => {
 });
 
 const checkAvailabilityDoctors = (async (req, res) => {
+    const today = new Date(new Date()).toLocaleDateString()
     let hospital = req.body.hospital
     let specialist = req.body.specialist
+    let query = {
+        verified: true,
+        "hospitalOrigin.hospital": hospital,
+        schedule: { $elemMatch: { date: { $gt: new Date(today).toISOString() }, hospital: hospital } }
+    }
+    if (typeof specialist !== 'undefined') {
+        query.specialist = specialist
+    }
     try {
-        const availableDoctors = await Doctor.find({
-            verified: true,
-            "hospitalOrigin.hospital": hospital,
-            specialist: specialist,
-            schedule: {
-                $exists: true,
-                $not: {
-                    $size: 0
-                }
-            }
-        }).select('-password -username -licenseNo -messageHistory -gmail -specialist -hospitalOrigin');
+        const availableDoctors = await Doctor.find(query).select('-password -username -licenseNo -messageHistory -gmail -hospitalOrigin');
         if (availableDoctors) {
             res.status(200).send(availableDoctors)
         } else {
@@ -179,6 +209,24 @@ const updateDoctor = (async (req, res) => {
     }
 });
 
+const updateDoctorSchedule = (async (req, res) => {
+    const { id } = req.params
+    try {
+        const response = await Doctor.findOneAndUpdate(
+            { _id: id, "schedule.id": req.body.schedule.id },
+            { $set: { "schedule.$": req.body.schedule } },
+            { new: true }
+        ).select("schedule")
+        if (!response) throw new Error('cannot update')
+        res.status(200).send(response)
+    } catch (err) {
+        console.log(err)
+        res.status(500).send({
+            message: err.message
+        })
+    }
+})
+
 const deleteDoctor = (async (req, res) => {
     const {
         id
@@ -203,9 +251,9 @@ const deleteDoctor = (async (req, res) => {
 });
 
 //pull doctor from a hospital
-const pullDoctorHospital = ((req, res) => {
-    let doctorID = req.body.doctorID
-    let hospital = req.body.hospital
+const pullDoctorHospital = (async (req, res) => {
+    let doctorID = await req.body.doctorID
+    let hospital = await req.body.hospital
 
     Doctor.findOneAndUpdate({
         _id: doctorID
@@ -229,10 +277,10 @@ const pullDoctorHospital = ((req, res) => {
 });
 
 //add patient records to the doctor of a new patient
-const pushPatientDoctor = ((req, res) => {
-    let doctorID = req.body.doctorID
-    let patientID = req.body.patientID
-    let patientFullName = req.body.patientFullName
+const pushPatientDoctor = (async (req, res) => {
+    let doctorID = await req.body.doctorID
+    let patientID = await req.body.patientID
+    let patientFullName = await req.body.patientFullName
 
     Doctor.findOneAndUpdate({
         _id: doctorID
@@ -324,9 +372,11 @@ module.exports = {
     checkAvailabilityDoctors,
     verify_username,
     getDoctors,
+    getDoctorsForManager,
     getDoctorsForFilter,
     pushDoctor,
     updateDoctor,
+    updateDoctorSchedule,
     deleteDoctor,
     pullDoctorHospital,
     pushPatientDoctor,
