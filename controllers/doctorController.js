@@ -45,6 +45,7 @@ const getDoctorsForFilter = (async (req, res) => {
     }
     let querySpecialistWithDateTime;
     if (new Date(req.body.date) instanceof Date && !isNaN(new Date(req.body.date)) && req.body.time) {
+        console.log('I worked')
         querySpecialistWithDateTime = {
             verified: true,
             "hospitalOrigin.hospital": req.body.hospital,
