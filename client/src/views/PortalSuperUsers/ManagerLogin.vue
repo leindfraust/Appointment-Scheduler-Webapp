@@ -18,7 +18,7 @@
                                         required @keyup.enter="login" />
                                 </div>
                                 <p v-if="incorrectUserPass" class="has-text-danger" style="margin-top: 5%">{{
-                                        validateMessage
+                                validateMessage
                                 }}</p>
                                 <p v-else-if="incorrectUserPass == false" class="has-text-danger"
                                     style="margin-top: 5%">{{ validateMessage }}</p>
@@ -58,9 +58,14 @@ export default {
             this.newAccount = true;
             await this.$store.commit("accountCreated", false);
         }
-        if (this.$store.state.managerHospital !== null) {
-            await this.$router.push(`/manager/${this.$store.state.managerHospital}`);
-        }
+    },
+    async beforeCreate() {
+        await axios.get("/session/manager").then(async response => {
+            if (typeof response.data.hospital !== 'undefined') {
+                this.$store.commit("managerHospital", response.data.hospital);
+                await this.$router.push(`/manager/${this.$store.state.managerHospital}`);
+            }
+        })
     },
     methods: {
         async login() {
@@ -77,7 +82,7 @@ export default {
                         password: this.password
                     })
                     .then(async (response) => {
-                        this.userManager = response.data
+                        this.userManager = await response.data
                         // if username and password matched to a user
                         if (await this.userManager) {
                             await axios.post("/session/manager", {
