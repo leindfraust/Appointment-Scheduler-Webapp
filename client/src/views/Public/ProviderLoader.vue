@@ -7,9 +7,53 @@
                 <div class="loader" style="margin: auto;"></div>
             </div>
         </div>
+        <div class="modal" :class="{ 'is-active': dateTimeFilter }">
+            <div class="modal-background"></div>
+            <div class="modal-content" style="overflow: auto">
+                <div class="box">
+                    <section class="section has-text-centered">
+                        <div class="has-text-left">
+                            <button class="button is-info"
+                                @click="filterDate = '', filterTime = '', clearFilterDateTime = true">Clear
+                                Filter</button>
+                        </div>
+                        <label class="label">Choose Preferred Date</label>
+                        <v-date-picker v-model="filterDate" is-expanded />
+                        <div class="block"></div>
+                        <label class="label">Choose Preferred Time </label>
+                        <div class="buttons is-centered">
+                            <button class="button" :class="{ 'is-active': filterTime == 'AM' }"
+                                @click="filterTime = 'AM'">AM</button>
+                            <button class="button" :class="{ 'is-active': filterTime == 'PM' }"
+                                @click="filterTime = 'PM'">PM</button>
+                        </div>
+
+                        <div class="block"></div>
+                        <div class="buttons is-centered">
+                            <button class="button" @click="dateTimeFilter = false">Cancel</button>
+                            <button class="button is-info" :disabled="filterTime == null || filterDate == null"
+                                @click="filterBySpecialization(), dateTimeFilter = false"
+                                v-if="!clearFilterDateTime">Confirm</button>
+                            <button class="button is-info"
+                                @click="filterBySpecialization(), dateTimeFilter = false, clearFilterDateTime = false"
+                                v-else>Confirm</button>
+                        </div>
+
+                    </section>
+                </div>
+            </div>
+        </div>
         <div class="block is-hidden-desktop"></div>
         <div v-if="citiesOrMunicipalities != ''">
             <div class="columns is-mobile" style="overflow: auto;">
+                <div class="column is-narrow">
+                    <div class="select is-rounded">
+                        <select v-model="distanceFilter">
+                            <option :value="false">Sort by Recommended</option>
+                            <option :value="true">Sort by Nearest</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="column is-narrow">
                     <div class="select is-rounded">
                         <select v-model="city">
@@ -18,7 +62,7 @@
                             <option
                                 v-for="(cityorMunicipality, index) in citiesOrMunicipalities.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
                                 :key="index">{{
-                                cityorMunicipality.name
+                                        cityorMunicipality.name
                                 }}</option>
                         </select>
                     </div>
@@ -35,36 +79,35 @@
                     </div>
                 </div>
                 <div class="column is-narrow">
-                    <button class="button is-rounded" @click="filterDistanceToggle"><span>Distance</span><span
-                            class="icon is-small">
-                            <i class="fas fa-angle-down" aria-hidden="true" v-if="distanceFilter"></i>
-                            <i class="fas fa-angle-up" aria-hidden="true" v-else></i>
-                        </span></button>
-                </div>
-                <div class="column is-narrow">
                     <div class="select is-rounded">
                         <select v-model="filterSpecialist" @change="filterBySpecialization">
                             <option value="" disabled>Specialist</option>
                             <option value="">Any</option>
                             <option v-for="specialist in specializations" :key="specialist" :value="specialist">{{
-                            specialist
+                                    specialist
                             }}</option>
                         </select>
                     </div>
+                </div>
+                <div class="column is-narrow">
+                    <button class="button is-rounded" @click="dateTimeFilter = true">{{ filterDate && filterTime ?
+                            `${new
+                                Date(filterDate).toDateString()}, ${filterTime}` : 'Date and Time'
+                    }} &nbsp;<i class="has-text-link fa-sharp fa-solid fa-angle-down"></i></button>
                 </div>
                 <div class="column">
                     <div class="is-pulled-right">
                         <div class="field has-addons">
                             <div class="control has-icons-left">
                                 <input class="input" type="text" v-model="province" style="width: 300px;"
-                                    placeholder="What region are you located?" list="provinces" />
+                                    placeholder="What province are you located?" list="provinces" />
                                 <span class="icon is-small is-left">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </span>
                             </div>
                             <datalist id="provinces">
                                 <option v-for="geodata in geolocationIndexed" :key="geodata._id">
-                                    {{geodata.province}}</option>
+                                    {{ geodata.province }}</option>
                             </datalist>
                             <div class="control">
                                 <button class="button is-info is-rounded" @click="loadProvider()"
@@ -90,14 +133,17 @@
                             </div>
                             <div class="column">
                                 <div class="notification is-info is-light"
-                                    v-if="filterSpecialist && geoHospital?.specialistArrFilter !== 0">{{
-                                    geoHospital?.specialistArrFilter
-                                    }} available {{ filterSpecialist }}</div>
+                                    v-if="filterSpecialist && geoHospital?.arrFilter !== 0">{{
+                                            geoHospital?.arrFilter
+                                    }}&nbsp;{{ new Date(filterDate) instanceof Date && !isNaN(new Date(filterDate)) &&
+        filterTime != null ? `available ${filterSpecialist} on ${new
+            Date(filterDate).toDateString()}, ${filterTime}` : `available ${filterSpecialist}`
+}}</div>
                                 <a @click="bookAppointment(geoHospital)">
                                     <h1 class="title is-4">{{ geoHospital.hospital }}</h1>
                                     <p class="subtitle is-6">{{ geoHospital.barangayORStreet }}, {{ geoHospital.city }},
                                         {{
-                                        geoHospital.province
+                                                geoHospital.province
                                         }}</p>
                                 </a>
                                 <br>
@@ -120,7 +166,7 @@
                     </div>
                 </div>
                 <div class="column notification is-danger is-light has-text-centered" v-else-if="!isHospitalLoading">
-                    Hospitals/Clinics not found, please try again or search another region.
+                    Hospitals/Clinics not found, please try again or search another province.
                 </div>
                 <div class="column is-5">
                     <iframe loading="lazy" id="geoIframe"
@@ -142,9 +188,9 @@ export default {
         },
         geoHospitalNearestUserIndexed() {
             if (this.geoHospitalNearestUser && this.filterSpecialist) {
-                return this.geoHospitalNearestUser.filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => x?.specialistArrFilter > 0).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city));
+                return this.geoHospitalNearestUser.slice().filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => x?.arrFilter > 0).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city)).slice().sort((a, b) => b.arrFilter - a.arrFilter);
             } else if (this.geoHospitalNearestUser) {
-                return this.geoHospitalNearestUser.filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city))
+                return this.geoHospitalNearestUser.slice().filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city)).slice().sort((a, b) => b.arrFilter - a.arrFilter)
             }
             else {
                 return false;
@@ -154,6 +200,13 @@ export default {
     async mounted() {
         await axios.get("/api/geolocation").then(response => this.geolocation = response.data);
         await this.loadProvider()
+    },
+    watch: {
+        distanceFilter(val) {
+            if (val != !val) {
+                this.filterDistanceToggle()
+            }
+        }
     },
     data() {
         return {
@@ -170,7 +223,11 @@ export default {
             geoHospitalNearestUser: "",
             specializations: this.$store.getters.getSpecializationList,
             filterSpecialist: this.$route.query.symptom,
+            filterDate: this.$route.query.date,
+            filterTime: this.$route.query.time,
+            clearFilterDateTime: false,
             distanceFilter: false,
+            dateTimeFilter: false,
             doctorSpecialistFilter: [],
             provincePrompt: false
         };
@@ -185,14 +242,13 @@ export default {
         },
         filterDistanceToggle() {
             this.isHospitalLoading = true;
-            this.geoHospitalNearestUser.sort((a, b) => this.distanceFilter ? b.distance - a.distance : a.distance - b.distance);
-            this.distanceFilter = !this.distanceFilter
+            this.geoHospitalNearestUser.sort((a, b) => this.distanceFilter ? a.distance - b.distance : (b.engagements + Math.pow(b.ratings, 2) / 100) * b.distance - (a.engagements + Math.pow(a.ratings, 2) / 100) * a.distance);
             this.isHospitalLoading = false;
         },
         async loadProvider() {
             this.isHospitalLoading = true;
             if (await this.geolocation.find(x => x.province === this.province)) {
-                this.$router.push({ path: '/provider', query: { name: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude } })
+                this.$router.push({ path: '/provider', query: { name: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude, date: new Date(this.filterDate).toLocaleDateString(), time: this.filterTime } })
                 this.citiesOrMunicipalities = this.geolocation.find(x => x.province === this.province);
                 await axios.post("/api/geoFindHospitalNearestUser", {
                     province: this.province,
@@ -207,16 +263,21 @@ export default {
             this.isHospitalLoading = false;
         },
         async filterBySpecialization() {
-            this.isHospitalLoading = true;
             this.doctorSpecialistFilter = []
-            this.$router.push({ path: '/provider', query: { name: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude } })
-            await axios.get("/api/doctor/filteration").then(response => {
-                this.geoHospitalNearestUser.forEach((e) => this.doctorSpecialistFilter.push(response.data.filter(x => x.hospitalOrigin.find(x => x.hospital == e.hospital) && x.specialist.find(x => x == this.filterSpecialist && e.specializations.find(x => x.specialist == this.filterSpecialist)) && (x.schedule).find(x => x.hospital == e.hospital && new Date(x.id) > new Date())).length))
+            await this.$router.push({ path: '/provider', query: { name: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude, date: this.filterDate != null ? new Date(this.filterDate).toLocaleDateString() : '', time: this.filterTime } })
+            await this.geoHospitalNearestUser.forEach(async (hospital,) => {
+                this.isHospitalLoading = true;
+                await axios.post("/api/doctor/filteration", {
+                    hospital: hospital.hospital,
+                    filterSpecialist: this.filterSpecialist,
+                    date: this.filterDate,
+                    time: this.filterTime
+                }).then(async response => {
+                    this.doctorSpecialistFilter.push({ hospital: hospital.hospital, docLength: response.data.filter((doctor) => hospital.specializations.find(x => x.specialist === this.filterSpecialist) && doctor.hospitalOrigin.filter(x => x === hospital.hospital)).length })
+                    this.isHospitalLoading = false;
+                });
+                await this.geoHospitalNearestUser.forEach((x) => x["arrFilter"] = this.doctorSpecialistFilter.find(e => x.hospital == e.hospital)?.docLength)
             });
-
-            this.geoHospitalNearestUser.forEach((x, i) => x["specialistArrFilter"] = this.doctorSpecialistFilter[i])
-            this.geoHospitalNearestUser.sort((a, b) => b.specialistArrFilter - a.specialistArrFilter)
-            this.isHospitalLoading = false;
         },
     },
     components: { NavigationTab }
