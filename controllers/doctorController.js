@@ -49,7 +49,7 @@ const getDoctorsForFilter = (async (req, res) => {
         querySpecialistWithDateTime = {
             verified: true,
             "hospitalOrigin.hospital": req.body.hospital,
-            schedule: { $elemMatch: { date: new Date(customDate).toISOString(), hospital: req.body.hospital } }
+            schedule: { $elemMatch: { date: { $eq: new Date(customDate).toISOString() }, timeStart: { $regex: `.*${req.body.time}.*` }, hospital: req.body.hospital } }
         }
         if (req.body.filterSpecialist) {
             querySpecialistWithDateTime.specialist = req.body.filterSpecialist
@@ -59,7 +59,7 @@ const getDoctorsForFilter = (async (req, res) => {
     try {
         const doctorList = await Doctor.find(querySpecialistWithDateTime ? querySpecialistWithDateTime : querySpecialistOnly).select('-password -username -licenseNo -verified -messageHistory -_id -gmail -__v -patients -alias -gmail')
         if (!doctorList) throw new Error('no items')
-        res.status(200).send(doctorList.filter(x => x.schedule.find(i => i.timeStart.includes(req.body.time))))
+        res.status(200).send(doctorList)
     } catch (error) {
         res.status(500).send({
             message: error.message
