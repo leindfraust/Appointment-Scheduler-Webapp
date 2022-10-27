@@ -59,13 +59,13 @@ app.use(helmet({
         policy: "same-origin"
     }
 }));
-app.use((req, res, next) => {
-    if (app.get('env') === 'production' && !req.secure) {
+app.use(express.static(path.join(__dirname, 'client/dist')))
+app.use(async (req, res, next) => {
+    if (await app.get('env') === 'production' && !req.secure) {
         return res.redirect("https://" + req.headers.host + req.url);
     }
     next();
 });
-app.use(express.static(path.join(__dirname, 'client/dist')))
 //use sessions
 const sess = {
     secret: 'leindfraust',
