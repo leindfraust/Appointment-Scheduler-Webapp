@@ -59,7 +59,7 @@ const getDoctorsForFilter = (async (req, res) => {
     try {
         const doctorList = await Doctor.find(querySpecialistWithDateTime ? querySpecialistWithDateTime : querySpecialistOnly).select('-password -username -licenseNo -verified -messageHistory -_id -gmail -__v -patients -alias -gmail')
         if (!doctorList) throw new Error('no items')
-        res.status(200).send(doctorList)
+        res.status(200).send(doctorList.filter(x => x.schedule.find(i => i.timeStart.includes(req.body.time))))
     } catch (error) {
         res.status(500).send({
             message: error.message

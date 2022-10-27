@@ -278,7 +278,7 @@ export default {
                     date: this.filterDate,
                     time: this.filterTime
                 }).then(async response => {
-                    this.doctorSpecialistFilter.push({ hospital: hospital.hospital, docLength: response.data.filter((doctor) => this.filterSpecialist ? hospital.specializations.find(x => x.specialist === this.filterSpecialist) && doctor.hospitalOrigin.filter(x => x === hospital.hospital) && new Date(this.filterDate) instanceof Date && !isNaN(new Date(this.filterDate)) && this.filterTime != null ? doctor.schedule.find(i => i.timeStart.includes(this.filterTime)) : doctor.hospitalOrigin.filter(x => x === hospital.hospital) : doctor.hospitalOrigin.filter(x => x === hospital.hospital)).length })
+                    this.doctorSpecialistFilter.push({ hospital: hospital.hospital, docLength: response.data.filter((doctor) => this.filterSpecialist ? hospital.specializations.find(x => x.specialist === this.filterSpecialist) && doctor.hospitalOrigin.filter(x => x === hospital.hospital) : doctor.hospitalOrigin.filter(x => x === hospital.hospital)).length })
                     this.isHospitalLoading = false;
                 });
             }
