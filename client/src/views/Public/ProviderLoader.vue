@@ -18,7 +18,7 @@
                                 Filter</button>
                         </div>
                         <label class="label">Choose Preferred Date</label>
-                        <v-date-picker v-model="filterDate" is-expanded />
+                        <v-date-picker v-model="filterDate" :min-date="new Date()" is-expanded />
                         <div class="block"></div>
                         <label class="label">Choose Preferred Time </label>
                         <div class="buttons is-centered">
@@ -192,9 +192,9 @@ export default {
         },
         geoHospitalNearestUserIndexed() {
             if (this.geoHospitalNearestUser && this.filterSpecialist || new Date(this.filterDate) instanceof Date && !isNaN(new Date(this.filterDate)) && this.filterTime != null) {
-                return this.geoHospitalNearestUser.slice().filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => x?.arrFilter > 0).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city)).slice().sort((a, b) => b.arrFilter - a.arrFilter);
+                return this.geoHospitalNearestUser.slice().sort((a, b) => this.distanceFilter ? a.distance - b.distance : ((b.engagements / 10 + b.ratings * 2) * 1000 - b.distance) / 1000 - ((a.engagements / 10 + a.ratings * 2) * 1000 - a.distance) / 1000).filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => x?.arrFilter > 0).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city)).slice().sort((a, b) => b.arrFilter - a.arrFilter);
             } else if (this.geoHospitalNearestUser) {
-                return this.geoHospitalNearestUser.slice().filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city)).slice().sort((a, b) => b.arrFilter - a.arrFilter)
+                return this.geoHospitalNearestUser.slice().sort((a, b) => this.distanceFilter ? a.distance - b.distance : ((b.engagements / 10 + b.ratings * 2) * 1000 - b.distance) / 1000 - ((a.engagements / 10 + a.ratings * 2) * 1000 - a.distance) / 1000).filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city)).slice().sort((a, b) => b.arrFilter - a.arrFilter)
             }
             else {
                 return false;
@@ -204,13 +204,6 @@ export default {
     async mounted() {
         await axios.get("/api/geolocation").then(response => this.geolocation = response.data);
         await this.loadProvider()
-    },
-    watch: {
-        distanceFilter(val) {
-            if (val != !val) {
-                this.filterDistanceToggle()
-            }
-        }
     },
     data() {
         return {
@@ -227,7 +220,7 @@ export default {
             geoHospitalNearestUser: "",
             specializations: this.$store.getters.getSpecializationList,
             filterSpecialist: this.$route.query.symptom,
-            filterDate: this.$route.query.date,
+            filterDate: new Date(this.$route.query.date),
             filterTime: this.$route.query.time,
             clearFilterDateTime: false,
             distanceFilter: false,
@@ -243,11 +236,6 @@ export default {
                 engagements: hospitalDetails.engagements + 1
             });
             await this.$router.push(`/${hospitalDetails._id}/doctors`)
-        },
-        filterDistanceToggle() {
-            this.isHospitalLoading = true;
-            this.geoHospitalNearestUser.sort((a, b) => this.distanceFilter ? a.distance - b.distance : (b.engagements + Math.pow(b.ratings, 2) / 100) * b.distance - (a.engagements + Math.pow(a.ratings, 2) / 100) * a.distance);
-            this.isHospitalLoading = false;
         },
         async loadProvider() {
             this.isHospitalLoading = true;
