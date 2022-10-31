@@ -22,16 +22,17 @@
             </div>
         </div>
         <section class="section is-medium has-text-centered" v-if="citiesOrMunicipalities == ''">
-            <h1 class="title">Find and make an appointment on best hospitals or clinics near your area.
+            <h1 class="title">Find and make an appointment on <span class="has-text-info">hospitals and clinics</span>
+                near you.
             </h1>
             <div class="container" v-if="citiesOrMunicipalities == ''">
                 <div class="dropdown" :class="{ 'is-active': isActiveDropdown }">
                     <div class="dropdown-trigger">
-                        <div class="field has-addons">
+                        <div class="field has-addons is-medium">
                             <div class="control has-icons-left">
-                                <input class="input" type="text" v-model="province" style="width: 300px;"
+                                <input class="input is-rounded" type="text" v-model="province" style="width: 300px;"
                                     placeholder="What province are you located?" @input="isActiveDropdown = true" />
-                                <span class="icon is-small is-left">
+                                <span class="icon is-left has-text-info">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </span>
                             </div>
@@ -59,52 +60,148 @@
                     :disabled="province == ''">Search</button>
                 <div>
                     <div class="block"></div>
-                    <div class="separator subtitle">Or pick a symptom.</div>
                     <div class="notification is-info" style="width: 50%; margin: auto" id="notification-region"
                         v-if="provincePrompt && this.province == ''">You must
                         select a province first.</div>
-                    <div class="columns is-mobile is-multiline" style="width: 80%; margin:auto">
-                        <div class="column is-6-mobile " id="mental-health">
-                            <a @click="searchProvider('Psychiatrists')">
-                                <img src="../assets/images/symptoms/mental-health.png" />
-                                <p class="subtitle is-5">Mental Health</p>
-                            </a>
+                    <div class="block">&nbsp;</div>
+                    <div class="columns is-centered is-hidden-mobile is-multiline">
+                        <div class="column is-2 symptom" @click="searchProvider('Psychiatrists')">
+                            <div class="columns symptom-button is-vcentered">
+                                <div class="column is-4">
+                                    <figure class="image"><img src="../assets/images/symptoms/mental-health.png" />
+                                    </figure>
+                                </div>
+                                <div class="column is-narrow">
+                                    <p class="subtitle is-6 has-text-weight-bold">Mental Health</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="column is-6-mobile" id="UTI">
-                            <a @click="searchProvider('Nephrologists')">
-                                <img src="../assets/images/symptoms/UTI.png" />
-                                <p class="subtitle is-5">UTI</p>
-                            </a>
+                        <div class="column is-2 symptom" @click="searchProvider('Gastroenterologists')">
+                            <div class="columns symptom-button is-vcentered">
+                                <div class="column is-4">
+                                    <figure class="image"><img src="../assets/images/symptoms/stomach-pain.png" />
+                                    </figure>
+                                </div>
+                                <div class="column is-narrow">
+                                    <p class="subtitle is-6 has-text-weight-bold">Stomach Pain</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="column is-6-mobile" id="stomach-pain">
-                            <a @click="searchProvider('Gastroenterologists')">
-                                <img src="../assets/images/symptoms/stomach-pain.png" />
-                                <p class="subtitle is-5">Stomach Pain</p>
-                            </a>
+                        <div class="column is-2 symptom">
+                            <div class="columns symptom-button is-vcentered" @click="searchProvider('')">
+                                <div class="column is-4">
+                                    <figure class="image"><img src="../assets/images/symptoms/dental-health.png" />
+                                    </figure>
+                                </div>
+                                <div class="column is-narrow">
+                                    <p class="subtitle is-6 has-text-weight-bold">Dental Health</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="column is-6-mobile" id="eye-health">
-                            <a @click="searchProvider('Ophthalmologists')">
-                                <img src="../assets/images/symptoms/eye-health.png" />
-                                <p class="subtitle is-5">Eye Health</p>
-                            </a>
+                    </div>
+                    <div class="block is-hidden-mobile">&nbsp;</div>
+                    <div class="columns is-centered is-hidden-mobile is-multiline">
+                        <div class="column is-2 symptom" @click="searchProvider('Nephrologists')">
+                            <div class="columns symptom-button is-vcentered">
+                                <div class="column is-4">
+                                    <figure class="image"><img src="../assets/images/symptoms/UTI.png" />
+                                    </figure>
+                                </div>
+                                <div class="column is-narrow">
+                                    <p class="subtitle is-6 has-text-weight-bold">UTI</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="column is-6-mobile" id="dental-health">
-                            <a @click="searchProvider('')">
-                                <img src="../assets/images/symptoms/dental-health.png" />
-                                <p class="subtitle is-5">Dental Health</p>
-                            </a>
+                        <div class="column is-2 symptom" @click="searchProvider('Ophthalmologists')">
+                            <div class="columns symptom-button is-vcentered">
+                                <div class="column is-4">
+                                    <figure class="image"><img src="../assets/images/symptoms/eye-health.png" />
+                                    </figure>
+                                </div>
+                                <div class="column is-narrow">
+                                    <p class="subtitle is-6 has-text-weight-bold">Eye Health</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="column is-6-mobile" id="fever">
-                            <a @click="searchProvider('')">
-                                <img src="../assets/images/symptoms/fever.png" />
-                                <p class="subtitle is-5">Fever</p>
-                            </a>
+                        <div class="column is-2 symptom" @click="searchProvider('')">
+                            <div class="columns symptom-button is-vcentered">
+                                <div class="column is-4">
+                                    <figure class="image"><img src="../assets/images/symptoms/fever.png" />
+                                    </figure>
+                                </div>
+                                <div class="column is-narrow">
+                                    <p class="subtitle is-6 has-text-weight-bold">Fever</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="column is-6-mobile" id="sore-throat">
-                            <a @click="searchProvider('Pediatricians')">
-                                <img src="../assets/images/symptoms/sore-throat.png" />
-                                <p class="subtitle is-5">Sore Throat</p>
-                            </a>
+                    </div>
+
+                    <div class="columns is-hidden-desktop is-centered is-mobile is-multiline">
+                        <div class="column is-5 symptom symptom-button" @click="searchProvider('Psychiatrists')">
+                            <div class="columns is-vcentered">
+                                <div class="column is-4">
+                                    <figure class="image"><img src="../assets/images/symptoms/mental-health.png" />
+                                    </figure>
+                                </div>
+                                <div class="column is-narrow">
+                                    <p class="subtitle is-6 has-text-weight-bold">Mental Health</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-5 symptom symptom-button" @click="searchProvider('Gastroenterologists')">
+                            <div class="columns is-vcentered">
+                                <div class="column is-4">
+                                    <figure class="image"><img src="../assets/images/symptoms/stomach-pain.png" />
+                                    </figure>
+                                </div>
+                                <div class="column is-narrow">
+                                    <p class="subtitle is-6 has-text-weight-bold">Stomach Pain</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-5 symptom symptom-button">
+                            <div class="columns is-vcentered" @click="searchProvider('')">
+                                <div class="column is-4">
+                                    <figure class="image"><img src="../assets/images/symptoms/dental-health.png" />
+                                    </figure>
+                                </div>
+                                <div class="column is-narrow">
+                                    <p class="subtitle is-6 has-text-weight-bold">Dental Health</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-5 symptom symptom-button" @click="searchProvider('Nephrologists')">
+                            <div class="columns is-vcentered">
+                                <div class="column is-4">
+                                    <figure class="image"><img src="../assets/images/symptoms/UTI.png" />
+                                    </figure>
+                                </div>
+                                <div class="column is-narrow">
+                                    <p class="subtitle is-6 has-text-weight-bold">UTI</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-5 symptom symptom-button" @click="searchProvider('Ophthalmologists')">
+                            <div class="columns is-vcentered">
+                                <div class="column is-4">
+                                    <figure class="image"><img src="../assets/images/symptoms/eye-health.png" />
+                                    </figure>
+                                </div>
+                                <div class="column is-narrow">
+                                    <p class="subtitle is-6 has-text-weight-bold">Eye Health</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-5 symptom symptom-button" @click="searchProvider('')">
+                            <div class="columns is-vcentered">
+                                <div class="column is-4">
+                                    <figure class="image"><img src="../assets/images/symptoms/fever.png" />
+                                    </figure>
+                                </div>
+                                <div class="column is-narrow">
+                                    <p class="subtitle is-6 has-text-weight-bold">Fever</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -219,6 +316,23 @@ export default {
 }
 </script>
 <style scoped>
+.symptom-button {
+    background: linear-gradient(95.61deg, #AEC9FF 41.1%, rgba(208, 223, 253, 0.38) 104.19%);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+}
+
+.symptom {
+    margin-right: 5%;
+    cursor: pointer;
+}
+
+@media (max-width: 991.98px) {
+    .symptom {
+        margin: 1% !important;
+    }
+}
+
 .separator {
     display: flex;
     align-items: center;
