@@ -13,9 +13,18 @@ const geolocationSchema = new Schema({
         type: Object,
         required: true
     },
+    location: {
+        type: {
+            type: String,
+        },
+        coordinates: [Number]
+    },
     citiesOrMunicipalities: Array
 });
 
+geolocationSchema.index({
+    location: '2dsphere'
+})
 const geolocation = mongoose.model('geolocation', geolocationSchema);
 
 module.exports = geolocation

@@ -4,12 +4,15 @@ const {
     getGeolocations,
     pushGeolocation,
     updateGeolocation,
-    deleteGeolocation
+    deleteGeolocation,
+    getProvinceNearestUser
 } = require('../../controllers/geoController')
 
 router.get('/', getGeolocations);
 
 router.post('/', pushGeolocation);
+
+router.post('/geofind-near-user', getProvinceNearestUser)
 
 router.put('/:id', updateGeolocation);
 

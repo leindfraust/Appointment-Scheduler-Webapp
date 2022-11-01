@@ -22,13 +22,14 @@
             </div>
         </div>
         <section class="section is-medium has-text-centered" v-if="citiesOrMunicipalities == ''">
+            <CatchError :err-msg="errMsg" />
             <h1 class="title">Find and make an appointment on <span class="has-text-info">hospitals and clinics</span>
                 near you.
             </h1>
             <div class="container" v-if="citiesOrMunicipalities == ''">
                 <div class="dropdown" :class="{ 'is-active': isActiveDropdown }">
                     <div class="dropdown-trigger">
-                        <div class="field has-addons is-medium">
+                        <div class="field has-addons is-medium is-hidden-mobile">
                             <div class="control has-icons-left">
                                 <input class="input is-rounded" type="text" v-model="province" style="width: 300px;"
                                     placeholder="What province are you located?" @input="isActiveDropdown = true" />
@@ -41,11 +42,20 @@
                                     :disabled="province == ''">Search</button>
                             </div>
                         </div>
+                        <div class="field has-addons is-medium is-hidden-desktop is-hidden-tablet">
+                            <div class="control has-icons-left">
+                                <input class="input is-rounded" type="text" v-model="province" style="width: 300px;"
+                                    placeholder="What province are you located?" @input="isActiveDropdown = true" />
+                                <span class="icon is-left has-text-info">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </span>
+                            </div>
+                        </div>
                     </div>
                     <div class="dropdown-menu">
                         <div class="dropdown-content has-text-left" v-if="Object.keys(geolocationIndexed).length !== 0">
                             <a class="dropdown-item" v-for="geodata in geolocationIndexed" :key="geodata._id"
-                                @click="selectRegion(geodata.province, geodata.geolocation)">{{ geodata.province }}</a>
+                                @click="selectRegion(geodata.province, geodata.location)">{{ geodata.province }}</a>
                         </div>
 
                         <div class="dropdown-content has-text-left" v-else>
@@ -56,7 +66,7 @@
                     </div>
                 </div>
                 <div class="block"></div>
-                <button class="button is-info is-rounded is-hidden-desktop" @click="searchProvider('')"
+                <button class="button is-info is-rounded is-hidden-desktop is-hidden-tablet" @click="searchProvider('')"
                     :disabled="province == ''">Search</button>
                 <div>
                     <div class="block"></div>
@@ -136,7 +146,7 @@
                         </div>
                     </div>
                     <!--Mobile symptom view-->
-                    <div class="columns is-hidden-desktop is-centered is-mobile is-multiline"
+                    <div class="columns is-hidden-desktop is-hidden-tablet is-centered is-mobile is-multiline"
                         style="padding: 50px; margin-bottom: auto;">
                         <div class="column is-5 symptom symptom-button" @click="searchProvider('Psychiatrists')">
                             <figure class="image"><img src="../assets/images/symptoms/mental-health.png" />
@@ -178,6 +188,7 @@
 <script>
 import axios from 'axios'
 import router from '../router';
+import CatchError from './CatchError.vue';
 import NavigationTab from './NavigationTab.vue'
 
 export default {
@@ -229,15 +240,16 @@ export default {
             userLatitude: "",
             userLongitude: "",
             isActiveDropdown: false,
-            provincePrompt: false
+            provincePrompt: false,
+            errMsg: ''
         };
     },
     methods: {
         selectRegion(province, location) {
             this.province = province;
             if (this.locationPermissionDenied) {
-                this.userLatitude = location.latitude
-                this.userLongitude = location.longitude
+                this.userLatitude = location.coordinates[1]
+                this.userLongitude = location.coordinates[0]
             }
             this.isActiveDropdown = false;
         },
@@ -257,9 +269,15 @@ export default {
                 alert("Geolocation is not supported by this browser");
             }
         },
-        geoUserPosition(position) {
+        async geoUserPosition(position) {
             this.userLatitude = position.coords.latitude;
             this.userLongitude = position.coords.longitude;
+            if (!this.locationPermissionDenied) {
+                await axios.post('/api/geolocation/geofind-near-user', {
+                    latitude: this.userLatitude,
+                    longitude: this.userLongitude
+                }).then(response => this.province = response.data[0].province).catch(err => this.errMsg = err)
+            }
         },
         geoUserPositionError(error) {
             switch (error.code) {
@@ -278,7 +296,7 @@ export default {
             }
         }
     },
-    components: { NavigationTab }
+    components: { NavigationTab, CatchError }
 }
 </script>
 <style scoped>

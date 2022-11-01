@@ -1,5 +1,5 @@
 const Hospital = require('../models/manager');
-const geolocation = require('../models/geolocation');
+const Geolocation = require('../models/geolocation');
 
 const getHospitalNearestUser = ((req, res) => {
     let province = req.body.province
@@ -29,9 +29,35 @@ const getHospitalNearestUser = ((req, res) => {
     })
 });
 
+const getProvinceNearestUser = ((req, res) => {
+    let latitude = req.body.latitude
+    let longitude = req.body.longitude
+
+    Geolocation.aggregate([{
+        $geoNear: {
+            near: {
+                type: 'Point',
+                coordinates: [longitude, latitude]
+            },
+            key: "location",
+            distanceField: 'distance',
+            spherical: true
+        }
+    }, { $limit: 1 }], (error, result) => {
+        if (error) {
+            console.log(error)
+            res.end()
+        } else {
+            let response_client = [...result]
+            delete response_client[0].citiesOrMunicipalities
+            res.status(200).send(response_client)
+        }
+    })
+});
+
 const getGeolocations = (async (req, res) => {
     try {
-        const geolocationList = await geolocation.find()
+        const geolocationList = await Geolocation.find()
         if (!geolocationList) throw new Error('no items')
         res.status(200).json(geolocationList)
     } catch (error) {
@@ -42,7 +68,7 @@ const getGeolocations = (async (req, res) => {
 });
 
 const pushGeolocation = (async (req, res) => {
-    const newGeolocation = new geolocation(req.body)
+    const newGeolocation = new Geolocation(req.body)
     try {
         const geolocationList = await newGeolocation.save()
         if (!geolocationList) throw new Error('Cannot save')
@@ -59,7 +85,7 @@ const updateGeolocation = (async (req, res) => {
         id
     } = req.params
     try {
-        const response = await geolocation.findByIdAndUpdate(id, req.body)
+        const response = await Geolocation.findByIdAndUpdate(id, req.body)
         if (!response) throw new Error('cannot update')
         const updated = {
             ...response._doc,
@@ -78,7 +104,7 @@ const deleteGeolocation = (async (req, res) => {
         id
     } = req.params
     try {
-        const removed = await geolocation.findByIdAndDelete(id)
+        const removed = await Geolocation.findByIdAndDelete(id)
         if (!removed) throw new Error('something went wrong, try again later')
         res.status(200).json(removed)
     } catch (err) {
@@ -89,7 +115,7 @@ const deleteGeolocation = (async (req, res) => {
 });
 
 
-//pull city or municipality from a geolocation
+//pull city or municipality from a Geolocation
 const pullCity = ((req, res) => {
     let provinceID = req.body.provinceID
     let postalCode = req.body.postalCode
@@ -97,7 +123,7 @@ const pullCity = ((req, res) => {
     let latitude = req.body.latitude
     let longitude = req.body.longitude
 
-    geolocation.findOneAndUpdate({
+    Geolocation.findOneAndUpdate({
         _id: provinceID
     }, {
         $pull: {
@@ -123,7 +149,7 @@ const pullCity = ((req, res) => {
     });
 });
 
-//push city/municipality in a geolocation 
+//push city/municipality in a Geolocation 
 const pushCity = ((req, res) => {
     let provinceID = req.body.provinceID
     let postalCode = req.body.postalCode
@@ -131,7 +157,7 @@ const pushCity = ((req, res) => {
     let latitude = req.body.latitude
     let longitude = req.body.longitude
 
-    geolocation.findOneAndUpdate({
+    Geolocation.findOneAndUpdate({
         _id: provinceID
     }, {
         $push: {
@@ -157,6 +183,7 @@ const pushCity = ((req, res) => {
     });
 });
 module.exports = {
+    getProvinceNearestUser,
     getHospitalNearestUser,
     getGeolocations,
     pushGeolocation,
