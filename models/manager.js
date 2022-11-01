@@ -82,15 +82,4 @@ managerSchema.index({
 })
 const manager = mongoose.model('manager', managerSchema);
 
-//need to be study at
-const accountDeletion = manager.discriminator('Deletion', new mongoose.Schema({
-    createdAt: {
-        type: Date,
-        default: Date.now,
-        index: {
-            expires: 600
-        }
-    }
-}))
-
 module.exports = manager
