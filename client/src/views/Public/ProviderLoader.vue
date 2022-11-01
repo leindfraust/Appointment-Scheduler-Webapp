@@ -99,9 +99,9 @@
                     <div class="is-pulled-right">
                         <div class="field has-addons">
                             <div class="control has-icons-left">
-                                <input class="input" type="text" v-model="province" style="width: 300px;"
+                                <input class="input is-rounded" type="text" v-model="province" style="width: 300px;"
                                     placeholder="What province are you located?" list="provinces" />
-                                <span class="icon is-small is-left">
+                                <span class="icon is-small is-left has-text-info">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </span>
                             </div>
