@@ -296,9 +296,11 @@
                         <div class="box" v-for="(geolocation, index) in provinceAndCitiesIndexed" :key="index">
                             <a class="has-text-danger" @click="deleteProvince(geolocation[0]._id)">Delete Province</a>
                             <p class="subtitle has-text-black">Province: {{ index }}</p>
-                            <p class="subtitle is-6 has-text-black">Latitude: {{ geolocation[0].geolocation?.latitude}}
+                            <p class="subtitle is-6 has-text-black">Latitude: {{
+                                    geolocation[0].location.coordinates[1]
+                            }}
                             </p>
-                            <p class="subtitle is-6 has-text-black">Longitude: {{ geolocation[0].geolocation?.longitude
+                            <p class="subtitle is-6 has-text-black">Longitude: {{ geolocation[0].location.coordinates[0]
                             }}
                             </p>
 
@@ -399,7 +401,7 @@
 </template>
 <script>
 import axios from 'axios'
-import _ from 'lodash'
+import groupBy from 'lodash/groupBy'
 
 export default {
     name: "SuperUser",
@@ -417,7 +419,7 @@ export default {
             return this.ticketList.filter(x => { return x.id.toLowerCase().includes(this.searchBar.toLowerCase()) || x.type.toLowerCase().includes(this.searchBar.toLowerCase()) || x.email.toLowerCase().includes(this.searchBar.toLowerCase()) })
         },
         provinceAndCitiesIndexed() {
-            return _.groupBy(
+            return groupBy(
                 this.provinceList.filter(x => {
                     return (x.citiesOrMunicipalities.find(x => { return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) }));
 
@@ -636,10 +638,10 @@ export default {
         async provincePost() {
             await axios.post('/api/geolocation', {
                 province: this.province,
-                geolocation: {
-                    latitude: this.provinceLatitude,
-                    longitude: this.provinceLongitude
-                }
+                location: {
+                    type: 'Point',
+                    coordinates: [this.provinceLongitude, this.provinceLatitude]
+                },
             });
             await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
             this.provincePostSuccess = true
