@@ -15,8 +15,12 @@
 
         <div id="navbar" class="navbar-menu" :class="{ 'is-active': isActive }">
             <div class="navbar-start is-hidden-desktop">
-                <a class="navbar-item">About</a>
-                <a class="navbar-item" @click="this.$router.push('/contactus')">Contact Us</a>
+                <div class="navbar-item">
+                    <router-link :to="'/about'" class="button is-dark is-inverted">About</router-link>
+                </div>
+                <div class="navbar-item">
+                    <router-link :to="'/contactus'" class="button is-dark is-inverted">Contact</router-link>
+                </div>
             </div>
             <div class="navbar-end" v-if="patient != ''">
                 <div class="navbar-item has-dropdown" :class="{ 'is-active': isActiveNotifications }">
@@ -24,7 +28,7 @@
                             v-if="notifications.find(x => x.new === true)"><i
                                 class="fa-solid fa-bell animate__animated animate__heartBeat animate__infinite"><span
                                     class="is-size-7">{{ notifications.filter(x =>
-                                    x.new).length
+                                            x.new).length
                                     }}</span></i></span><span class="has-text-info" v-else><i
                                 class="fa-solid fa-bell"></i></span></a>
                     <div class="navbar-dropdown is-right notif-list" v-if="notifications.length !== 0">
@@ -34,7 +38,7 @@
                             <div class="notification is-info" :class="{ 'is-light': !notifs.new }">
                                 <a style="text-decoration: none;" @click="openNotif(notifs, index)">{{ notifs.subject }}
                                     <p class="help">{{ notifs.from == 'Medic Search' ? `From ${notifs.from}` : `From
-                                    Dr. ${notifs.from}`
+                                                                            Dr. ${notifs.from}`
                                     }}</p>
                                 </a>
                                 <button class="delete" @click="deleteNotif(notifs)"></button>
@@ -77,13 +81,13 @@
             </div>
             <div class="navbar-end" v-else>
                 <div class="navbar-item">
-                    <div class="buttons">
-                        <router-link :to="'/user/login'" class="button is-dark is-inverted"
-                            style="background-color: transparent">Log in</router-link>
-                        <router-link :to="'/user/signup'" class="button is-info">
-                            <strong>Sign up</strong>
-                        </router-link>
-                    </div>
+                    <router-link :to="'/user/login'" class="button is-dark is-inverted"
+                        style="background-color: transparent">Log in</router-link>
+                </div>
+                <div class="navbar-item">
+                    <router-link :to="'/user/signup'" class="button is-info">
+                        <strong>Sign up</strong>
+                    </router-link>
                 </div>
                 <div class="navbar-item has-dropdown is-hidden-mobile" :class="{ 'is-active': isActiveMenuDropdown }">
                     <a class="navbar-item" @click="isActiveMenuDropdown = !isActiveMenuDropdown"><i
@@ -102,7 +106,7 @@
         <div class="modal-content box">
             <section class="section">
                 <p class="title">{{ viewNotif.from == 'Medic Search' ? `From ${viewNotif.from}` : `From
-                Dr. ${viewNotif.from}`
+                                    Dr. ${viewNotif.from}`
                 }}</p>
                 <p class="subtitle">{{ new Date(viewNotif.date).toDateString() }}</p>
                 <p class="subtitle">{{ viewNotif.message }}</p>
