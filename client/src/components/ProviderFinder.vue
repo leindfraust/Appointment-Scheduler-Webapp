@@ -23,22 +23,24 @@
         </div>
         <section class="section is-medium has-text-centered" v-if="citiesOrMunicipalities == ''">
             <CatchError :err-msg="errMsg" />
-            <h1 class="title">Find and make an appointment on <span class="has-text-info">hospitals and clinics</span>
+            <h1 class="title is-2 is-size-3-mobile">Find and make an appointment on <span
+                    class="has-text-info">hospitals and clinics</span>
                 near you.
             </h1>
+            <br class="is-hidden-mobile" />
             <div class="container" v-if="citiesOrMunicipalities == ''">
                 <div class="dropdown" :class="{ 'is-active': isActiveDropdown }">
                     <div class="dropdown-trigger">
                         <div class="field has-addons is-medium is-hidden-mobile">
                             <div class="control has-icons-left">
-                                <input class="input is-rounded" type="text" v-model="province" style="width: 300px;"
+                                <input class="input is is-rounded" type="text" v-model="province" style="width: 300px;"
                                     placeholder="What province are you located?" @input="isActiveDropdown = true" />
-                                <span class="icon is-left has-text-info">
+                                <span class="icon is-left is-large has-text-info">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </span>
                             </div>
                             <div class="control is-hidden-mobile">
-                                <button class="button is-info is-rounded" @click="searchProvider('')"
+                                <button class="button  is-info is-rounded" @click="searchProvider('')"
                                     :disabled="province == ''">Search</button>
                             </div>
                         </div>
