@@ -16,10 +16,13 @@
         <div id="navbar" class="navbar-menu" :class="{ 'is-active': isActive }">
             <div class="navbar-start is-hidden-desktop">
                 <div class="navbar-item">
-                    <router-link :to="'/about'" class="button is-dark is-inverted">About</router-link>
+                    <router-link :to="'/doctor/login'" class="navbar-item">Doctor Login</router-link>
+                    <router-link :to="'/manager/login'" class="navbar-item">Provider Login</router-link>
                 </div>
+                <hr>
                 <div class="navbar-item">
-                    <router-link :to="'/contactus'" class="button is-dark is-inverted">Contact</router-link>
+                    <router-link :to="'/about'" class="navbar-item">About</router-link>
+                    <router-link :to="'/contactus'" class="navbar-item">Contact</router-link>
                 </div>
             </div>
             <div class="navbar-end" v-if="patient != ''">
@@ -74,6 +77,9 @@
                     <a class="navbar-item" @click="isActiveMenuDropdown = !isActiveMenuDropdown"><i
                             class="fa-solid fa-bars"></i></a>
                     <div class="navbar-dropdown is-right">
+                        <router-link :to="'/doctor/login'" class="navbar-item">Doctor Login</router-link>
+                        <router-link :to="'/manager/login'" class="navbar-item">Provider Login</router-link>
+                        <hr>
                         <router-link :to="'/about'" class="navbar-item">About</router-link>
                         <router-link :to="'/contactus'" class="navbar-item">Contact Us</router-link>
                     </div>
@@ -93,8 +99,11 @@
                     <a class="navbar-item" @click="isActiveMenuDropdown = !isActiveMenuDropdown"><i
                             class="fa-solid fa-bars"></i></a>
                     <div class="navbar-dropdown is-right">
-                        <a class="navbar-item">About</a>
-                        <a class="navbar-item" @click="this.$router.push('/contactus')">Contact Us</a>
+                        <router-link :to="'/doctor/login'" class="navbar-item">Doctor Login</router-link>
+                        <router-link :to="'/manager/login'" class="navbar-item">Provider Login</router-link>
+                        <hr>
+                        <router-link :to="'/about'" class="navbar-item">About</router-link>
+                        <router-link :to="'/contactus'" class="navbar-item">Contact Us</router-link>
                     </div>
                 </div>
             </div>
