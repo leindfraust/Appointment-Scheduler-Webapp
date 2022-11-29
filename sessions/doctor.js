@@ -19,6 +19,8 @@ router.post('/', (req, res) => {
     req.session.hospitalOrigin = req.body.hospitalOrigin
     req.session.username = req.body.username
     req.session.messageHistory = req.body.messageHistory
+    req.session.appointmentCategories = req.body.appointmentCategories
+    req.session.paymentMethods = req.body.paymentMethods
     req.session.save((err) => {
         if (err) {
             console.log(err);
@@ -38,6 +40,8 @@ router.put('/', (req, res) => {
     req.session.hospitalOrigin = req.body.hospitalOrigin || req.session.hospitalOrigin
     req.session.username = req.body.username || req.session.username
     req.session.messageHistory = req.body.messageHistory || req.session.messageHistory
+    req.session.appointmentCategories = req.body.appointmentCategories || req.session.appointmentCategories
+    req.session.paymentMethods = req.body.paymentMethods || req.session.paymentMethods
     req.session.save((err) => {
         if (err) {
             console.log(err);

@@ -16,11 +16,13 @@ const DoctorProfile = () => import('../views/PortalDoctor/DoctorProfile.vue')
 const DoctorCancelledAppointments = () => import('../views/PortalDoctor/DoctorCancelledAppointments.vue')
 const DoctorPatientHistory = () => import('../views/PortalDoctor/DoctorPatientHistory.vue')
 const DoctorSecurity = () => import('../views/PortalDoctor/DoctorSecurity.vue')
+const DoctorPayment = () => import('../views/PortalDoctor/DoctorPayment.vue')
 const DoctorPickSuccess = () => import('../views/PortalSuccessConfirmations/DoctorPickSuccess.vue')
 const ImageUploadSuccess = () => import('../views/PortalSuccessConfirmations/ImageUploadSuccess')
 const imageUploadSuccessPatientProfile = () => import('../views/PortalSuccessConfirmations/imageUploadSuccessPatientProfile.vue')
 const ImageUploadSuccessDoctor = () => import('../views/PortalSuccessConfirmations/ImageUploadSuccessDoctor.vue')
 const ImageUploadSuccessManager = () => import('../views/PortalSuccessConfirmations/imageUploadSuccessManager.vue')
+const PaymentStatus = () => import('../views/Public/PaymentStatus.vue')
 const UserSignUp = () => import('../views/Public/UserSignUp.vue')
 const UserLogin = () => import('../views/Public/UserLogin.vue')
 const User = () => import('../views/Public/UserView.vue')
@@ -145,6 +147,13 @@ const routes = [{
         requiresAuth: true
     },
 },
+{
+    path: '/doctor/:user/payment',
+    component: DoctorPayment,
+    meta: {
+        requiresAuth: true
+    },
+},
 //Confirmation routes
 {
     path: '/imgUploadSuccess',
@@ -172,6 +181,13 @@ const routes = [{
     component: ImageUploadSuccessManager,
     meta: {
         requireImgUploadSuccessManager: true
+    }
+},
+{
+    path: '/payment-status',
+    component: PaymentStatus,
+    meta: {
+        requirePaymentTransacted: true
     }
 },
 //User routes
@@ -241,17 +257,6 @@ import axios from 'axios'
 import socket from '../socket'
 
 //route guards
-router.beforeEach((to, from, next) => {
-    if (to.matched.some(route => route.meta.requireProcess)) {
-        if (store.state.statusAvailability) {
-            return next();
-        } else {
-            return next('/user/:user/doctors');
-        }
-    }
-    next();
-});
-
 router.beforeEach((to, from, next) => {
     if (to.matched.some(route => route.meta.requireImgUploadSuccess)) {
         if (store.state.imgSuccess === true) {
@@ -368,7 +373,18 @@ router.beforeEach((to, from, next) => {
         if (store.state.statusAvailability) {
             return next();
         } else {
-            return next('/user/:user/doctors');
+            return next('/');
+        }
+    }
+    next();
+});
+
+router.beforeEach((to, from, next) => {
+    if (to.matched.some(route => route.meta.requirePaymentTransacted)) {
+        if (store.state.paymentID) {
+            return next();
+        } else {
+            return next('/');
         }
     }
     next();

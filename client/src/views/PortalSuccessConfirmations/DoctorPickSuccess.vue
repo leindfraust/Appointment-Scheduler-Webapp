@@ -3,9 +3,10 @@
   <section class="section is-large" id="background">
     <div class="container">
       <h1 class="subtitle has-text-centered">
-        You have been successfuly appointed to <b>{{ patient.doctor }}, {{ patient.specialization }}</b> at
-        <b>{{ new Date(patient.schedule.date).toDateString() }}</b>, <b>{{ patient.schedule.timeStart }}</b> -
-        <b>{{ patient.schedule.timeEnd }}</b> in <b>{{ patient.hospital }}</b>.
+        You have been successfuly appointed to <b>{{ patient.doctorName }}, {{ patient.specialization }}</b> at
+        <b>{{ new Date(patient.schedule[0].date).toDateString() }}</b>, <b>{{ patient.schedule[0].timeStart }}</b> -
+        <b>{{ patient.schedule[0].timeEnd }}</b> in <b>{{ patient.hospital }}</b> for <b>{{ patient.appointmentCategory
+        }}</b>.
       </h1>
       <h1 class="subtitle has-text-centered">Your <b>priority number</b> is
         <b>{{ patient.priorityNum }}</b>
@@ -40,9 +41,10 @@
         </div>
         <div class="block">&nbsp;</div>
         <h1 class="subtitle has-text-centered">
-          You have been successfuly appointed to <b>{{ patient.doctor }}, {{ patient.specialization }}</b> at
-          <b>{{ new Date(patient.schedule.date).toDateString() }}</b>, <b>{{ patient.schedule.timeStart }}</b> -
-          <b>{{ patient.schedule.timeEnd }}</b> in <b>{{ patient.hospital }}</b>.
+          You have been successfuly appointed to <b>{{ patient.doctorName }}, {{ patient.specialization }}</b> at
+          <b>{{ new Date(patient.schedule[0].date).toDateString() }}</b>, <b>{{ patient.schedule[0].timeStart }}</b> -
+          <b>{{ patient.schedule[0].timeEnd }}</b> in <b>{{ patient.hospital }}</b> for <b>{{ patient.appointmentCategory
+          }}</b>.
         </h1>
         <h1 class="subtitle has-text-centered">Your <b>priority number</b> is
           <b>{{ patient.priorityNum }}</b>
@@ -57,9 +59,9 @@
         <h1 class="subtitle"><b>Birthday:</b> {{ patient.birthDay }}</h1>
         <h1 class="subtitle"><b>Symptoms/Comments:</b> {{ patient.comments }}</h1>
         <div class="is-pulled-right" style="padding-top: 10%">
-          <figure class="image is-128x128">
+          <figure class="image is-128x128" style="width: 150px">
             <img src="../../assets/images/logos/medi-search-horizontal.png" />
-            <p class="subtitle is-6 has-text-info has-text-right">bit.ly/MedSearch</p>
+            <p class="subtitle is-6 has-text-info has-text-centered">bit.ly/MedicSearch</p>
           </figure>
         </div>
       </section>
@@ -79,8 +81,10 @@ export default {
       pdfHide: true
     };
   },
-  mounted() {
+  unmounted() {
     store.commit("statusAvailability", false)
+    store.commit("patientDetails", [])
+    store.commit("appointed", false)
   },
   components: { NavigationTab },
   methods: {

@@ -48,6 +48,10 @@ const appointmentSchema = new Schema({
         type: String,
         required: true,
     },
+    appointmentCategory: {
+        type: String,
+        required: true
+    },
     ifPatientVisited: {
         type: Boolean,
         default: false

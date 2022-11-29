@@ -42,6 +42,9 @@
             <li>
                 <a @click="openSecurity">Security</a>
             </li>
+            <li>
+                <a @click="openPayment">Payment</a>
+            </li>
             <p class="menu-label">Support</p>
             <li>
                 <a @click="openFAQs">FAQ</a>
@@ -89,6 +92,9 @@ export default {
         },
         async openSchedule() {
             await this.$router.push(`/doctor/${this.alias}/schedule`);
+        },
+        async openPayment() {
+            await this.$router.push(`/doctor/${this.alias}/payment`)
         },
         menuNav() {
             this.isActive = !this.isActive

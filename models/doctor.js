@@ -40,6 +40,11 @@ const doctorSchema = new Schema({
         type: Number,
         default: 0
     },
+    appointmentCategories: {
+        type: Array,
+        default: ["Consultation"]
+    },
+    paymentMethods: Object,
     specialist: Array,
     schedule: Array,
     patients: Array,

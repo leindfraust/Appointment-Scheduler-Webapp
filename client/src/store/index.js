@@ -6,6 +6,8 @@ import createPersistedState from 'vuex-persistedstate'
 const store = createStore({
     plugins: [createPersistedState()],
     state: {
+        paymentStatus: 'pending',
+        paymentID: '',
         notificationClicked: false,
         checkProfileImg: false,
         accountCreated: false,
@@ -40,6 +42,12 @@ const store = createStore({
         getSpecializationList: state => state.specializationList
     },
     mutations: {
+        paymentStatus(state, paymentStatus) {
+            state.paymentStatus = paymentStatus
+        },
+        paymentID(state, paymentID) {
+            state.paymentID = paymentID
+        },
         checkProfileImg(state, checkProfileImg) {
             state.checkProfileImg = checkProfileImg
         },

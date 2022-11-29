@@ -36,11 +36,77 @@
                       <label class="label">Appointment limit:</label>
                       <input class="input" type="number" v-model="appointmentLimits" style="width: 33%;" />
                     </div>
+                    <div class="columns" style="margin: auto">
+                      <div class="column">
+                        <p class="label">
+                          Appointment Categories(select all that applies)
+                        </p>
+                        <nav class="panel">
+                          <div style="max-height: 20em; overflow: auto">
+                            <div class="panel-block" v-for="(category, index) in appointmentCategories" :key="index"
+                              :value="category">
+                              <a @click="selectAppointmentCategory(category)">{{ category }}&nbsp;
+                              </a><a class="has-text-danger" @click="deleteAppointmentCategory(category)"
+                                v-if="category != 'Consultation'">DELETE</a>
+                            </div>
+                            <div class="panel-block">
+                              <div class="has-text-centered">
+                                <div class="field has-addons">
+                                  <div class="control">
+                                    <input class="input" type="text" v-model="appointmentCategory" />
+                                  </div>
+                                  <div class="control">
+                                    <button class="button is-info" @click="addAppointmentCategory"
+                                      :disabled="appointmentCategory == ''">Add</button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </nav>
+                      </div>
+                      <div class="column">
+                        <label class="label">Selected</label>
+                        <div class="columns is-multiline">
+                          <div class="column" id="selectedSpecializations">
+                            <button v-for="(category, index) in selectedAppointmentCategories" :key="index"
+                              class="button is-light" style="margin: 5px">
+                              {{ category }}&nbsp;
+                              <span class="has-text-danger" @click="undoAppointmentCategory(category)">X</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <br />
+                    <div class="field">
+                      <label class="checkbox">
+                        <input type="checkbox" :checked="paymentFirst" @click="paymentFirst = !paymentFirst">
+                        Enable <b>Payment-first</b> for this schedule
+                      </label>
+                      <div class="block"></div>
+                      <div class="field" v-if="paymentFirst">
+                        <label class="label">Payment Amount: </label>
+                        <div class="control">
+                          <input type="number" class="input" placeholder="amount" v-model="paymentAmount"
+                            style="width: 33%;" />
+                        </div>
+                      </div>
+                      <p class="help" v-if="paymentFirst">Make sure you have successfully <b>activated your account</b>
+                        and had
+                        already setup your <b>Payment methods</b> under
+                        <b>Verification and Information</b>. Failing to setup your payment methods might delay your
+                        payout every week.
+                      </p>
+                    </div>
+                    <br />
                     <div class="block">
                       <button class="button" :class="{ 'is-primary': !updateSchedule, 'is-info': updateSchedule }"
-                        type="button" @click="uploadSched">{{ updateSchedule ? 'Update Schedule'
-                            :
-                            'Add Schedule'
+                        type="button" @click="uploadSched"
+                        :disabled="selectedAppointmentCategories.length == 0 || paymentFirst ? !paymentAmount : undefined">{{
+                            updateSchedule ? 'Update Schedule'
+                              :
+                              'Add Schedule'
                         }}</button>
                     </div>
                   </div>
@@ -66,7 +132,7 @@
             <div class="column">
               <div class="container">
                 <h1 class="subtitle has-text-weight-bold">Ongoing Schedules:</h1>
-                <div class="columns is-multiline" style="overflow: scroll; max-height: 30em"
+                <div class="columns is-multiline is-vcentered" style="overflow: scroll; max-height: 30em"
                   v-if="Object.keys(daysIndexed).length !== 0">
                   <div class="column is-6" v-for="schedules in daysIndexed" :key="schedules.id">
                     <div class="block card">
@@ -84,6 +150,9 @@
                           <p class="has-text-black">Hospital: {{ schedules.hospital }}</p>
                           <p class="has-text-black">{{ schedules.timeStart }} - {{ schedules.timeEnd }}</p>
                           <p class="has-text-black">Appointment limit: {{ schedules.appointmentLimit }}</p>
+                          <p class="has-text-black" v-if="schedules.paymentFirst">Payment Amount:
+                            {{ schedules.paymentAmount }}</p>
+                          <p class="help" v-if="schedules.paymentFirst"><b>Payment-first Appointment</b></p>
                         </div>
                       </div>
                     </div>
@@ -133,16 +202,18 @@ export default {
       loading: false,
       hospitalList: [],
       selectedHospital: '',
-      updateSchedule: false
+      updateSchedule: false,
+      appointmentCategory: '',
+      appointmentCategories: [],
+      selectedAppointmentCategories: [],
+      paymentFirst: false,
+      paymentAmount: 500
     };
   },
   async mounted() {
-    await axios
-      .get("/session/doctor")
-      .then((response) => (this.days = response.data.schedule));
-    await axios
-      .get("/session/doctor")
-      .then((response) => (this.userID = response.data._id));
+    await axios.get("/session/doctor").then((response) => (this.days = response.data.schedule));
+    await axios.get("/session/doctor").then(response => this.appointmentCategories = response.data.appointmentCategories)
+    await axios.get("/session/doctor").then((response) => (this.userID = response.data._id));
     await axios.get("/session/doctor").then(response => this.hospitalList = response.data.hospitalOrigin)
     this.selectedHospital = await this.hospitalList[0].hospital
   },
@@ -190,7 +261,10 @@ export default {
               timeEnd: this.timeEnd.toLocaleTimeString(),
               appointmentLimit: this.appointmentLimits,
               prefix: this.prefix,
-              hospital: this.selectedHospital
+              hospital: this.selectedHospital,
+              appointmentCategories: this.selectedAppointmentCategories,
+              paymentFirst: this.paymentFirst,
+              paymentAmount: this.paymentAmount
             }
           }).then(async response => {
             await axios.put('/session/doctor', {
@@ -210,7 +284,10 @@ export default {
           timeEnd: this.timeEnd.toLocaleTimeString(),
           appointmentLimit: this.appointmentLimits,
           prefix: this.prefix,
-          hospital: this.selectedHospital
+          hospital: this.selectedHospital,
+          appointmentCategories: this.selectedAppointmentCategories,
+          paymentFirst: this.paymentFirst,
+          paymentAmount: this.paymentAmount
         });
         try {
           await axios.put(`/api/doctor/${this.userID}`, {
@@ -285,6 +362,9 @@ export default {
         this.timeEnd = this.timeStringConvert(schedule.timeEnd, new Date(schedule.dayDetail.date))
         this.appointmentLimits = schedule.appointmentLimit
         this.selectedHospital = schedule.hospital
+        this.selectedAppointmentCategories = [...schedule.appointmentCategories]
+        this.paymentFirst = schedule.paymentFirst
+        this.paymentAmount = schedule.paymentAmount
       }
     },
     modalClose() {
@@ -295,7 +375,46 @@ export default {
       this.timeStart = ''
       this.timeEnd = ''
       this.appointmentLimits = 10
+      this.selectedAppointmentCategories = []
+      this.appointmentCategory = ''
     },
+    async addAppointmentCategory() {
+      if (!this.appointmentCategories.find(x => x === this.appointmentCategory)) {
+        this.appointmentCategories.push(this.appointmentCategory)
+      }
+      try {
+        await axios.put(`/api/doctor/${this.userID}`, {
+          appointmentCategories: this.appointmentCategories
+        })
+        await axios.put('/session/doctor', {
+          appointmentCategories: this.appointmentCategories
+        })
+      } catch (err) {
+        this.errMsg = err
+      }
+      this.appointmentCategory = ''
+    },
+    async deleteAppointmentCategory(category) {
+      this.appointmentCategories = this.appointmentCategories.filter(x => x !== category)
+      try {
+        await axios.put(`/api/doctor/${this.userID}`, {
+          appointmentCategories: this.appointmentCategories
+        })
+        await axios.put('/session/doctor', {
+          appointmentCategories: this.appointmentCategories
+        })
+      } catch (err) {
+        this.errMsg = err
+      }
+    },
+    selectAppointmentCategory(category) {
+      if (!this.selectedAppointmentCategories.find(x => x === category)) {
+        this.selectedAppointmentCategories.push(category)
+      }
+    },
+    undoAppointmentCategory(category) {
+      this.selectedAppointmentCategories = this.selectedAppointmentCategories.filter(x => x !== category)
+    }
   },
 };
 </script>
