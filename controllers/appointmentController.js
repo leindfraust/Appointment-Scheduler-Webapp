@@ -41,7 +41,8 @@ const getAppointmentsforDoctorCheckPriority = (async (req, res) => {
     try {
         const appointmentList = await AppointmentList.find({
             doctorID: req.body.doctorID,
-            "schedule.date": req.body.schedule
+            "schedule.date": req.body.schedule,
+            ifPatientCancelled: false
         })
         if (!appointmentList) throw new Error('no items')
         const priorityLength = appointmentList.length
@@ -84,7 +85,7 @@ const pushAppointment = (async (req, res) => {
     try {
         const appointmentList = await newAppointment.save()
         if (!appointmentList) throw new Error('Cannot save')
-        res.status(200).end()
+        res.status(200).send(appointmentList)
     } catch (err) {
         res.status(500).send(err)
     }
