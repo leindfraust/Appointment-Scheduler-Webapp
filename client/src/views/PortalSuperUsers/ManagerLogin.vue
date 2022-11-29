@@ -18,17 +18,16 @@
                                         required @keyup.enter="login" />
                                 </div>
                                 <p v-if="incorrectUserPass" class="has-text-danger" style="margin-top: 5%">{{
-                                validateMessage
+                                        validateMessage
                                 }}</p>
                                 <p v-else-if="incorrectUserPass == false" class="has-text-danger"
                                     style="margin-top: 5%">{{ validateMessage }}</p>
                                 <button type="button" class="button is-primary" @click="login">Login</button>
                                 <hr />
-                                <h1 class="title">Or</h1>
                                 <a @click="signup" class="is-danger">Create an account</a>
                             </form>
                         </div>
-                        <ForgotPassword :userType="'manager'" />
+                        <ForgotPassword :userType="'manager'" :forgotPasswordPromptCount="forgotPasswordCount" />
                     </div>
                 </div>
             </div>
@@ -50,7 +49,8 @@ export default {
             userManager: null,
             incorrectUserPass: "",
             validateMessage: "",
-            newAccount: false
+            newAccount: false,
+            forgotPasswordCount: 0
         };
     },
     async mounted() {
@@ -94,6 +94,7 @@ export default {
                             await this.$router.push(`/manager/${this.userManager.hospital}`);
                         }
                         else {
+                            this.forgotPasswordCount = this.forgotPasswordCount + 1
                             this.validateMessage = "Incorrect username or password";
                             this.incorrectUserPass = true;
                             this.username = null;

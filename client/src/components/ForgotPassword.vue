@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import axios from 'axios';
 
 let isLoading = ref(false)
@@ -21,9 +21,14 @@ let emailHandler = ref(props.email)
 const props = defineProps({
     userType: String,
     username: String,
-    email: String
+    email: String,
+    forgotPasswordPromptCount: {
+        type: Number,
+        default: 0
+    }
 });
-
+const forgotPasswordPromptCountLimit = ref(2)
+const forgotPasswordPromptCount = computed(() => props.forgotPasswordPromptCount)
 async function forgotPasswordOTP() {
     if (usernameHandler.value != null || emailHandler.value != null) {
         isLoading.value = true
@@ -155,7 +160,8 @@ async function pushNewPassword() {
 }
 </script>
 <template>
-    <a class="subtitle has-text-danger" @click="modal = !modal">Forgot Password</a>
+    <a class="help has-text-danger" @click="modal = !modal"
+        v-if="forgotPasswordPromptCount >= forgotPasswordPromptCountLimit">Forgot Password</a>
     <div class="modal" :class="{ 'is-active': modal }">
         <div class="modal-background"></div>
         <div class="modal-content has-text-left" style="width: 40%; margin: auto">
@@ -189,7 +195,7 @@ async function pushNewPassword() {
             </section>
             <section class="section box" v-else>
                 <div class="container" v-if="!codeVerified">
-                <div class="notification is-warning" v-if="codeIncorrect">Incorrect code, please try again.</div>
+                    <div class="notification is-warning" v-if="codeIncorrect">Incorrect code, please try again.</div>
                     <div class="field">
                         <div class="control">
                             <label class="label">Enter code</label>

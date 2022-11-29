@@ -25,10 +25,9 @@
               <button type="button" class="button is-info is-rounded" @click="login">Login</button>
               <br />
               <br />
-              <h1 class="subtitle">OR</h1>
               <a href="/user/signup">Create an account</a>
             </div>
-            <ForgotPassword :userType="'patient'" />
+            <ForgotPassword :userType="'patient'" :forgotPasswordPromptCount="forgotPasswordCount" />
           </div>
         </div>
       </div>
@@ -52,7 +51,8 @@ export default {
       userPatient: null,
       validateMessage: null,
       incorrectUserPass: Boolean,
-      newAccount: false
+      newAccount: false,
+      forgotPasswordCount: 0
     }
   },
   async mounted() {
@@ -101,6 +101,7 @@ export default {
                 store.commit("patientID", this.userPatient._id)
                 await this.$router.push(`/user/${this.userPatient.username}`);
               } else {
+                this.forgotPasswordCount = this.forgotPasswordCount + 1
                 this.validateMessage = "Incorrect username or password";
                 this.incorrectUserPass = true;
                 this.username = null;

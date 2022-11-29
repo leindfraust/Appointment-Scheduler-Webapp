@@ -22,11 +22,10 @@
             }}</p>
             <button type="button" class="button is-rounded is-link" @click="login">Login</button>
             <hr />
-            <h1 class="title">Or</h1>
             <a @click="signup" class="is-danger">Create an account</a>
           </form>
         </div>
-        <ForgotPassword :userType="'doctor'" />
+        <ForgotPassword :userType="'doctor'" :forgotPasswordPromptCount="forgotPasswordCount" />
       </div>
     </div>
   </section>
@@ -46,6 +45,7 @@ export default {
       incorrectUserPass: Boolean,
       validateMessage: "",
       specializations: null,
+      forgotPasswordCount: 0
     };
   },
   async beforeCreate() {
@@ -87,7 +87,9 @@ export default {
                   hospitalOrigin: this.userDoctor.hospitalOrigin,
                   schedule: this.userDoctor.schedule,
                   username: this.userDoctor.username,
-                  messageHistory: this.userDoctor.messageHistory
+                  messageHistory: this.userDoctor.messageHistory,
+                  appointmentCategories: this.userDoctor.appointmentCategories,
+                  paymentMethods: this.userDoctor.paymentMethods
                 });
                 this.$store.commit("alias", this.userDoctor.alias);
                 this.$store.commit("doctorID", this.userDoctor._id);
@@ -95,6 +97,7 @@ export default {
                 await this.$router.push(`/doctor/${this.userDoctor.alias}/appointments`);
               }
               else {
+                this.forgotPasswordCount = this.forgotPasswordCount + 1
                 this.validateMessage = "Incorrect username or password";
                 this.incorrectUserPass = true;
                 this.username = null;
