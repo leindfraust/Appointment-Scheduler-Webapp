@@ -6,7 +6,7 @@
   "scripts": {
     "server": "nodemon --exec \"npm run lint && node index\"",
     "client": "npm run serve --prefix client",
-    "dev": "concurrently \"npm run server\" \"npm run client\" \"",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
     "start": "node index.js",
     "lint": "eslint .  --ext .js"
   },
@@ -20,23 +20,19 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "express-fileupload": "^1.4.0",
-    "express-formidable": "^1.2.0",
     "express-session": "^1.17.3",
-    "filter-obj": "^5.1.0",
     "formidable": "^2.0.1",
-    "helmet": "^6.0.0",
-    "http-server": "^14.1.1",
-    "mongoose": "^6.7.0",
+    "helmet": "^6.0.1",
+    "mongoose": "^6.7.4",
     "morgan": "^1.10.0",
-    "node-cron": "^3.0.2",
     "nodemailer": "^6.8.0",
-    "socket.io": "^4.5.3",
-    "util": "^0.12.5"
+    "socket.io": "^4.5.4"
   },
   "devDependencies": {
-    "concurrently": "^7.5.0",
-    "eslint": "^8.26.0",
+    "concurrently": "^7.6.0",
+    "cypress": "^11.2.0",
+    "eslint": "^8.28.0",
+    "eslint-plugin-cypress": "^2.12.1",
     "nodemon": "^2.0.20"
   }
 }
