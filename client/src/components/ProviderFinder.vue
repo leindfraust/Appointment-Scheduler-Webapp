@@ -21,166 +21,61 @@
                 </section>
             </div>
         </div>
-        <section class="section is-medium has-text-centered" v-if="citiesOrMunicipalities == ''">
-            <CatchError :err-msg="errMsg" />
-            <h1 class="title is-2 is-size-3-mobile">Find and make an appointment on <span
-                    class="has-text-info">hospitals and clinics</span>
-                near you.
-            </h1>
-            <br class="is-hidden-mobile" />
-            <div class="container" v-if="citiesOrMunicipalities == ''">
-                <div class="dropdown" :class="{ 'is-active': isActiveDropdown }">
-                    <div class="dropdown-trigger">
-                        <div class="field has-addons is-medium is-hidden-mobile">
-                            <div class="control has-icons-left">
-                                <input class="input is is-rounded" type="text" v-model="province" style="width: 300px;"
-                                    placeholder="What province are you located?" @input="isActiveDropdown = true" />
-                                <span class="icon is-left is-large has-text-info">
-                                    <i class="fa-solid fa-location-dot"></i>
-                                </span>
+        <section class="hero is-fullheight is-medium has-text-centered" v-if="citiesOrMunicipalities == ''">
+            <div class="hero-body">
+                <div class="container">
+                    <CatchError :err-msg="errMsg" />
+                    <h1 class="title is-2 is-size-3-mobile has-text-weight-bold">Find and make an appointment on <span
+                            class="has-text-info">hospitals and clinics</span>
+                        near you.
+                    </h1>
+                    <br class="is-hidden-mobile" />
+                    <div class="container" v-if="citiesOrMunicipalities == ''">
+                        <div class="dropdown" :class="{ 'is-active': isActiveDropdown }">
+                            <div class="dropdown-trigger">
+                                <div class="field has-addons is-medium is-hidden-mobile">
+                                    <div class="control has-icons-left">
+                                        <input class="input is-medium is is-rounded" type="text" v-model="province"
+                                            style="width: 300px;" placeholder="What province are you located?"
+                                            @input="isActiveDropdown = true" />
+                                        <span class="icon is-left is-medium has-text-info">
+                                            <i class="is-size-4 fa-solid fa-location-dot"></i>
+                                        </span>
+                                    </div>
+                                    <div class="control is-hidden-mobile">
+                                        <button class="button is-medium is-info is-rounded" @click="searchProvider('')"
+                                            :disabled="province == ''">Search</button>
+                                    </div>
+                                </div>
+                                <div class="field has-addons is-medium is-hidden-desktop is-hidden-tablet">
+                                    <div class="control has-icons-left">
+                                        <input class="input is-rounded" type="text" v-model="province"
+                                            style="width: 300px;" placeholder="What province are you located?"
+                                            @input="isActiveDropdown = true" />
+                                        <span class="icon is-left has-text-info">
+                                            <i class="fa-solid fa-location-dot"></i>
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="control is-hidden-mobile">
-                                <button class="button  is-info is-rounded" @click="searchProvider('')"
-                                    :disabled="province == ''">Search</button>
-                            </div>
-                        </div>
-                        <div class="field has-addons is-medium is-hidden-desktop is-hidden-tablet">
-                            <div class="control has-icons-left">
-                                <input class="input is-rounded" type="text" v-model="province" style="width: 300px;"
-                                    placeholder="What province are you located?" @input="isActiveDropdown = true" />
-                                <span class="icon is-left has-text-info">
-                                    <i class="fa-solid fa-location-dot"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="dropdown-menu">
-                        <div class="dropdown-content has-text-left" v-if="Object.keys(geolocationIndexed).length !== 0">
-                            <a class="dropdown-item" v-for="geodata in geolocationIndexed" :key="geodata._id"
-                                @click="selectRegion(geodata.province, geodata.location)">{{ geodata.province }}</a>
-                        </div>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-content has-text-left"
+                                    v-if="Object.keys(geolocationIndexed).length !== 0">
+                                    <a class="dropdown-item" v-for="geodata in geolocationIndexed" :key="geodata._id"
+                                        @click="selectRegion(geodata.province, geodata.location)">{{ geodata.province
+                                        }}</a>
+                                </div>
 
-                        <div class="dropdown-content has-text-left" v-else>
-                            <p class="dropdown-item has-text-danger">
-                                Province not found or supported, please try again.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="block"></div>
-                <button class="button is-info is-rounded is-hidden-desktop is-hidden-tablet" @click="searchProvider('')"
-                    :disabled="province == ''">Search</button>
-                <div>
-                    <div class="block"></div>
-                    <div class="notification is-info" style="width: 50%; margin: auto" id="notification-region"
-                        v-if="provincePrompt && this.province == ''">You must
-                        select a province first.</div>
-                    <div class="block is-hidden-mobile">&nbsp;</div>
-                    <div class="columns is-centered is-hidden-mobile is-multiline">
-                        <div class="column is-2 symptom" @click="searchProvider('Psychiatrists')">
-                            <div class="columns symptom-button is-vcentered">
-                                <div class="column is-4">
-                                    <figure class="image"><img src="../assets/images/symptoms/mental-health.png" />
-                                    </figure>
-                                </div>
-                                <div class="column is-narrow">
-                                    <p class="subtitle is-6 has-text-weight-bold">Mental Health</p>
+                                <div class="dropdown-content has-text-left" v-else>
+                                    <p class="dropdown-item has-text-danger">
+                                        Province not found or supported, please try again.
+                                    </p>
                                 </div>
                             </div>
                         </div>
-                        <div class="column is-2 symptom" @click="searchProvider('Gastroenterologists')">
-                            <div class="columns symptom-button is-vcentered">
-                                <div class="column is-4">
-                                    <figure class="image"><img src="../assets/images/symptoms/stomach-pain.png" />
-                                    </figure>
-                                </div>
-                                <div class="column is-narrow">
-                                    <p class="subtitle is-6 has-text-weight-bold">Stomach Pain</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="column is-2 symptom">
-                            <div class="columns symptom-button is-vcentered" @click="searchProvider('')">
-                                <div class="column is-4">
-                                    <figure class="image"><img src="../assets/images/symptoms/dental-health.png" />
-                                    </figure>
-                                </div>
-                                <div class="column is-narrow">
-                                    <p class="subtitle is-6 has-text-weight-bold">Dental Health</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="block is-hidden-mobile">&nbsp;</div>
-                    <div class="columns is-centered is-hidden-mobile is-multiline">
-                        <div class="column is-2 symptom" @click="searchProvider('Nephrologists')">
-                            <div class="columns symptom-button is-vcentered">
-                                <div class="column is-4">
-                                    <figure class="image"><img src="../assets/images/symptoms/UTI.png" />
-                                    </figure>
-                                </div>
-                                <div class="column is-narrow">
-                                    <p class="subtitle is-6 has-text-weight-bold">UTI</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="column is-2 symptom" @click="searchProvider('Ophthalmologists')">
-                            <div class="columns symptom-button is-vcentered">
-                                <div class="column is-4">
-                                    <figure class="image"><img src="../assets/images/symptoms/eye-health.png" />
-                                    </figure>
-                                </div>
-                                <div class="column is-narrow">
-                                    <p class="subtitle is-6 has-text-weight-bold">Eye Health</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="column is-2 symptom" @click="searchProvider('')">
-                            <div class="columns symptom-button is-vcentered">
-                                <div class="column is-4">
-                                    <figure class="image"><img src="../assets/images/symptoms/fever.png" />
-                                    </figure>
-                                </div>
-                                <div class="column is-narrow">
-                                    <p class="subtitle is-6 has-text-weight-bold">Fever</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!--Mobile symptom view-->
-                    <div class="columns is-hidden-desktop is-hidden-tablet is-centered is-mobile is-multiline"
-                        style="padding: 50px; margin-bottom: auto;">
-                        <div class="column is-5 symptom symptom-button" @click="searchProvider('Psychiatrists')">
-                            <figure class="image"><img src="../assets/images/symptoms/mental-health.png" />
-                            </figure>
-                            <p class="subtitle is-6 has-text-weight-bold">Mental Health</p>
-
-                        </div>
-                        <div class="column is-5 symptom symptom-button" @click="searchProvider('Gastroenterologists')">
-                            <figure class="image"><img src="../assets/images/symptoms/stomach-pain.png" />
-                            </figure>
-                            <p class="subtitle is-6 has-text-weight-bold">Stomach Pain</p>
-                        </div>
-                        <div class="column is-5 symptom symptom-button">
-                            <figure class="image"><img src="../assets/images/symptoms/dental-health.png" />
-                            </figure>
-                            <p class="subtitle is-6 has-text-weight-bold">Dental Health</p>
-                        </div>
-                        <div class="column is-5 symptom symptom-button" @click="searchProvider('Nephrologists')">
-                            <figure class="image"><img src="../assets/images/symptoms/UTI.png" />
-                            </figure>
-                            <p class="subtitle is-6 has-text-weight-bold">UTI</p>
-                        </div>
-                        <div class="column is-5 symptom symptom-button" @click="searchProvider('Ophthalmologists')">
-                            <figure class="image"><img src="../assets/images/symptoms/eye-health.png" />
-                            </figure>
-                            <p class="subtitle is-6 has-text-weight-bold">Eye Health</p>
-                        </div>
-                        <div class="column is-5 symptom symptom-button" @click="searchProvider('')">
-                            <figure class="image"><img src="../assets/images/symptoms/fever.png" />
-                            </figure>
-                            <p class="subtitle is-6 has-text-weight-bold">Fever</p>
-                        </div>
+                        <div class="block"></div>
+                        <button class="button is-info is-rounded is-hidden-desktop is-hidden-tablet"
+                            @click="searchProvider('')" :disabled="province == ''">Search</button>
                     </div>
                 </div>
             </div>
@@ -242,7 +137,6 @@ export default {
             userLatitude: "",
             userLongitude: "",
             isActiveDropdown: false,
-            provincePrompt: false,
             errMsg: ''
         };
     },
@@ -255,12 +149,9 @@ export default {
             }
             this.isActiveDropdown = false;
         },
-        searchProvider(filterSymptom) {
+        searchProvider() {
             if (this.province) {
-                this.provincePrompt = false
-                router.push({ path: '/provider', query: { name: this.province, symptom: filterSymptom, userLat: this.userLatitude, userLong: this.userLongitude } })
-            } else {
-                this.provincePrompt = true
+                router.push({ path: '/provider', query: { name: this.province, symptom: '', userLat: this.userLatitude, userLong: this.userLongitude } })
             }
         },
         getUserLocation() {
@@ -302,23 +193,6 @@ export default {
 }
 </script>
 <style scoped>
-.symptom-button {
-    background: linear-gradient(95.61deg, #AEC9FF 41.1%, rgba(208, 223, 253, 0.38) 104.19%);
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
-    border-radius: 10px;
-}
-
-.symptom {
-    margin-right: 5%;
-    cursor: pointer;
-}
-
-@media (max-width: 991.98px) {
-    .symptom {
-        margin: 4% !important;
-    }
-}
-
 @media (max-width: 991.98px) {
     #geoIframe {
         width: 75vw;
