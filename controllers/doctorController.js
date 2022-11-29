@@ -45,7 +45,7 @@ const getDoctorsForFilter = (async (req, res) => {
         schedule: { $elemMatch: { date: { $gt: new Date(today).toISOString() }, hospital: req.body.hospital } }
     }
     let querySpecialistWithDateTime;
-    if (new Date(req.body.date) instanceof Date && !isNaN(new Date(req.body.date)) && req.body.time) {
+    if (new Date(req.body.date) instanceof Date && !isNaN(new Date(req.body.date))) {
         querySpecialistWithDateTime = {
             verified: true,
             "hospitalOrigin.hospital": req.body.hospital,
@@ -308,6 +308,33 @@ const pushPatientDoctor = (async (req, res) => {
     });
 });
 
+const pullPatientDoctor = (async (req, res) => {
+    let doctorID = await req.body.doctorID
+    let patientID = await req.body.patientID
+    let patientFullName = await req.body.patientFullName
+
+    Doctor.findOneAndUpdate({
+        _id: doctorID
+    }, {
+        $pull: {
+            patients: {
+                patient: patientID,
+                patientName: patientFullName
+            }
+        }
+    }, {
+        returnOriginal: false
+    }, function (error, success) {
+        if (error) {
+            console.log(error)
+            res.status(500)
+        } else {
+            console.log(success)
+            res.status(200).end()
+        }
+    });
+});
+
 //get copy of doctor's messages to a patient
 const pushMessages = ((req, res) => {
     Doctor.findOneAndUpdate({
@@ -384,6 +411,7 @@ module.exports = {
     deleteDoctor,
     pullDoctorHospital,
     pushPatientDoctor,
+    pullPatientDoctor,
     pushMessages,
     pullMessage,
     clearMessages

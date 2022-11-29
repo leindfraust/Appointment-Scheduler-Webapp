@@ -6,7 +6,8 @@ const {
     pushMessages,
     checkAvailabilityDoctors,
     pullMessage,
-    clearMessages
+    clearMessages,
+    pullPatientDoctor
 } = require('../../controllers/doctorController')
 
 //pull doctor from a hospital
@@ -14,6 +15,8 @@ router.post('/doctorPullHospital', pullDoctorHospital);
 
 //add patient records to the doctor of a new patient
 router.post('/patientUpdate', pushPatientDoctor);
+
+router.post('/patientDelete', pullPatientDoctor);
 
 router.post('/pushMsg', pushMessages)
 
