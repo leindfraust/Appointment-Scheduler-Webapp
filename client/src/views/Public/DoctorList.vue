@@ -79,7 +79,7 @@
                     <div class="column">
                       <figure class="image is-5by4">
                         <img
-                          :src="`http://res.cloudinary.com/leindfraust/image/upload/v1/assets/doctors/${doctors.alias}.jpg`" />
+                          :src="`http://res.cloudinary.com/leindfraust/image/upload/v${new Date().getMonth()}${new Date().getDate()}/assets/doctors/${doctors.alias}.jpg`" />
                       </figure>
                     </div>
                     <div class="column is-5">
@@ -91,9 +91,6 @@
                           <span class="has-text-weight-semibold" v-else><span v-for="specialist in doctors.specialist"
                               :key="specialist">{{ specialist }} <br /></span></span>
                           <br />
-                          <span class="subtitle is-6 has-text-info">({{ doctors.visits == null ? '0 visits' :
-                              `${doctors.visits} visits`
-                          }})</span>
                         </p>
                       </div>
                     </div>
@@ -166,7 +163,7 @@ export default {
   computed: {
     doctorSearch() {
       if (this.doctorList) {
-        return this.doctorList.filter(x => x.name.toLowerCase().includes(this.doctorSearchBar.toLowerCase()))
+        return this.doctorList.filter(x => x.name.toLowerCase().includes(this.doctorSearchBar.toLowerCase())).slice().sort((a, b) => a.visits - b.visits)
       } else {
         return false
       }
