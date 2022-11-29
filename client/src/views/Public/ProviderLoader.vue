@@ -1,6 +1,7 @@
 <template>
     <div id="background">
-        <NavigationTab />
+        <NavigationTab :provider-finder-mode="true" :provider-provinces="geolocation" :province-selected="province"
+            @load-provider="unloadPropData($event, arg)" />
         <div class="modal" :class="{ 'is-active': isHospitalLoading }">
             <div class="modal-background"></div>
             <div class="modal-content" style="overflow: hidden">
@@ -12,39 +13,31 @@
             <div class="modal-content" style="overflow: auto">
                 <div class="box">
                     <section class="section has-text-centered">
-                        <div class="has-text-left">
-                            <button class="button is-info"
-                                @click="filterDate = '', filterTime = '', clearFilterDateTime = true">Clear
-                                Filter</button>
-                        </div>
                         <label class="label">Choose Preferred Date</label>
                         <v-date-picker v-model="filterDate" :min-date="new Date()" is-expanded />
                         <div class="block"></div>
-                        <label class="label">Choose Preferred Time </label>
+                        <label class="label">Choose Preferred Time(Optional) </label>
                         <div class="buttons is-centered">
                             <button class="button" :class="{ 'is-active': filterTime == 'AM' }"
-                                @click="filterTime = 'AM'">AM</button>
+                                @click="filterTime == 'AM' ? filterTime = '' : filterTime = 'AM'">AM</button>
                             <button class="button" :class="{ 'is-active': filterTime == 'PM' }"
-                                @click="filterTime = 'PM'">PM</button>
+                                @click="filterTime == 'PM' ? filterTime = '' : filterTime = 'PM'">PM</button>
                         </div>
 
                         <div class="block"></div>
                         <div class="buttons is-centered">
-                            <button class="button" @click="dateTimeFilter = false">Cancel</button>
-                            <button class="button is-info" :disabled="filterTime == null || filterDate == null"
-                                @click="filterSpecialistDateTime(), dateTimeFilter = false"
-                                v-if="!clearFilterDateTime">Confirm</button>
-                            <button class="button is-info"
-                                @click="filterSpecialistDateTime(), dateTimeFilter = false, clearFilterDateTime = false"
-                                v-else>Confirm</button>
+                            <button class="button"
+                                @click="dateTimeFilter = false, filterTime = '', filterDate = '', filterSpecialistDateTime()">Cancel</button>
+                            <button class="button is-info" :disabled="filterTime == '' || filterDate == null"
+                                @click="filterSpecialistDateTime(), dateTimeFilter = false">Confirm</button>
                         </div>
 
                     </section>
                 </div>
             </div>
         </div>
-        <div class="block is-hidden-desktop"></div>
-        <div v-if="citiesOrMunicipalities != ''">
+        <div class="block"></div>
+        <div class="is-hidden-desktop" v-if="citiesOrMunicipalities != ''">
             <div class="columns is-mobile" style="overflow: auto;">
                 <div class="column is-narrow">
                     <div class="select is-rounded">
@@ -90,38 +83,73 @@
                     </div>
                 </div>
                 <div class="column is-narrow">
-                    <button class="button is-rounded" @click="dateTimeFilter = true">{{ filterDate && filterTime ?
-                            `${new
-                                Date(filterDate).toDateString()}, ${filterTime}` : 'Date and Time'
-                    }} &nbsp;<i class="has-text-link fa-sharp fa-solid fa-angle-down"></i></button>
+                    <button class="button is-info" @click="dateTimeFilter = true">Date and Time</button>
                 </div>
-                <div class="column">
-                    <div class="is-pulled-right">
-                        <div class="field has-addons">
-                            <div class="control has-icons-left">
-                                <input class="input is-rounded" type="text" v-model="province" style="width: 300px;"
-                                    placeholder="What province are you located?" list="provinces" />
-                                <span class="icon is-small is-left has-text-info">
-                                    <i class="fa-solid fa-location-dot"></i>
-                                </span>
+            </div>
+        </div>
+        <div class="container is-fluid" v-if="citiesOrMunicipalities != ''">
+            <div class="block"></div>
+            <div class="columns">
+                <div class="column is-2 has-text-centered-mobile is-hidden-mobile"
+                    style="box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25); clip-path: inset(0px -15px 0px 0px);">
+                    <br />
+                    <div class="container">
+                        <div class="block">
+                            <div class="select">
+                                <select v-model="distanceFilter">
+                                    <option :value="true">Sort by Nearest</option>
+                                    <option :value="false">Sort by Recommended</option>
+                                </select>
                             </div>
-                            <datalist id="provinces">
-                                <option v-for="geodata in geolocationIndexed" :key="geodata._id">
-                                    {{ geodata.province }}</option>
-                            </datalist>
-                            <div class="control">
-                                <button class="button is-info is-rounded" @click="loadProvider()"
-                                    :disabled="province == ''">Search</button>
+                        </div>
+                        <div class="block">
+                            <div class="select">
+                                <select v-model="city">
+                                    <option value="" disabled>City/Municipalit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    </option>
+                                    <option value="">Any</option>
+                                    <option
+                                        v-for="(cityorMunicipality, index) in citiesOrMunicipalities.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
+                                        :key="index">{{
+                                                cityorMunicipality.name.replace('City', '').replace('Municipality', '')
+                                        }}</option>
+                                </select>
                             </div>
+                        </div>
+                        <div class="block">
+                            <div class="select">
+                                <select v-model="typeFilter">
+                                    <option :value="''" disabled>Type of
+                                        Facility&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
+                                    <option :value="''">Any</option>
+                                    <option value="Public">Public Hospital</option>
+                                    <option value="Private">Private Hospital</option>
+                                    <option value="Clinic">Clinic</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="block">
+                            <div class="select">
+                                <select v-model="filterSpecialist" @change="filterSpecialistDateTime">
+                                    <option value="" disabled>Specialist</option>
+                                    <option value="">Any</option>
+                                    <option v-for="specialist in specializations" :key="specialist" :value="specialist">
+                                        {{
+                                                specialist
+                                        }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="block">
+                            <button class="button is-info" @click="dateTimeFilter = true">Date and Time</button>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="columns">
-                <div class="column" v-if="geoHospitalNearestUser.length !== 0"
-                    style="max-height: 100vh; overflow: auto">
+                <div class="column is-1 is-hidden-mobile"></div>
+                <div class="column is-6" v-if="geoHospitalNearestUser.length !== 0">
+                    <br />
                     <div class="container is-fluid">
-                        <div class="columns has-text-left" id="hospital" style="margin-bottom: 5%"
+                        <div class="columns is-centered has-text-left" id="hospital" style="margin-bottom: 7.5%;"
                             v-for="(geoHospital, index) in geoHospitalNearestUserIndexed" :key="index">
                             <div class="column is-5">
                                 <a @click="bookAppointment(geoHospital)">
@@ -132,14 +160,8 @@
                                 </a>
                             </div>
                             <div class="column">
-                                <div class="notification is-info is-light" v-if="geoHospital?.arrFilter > 0">{{
-                                        geoHospital?.arrFilter
-                                }}&nbsp;{{ new Date(filterDate) instanceof Date && !isNaN(new Date(filterDate))
-        &&
-        filterTime != null ? `available ${filterSpecialist} on ${new
-            Date(filterDate).toDateString()}, ${filterTime}` : `available
-                                    ${filterSpecialist}`
-}}</div>
+                                <div class="notification is-info is-light" v-if="geoHospital?.arrFilter > 0">Available
+                                    for appointments</div>
                                 <a @click="bookAppointment(geoHospital)">
                                     <h1 class="title is-4">{{ geoHospital.hospital }}</h1>
                                     <p class="subtitle is-6">{{ geoHospital.barangayORStreet }}, {{ geoHospital.city
@@ -159,20 +181,15 @@
                                     </span>
                                 </div>
                             </div>
-                            <hr>
                         </div>
                     </div>
                     <div class="column notification is-danger is-light has-text-centered"
                         v-if="geoHospitalNearestUserIndexed.length == 0">
-                        Sorry, no Hospitals/Clinics has been found.
+                        Sorry, no doctors available.
                     </div>
                 </div>
                 <div class="column notification is-danger is-light has-text-centered" v-else-if="!isHospitalLoading">
-                    Hospitals/Clinics not found, please try again or search another province.
-                </div>
-                <div class="column is-5">
-                    <iframe loading="lazy" id="geoIframe"
-                        :src="`https://maps.google.com/maps?q=${userLatitude},${userLongitude}&hl=es;z=14&amp;output=embed`"></iframe>
+                    No registered hospitals/clinics are found, please try again or search another province.
                 </div>
             </div>
         </div>
@@ -222,14 +239,17 @@ export default {
             filterSpecialist: this.$route.query.symptom,
             filterDate: new Date(this.$route.query.date),
             filterTime: this.$route.query.time,
-            clearFilterDateTime: false,
-            distanceFilter: false,
+            distanceFilter: true,
             dateTimeFilter: false,
             doctorSpecialistFilter: [],
             provincePrompt: false
         };
     },
     methods: {
+        async unloadPropData(province) {
+            this.province = province
+            await this.loadProvider()
+        },
         async bookAppointment(hospitalDetails) {
             this.$store.commit("hospitalDetails", hospitalDetails)
             await axios.put(`/api/manager/${hospitalDetails._id}`, {
@@ -277,6 +297,15 @@ export default {
 }
 </script>
 <style scoped>
+select {
+    border: 0px;
+    outline: 0px;
+}
+
+.select {
+    max-width: 12rem;
+}
+
 @media (max-width: 991.98px) {
     #geoIframe {
         width: 75vw;
@@ -371,9 +400,5 @@ export default {
 
 ::-webkit-scrollbar-thumb:hover {
     background-color: #a8bbbf;
-}
-
-[list]::-webkit-calendar-picker-indicator {
-    opacity: 0 !important;
 }
 </style>
