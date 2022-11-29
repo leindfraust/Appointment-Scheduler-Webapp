@@ -26,7 +26,7 @@ let navCancelledAppointments = ref(false)
 let file = ref()
 let uploadProfileButton = ref(false)
 let imgPreviewFile = ref()
-let searchRefID = ref('')
+let searchBar = ref('')
 let buttonProfileImgSubmitLoading = ref(false)
 
 onMounted(async () => {
@@ -55,20 +55,20 @@ const cancelledAppointments = computed(() => {
 
 function sortPastAppointments() {
     return appointmentListDone.value.sort((a, b) => {
-        return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
-    }).filter(x => x.referenceID.toLowerCase().includes(searchRefID.value.toLowerCase()))
+        return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
+    }).filter(x => x.referenceID.toLowerCase().includes(searchBar.value.toLowerCase() || x.firstName.toLowerCase().includes(searchBar.value.toLowerCase()) || x.lastName.toLowerCase().includes(searchBar.value.toLowerCase())))
 
 }
 function sortOngoingAppointments() {
     return appointmentListOngoing.value.sort((a, b) => {
-        new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
-    }).filter(x => x.referenceID.toLowerCase().includes(searchRefID.value.toLowerCase()))
+        return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
+    }).filter(x => x.referenceID.toLowerCase().includes(searchBar.value.toLowerCase()) || x.firstName.toLowerCase().includes(searchBar.value.toLowerCase()) || x.lastName.toLowerCase().includes(searchBar.value.toLowerCase()))
 }
 
 function sortCancelledAppointments() {
     return appointmentListCancelled.value.sort((a, b) => {
         new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
-    }).filter(x => x.referenceID.toLowerCase().includes(searchRefID.value.toLowerCase()))
+    }).filter(x => x.referenceID.toLowerCase().includes(searchBar.value.toLowerCase()) || x.firstName.toLowerCase().includes(searchBar.value.toLowerCase()) || x.lastName.toLowerCase().includes(searchBar.value.toLowerCase()))
 }
 //methods
 async function selectProvince(province) {
@@ -353,7 +353,7 @@ async function uploadProfilePhotoClient() {
                     <button class="button is-static fa fa-search"></button>
                 </div>
                 <div class="control">
-                    <input type="text" class="input" placeholder="Search Reference ID" v-model="searchRefID" />
+                    <input type="text" class="input" placeholder="Search Reference ID" v-model="searchBar" />
                 </div>
             </div>
             <div class="container box" v-if="navOngoingAppointments">
