@@ -1,10 +1,11 @@
 <template>
-    <nav class="navbar" role="navigation" aria-label="main navigation">
+    <nav class="navbar" role="navigation" aria-label="main navigation"
+        :class="{ 'provider-finder-mode': providerFinderMode }"
+        style="background-color: transparent; border-bottom:  0.5px solid #969696;">
         <div class="navbar-brand">
             <a class="navbar-item" href="/">
                 <img src="../assets/images/logos/medi-search-horizontal.png" />
             </a>
-
             <a role="button" class="navbar-burger" :class="{ 'is-active': isActive }" aria-label="menu"
                 aria-expanded="false" data-target="navbar" @click="navbar">
                 <span aria-hidden="true"></span>
@@ -12,9 +13,46 @@
                 <span aria-hidden="true"></span>
             </a>
         </div>
-
+        <div class="navbar-menu" v-if="providerFinderMode">
+            <div class="field has-addons navbar-item" style="margin-left: auto">
+                <div class="control has-icons-left">
+                    <input class="input is-rounded" type="text" v-model="provinceInput" style="width: 350px;"
+                        placeholder="What province are you located?" list="provinces" />
+                    <span class="icon is-small is-left has-text-info">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </span>
+                </div>
+                <datalist id="provinces">
+                    <option v-for="geodata in providerProvinces" :key="geodata._id">
+                        {{ geodata.province }}</option>
+                </datalist>
+                <div class="control">
+                    <button class="button is-info is-rounded" :disabled="provinceInput == ''"
+                        @click="$emit('loadProvider', provinceInput)">Search</button>
+                </div>
+            </div>
+        </div>
         <div id="navbar" class="navbar-menu" :class="{ 'is-active': isActive }">
             <div class="navbar-start is-hidden-desktop">
+                <div v-if="providerFinderMode">
+                    <div class="field has-addons navbar-item" style="margin-left: auto">
+                        <div class="control has-icons-left">
+                            <input class="input is-rounded" type="text" v-model="provinceInput"
+                                placeholder="What province are you located?" list="provinces" />
+                            <span class="icon is-small is-left has-text-info">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </span>
+                        </div>
+                        <datalist id="provinces">
+                            <option v-for="geodata in providerProvinces" :key="geodata._id">
+                                {{ geodata.province }}</option>
+                        </datalist>
+                        <div class="control">
+                            <button class="button is-info is-rounded" :disabled="provinceInput == ''"
+                                @click="$emit('loadProvider', provinceInput)">Search</button>
+                        </div>
+                    </div>
+                </div>
                 <div class="navbar-item">
                     <router-link :to="'/doctor/login'" class="navbar-item">Doctor Login</router-link>
                     <router-link :to="'/manager/login'" class="navbar-item">Provider Login</router-link>
@@ -139,6 +177,18 @@ import axios from 'axios'
 import socket from '../socket'
 export default {
     name: 'NavigationTab',
+    emits: ['loadProvider'],
+    props: {
+        providerFinderMode: {
+            type: Boolean,
+            default: false
+        },
+        providerProvinces: {
+            type: Array,
+            default: undefined
+        },
+        provinceSelected: String
+    },
     async mounted() {
         await axios.get(`https://res.cloudinary.com/leindfraust/image/upload/v1/assets/patients/${this.$store.state.patientUsername}.jpg`).then(response => response.status == 200 ? this.$store.commit('checkProfileImg', true) : this.$store.commit('checkProfileImg', false)).catch(err => err ? this.$store.commit('checkProfileImg', false) : this.$store.commit('checkProfileImg', true))
         this.checkImgState = true
@@ -167,7 +217,8 @@ export default {
             patient: this.$store.state.patientUsername,
             notifications: [],
             viewNotif: [],
-            checkImgState: false
+            checkImgState: false,
+            provinceInput: this.provinceSelected
         }
     },
     methods: {
@@ -200,7 +251,7 @@ export default {
         },
         closeNotificationModal() {
             this.isActiveModal = false
-        },
+        }
     }
 }
 </script>
@@ -209,5 +260,16 @@ export default {
     max-height: 20em;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+.provider-finder-mode {
+    padding: 1.5% !important;
+    background-color: rgba(216, 229, 255, 0.44) !important;
+    box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.1);
+    border-bottom: 0px !important;
+}
+
+[list]::-webkit-calendar-picker-indicator {
+    opacity: 0 !important;
 }
 </style>
