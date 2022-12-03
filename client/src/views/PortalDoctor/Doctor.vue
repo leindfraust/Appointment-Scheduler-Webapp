@@ -98,11 +98,11 @@
                           <p class="subtitle is-4 has-text-centered">Do you wish to cancel the appointment? </p>
                           <p class="subtitle is-6 has-text-centered">The user will be notified of the cancellation via
                             email and notifications if you wish to proceed.</p>
-                          <p class="help">NOTE: This action cannot be undone.</p>
                           <div class="buttons is-centered">
                             <button class="button has-text-success" @click="cancelAppointment">YES</button>
                             <button class="button has-text-danger" @click="cancelModalCancel">NO</button>
                           </div>
+                          <p class="help">NOTE: This action cannot be undone.</p>
                         </div>
                         <button class="modal-close is-large" aria-label="close" @click="cancelModalCancel"></button>
                       </div>
