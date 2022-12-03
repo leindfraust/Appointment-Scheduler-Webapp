@@ -403,6 +403,7 @@ export default {
         await axios.put('/session/doctor', {
           appointmentCategories: this.appointmentCategories
         })
+        this.undoAppointmentCategory(category)
       } catch (err) {
         this.errMsg = err
       }
