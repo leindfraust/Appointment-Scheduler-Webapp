@@ -2,14 +2,15 @@
 import { ref } from 'vue'
 import axios from 'axios';
 
-let ticketID = ref('')
-let ticketType = ref('')
-let title = ref('')
-let message = ref('')
-let email = ref('')
-let loading = ref(false)
-let errMsg = ref('')
-let success = ref(false)
+const ticketID = ref('')
+const ticketType = ref('')
+const title = ref('')
+const message = ref('')
+const email = ref('')
+const loading = ref(false)
+const errMsg = ref('')
+const success = ref(false)
+const problemSelect = ref(false)
 //methods
 async function submitIssue() {
     loading.value = true
@@ -60,15 +61,19 @@ function generateTicket() {
             }}. Please see your email for further instructions.</div>
             <div v-else>
                 <h1 class="title">Contact Us</h1>
-                <div class="dropdown is-hoverable block">
+                <div class="dropdown block" :class="{ 'is-active': problemSelect }">
                     <div class="dropdown-trigger">
-                        <button class="button">{{ ticketType == '' ? 'Select a Problem' : ticketType }}</button>
+                        <button class="button" @click="problemSelect = !problemSelect">
+                            {{ ticketType == '' ? 'Select a Problem' : ticketType }}</button>
                     </div>
                     <div class="dropdown-menu">
                         <div class="dropdown-content">
-                            <a class="dropdown-item" @click="ticketType = 'General Inquiry'">General Inquiry</a>
-                            <a class="dropdown-item" @click="ticketType = 'Account Problem'">Account Problem</a>
-                            <a class="dropdown-item" @click="ticketType = 'Report a bug'">Report a bug</a>
+                            <a class="dropdown-item"
+                                @click="(ticketType = 'General Inquiry', problemSelect = false)">General Inquiry</a>
+                            <a class="dropdown-item"
+                                @click="(ticketType = 'Account Problem', problemSelect = false)">Account Problem</a>
+                            <a class="dropdown-item"
+                                @click="(ticketType = 'Report a bug', problemSelect = false)">Report a bug</a>
                         </div>
                     </div>
                 </div>
