@@ -1,6 +1,7 @@
 {
   "name": "appointment_scheduler_webapp_expressmongodb",
   "version": "1.0.0",
+  "private": true,
   "description": "appointment scheduler web server with express and mongodbatlas",
   "main": "index.js",
   "scripts": {
@@ -11,7 +12,6 @@
     "lint": "eslint .  --ext .js"
   },
   "author": "Leindfraust",
-  "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.0",
     "cloudinary": "^1.32.0",
