@@ -21,7 +21,7 @@
                 </section>
             </div>
         </div>
-        <section class="hero is-fullheight is-medium has-text-centered" v-if="citiesOrMunicipalities == ''">
+        <section class="hero is-large has-text-centered" v-if="citiesOrMunicipalities == ''">
             <div class="hero-body">
                 <div class="container">
                     <CatchError :err-msg="errMsg" />
