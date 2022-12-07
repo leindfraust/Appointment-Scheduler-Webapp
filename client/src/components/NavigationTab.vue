@@ -76,7 +76,7 @@
                         <div class="navbar-item" v-for="(notifs, index) in notifications.sort((a, b) => {
                             return new Date(b.date).getTime() - new Date(a.date).getTime()
                         })" :key="index">
-                            <div class="notification is-info" :class="{ 'is-light': !notifs.new }">
+                            <div class="notification is-info" :class="{ 'is-light': !notifs.new }" style="width: 20rem">
                                 <a style="text-decoration: none;" @click="openNotif(notifs, index)">{{ notifs.subject }}
                                     <p class="help">{{ notifs.from == 'Medic Search' ? `From ${notifs.from}` : `From
                                                                             Dr. ${notifs.from}`
