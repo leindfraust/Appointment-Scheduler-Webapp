@@ -45,7 +45,7 @@ const getDoctorsForFilter = (async (req, res) => {
         schedule: { $elemMatch: { date: { $gt: new Date(today).toISOString() }, hospital: req.body.hospital } }
     }
     let querySpecialistWithDateTime;
-    if (new Date(req.body.date) instanceof Date && !isNaN(new Date(req.body.date))) {
+    if (req.body.date && new Date(req.body.date) instanceof Date && !isNaN(new Date(req.body.date))) {
         querySpecialistWithDateTime = {
             verified: true,
             "hospitalOrigin.hospital": req.body.hospital,
