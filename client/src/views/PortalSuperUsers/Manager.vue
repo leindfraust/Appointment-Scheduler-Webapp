@@ -17,21 +17,14 @@
                 <h1 class="title">{{ managerHospital.hospital }}</h1>
                 <div class="container" v-if="!loading && hospitalStatus.status == 'Active'">
                     <h1 class="title is-4">Insights</h1>
-                    <div class="columns">
-                        <div class="column">
-                            <LineChart :chartData="lineChartData" :options="lineChartOptions" />
-                        </div>
-                        <div class="column">
-                            <BarChart :chartData="barChartData" :options="barChartOptions" />
-                        </div>
-                    </div>
+                    <LineChart :chartData="lineChartData" :options="lineChartOptions" />
                 </div>
                 <hr>
                 <div class="container" v-if="Object.keys(doctorAccountsIndexed).length !== 0">
                     <h2 class="title is-4">Upcoming Ongoing Schedules</h2>
                     <div class="columns is-multiline is-centered">
                         <div class="column is-5"
-                            v-for="doctor in doctorAccountsIndexed.slice().filter(x => x.verified && x.schedule.find(x => new Date(x.date).getTime() >= new Date(new Date().toDateString()).getTime() ) && x.schedule.find(x => x.hospital == managerHospital.hospital) ).sort((a, b) => new Date(b?.schedule.find(x => new Date(x.date).getTime() >= new Date(new Date().toDateString()).getTime()).date).getTime() - new Date(a?.schedule.find(x => new Date(x.date).getTime() >= new Date(new Date().toDateString()).getTime()).date).getTime())"
+                            v-for="doctor in doctorAccountsIndexed.slice().filter(x => x.verified && x.schedule.find(x => new Date(x.date).getTime() >= new Date(new Date().toDateString()).getTime()) && x.schedule.find(x => x.hospital == managerHospital.hospital)).sort((a, b) => new Date(b?.schedule.find(x => new Date(x.date).getTime() >= new Date(new Date().toDateString()).getTime()).date).getTime() - new Date(a?.schedule.find(x => new Date(x.date).getTime() >= new Date(new Date().toDateString()).getTime()).date).getTime())"
                             :key="doctor._id">
                             <div class="box">
                                 <div class="columns">
@@ -43,17 +36,18 @@
                                         </figure>
                                     </div>
                                     <div class="column">
-                                        <p class="subtitle is-5">Dr. {{doctor.name}}</p>
-                                        <p class="subtitle is-6">{{doctor.specialist.toString()}}</p>
+                                        <p class="subtitle is-5">Dr. {{ doctor.name }}</p>
+                                        <p class="subtitle is-6">{{ doctor.specialist.toString() }}</p>
                                         <p class="subtitle is-5">Schedules: </p>
                                         <span v-for="schedule in doctor.schedule" :key="schedule.id">
                                             <p class="subtitle is-6"
                                                 v-if="new Date(schedule.date).getTime() >= new Date(new Date().toDateString()).getTime() && schedule.hospital == managerHospital.hospital">
                                                 <strong
                                                     v-if="new Date(schedule.date).getTime() == new Date(new Date().toDateString()).getTime() && schedule.hospital == managerHospital.hospital"
-                                                    class="has-text-info">TODAY: </strong> {{`${new
-                                                    Date(schedule.date).toDateString()}, ${schedule.timeStart} -
-                                                    ${schedule.timeEnd}`}}
+                                                    class="has-text-info">TODAY: </strong> {{ `${new
+                                                            Date(schedule.date).toDateString()}, ${schedule.timeStart} -
+                                                                                                    ${schedule.timeEnd}`
+                                                    }}
                                             </p>
                                         </span>
                                     </div>
@@ -129,7 +123,7 @@
 import axios from 'axios'
 import ManagerMenuVue from '../../components/ManagerMenu.vue'
 import { Chart, registerables } from 'chart.js'
-import { LineChart, BarChart } from 'vue-chart-3'
+import { LineChart } from 'vue-chart-3'
 
 Chart.register(...registerables)
 
@@ -137,8 +131,7 @@ export default {
     name: "ManagerDashboard",
     components: {
         ManagerMenuVue,
-        LineChart,
-        BarChart
+        LineChart
     },
     computed: {
         doctorAccountsIndexed() {
@@ -171,20 +164,6 @@ export default {
                 backgroundColor: ['#77CEFF'],
             }]
         }
-
-        //bar chart variables
-        let doctors = []
-        let dataArrBar = []
-        this.hospitalAppointments.forEach(x => doctors.push(x.doctorName))
-        let barChartLabel = [...new Set(doctors)]
-        barChartLabel.forEach(e => dataArrBar.push(this.hospitalAppointments.filter(x => x.doctorName == e && x.ifPatientVisited).length))
-        this.barChartData = {
-            labels: barChartLabel,
-            datasets: [{
-                data: dataArrBar,
-                backgroundColor: ['#77CEFF']
-            }]
-        }
         this.loading = false
     },
     data() {
@@ -207,19 +186,6 @@ export default {
                     title: {
                         display: true,
                         text: 'Appointment counts throughout this year',
-                    },
-                },
-            },
-            barChartData: [],
-            barChartOptions: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false,
-                    },
-                    title: {
-                        display: true,
-                        text: 'Top performing doctors',
                     },
                 },
             },
