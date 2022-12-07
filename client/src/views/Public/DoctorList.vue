@@ -1,6 +1,5 @@
 <template>
   <NavigationTab />
-  <div class="block" style="box-shadow: 5px 5px 5px 5px whitesmoke;">&nbsp;</div>
   <div class="modal" :class="{ 'is-active': isDoctorLoading }">
     <div class="modal-background"></div>
     <div class="modal-content" style="overflow: hidden">
@@ -77,7 +76,7 @@
                 <div v-if="Object.keys(doctorSearch).length !== 0">
                   <div class="columns" v-for="doctors in doctorSearch" :key="doctors._id">
                     <div class="column">
-                      <figure class="image is-5by4">
+                      <figure class="image is-square">
                         <img
                           :src="`http://res.cloudinary.com/leindfraust/image/upload/v${new Date().getMonth()}${new Date().getDate()}/assets/doctors/${doctors.alias}.jpg`" />
                       </figure>
@@ -159,11 +158,14 @@ export default {
       this.typeClinic = true
       this.getDoctors(undefined)
     }
+    if (await this.$store.state.patientFilters.filterSpecialist) {
+      await this.getDoctors('Allergists')
+    }
   },
   computed: {
     doctorSearch() {
       if (this.doctorList) {
-        return this.doctorList.filter(x => x.name.toLowerCase().includes(this.doctorSearchBar.toLowerCase())).slice().sort((a, b) => a.visits - b.visits)
+        return this.doctorList.filter(x => x.name.toLowerCase().includes(this.doctorSearchBar.toLowerCase())).slice().sort((a, b) => a.visits - b.visits).sort((a, b) => this.$store.state.patientFilters.filterDate ? new Date(a.schedule[0].date).getTime() - new Date(this.$store.state.patientFilters.filterDate).getTime() : a - b)
       } else {
         return false
       }
@@ -180,6 +182,8 @@ export default {
         specialist: specialization
       }).then(response => response ? this.doctorList = response.data : this.doctorList = []).catch(err => this.errMsg = err)
       this.isDoctorLoading = false
+
+      this.$store.commit("patientFilters", {}) // clear filters
     },
     async pickDoctor(details, specialization) {
       store.commit("pickedSpecialization", specialization)

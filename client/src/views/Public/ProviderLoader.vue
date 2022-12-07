@@ -27,8 +27,8 @@
                         <div class="block"></div>
                         <div class="buttons is-centered">
                             <button class="button"
-                                @click="dateTimeFilter = false, filterTime = '', filterDate = '', filterSpecialistDateTime()">Cancel</button>
-                            <button class="button is-info" :disabled="filterTime == '' || filterDate == null"
+                                @click="dateTimeFilter = false, filterTime = '', filterDate = undefined, filterSpecialistDateTime()">Cancel</button>
+                            <button class="button is-info" :disabled="filterDate == undefined"
                                 @click="filterSpecialistDateTime(), dateTimeFilter = false">Confirm</button>
                         </div>
 
@@ -55,7 +55,7 @@
                             <option
                                 v-for="(cityorMunicipality, index) in citiesOrMunicipalities.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
                                 :key="index">{{
-                                        cityorMunicipality.name
+                                        cityorMunicipality.name.replace('City', '').replace('Municipality', '')
                                 }}</option>
                         </select>
                     </div>
@@ -251,7 +251,13 @@ export default {
             await this.loadProvider()
         },
         async bookAppointment(hospitalDetails) {
+            const filters = {
+                filterSpecialist: this.filterSpecialist,
+                filterDate: this.filterDate,
+                filterTime: this.filterTime
+            }
             this.$store.commit("hospitalDetails", hospitalDetails)
+            this.$store.commit("patientFilters", filters)
             await axios.put(`/api/manager/${hospitalDetails._id}`, {
                 engagements: hospitalDetails.engagements + 1
             });

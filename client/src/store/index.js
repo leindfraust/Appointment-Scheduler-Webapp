@@ -7,6 +7,7 @@ const store = createStore({
     plugins: [createPersistedState()],
     state: {
         paymentStatus: 'pending',
+        patientFilters: {}, //specialist and date/time filter
         paymentID: '',
         notificationClicked: false,
         checkProfileImg: false,
@@ -42,6 +43,9 @@ const store = createStore({
         getSpecializationList: state => state.specializationList
     },
     mutations: {
+        patientFilters(state, patientFilters) {
+            state.patientFilters = patientFilters
+        },
         paymentStatus(state, paymentStatus) {
             state.paymentStatus = paymentStatus
         },
