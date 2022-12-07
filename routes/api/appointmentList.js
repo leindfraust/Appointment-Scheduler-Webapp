@@ -3,6 +3,8 @@ const router = express.Router();
 const {
     getAppointments,
     pushAppointment,
+    checkDoubleAppointment,
+    checkMultipleAppointment,
     updateAppointment,
     deleteAppointment,
     getAppointmentsforDoctor,
@@ -15,6 +17,10 @@ const {
 router.get('/', getAppointments);
 
 router.post('/', pushAppointment);
+
+router.post('/check-double-appointment', checkDoubleAppointment);
+
+router.post('/check-multiple-appointment', checkMultipleAppointment);
 
 router.post('/managers', getAppointmentsforManager)
 

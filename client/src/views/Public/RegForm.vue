@@ -21,6 +21,32 @@
         </section>
       </div>
     </div>
+    <div class="modal" :class="{ 'is-active': doubleAppointmentID }">
+      <div class="modal-background"></div>
+      <div class="modal-content box">
+        <section class="section">
+          <div class="notification is-info">You have an existing appointment with the same details, do you want to
+            cancel your last appointment and make a new appointment?</div>
+          <div class="buttons is-centered">
+            <button class="button" @click="(doubleAppointmentID = false)">No</button>
+            <button class="button is-info" @click="reAppointment">Yes</button>
+          </div>
+        </section>
+      </div>
+    </div>
+    <div class="modal" :class="{ 'is-active': multipleAppointment }">
+      <div class="modal-background"></div>
+      <div class="modal-content box">
+        <section class="section">
+          <div class="notification is-info">You have an existing appointment with the same schedule, do you want to
+            continue with your appointment?</div>
+          <div class="buttons is-centered">
+            <button class="button" @click="(multipleAppointment = false)">No</button>
+            <button class="button is-info" @click="appoint">Yes</button>
+          </div>
+        </section>
+      </div>
+    </div>
     <!-- New -->
     <div class="columns registration-form" style="width: 75%; margin: auto">
       <div class="column">
@@ -114,7 +140,7 @@
         <div class="block has-text-centered">
           <button type="button" class="button is-info"
             :disabled="comments == null || schedule == null || firstName == '' || lastName == '' || birthDay == null || contactNum == '' || comments == '' || currentAddress == ''"
-            @click="appoint">Submit
+            @click="checkAppointmentDuplication">Submit
             appointment</button>
         </div>
       </div>
@@ -170,7 +196,9 @@ export default {
       paymentFailed: false,
       paymentStatus: store.state.paymentStatus,
       paymentSuccesPatientDetails: store.state.patientDetails,
-      paymentWindowWaiting: false
+      paymentWindowWaiting: false,
+      doubleAppointmentID: false,
+      multipleAppointment: false
     };
   },
   async created() {
@@ -196,6 +224,34 @@ export default {
 
   },
   methods: {
+    async checkAppointmentDuplication() {
+      try {
+        await axios.post('/api/appointmentList/check-double-appointment', {
+          firstName: this.firstName,
+          lastName: this.lastName,
+          schedule: this.schedule,
+          patientID: this.patient._id,
+          doctorID: this.doctorDetails._id
+        }).then(response => response.data ? this.doubleAppointmentID = response.data : this.doubleAppointmentID = false)
+        if (!this.doubleAppointmentID) {
+          await axios.post('/api/appointmentList/check-multiple-appointment', {
+            schedule: this.schedule,
+            patientID: this.patient._id,
+            doctorID: this.doctorDetails._id
+          }).then(response => response.data ? this.multipleAppointment = true : this.multipleAppointment = false)
+        }
+      } catch (err) {
+        this.errMsg = err
+      }
+      if (!this.doubleAppointmentID && !this.multipleAppointment) {
+        await this.appoint()
+      }
+    },
+    async reAppointment() {
+      await axios.delete(`/api/appointmentList/${this.doubleAppointmentID}`).catch(err => this.errMsg = err)
+      this.doubleAppointmentID = false
+      await this.appoint()
+    },
     async appoint() {
       this.isLoading = true
       let radio = document.getElementsByClassName('radioSched');
