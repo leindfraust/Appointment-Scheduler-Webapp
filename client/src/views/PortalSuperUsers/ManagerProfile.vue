@@ -29,11 +29,12 @@
                     </figure>
                     <!--Hospital picture & upload -->
                     <form id="formUpload" action="/api/imgUploadManager" method="post" enctype="multipart/form-data"
-                        style="margin: auto; width: 50%" class="field">
+                        style="margin-left: auto; width: 50%" class="form">
                         <div class="control">
                             <input type="hidden" name="hospital" :value="(managerHospital)" />
                             <input class="input" type="file" name="imgFile" @change="fileHandlerInput($event)"
                                 required />
+                            <div class="block"></div>
                             <div class="buttons is-centered" v-if="imgPreview">
                                 <button class="button" type="button" @click="imgPreview = ''">Cancel Upload</button>
                                 <button type="submit" value="Upload" class="button is-info">Upload Photo</button>
@@ -96,6 +97,7 @@
                                 <div class="field" v-if="editingMode">
                                     <input class="input" type="text" v-model="editLongitude" />
                                 </div>
+                                <p class="subtitle is-6 has-text-info">To get accurate geological coordinates, please refer to <a href="https://www.google.com/maps" class="has-text-weight-bold">Google Maps</a>.</p>
                             </div>
                             <div class="column">
                                 <iframe v-if="hospitalData !== ''" width="500" height="500"
