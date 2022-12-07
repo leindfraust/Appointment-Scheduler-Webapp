@@ -3,9 +3,13 @@
   <section class="section is-large" id="background">
     <div class="container">
       <h1 class="subtitle has-text-centered">
-        You have been successfuly appointed to <b>{{ patient.doctorName }}, {{ patient.specialization }}</b> at
-        <b>{{ new Date(patient.schedule[0].date).toDateString() }}</b>, <b>{{ patient.schedule[0].timeStart }}</b> -
-        <b>{{ patient.schedule[0].timeEnd }}</b> in <b>{{ patient.hospital }}</b> for <b>{{ patient.appointmentCategory
+        You have been successfuly appointed to
+        <p><b>{{ patient.doctorName }} {{ patient.specialization }}</b></p> at
+        <p><b>{{ new Date(patient.schedule[0].date).toDateString() }}</b></p>
+        <p><b>{{ patient.schedule[0].timeStart }}</b> -
+          <b>{{ patient.schedule[0].timeEnd }}</b>
+        </p>
+        in <b>{{ patient.hospital }}</b> for <b>{{ patient.appointmentCategory
         }}</b>.
       </h1>
       <h1 class="subtitle has-text-centered">Your <b>priority number</b> is
@@ -41,9 +45,13 @@
         </div>
         <div class="block">&nbsp;</div>
         <h1 class="subtitle has-text-centered">
-          You have been successfuly appointed to <b>{{ patient.doctorName }}, {{ patient.specialization }}</b> at
-          <b>{{ new Date(patient.schedule[0].date).toDateString() }}</b>, <b>{{ patient.schedule[0].timeStart }}</b> -
-          <b>{{ patient.schedule[0].timeEnd }}</b> in <b>{{ patient.hospital }}</b> for <b>{{ patient.appointmentCategory
+          You have been successfuly appointed to
+          <p><b>{{ patient.doctorName }} {{ patient.specialization }}</b></p> at
+          <p><b>{{ new Date(patient.schedule[0].date).toDateString() }}</b></p>
+          <p><b>{{ patient.schedule[0].timeStart }}</b> -
+            <b>{{ patient.schedule[0].timeEnd }}</b>
+          </p>
+          in <b>{{ patient.hospital }}</b> for <b>{{ patient.appointmentCategory
           }}</b>.
         </h1>
         <h1 class="subtitle has-text-centered">Your <b>priority number</b> is
@@ -58,7 +66,7 @@
         <h1 class="subtitle"><b>Contact Number:</b> {{ patient.contactNum }}</h1>
         <h1 class="subtitle"><b>Birthday:</b> {{ patient.birthDay }}</h1>
         <h1 class="subtitle"><b>Symptoms/Comments:</b> {{ patient.comments }}</h1>
-        <div class="is-pulled-right" style="padding-top: 10%">
+        <div class="is-pulled-right" style="padding-top: 5%">
           <figure class="image is-128x128" style="width: 150px">
             <img src="../../assets/images/logos/medi-search-horizontal.png" />
             <p class="subtitle is-6 has-text-info has-text-centered">bit.ly/MedicSearch</p>
