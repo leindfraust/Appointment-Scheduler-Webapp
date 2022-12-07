@@ -1,6 +1,6 @@
 {
   "name": "appointment_scheduler_webapp_expressmongodb",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "appointment scheduler web server with express and mongodbatlas",
   "main": "index.js",
