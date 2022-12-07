@@ -49,7 +49,8 @@
                           appointments.birthDay,
                           appointments._id
                         )
-                      " v-if="new Date(index).toDateString() == new Date().toDateString()">Confirm Visitation</button>
+                      " v-if="(new Date(index).getTime() == new Date(new Date().toDateString()).getTime())">Confirm
+                        Visitation</button>
                       <button class="button has-text-danger" type="button" @click="toggleCancelModal(appointments)"
                         v-else>Cancel Visitation</button>
                       <br />
@@ -224,7 +225,7 @@ export default {
         await axios.put(`/api/doctor/${store.state.doctorID}`, {
           visits: this.appointmentSched.filter(x => x.ifPatientVisited == true).length + 1
         });
-        await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID }).then(response => this.appointmentSched = response.data);
+        await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID, ongoing: true }).then(response => this.appointmentSched = response.data).catch(err => this.errMsg = err);
       } catch (err) {
         this.errMsg = err
       }
