@@ -47,9 +47,6 @@
             </li>
             <p class="menu-label">Support</p>
             <li>
-                <a @click="openFAQs">FAQ</a>
-            </li>
-            <li>
                 <a @click="this.$router.push('/contactus')">Contact Us</a>
             </li>
         </ul>
