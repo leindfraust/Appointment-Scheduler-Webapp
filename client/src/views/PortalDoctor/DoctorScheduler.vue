@@ -238,9 +238,8 @@ export default {
   },
   methods: {
     sortDate() {
-      return this.days.sort((a, b) => {
-        new Date(a.id) - new Date(b.id)
-      }).filter(x => { return new Date(x.id) > new Date() })
+      return this.days.filter(x => { return new Date(x.id) > new Date() }).sort((a, b) =>
+        new Date(a.date).valueOf() - new Date(b.date).valueOf())
     },
     timeStringConvert(timeString, dateObject) {
       dateObject.setHours(timeString.substr(0, timeString.indexOf(":")))
