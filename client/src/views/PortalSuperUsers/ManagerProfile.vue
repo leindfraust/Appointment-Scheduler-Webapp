@@ -97,7 +97,9 @@
                                 <div class="field" v-if="editingMode">
                                     <input class="input" type="text" v-model="editLongitude" />
                                 </div>
-                                <p class="subtitle is-6 has-text-info">To get accurate geological coordinates, please refer to <a href="https://www.google.com/maps" class="has-text-weight-bold">Google Maps</a>.</p>
+                                <p class="subtitle is-6 has-text-info">To get accurate geological coordinates, please
+                                    refer to <a href="https://www.google.com/maps" class="has-text-weight-bold">Google
+                                        Maps</a>.</p>
                             </div>
                             <div class="column">
                                 <iframe v-if="hospitalData !== ''" width="500" height="500"
