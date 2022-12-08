@@ -1,6 +1,6 @@
 {
   "name": "appointment_scheduler_webapp_expressmongodb",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "description": "appointment scheduler web server with express and mongodbatlas",
   "main": "index.js",
@@ -21,17 +21,17 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
-    "formidable": "^2.0.1",
+    "formidable": "^2.1.1",
     "helmet": "^6.0.1",
-    "mongoose": "^6.7.4",
+    "mongoose": "^6.8.0",
     "morgan": "^1.10.0",
     "nodemailer": "^6.8.0",
     "socket.io": "^4.5.4"
   },
   "devDependencies": {
     "concurrently": "^7.6.0",
-    "cypress": "^11.2.0",
-    "eslint": "^8.28.0",
+    "cypress": "^12.0.1",
+    "eslint": "^8.29.0",
     "eslint-plugin-cypress": "^2.12.1",
     "nodemon": "^2.0.20"
   }
