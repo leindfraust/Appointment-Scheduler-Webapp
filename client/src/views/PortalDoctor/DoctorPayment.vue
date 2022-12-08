@@ -85,7 +85,7 @@ async function updateBankDetails() {
                         <p class="help">By providing the information below, you agreed to let Medic Search
                             <b>hold
                                 your
-                                payments</b> until every week for your payout. Medic Search will <b>charge 2%
+                                payments</b> until every week for your payout. Medic Search will <b>charge 1%
                                 transaction fee</b> for
                             every successful appointments. This only applies to <b>payment-first</b>
                             appointments.
