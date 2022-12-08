@@ -28,7 +28,7 @@
           <div class="notification is-info">You have an existing appointment with the same details, do you want to
             cancel your last appointment and make a new appointment?</div>
           <div class="buttons is-centered">
-            <button class="button" @click="(doubleAppointmentID = false)">No</button>
+            <button class="button" @click="reloadPage">No</button>
             <button class="button is-info" @click="reAppointment">Yes</button>
           </div>
         </section>
@@ -41,7 +41,7 @@
           <div class="notification is-info">You have an existing appointment with the same schedule, do you want to
             continue with your appointment?</div>
           <div class="buttons is-centered">
-            <button class="button" @click="(multipleAppointment = false)">No</button>
+            <button class="button" @click="reloadPage">No</button>
             <button class="button is-info" @click="appoint">Yes</button>
           </div>
         </section>
@@ -77,7 +77,7 @@
                 </div>
               </div>
               <div class="field">
-                <label class="label">Birthday</label>
+                <label class="label">Birthdate</label>
                 <div class="control">
                   <v-date-picker class="block" v-model="birthDay">
                     <template v-slot="{ inputValue, togglePopover }">
