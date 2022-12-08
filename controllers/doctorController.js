@@ -82,10 +82,10 @@ const checkAvailabilityDoctors = (async (req, res) => {
     if (typeof specialist !== 'undefined') {
         query.specialist = specialist
     }
-    if (filterDate !== undefined && new Date(filterDate) instanceof Date) {
-        query.schedule = { $elemMatch: { date: new Date(filterDate).toISOString(), hospital: hospital } }
-        if (filterTime !== '') {
-            query.schedule = { $elemMatch: { date: new Date(req.body.filterDate).toISOString(), hospital: hospital, timeStart: { $regex: `.*${req.body.filterTime}.*` } } }
+    if (filterDate && filterDate !== undefined && new Date(filterDate) instanceof Date) {
+        query.schedule = { $elemMatch: { date: new Date(new Date(filterDate).toDateString()).toISOString(), hospital: hospital } }
+        if (filterTime !== '' && filterTime) {
+            query.schedule = { $elemMatch: { date: new Date(new Date(req.body.filterDate).toDateString()).toISOString(), hospital: hospital, timeStart: { $regex: `.*${req.body.filterTime}.*` } } }
         }
     }
     try {
