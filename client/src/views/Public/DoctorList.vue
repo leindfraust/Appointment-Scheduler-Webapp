@@ -141,7 +141,8 @@ export default {
       specializationClicked: false,
       doctorSearchBar: '',
       isDoctorLoading: false,
-      typeClinic: false
+      typeClinic: false,
+      patientFilters: store.state.patientFilters
     };
   },
   async mounted() {
@@ -158,14 +159,17 @@ export default {
       this.typeClinic = true
       this.getDoctors(undefined)
     }
-    if (await this.$store.state.patientFilters.filterSpecialist) {
+    if (await this.patientFilters.filterSpecialist) {
       await this.getDoctors('Allergists')
     }
+  },
+  unmounted() {
+    store.commit("patientFilters", {})
   },
   computed: {
     doctorSearch() {
       if (this.doctorList) {
-        return this.doctorList.filter(x => x.name.toLowerCase().includes(this.doctorSearchBar.toLowerCase())).slice().sort((a, b) => a.visits - b.visits).sort((a, b) => this.$store.state.patientFilters.filterDate ? new Date(a.schedule[0].date).getTime() - new Date(this.$store.state.patientFilters.filterDate).getTime() : a - b)
+        return this.doctorList.filter(x => x.name.toLowerCase().includes(this.doctorSearchBar.toLowerCase())).slice().sort((a, b) => a.visits - b.visits)
       } else {
         return false
       }
@@ -179,11 +183,11 @@ export default {
       this.pickedSpecialist = specialization;
       await axios.post("/api/checkDoctorAvailability", {
         hospital: this.hospitalDetails.hospital,
-        specialist: specialization
+        specialist: specialization,
+        filterDate: this.patientFilters.filterDate,
+        filterTime: this.patientFilters.filterTime
       }).then(response => response ? this.doctorList = response.data : this.doctorList = []).catch(err => this.errMsg = err)
       this.isDoctorLoading = false
-
-      this.$store.commit("patientFilters", {}) // clear filters
     },
     async pickDoctor(details, specialization) {
       store.commit("pickedSpecialization", specialization)

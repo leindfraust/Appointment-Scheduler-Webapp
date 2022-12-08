@@ -256,8 +256,8 @@ export default {
                 filterDate: this.filterDate,
                 filterTime: this.filterTime
             }
-            this.$store.commit("hospitalDetails", hospitalDetails)
-            this.$store.commit("patientFilters", filters)
+            await this.$store.commit("hospitalDetails", hospitalDetails)
+            await this.$store.commit("patientFilters", filters)
             await axios.put(`/api/manager/${hospitalDetails._id}`, {
                 engagements: hospitalDetails.engagements + 1
             });
@@ -282,6 +282,9 @@ export default {
         },
         async filterSpecialistDateTime() {
             this.doctorSpecialistFilter = []
+            if (this.filterTime == undefined) {
+                this.filterTime = ''
+            }
             await this.$router.push({ path: '/provider', query: { name: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude, date: this.filterDate != null ? new Date(this.filterDate).toLocaleDateString() : '', time: this.filterTime } })
             const hospitals = this.geoHospitalNearestUser
             for await (const hospital of hospitals) {
