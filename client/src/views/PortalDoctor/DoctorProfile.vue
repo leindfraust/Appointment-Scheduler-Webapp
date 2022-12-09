@@ -80,7 +80,7 @@
                     </div>
                     <div class="field">
                       <label class="label">
-                        <b>Gmail:</b>
+                        <b>Email:</b>
                       </label>
                       <div class="control">
                         <input class="input" size="5" type="text" v-model="gmail" :disabled="verified == true" />

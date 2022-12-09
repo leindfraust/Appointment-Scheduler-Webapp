@@ -62,7 +62,7 @@
 
                 <div class="field">
                   <div class="control">
-                    <label class="label">Gmail(Optional):</label>
+                    <label class="label">Email(Optional):</label>
                     <div v-if="emailFound !== ''">
                       <p class="help is-danger" v-if="emailFound">Unavailable<i class="fas fa-spinner fa-spin"
                           v-if="loadingEmail"></i></p>

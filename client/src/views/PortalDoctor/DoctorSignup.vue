@@ -89,7 +89,7 @@
               </div>
             </div>
             <div class="field">
-              <label class="label">Gmail</label>
+              <label class="label">Email</label>
               <div v-if="emailFound !== ''">
                 <p class="help is-danger" v-if="emailFound">
                   Unavailable
