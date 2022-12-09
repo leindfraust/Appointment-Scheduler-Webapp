@@ -32,11 +32,10 @@ const store = createStore({
         hospitalDetails: [],
         hospitalName: '',
         specializationList: ["Allergists", "Anesthesiologists", "Cardiologists", "Colon and Rectal Surgeons", "Critical Care Medicine Specialists", " Dermatologists", "Endocrinologists", "Emergency Medicine Specialists", "Family Physicians",
-            "Gastroenterologists", "Geriatric Medicine Specialists", "Hematologists", "Hospice and Palliative Medicine Specialists", "Infectious Disease Specialists",
+            "Gastroenterologists", "Geriatric Medicine Specialists", "General Practitioner", "Hematologists", "Hospice and Palliative Medicine Specialists", "Infectious Disease Specialists",
             "Internists", "Medical Geneticists", "Nephrologists", "Neurologists", "Obstetricians and Gynecologists", "Oncologists", "Ophthalmologists",
             "Osteopaths", "Otolaryngologists", "Pathologists", "Pediatricians", "Physiatrists", "Plastic Surgeons", "Podiatrists", "Preventive Medicine Specialists", "Psychiatrists", "Pulmonologists", "Radiologists", "Rheumatologists", "Sleep Medicine Specialists", "Sports Medicine Specialists", "General Surgeons",
-            "Urologists"
-        ]
+            "Urologists"]
     },
     getters: {
         getStatusAvail: state => state.statusAvailability,
