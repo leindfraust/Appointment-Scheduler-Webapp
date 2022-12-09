@@ -24,7 +24,7 @@
                     <h2 class="title is-4">Upcoming Ongoing Schedules</h2>
                     <div class="columns is-multiline is-centered">
                         <div class="column is-5"
-                            v-for="doctor in doctorAccountsIndexed.slice().filter(x => x.verified && x.schedule.find(x => new Date(x.date).getTime() >= new Date(new Date().toDateString()).getTime()) && x.schedule.find(x => x.hospital == managerHospital.hospital)).sort((a, b) => new Date(b?.schedule.find(x => new Date(x.date).getTime() >= new Date(new Date().toDateString()).getTime()).date).getTime() - new Date(a?.schedule.find(x => new Date(x.date).getTime() >= new Date(new Date().toDateString()).getTime()).date).getTime())"
+                            v-for="doctor in doctorAccountsIndexed.slice().filter(x => x.verified && x.schedule.find(x => new Date(x.date).getTime() >= new Date(new Date().toDateString()).getTime()) && x.schedule.find(x => x.hospital == managerHospital.hospital)).sort((a, b) => new Date(a.schedule.date).valueOf() - new Date(b.schedule.date).valueOf())"
                             :key="doctor._id">
                             <div class="box">
                                 <div class="columns">
@@ -39,7 +39,9 @@
                                         <p class="subtitle is-5">Dr. {{ doctor.name }}</p>
                                         <p class="subtitle is-6">{{ doctor.specialist.toString() }}</p>
                                         <p class="subtitle is-5">Schedules: </p>
-                                        <span v-for="schedule in doctor.schedule" :key="schedule.id">
+                                        <span
+                                            v-for="schedule in doctor.schedule.sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())"
+                                            :key="schedule.id">
                                             <p class="subtitle is-6"
                                                 v-if="new Date(schedule.date).getTime() >= new Date(new Date().toDateString()).getTime() && schedule.hospital == managerHospital.hospital">
                                                 <strong
@@ -150,19 +152,36 @@ export default {
             "July", "August", "September", "October", "November", "December"
         ];
         let schedules = []
-        let dataArrLine = []
+        let dataArrLineVisited = []
+        let dataArrLineNotVisited = []
+        let dataArrLineCancelled = []
         this.hospitalAppointments.forEach(x => {
             if (new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear()) return schedules.push(monthNames[x.schedule[0].dayDetail.month - 1])
         })
         let lineChartLabel = [...new Set(schedules)]
 
-        lineChartLabel.forEach(e => dataArrLine.push(this.hospitalAppointments.filter(x => new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear() && monthNames[x.schedule[0].dayDetail.month] == e && x.ifPatientVisited).length))
+        lineChartLabel.forEach(e => dataArrLineVisited.push(this.hospitalAppointments.filter(x => new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear() && monthNames[x.schedule[0].dayDetail.month] == e && x.ifPatientVisited).length))
+        lineChartLabel.forEach(e => dataArrLineNotVisited.push(this.hospitalAppointments.filter(x => new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear() && monthNames[x.schedule[0].dayDetail.month] == e && !x.ifPatientVisited).length))
+        lineChartLabel.forEach(e => dataArrLineCancelled.push(this.hospitalAppointments.filter(x => new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear() && monthNames[x.schedule[0].dayDetail.month] == e && x.ifPatientCancelled).length))
         this.lineChartData = {
             labels: lineChartLabel,
-            datasets: [{
-                data: dataArrLine,
-                backgroundColor: ['#77CEFF'],
-            }]
+            datasets: [
+                {
+                    label: 'Confirmed Appointments',
+                    data: dataArrLineVisited,
+                    backgroundColor: ['#77CEFF'],
+                },
+                {
+                    label: 'Cancelled Appointments',
+                    data: dataArrLineCancelled,
+                    backgroundColor: ['orange'],
+                },
+                {
+                    label: "No Action Appointments",
+                    data: dataArrLineNotVisited,
+                    backgroundColor: ['red']
+                }
+            ]
         }
         this.loading = false
     },
@@ -181,7 +200,7 @@ export default {
                 responsive: true,
                 plugins: {
                     legend: {
-                        display: false,
+                        display: true,
                     },
                     title: {
                         display: true,
