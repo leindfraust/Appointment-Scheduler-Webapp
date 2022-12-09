@@ -47,11 +47,25 @@
         </section>
       </div>
     </div>
+    <div class="modal" :class="{ 'is-active': confirmDetails }">
+      <div class="modal-background"></div>
+      <div class="modal-content box">
+        <section class="section">
+          <div class="notification is-info">Before we continue, please confirm the patient's details to ensure they are
+            correct as they cannot be changed later on. Do you want to continue?</div>
+          <div class="buttons is-centered">
+            <button class="button" @click="confirmDetails = false">No</button>
+            <button class="button is-info"
+              @click="confirmDetails ? checkAppointmentDuplication() : confirmDetails = false">Yes</button>
+          </div>
+        </section>
+      </div>
+    </div>
     <!-- New -->
     <div class="columns registration-form" style="width: 75%; margin: auto">
       <div class="column">
         <form>
-          <div class="block">To book your appointment, we have to verify a few details.</div>
+          <div class="block">Please enter the patient's information.</div>
           <div class="field is-horizontal">
             <div class="field-body">
               <div class="field">
@@ -140,7 +154,7 @@
         <div class="block has-text-centered">
           <button type="button" class="button is-info"
             :disabled="comments == null || schedule == null || firstName == '' || lastName == '' || birthDay == null || contactNum == '' || comments == '' || currentAddress == ''"
-            @click="checkAppointmentDuplication">Submit
+            @click="confirmDetails = true">Submit
             appointment</button>
         </div>
       </div>
@@ -198,7 +212,8 @@ export default {
       paymentSuccesPatientDetails: store.state.patientDetails,
       paymentWindowWaiting: false,
       doubleAppointmentID: false,
-      multipleAppointment: false
+      multipleAppointment: false,
+      confirmDetails: false
     };
   },
   async created() {
@@ -225,6 +240,7 @@ export default {
   },
   methods: {
     async checkAppointmentDuplication() {
+      this.confirmDetails = false
       try {
         await axios.post('/api/appointmentList/check-double-appointment', {
           firstName: this.firstName,
@@ -371,11 +387,8 @@ export default {
     },
     generateRefID() {
       let result = '';
-      let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let charactersLength = characters.length;
-      for (let i = 0; i < 12; i++) {
-        result += characters.charAt(Math.floor(Math.random() *
-          charactersLength));
+      for (let i = 0; i < 6; i++) {
+        result += Math.floor(Math.random() * 9);
       }
       this.refID = result.toUpperCase()
     },
