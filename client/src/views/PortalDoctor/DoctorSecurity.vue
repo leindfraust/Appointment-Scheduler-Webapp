@@ -29,7 +29,7 @@
                                             required />
                                     </div>
                                     <div v-if="incorrectPasswordValidate" class="notification is-warning">{{
-                                    currentPasswordValidateMessage
+                                            currentPasswordValidateMessage
                                     }}</div>
                                 </div>
                                 <div class="field">
@@ -39,7 +39,7 @@
                                             required :class="{ 'is-danger': passwordValidate }" />
                                     </div>
                                     <div v-if="passwordValidate" class="notification is-danger">{{
-                                    passwordValidateMessage
+                                            passwordValidateMessage
                                     }}</div>
                                 </div>
                                 <div class="field">
@@ -49,7 +49,7 @@
                                             required :class="{ 'is-danger': passwordValidate }" />
                                     </div>
                                     <div v-if="passwordValidate" class="notification is-danger">{{
-                                    passwordValidateMessage
+                                            passwordValidateMessage
                                     }}</div>
                                 </div>
                                 <div class="field">
@@ -90,6 +90,7 @@
                                                     :disabled="codeError" />
                                             </div>
                                         </div>
+                                        <div class="block"></div>
                                         <div class="has-text-centered" v-if="!codeError">
                                             <button class="button is-info" :disabled="OTP === ''"
                                                 @click="confirmOTPEditInfo">Confirm</button>
@@ -105,6 +106,7 @@
                                             <div class="control has-text-centered">
                                                 <input class="input" type="email" v-model="gmail" />
                                             </div>
+                                            <div class="block"></div>
                                             <div class="has-text-centered">
                                                 <button class="button is-success" @click="sendVerificationEmail"
                                                     :disabled="gmail === ''">Verify</button>
@@ -124,6 +126,7 @@
                                                     oninput="this.value=this.value.slice(0,this.maxLength)"
                                                     :disabled="codeError || OTP == ''" />
                                             </div>
+                                            <div class="block"></div>
                                             <div class="has-text-centered" v-if="!codeError">
                                                 <button class="button is-info" :disabled="OTP === ''"
                                                     @click="verifyEmail">Confirm</button>
