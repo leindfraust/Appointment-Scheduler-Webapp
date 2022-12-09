@@ -114,8 +114,8 @@
                     <b>Specializations:</b>
                   </label>
                   <div class="control">
-                    <button class="button" style="margin: 5px" v-for="(specializations, index) in specialist"
-                      :key="index">
+                    <button class="button" style="margin: 5px; margin-top: auto"
+                      v-for="(specializations, index) in specialist" :key="index">
                       {{ specializations }}&nbsp;
                       <span class="has-text-danger" @click="pullSpecialization(specializations)">x</span>
                     </button>&nbsp;
