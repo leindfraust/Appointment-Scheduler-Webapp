@@ -13,8 +13,9 @@ import FooterBlock from '../../components/FooterBlock.vue';
             <h2>OVERVIEW</h2>
 
             <p style="white-space: pre-wrap;">This website is operated by <strong>Medic Search</strong>. Throughout the
-                site, the terms “we”, “us” and “our” refer to Medic
-                Search. <strong>Medic Search</strong> offers this website, including all information, tools and Services
+                site, the terms “we”, “us” and “our” refer to <strong>Medic
+                    Search</strong>. <strong>Medic Search</strong> offers this website, including all information, tools
+                and Services
                 available from this
                 site to you, the user, conditioned upon your acceptance of all terms, conditions, policies and notices
                 stated here.
@@ -396,7 +397,7 @@ import FooterBlock from '../../components/FooterBlock.vue';
                 romaygbriecloy@hotmail.com.</p>
 
             Our contact information is posted below:
-            Medic Search
+            <strong>Medic Search</strong>
             romaygbriecloy@hotmail.com
             Bais City, Negros Oriental Philippines
         </div>
