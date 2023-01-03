@@ -1,3 +1,162 @@
+<!-- eslint-disable vue/multi-word-component-names -->
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import axios from "axios";
+import { useStore } from "vuex";
+import groupBy from 'lodash/groupBy'
+import DoctorMenu from "../../components/DoctorMenu.vue";
+import socket from '../../socket'
+import CatchError from "../../components/CatchError.vue";
+
+const store = useStore()
+
+const errMsg = ref('')
+const isActiveModalConfirm = ref(false)
+const isActiveModalCancel = ref(false)
+const id = ref(null)
+const refID = ref(null)
+const refIDPatient = ref(null)
+const firstName = ref(null)
+const lastName = ref(null)
+const birthDay = ref(null)
+const contactNum = ref(null)
+const doctorName = ref(null)
+const searchBar = ref('')
+const appointmentSched = ref([])
+const file = ref(null)
+const confirmLoadingButton = ref(false)
+
+const appointmentSchedules = computed(() => {
+  if (appointmentSched.value) {
+    return groupBy(
+      appointmentSched.value.filter((x) => {
+        return (
+          x.firstName.toLowerCase().includes(searchBar.value.toLowerCase()) ||
+          x.lastName.toLowerCase().includes(searchBar.value.toLowerCase()) ||
+          x.referenceID.toLowerCase().includes(searchBar.value.toLowerCase())
+        );
+      }).sort((a, b) => {
+        return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
+      })
+      ,
+      "schedule[0].date"
+    );
+  } else {
+    return false
+  }
+})
+onMounted(async () => {
+  await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID, ongoing: true }).then(response => appointmentSched.value = response.data).catch(err => errMsg.value = err);
+})
+async function confirmVisitation() {
+  confirmLoadingButton.value = true
+  generateRefID()
+
+  let titleMsg = 'Appointment visitation confirmed'
+  let noticeMsg = `Your appointment visitation has been confirmed by your doctor Ms/Mr. ${doctorName.value}, reference ID: ${refIDPatient.value}, a digital prescription will be displayed below if your doctor has uploaded one. We hope you well!`
+  socket.emit('message', file.value ? refID.value : null, titleMsg, noticeMsg, "Medic Search", new Date())
+
+  if (file.value) {
+    const formData = new FormData()
+    formData.append('id', refID.value)
+    formData.append('imgFile', file.value)
+
+    await axios.post("/api/imgUploadVisitation", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    }).catch(err => errMsg.value = err);
+  }
+
+  try {
+    await axios.put(`/api/appointmentList/${id.value}`, {
+      firstName: firstName.value,
+      lastName: lastName.value,
+      contactNum: contactNum.value,
+      birthDay: birthDay.value,
+      ifPatientVisited: true
+    });
+    await axios.put(`/api/doctor/${store.state.doctorID}`, {
+      visits: appointmentSched.value.filter(x => x.ifPatientVisited == true).length + 1
+    });
+    await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID, ongoing: true }).then(response => appointmentSched.value = response.data).catch(err => errMsg.value = err);
+  } catch (err) {
+    errMsg.value = err
+  }
+  confirmLoadingButton.value = false
+  isActiveModalConfirm.value = false
+}
+
+async function cancelAppointment() {
+
+  let titleMsg = 'Your appointment has been cancelled!'
+  let noticeMsg = `Your appointment visitation has been cancelled by your doctor Ms/Mr. ${doctorName.value}, reference ID: ${refIDPatient.value}, this is due to some emergencies or problems in their side. We hope you understand.`
+  socket.emit('message', null, titleMsg, noticeMsg, "Medic Search", new Date())
+
+  await axios.put(`/api/appointmentList/${id.value}`, {
+    ifPatientCancelled: true
+  }).catch(err => errMsg.value = err)
+  await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID, ongoing: true }).then(response => appointmentSched.value = response.data);
+  isActiveModalCancel.value = false
+}
+async function toggleConfirmModal(
+  refID,
+  doctorNameParam,
+  patientIDParam,
+  firstNameParam,
+  lastNameParam,
+  contactNumParam,
+  birthDayParam,
+  _id
+) {
+  isActiveModalConfirm.value = true
+  refIDPatient.value = refID
+  doctorName.value = doctorNameParam
+  firstName.value = firstNameParam;
+  lastName.value = lastNameParam;
+  contactNum.value = contactNumParam;
+  birthDay.value = birthDayParam;
+  id.value = _id;
+  socket.connect()
+  socket.emit('join room', patientIDParam)
+}
+
+function cancelModalConfirm() {
+  isActiveModalConfirm.value = false
+  socket.disconnect()
+}
+
+async function toggleCancelModal(appointment) {
+  isActiveModalCancel.value = true
+  refIDPatient.value = appointment.referenceID
+  doctorName.value = appointment.doctorName
+  id.value = appointment._id
+  socket.connect()
+  socket.emit('join room', appointment.patientID)
+}
+function cancelModalCancel() {
+  isActiveModalCancel.value = false
+  socket.disconnect()
+}
+class generateRefID {
+  constructor() {
+    let result = '';
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let charactersLength = characters.length;
+    for (let i = 0; i < 12; i++) {
+      result += characters.charAt(Math.floor(Math.random() *
+        charactersLength));
+    }
+    refID.value = result;
+  }
+}
+class handleFile {
+  constructor(e) {
+    file.value = e.target.files[0];
+  }
+}
+
+</script>
 <template>
   <div class="main-doctor">
     <div class="columns">
@@ -133,7 +292,7 @@
   </div>
 </template>
 
-<script>
+<!--<script>
 import axios from "axios";
 import store from "../../store";
 import groupBy from 'lodash/groupBy'
@@ -171,13 +330,13 @@ export default {
   },
   computed: {
     appointmentSchedules() {
-      if (this.appointmentSched) {
+      if (appointmentSched.value) {
         return groupBy(
-          this.appointmentSched.filter((x) => {
+          appointmentSched.value.filter((x) => {
             return (
-              x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
-              x.lastName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
-              x.referenceID.toLowerCase().includes(this.searchBar.toLowerCase())
+              x.firstName.toLowerCase().includes(searchBar.value.toLowerCase()) ||
+              x.lastName.toLowerCase().includes(searchBar.value.toLowerCase()) ||
+              x.referenceID.toLowerCase().includes(searchBar.value.toLowerCase())
             );
           }).sort((a, b) => {
             return new Date(a.schedule[0].date).getTime() - new Date(b.schedule[0].date).getTime()
@@ -191,58 +350,58 @@ export default {
     },
   },
   async mounted() {
-    await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID, ongoing: true }).then(response => this.appointmentSched = response.data).catch(err => this.errMsg = err);
+    await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID, ongoing: true }).then(response => appointmentSched.value = response.data).catch(err => errMsg.value = err);
   },
   methods: {
     async confirmVisitation() {
-      this.confirmLoadingButton = true
+      confirmLoadingButton.value = true
       this.generateRefID()
 
       let titleMsg = 'Appointment visitation confirmed'
-      let noticeMsg = `Your appointment visitation has been confirmed by your doctor Ms/Mr. ${this.doctorName}, reference ID: ${this.refIDPatient}, a digital prescription will be displayed below if your doctor has uploaded one. We hope you well!`
-      socket.emit('message', this.file ? this.refID : null, titleMsg, noticeMsg, "Medic Search", new Date())
+      let noticeMsg = `Your appointment visitation has been confirmed by your doctor Ms/Mr. ${doctorName.value}, reference ID: ${refIDPatient.value}, a digital prescription will be displayed below if your doctor has uploaded one. We hope you well!`
+      socket.emit('message', file.value ? refID.value : null, titleMsg, noticeMsg, "Medic Search", new Date())
 
-      if (this.file) {
+      if (file.value) {
         const formData = new FormData()
-        formData.append('id', this.refID)
-        formData.append('imgFile', this.file)
+        formData.append('id', refID.value)
+        formData.append('imgFile', file.value)
 
         await axios.post("/api/imgUploadVisitation", formData, {
           headers: {
             "Content-Type": "multipart/form-data"
           }
-        }).catch(err => this.errMsg = err);
+        }).catch(err => errMsg.value = err);
       }
 
       try {
-        await axios.put(`/api/appointmentList/${this.id}`, {
-          firstName: this.firstName,
-          lastName: this.lastName,
-          contactNum: this.contactNum,
-          birthDay: this.birthDay,
+        await axios.put(`/api/appointmentList/${id.value}`, {
+          firstName: firstName.value,
+          lastName: lastName.value,
+          contactNum: contactNum.value,
+          birthDay: birthDay.value,
           ifPatientVisited: true
         });
         await axios.put(`/api/doctor/${store.state.doctorID}`, {
-          visits: this.appointmentSched.filter(x => x.ifPatientVisited == true).length + 1
+          visits: appointmentSched.value.filter(x => x.ifPatientVisited == true).length + 1
         });
-        await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID, ongoing: true }).then(response => this.appointmentSched = response.data).catch(err => this.errMsg = err);
+        await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID, ongoing: true }).then(response => appointmentSched.value = response.data).catch(err => errMsg.value = err);
       } catch (err) {
-        this.errMsg = err
+        errMsg.value = err
       }
-      this.confirmLoadingButton = false
-      this.isActiveModalConfirm = false
+      confirmLoadingButton.value = false
+      isActiveModalConfirm.value = false
     },
     async cancelAppointment() {
 
       let titleMsg = 'Your appointment has been cancelled!'
-      let noticeMsg = `Your appointment visitation has been cancelled by your doctor Ms/Mr. ${this.doctorName}, reference ID: ${this.refIDPatient}, this is due to some emergencies or problems in their side. We hope you understand.`
+      let noticeMsg = `Your appointment visitation has been cancelled by your doctor Ms/Mr. ${doctorName.value}, reference ID: ${refIDPatient.value}, this is due to some emergencies or problems in their side. We hope you understand.`
       socket.emit('message', null, titleMsg, noticeMsg, "Medic Search", new Date())
 
-      await axios.put(`/api/appointmentList/${this.id}`, {
+      await axios.put(`/api/appointmentList/${id.value}`, {
         ifPatientCancelled: true
-      }).catch(err => this.errMsg = err)
-      await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID, ongoing: true }).then(response => this.appointmentSched = response.data);
-      this.isActiveModalCancel = false
+      }).catch(err => errMsg.value = err)
+      await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID, ongoing: true }).then(response => appointmentSched.value = response.data);
+      isActiveModalCancel.value = false
     },
     async toggleConfirmModal(
       refID,
@@ -254,31 +413,31 @@ export default {
       birthDay,
       _id
     ) {
-      this.isActiveModalConfirm = true
-      this.refIDPatient = refID
-      this.doctorName = doctorName
-      this.firstName = firstName;
-      this.lastName = lastName;
-      this.contactNum = contactNum;
-      this.birthDay = birthDay;
-      this.id = _id;
+      isActiveModalConfirm.value = true
+      refIDPatient.value = refID
+      doctorName.value = doctorName
+      firstName.value = firstName;
+      lastName.value = lastName;
+      contactNum.value = contactNum;
+      birthDay.value = birthDay;
+      id.value = _id;
       socket.connect()
       socket.emit('join room', patientID)
     },
     cancelModalConfirm() {
-      this.isActiveModalConfirm = false
+      isActiveModalConfirm.value = false
       socket.disconnect()
     },
     async toggleCancelModal(appointment) {
-      this.isActiveModalCancel = true
-      this.refIDPatient = appointment.referenceID
-      this.doctorName = appointment.doctorName
-      this.id = appointment._id
+      isActiveModalCancel.value = true
+      refIDPatient.value = appointment.referenceID
+      doctorName.value = appointment.doctorName
+      id.value = appointment._id
       socket.connect()
       socket.emit('join room', appointment.patientID)
     },
     cancelModalCancel() {
-      this.isActiveModalCancel = false
+      isActiveModalCancel.value = false
       socket.disconnect()
     },
     generateRefID() {
@@ -289,15 +448,15 @@ export default {
         result += characters.charAt(Math.floor(Math.random() *
           charactersLength));
       }
-      this.refID = result
+      refID.value = result
     },
     handleFile(e) {
-      this.file = e.target.files[0]
+      file.value = e.target.files[0]
     }
   },
 };
 </script>
-
+-->
 <style scoped>
 .customField {
   padding: 1%;
