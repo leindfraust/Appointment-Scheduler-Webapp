@@ -1,3 +1,154 @@
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import axios from 'axios'
+import groupBy from 'lodash/groupBy'
+import CatchError from '../../components/CatchError.vue'
+import DoctorMenu from "../../components/DoctorMenu.vue"
+import socket from '../../socket'
+import { useStore } from 'vuex'
+
+const store = useStore()
+onMounted(async () => {
+  await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID, ongoing: false }).then(response => appointmentSched.value = response.data);
+  await axios.get('/session/doctor').then(response => doctorName.value = response.data.fullname)
+  await axios.get('/session/doctor').then(response => messageHistory.value = response.data.messageHistory.reverse())
+})
+
+const errMsg = ref('')
+const clearMsgPrompt = ref(false)
+const loadingButton = ref(false)
+const searchBar = ref("")
+const appointmentSched = ref([])
+const file = ref(null)
+const isActiveModal = ref(false)
+const selectedPatient = ref('')
+const messageSuccessSelectedPatient = ref('')
+const refID = ref('')
+const doctorName = ref('')
+const titleMsg = ref('')
+const noticeMsg = ref('Dear')
+const notificationSent = ref(false)
+const messageHistory = ref([])
+
+const appointmentSchedules = computed(() => {
+  if (appointmentSched.value) {
+    return groupBy(
+      appointmentSched.value.filter((x) => {
+        return (
+          x.firstName.toLowerCase().includes(searchBar.value.toLowerCase()) ||
+          x.lastName.toLowerCase().includes(searchBar.value.toLowerCase()) ||
+          x.referenceID.toLowerCase().includes(searchBar.value.toLowerCase())
+        );
+      })
+        .sort((a, b) => {
+          return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
+        })
+      ,
+      "schedule[0].date"
+    );
+  } else {
+    return false
+  }
+})
+function sendNotifActive(id, firstName, lastName) {
+  isActiveModal.value = true
+  selectedPatient.value = firstName + " " + lastName
+  noticeMsg.value = `Dear Ms/Mr. ${selectedPatient.value},`
+  socket.connect()
+  socket.emit('join room', id)
+}
+function sendNotifInactive() {
+  isActiveModal.value = false
+  selectedPatient.value = ''
+  socket.disconnect()
+}
+function generateRefID() {
+  let result = '';
+  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let charactersLength = characters.length;
+  for (let i = 0; i < 12; i++) {
+    result += characters.charAt(Math.floor(Math.random() *
+      charactersLength));
+  }
+  refID.value = result
+}
+async function sendNotif() {
+  loadingButton.value = true
+  if (file.value) {
+    generateRefID()
+    const formData = new FormData()
+    formData.append('id', refID.value)
+    formData.append('doctorID', store.state.doctorID)
+    formData.append('imgFile', file.value)
+
+    await axios.post("/api/imgUploadImgMsg", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
+  } else {
+    refID.value = null
+  }
+  let resMsg
+  messageSuccessSelectedPatient.value = selectedPatient.value
+  socket.emit('message', refID.value, titleMsg.value, noticeMsg.value, doctorName.value, new Date())
+  await axios.post('/api/pushMsg', {
+    id: store.state.doctorID,
+    message: {
+      id: refID.value,
+      to: selectedPatient.value,
+      subject: titleMsg.value,
+      message: noticeMsg.value,
+      date: new Date(),
+    }
+  }).then(response => resMsg = response.data).catch(err => errMsg.value = err)
+  await axios.put('/session/doctor', {
+    messageHistory: resMsg
+  });
+  messageHistory.value = resMsg.reverse()
+  noticeMsg.value = ''
+  notificationSent.value = true
+  loadingButton.value = false
+}
+async function deleteNotif(msg) {
+  let resMsg
+  try {
+    await axios.post('/api/imgUploadImgMsgDeleteDoctor', {
+      doctorID: 'assets/patientimgmsg/doctorCopy/' + store.state.doctorID,
+      id: msg.id
+    });
+    await axios.post('/api/pullMsg', {
+      id: store.state.doctorID,
+      message: msg
+    }).then(response => resMsg = response.data).catch(err => { errMsg.value = err })
+    await axios.put('/session/doctor', {
+      messageHistory: resMsg
+    });
+  } catch (err) {
+    errMsg.value = err
+  }
+  messageHistory.value = resMsg.reverse()
+}
+async function clearNotif() {
+  try {
+    await axios.post('/api/imgUploadImgMsgClearDoctor', {
+      doctorID: store.state.doctorID
+    });
+    await axios.post('/api/clearMsg', {
+      id: store.state.doctorID
+    }).then(response => messageHistory.value = response.data).catch(err => errMsg.value = err)
+    await axios.put('/session/doctor', {
+      messageHistory: messageHistory.value
+    });
+  } catch (err) {
+    errMsg.value = err
+  }
+  clearMsgPrompt.value = false
+}
+function handleFile(e) {
+  file.value = e.target.files[0]
+}
+</script>
 <template>
   <div class="main-doctor">
     <div class="columns">
@@ -151,168 +302,6 @@
     </div>
   </div>
 </template>
-<script>
-import axios from 'axios'
-import groupBy from 'lodash/groupBy'
-import CatchError from '../../components/CatchError.vue'
-import DoctorMenu from "../../components/DoctorMenu.vue"
-import socket from '../../socket'
-
-export default {
-  name: "PatientLogs",
-  components: {
-    DoctorMenu,
-    CatchError
-  },
-  async mounted() {
-    await axios.post('/api/appointmentList/doctors', { id: this.$store.state.doctorID, ongoing: false }).then(response => this.appointmentSched = response.data);
-    await axios.get('/session/doctor').then(response => this.doctorName = response.data.fullname)
-    await axios.get('/session/doctor').then(response => this.messageHistory = response.data.messageHistory.reverse())
-  },
-  data() {
-    return {
-      errMsg: '',
-      clearMsgPrompt: false,
-      loadingButton: false,
-      searchBar: "",
-      appointmentSched: [],
-      alias: this.$store.state.alias,
-      file: null,
-      isActiveModal: false,
-      selectedPatient: '',
-      messageSuccessSelectedPatient: '',
-      refID: '',
-      doctorName: '',
-      titleMsg: '',
-      noticeMsg: 'Dear',
-      notificationSent: false,
-      messageHistory: []
-    }
-  },
-  computed: {
-    appointmentSchedules() {
-      if (this.appointmentSched) {
-        return groupBy(
-          this.appointmentSched.filter((x) => {
-            return (
-              x.firstName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
-              x.lastName.toLowerCase().includes(this.searchBar.toLowerCase()) ||
-              x.referenceID.toLowerCase().includes(this.searchBar.toLowerCase())
-            );
-          })
-            .sort((a, b) => {
-              return new Date(b.schedule[0].date).getTime() - new Date(a.schedule[0].date).getTime()
-            })
-          ,
-          "schedule[0].date"
-        );
-      } else {
-        return false
-      }
-    },
-  },
-  methods: {
-    sendNotifActive(id, firstName, lastName) {
-      this.isActiveModal = true
-      this.selectedPatient = firstName + " " + lastName
-      this.noticeMsg = `Dear Ms/Mr. ${this.selectedPatient},`
-      socket.connect()
-      socket.emit('join room', id)
-    },
-    sendNotifInactive() {
-      this.isActiveModal = false
-      this.selectedPatient = ''
-      socket.disconnect()
-    },
-    generateRefID() {
-      let result = '';
-      let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let charactersLength = characters.length;
-      for (let i = 0; i < 12; i++) {
-        result += characters.charAt(Math.floor(Math.random() *
-          charactersLength));
-      }
-      this.refID = result
-    },
-    async sendNotif() {
-      this.loadingButton = true
-      if (this.file) {
-        this.generateRefID()
-        const formData = new FormData()
-        formData.append('id', this.refID)
-        formData.append('doctorID', this.$store.state.doctorID)
-        formData.append('imgFile', this.file)
-
-        await axios.post("/api/imgUploadImgMsg", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data"
-          }
-        });
-      } else {
-        this.refID = null
-      }
-      let resMsg
-      this.messageSuccessSelectedPatient = this.selectedPatient
-      socket.emit('message', this.refID, this.titleMsg, this.noticeMsg, this.doctorName, new Date())
-      await axios.post('/api/pushMsg', {
-        id: this.$store.state.doctorID,
-        message: {
-          id: this.refID,
-          to: this.selectedPatient,
-          subject: this.titleMsg,
-          message: this.noticeMsg,
-          date: new Date(),
-        }
-      }).then(response => resMsg = response.data).catch(err => this.errMsg = err)
-      await axios.put('/session/doctor', {
-        messageHistory: resMsg
-      });
-      this.messageHistory = resMsg.reverse()
-      this.noticeMsg = ''
-      this.notificationSent = true
-      this.loadingButton = false
-    },
-    async deleteNotif(msg) {
-      let resMsg
-      try {
-        await axios.post('/api/imgUploadImgMsgDeleteDoctor', {
-          doctorID: 'assets/patientimgmsg/doctorCopy/' + this.$store.state.doctorID,
-          id: msg.id
-        });
-        await axios.post('/api/pullMsg', {
-          id: this.$store.state.doctorID,
-          message: msg
-        }).then(response => resMsg = response.data).catch(err => { this.errMsg = err })
-        await axios.put('/session/doctor', {
-          messageHistory: resMsg
-        });
-      } catch (err) {
-        this.errMsg = err
-      }
-      this.messageHistory = resMsg.reverse()
-    },
-    async clearNotif() {
-      try {
-        await axios.post('/api/imgUploadImgMsgClearDoctor', {
-          doctorID: this.$store.state.doctorID
-        });
-        await axios.post('/api/clearMsg', {
-          id: this.$store.state.doctorID
-        }).then(response => this.messageHistory = response.data).catch(err => this.errMsg = err)
-        await axios.put('/session/doctor', {
-          messageHistory: this.messageHistory
-        });
-      } catch (err) {
-        this.errMsg = err
-      }
-      this.clearMsgPrompt = false
-    },
-    handleFile(e) {
-      this.file = e.target.files[0]
-    }
-  }
-}
-</script>
 <style scoped>
 
 </style>
