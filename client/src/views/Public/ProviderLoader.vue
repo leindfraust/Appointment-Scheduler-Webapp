@@ -1,7 +1,7 @@
 <template>
     <div id="background">
-        <NavigationTab :provider-finder-mode="true" :provider-provinces="geolocation" :province-selected="province"
-            @load-provider="unloadPropData($event, arg)" />
+        <NavigationTab :provider-finder-mode="true" :provider-provinces="geolocation" :query="province"
+            :provider-list="geoHospitalNearestUser" @unload-prop-data="unloadPropData($event, arg)" />
         <div class="modal" :class="{ 'is-active': isHospitalLoading }">
             <div class="modal-background"></div>
             <div class="modal-content" style="overflow: hidden">
@@ -55,7 +55,7 @@
                             <option
                                 v-for="(cityorMunicipality, index) in citiesOrMunicipalities.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
                                 :key="index">{{
-                                        cityorMunicipality.name.replace('City', '').replace('Municipality', '')
+                                    cityorMunicipality.name.replace('City', '').replace('Municipality', '')
                                 }}</option>
                         </select>
                     </div>
@@ -74,10 +74,10 @@
                 <div class="column is-narrow">
                     <div class="select is-rounded">
                         <select v-model="filterSpecialist" @change="filterSpecialistDateTime">
-                            <option value="" disabled>Specialist</option>
-                            <option value="">Any</option>
+                            <option :value="undefined || ''" disabled>Specialist</option>
+                            <option :value="undefined || ''">Any</option>
                             <option v-for="specialist in specializations" :key="specialist" :value="specialist">{{
-                                    specialist
+                                specialist
                             }}</option>
                         </select>
                     </div>
@@ -111,7 +111,7 @@
                                     <option
                                         v-for="(cityorMunicipality, index) in citiesOrMunicipalities.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })"
                                         :key="index">{{
-                                                cityorMunicipality.name.replace('City', '').replace('Municipality', '')
+                                            cityorMunicipality.name.replace('City', '').replace('Municipality', '')
                                         }}</option>
                                 </select>
                             </div>
@@ -131,11 +131,11 @@
                         <div class="block">
                             <div class="select">
                                 <select v-model="filterSpecialist" @change="filterSpecialistDateTime">
-                                    <option value="" disabled>Specialist</option>
-                                    <option value="">Any</option>
+                                    <option :value="undefined || ''" disabled>Specialist</option>
+                                    <option :value="undefined || ''">Any</option>
                                     <option v-for="specialist in specializations" :key="specialist" :value="specialist">
                                         {{
-                                                specialist
+                                            specialist
                                         }}</option>
                                 </select>
                             </div>
@@ -160,14 +160,17 @@
                                 </a>
                             </div>
                             <div class="column">
-                                <div class="notification is-info is-light" v-if="geoHospital?.arrFilter > 0">Available
+                                <div class="notification is-info is-light"
+                                    v-if="(filterDate instanceof Date && !isNaN(filterDate) || filterSpecialist)">
+                                    Available
                                     for appointments</div>
                                 <a @click="bookAppointment(geoHospital)">
                                     <h1 class="title is-4">{{ geoHospital.hospital }}</h1>
-                                    <p class="subtitle is-6">{{ geoHospital.barangayORStreet }}, {{ geoHospital.city
+                                    <p class="subtitle is-6">{{ geoHospital.barangayORStreet }}, {{
+                                        geoHospital.city
                                     }},
                                         {{
-                                                geoHospital.province
+                                            geoHospital.province
                                         }}</p>
                                 </a>
                                 <br>
@@ -208,12 +211,9 @@ export default {
             return this.geolocation.filter(x => { return x.province.toLowerCase().includes(this.province.toLowerCase()); });
         },
         geoHospitalNearestUserIndexed() {
-            if (this.geoHospitalNearestUser && this.filterSpecialist || new Date(this.filterDate) instanceof Date && !isNaN(new Date(this.filterDate)) && this.filterTime != null) {
+            if (this.geoHospitalNearestUser) {
                 return this.geoHospitalNearestUser.slice().sort((a, b) => this.distanceFilter ? a.distance - b.distance : ((b.engagements / 10 + b.ratings * 2) * 1000 - b.distance) / 1000 - ((a.engagements / 10 + a.ratings * 2) * 1000 - a.distance) / 1000).filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => x?.arrFilter > 0).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city)).slice().sort((a, b) => b.arrFilter - a.arrFilter);
-            } else if (this.geoHospitalNearestUser) {
-                return this.geoHospitalNearestUser.slice().sort((a, b) => this.distanceFilter ? a.distance - b.distance : ((b.engagements / 10 + b.ratings * 2) * 1000 - b.distance) / 1000 - ((a.engagements / 10 + a.ratings * 2) * 1000 - a.distance) / 1000).filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city)).slice().sort((a, b) => b.arrFilter - a.arrFilter)
-            }
-            else {
+            } else {
                 return false;
             }
         }
@@ -231,7 +231,8 @@ export default {
             geolocation: [],
             typeFilter: '',
             citiesOrMunicipalities: [],
-            province: this.$route.query.name,
+            hospitalQuery: this.$route.query.hospital,
+            province: this.$route.query.province,
             userLatitude: this.$route.query.userLat,
             userLongitude: this.$route.query.userLong,
             geoHospitalNearestUser: "",
@@ -246,8 +247,13 @@ export default {
         };
     },
     methods: {
-        async unloadPropData(province) {
-            this.province = province
+        async unloadPropData(props) {
+            this.hospitalQuery = ''
+            if (this.geolocation.filter(prop => prop.province == props).length !== 0) {
+                this.province = props
+            } else {
+                this.hospitalQuery = props
+            }
             await this.loadProvider()
         },
         async bookAppointment(hospitalDetails) {
@@ -266,17 +272,19 @@ export default {
         async loadProvider() {
             this.isHospitalLoading = true;
             if (await this.geolocation.find(x => x.province === this.province)) {
-                this.$router.push({ path: '/provider', query: { name: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude, date: new Date(this.filterDate).toLocaleDateString(), time: this.filterTime } })
+                await this.$router.push({ path: '/provider', query: { hospital: this.hospitalQuery, province: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude, date: new Date(this.filterDate).toLocaleDateString(), time: this.filterTime } })
                 this.citiesOrMunicipalities = this.geolocation.find(x => x.province === this.province);
+                if (!this.hospitalQuery) {
+                    this.hospitalQuery = ''
+                }
                 await axios.post("/api/geoFindHospitalNearestUser", {
                     province: this.province,
+                    hospitalQuery: this.hospitalQuery,
                     latitude: parseFloat(this.userLatitude),
                     longitude: parseFloat(this.userLongitude)
                 }).then(response => this.geoHospitalNearestUser = response.data);
                 document.getElementById('background').style.background = 'none'
-                if (this.filterSpecialist || new Date(this.filterDate) instanceof Date && !isNaN(new Date(this.filterDate)) && this.filterTime != null) {
-                    await this.filterSpecialistDateTime()
-                }
+                await this.filterSpecialistDateTime()
             }
             this.isHospitalLoading = false;
         },
@@ -285,10 +293,13 @@ export default {
             if (this.filterTime == undefined) {
                 this.filterTime = ''
             }
-            await this.$router.push({ path: '/provider', query: { name: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude, date: this.filterDate != null ? new Date(this.filterDate).toLocaleDateString() : '', time: this.filterTime } })
+            await this.$router.push({ path: '/provider', query: { hospital: this.hospitalQuery, province: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude, date: new Date(this.filterDate).toLocaleDateString(), time: this.filterTime } })
             const hospitals = this.geoHospitalNearestUser
             for await (const hospital of hospitals) {
                 this.isHospitalLoading = true;
+                if (!this.hospitalQuery) {
+                    this.hospitalQuery = ''
+                }
                 await axios.post("/api/doctor/filteration", {
                     hospital: hospital.hospital,
                     filterSpecialist: this.filterSpecialist,

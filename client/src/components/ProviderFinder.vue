@@ -35,12 +35,39 @@
                             <div class="dropdown-trigger">
                                 <div class="field has-addons is-medium is-hidden-mobile">
                                     <div class="control has-icons-left">
-                                        <input class="input is-medium is is-rounded" type="text" v-model="province"
+                                        <input class="input is-medium is-rounded" type="text" v-model="province"
                                             style="width: 300px;" placeholder="What province are you located?"
                                             @input="isActiveDropdown = true" />
                                         <span class="icon is-left is-medium has-text-info">
                                             <i class="is-size-4 fa-solid fa-location-dot"></i>
                                         </span>
+                                    </div>
+                                    <div class="control is-hidden-mobile">
+                                        <v-date-picker v-model="filterDate" :min-date="new Date()">
+                                            <template v-slot="{ inputValue, inputEvents }">
+                                                <input class="input is-medium is-rounded"
+                                                    :value="!inputValue ? 'Any date' : inputValue" v-on="inputEvents"
+                                                    style="width: 150px;" />
+                                            </template>
+                                        </v-date-picker>
+                                    </div>
+                                    <div class="control is-hidden-mobile">
+                                        <div class="select is-medium">
+                                            <select v-model="filterTime">
+                                                <option value="">Any time</option>
+                                                <option value="AM">AM</option>
+                                                <option value="PM">PM</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="control is-hidden-mobile">
+                                        <div class="select is-medium">
+                                            <select v-model="filterSpecialist">
+                                                <option value="">Any specialist</option>
+                                                <option v-for="specialization in specializations" :key="specialization"
+                                                    :value="specialization">{{ specialization }}</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <div class="control is-hidden-mobile">
                                         <button class="button is-medium is-info is-rounded" @click="searchProvider('')"
@@ -62,7 +89,8 @@
                                 <div class="dropdown-content has-text-left"
                                     v-if="Object.keys(geolocationIndexed).length !== 0">
                                     <a class="dropdown-item" v-for="geodata in geolocationIndexed" :key="geodata._id"
-                                        @click="selectRegion(geodata.province, geodata.location)">{{ geodata.province
+                                        @click="selectRegion(geodata.province, geodata.location)">{{
+                                            geodata.province
                                         }}</a>
                                 </div>
 
@@ -72,6 +100,33 @@
                                     </p>
                                 </div>
                             </div>
+                        </div>
+                        <br /><br />
+                        <div class="columns is-mobile is-gapless is-centered is-hidden-desktop is-hidden-tablet">
+                            <div class="column is-narrow">
+                                <v-date-picker v-model="filterDate" :min-date="new Date()">
+                                    <template v-slot="{ inputValue, inputEvents }">
+                                        <input class="input" :value="!inputValue ? 'Any date' : inputValue"
+                                            v-on="inputEvents" style="width: 150px;" />
+                                    </template>
+                                </v-date-picker>
+                            </div>
+                            <div class="column is-narrow">
+                                <div class="select">
+                                    <select v-model="filterTime">
+                                        <option value="">Any time</option>
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="select is-hidden-desktop is-hidden-tablet">
+                            <select v-model="filterSpecialist">
+                                <option value="">Any specialist</option>
+                                <option v-for="specialization in specializations" :key="specialization"
+                                    :value="specialization">{{ specialization }}</option>
+                            </select>
                         </div>
                         <div class="block"></div>
                         <button class="button is-info is-rounded is-hidden-desktop is-hidden-tablet"
@@ -137,7 +192,11 @@ export default {
             userLatitude: "",
             userLongitude: "",
             isActiveDropdown: false,
-            errMsg: ''
+            errMsg: '',
+            specializations: this.$store.getters.getSpecializationList,
+            filterSpecialist: '',
+            filterDate: undefined,
+            filterTime: ''
         };
     },
     methods: {
@@ -149,9 +208,9 @@ export default {
             }
             this.isActiveDropdown = false;
         },
-        searchProvider() {
+        async searchProvider() {
             if (this.province) {
-                router.push({ path: '/provider', query: { name: this.province, symptom: '', userLat: this.userLatitude, userLong: this.userLongitude } })
+                await router.push({ path: '/provider', query: { hospital: '', province: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude, date: new Date(this.filterDate).toLocaleDateString(), time: this.filterTime } })
             }
         },
         getUserLocation() {
