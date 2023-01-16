@@ -47,8 +47,8 @@
                                                 <strong
                                                     v-if="new Date(schedule.date).getTime() == new Date(new Date().toDateString()).getTime() && schedule.hospital == managerHospital.hospital"
                                                     class="has-text-info">TODAY: </strong> {{ `${new
-                                                            Date(schedule.date).toDateString()}, ${schedule.timeStart} -
-                                                                                                    ${schedule.timeEnd}`
+        Date(schedule.date).toDateString()}, ${schedule.timeStart} -
+                                                    ${schedule.timeEnd}`
                                                     }}
                                             </p>
                                         </span>
