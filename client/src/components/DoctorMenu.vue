@@ -70,7 +70,7 @@ export default {
         async logout() {
             store.commit("alias", null);
             await axios.delete("/session/doctor");
-            await this.$router.push("/doctor/login");
+            await this.$router.push("/account/login");
         },
         async routeHome() {
             await this.$router.push(`/doctor/${this.alias}/appointments`);

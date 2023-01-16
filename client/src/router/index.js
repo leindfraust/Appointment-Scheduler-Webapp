@@ -8,7 +8,6 @@ const AboutMedicSearch = () => import('../views/Public/AboutMedicSearch.vue')
 const TermsAndConditions = () => import('../views/Public/TermsAndConditions.vue')
 const DoctorList = () => import('../views/Public/DoctorList.vue')
 const RegForm = () => import('../views/Public/RegForm.vue')
-const DoctorLogin = () => import('../views/PortalDoctor/DoctorLogin.vue')
 const DoctorSignup = () => import('../views/PortalDoctor/DoctorSignup.vue')
 const Doctor = () => import('../views/PortalDoctor/Doctor.vue')
 const DoctorScheduler = () => import('../views/PortalDoctor/DoctorScheduler.vue')
@@ -24,14 +23,13 @@ const ImageUploadSuccessDoctor = () => import('../views/PortalSuccessConfirmatio
 const ImageUploadSuccessManager = () => import('../views/PortalSuccessConfirmations/imageUploadSuccessManager.vue')
 const PaymentStatus = () => import('../views/Public/PaymentStatus.vue')
 const UserSignUp = () => import('../views/Public/UserSignUp.vue')
-const UserLogin = () => import('../views/Public/UserLogin.vue')
+const DynamicLogin = () => import('../views/Public/DynamicLogin.vue')
 const User = () => import('../views/Public/UserView.vue')
 const UserProfile = () => import('../views/Public/UserProfile.vue')
 const UserSecurity = () => import('../views/Public/UserSecurity.vue')
 const SuperUser = () => import('../views/PortalSuperUsers/SuperUser.vue')
 const SuperUserLogin = () => import('../views/PortalSuperUsers/SuperUserLogin.vue')
 const Manager = () => import('../views/PortalSuperUsers/Manager.vue')
-const ManagerLogin = () => import('../views/PortalSuperUsers/ManagerLogin.vue')
 const ManagerSignup = () => import('../views/PortalSuperUsers/ManagerSignup.vue')
 const ManagerProfile = () => import('../views/PortalSuperUsers/ManagerProfile.vue')
 const ManagerSecurity = () => import('../views/PortalSuperUsers/ManagerSecurity.vue')
@@ -54,6 +52,10 @@ const routes = [{
     path: '/provider',
     component: () => import('../views/Public/ProviderLoader.vue')
 },
+{
+    path: '/account/login',
+    component: DynamicLogin
+},
 //Manager/Hospital account routes
 {
     path: '/manager/:user',
@@ -65,10 +67,6 @@ const routes = [{
 {
     path: '/manager/signup',
     component: ManagerSignup
-},
-{
-    path: '/manager/login',
-    component: ManagerLogin,
 },
 {
     path: '/manager/:user/profile',
@@ -97,10 +95,6 @@ const routes = [{
     component: SuperUserLogin,
 },
 //doctor account routes
-{
-    path: '/doctor/login',
-    component: DoctorLogin,
-},
 {
     path: '/doctor/signup',
     component: DoctorSignup,
@@ -196,10 +190,6 @@ const routes = [{
     component: UserSignUp
 },
 {
-    path: '/user/login',
-    component: UserLogin
-},
-{
     path: '/:hospital/doctors',
     component: DoctorList,
 },
@@ -262,7 +252,7 @@ router.beforeEach((to, from, next) => {
         if (store.state.imgSuccess === true) {
             return next();
         } else {
-            return next('/doctor/login');
+            return next('/account/login');
         }
     }
     next();
@@ -273,7 +263,7 @@ router.beforeEach((to, from, next) => {
         if (store.state.imgSuccessManager) {
             return next();
         } else {
-            return next('/manager/login');
+            return next('/account/login');
         }
     }
     next();
@@ -306,7 +296,7 @@ router.beforeEach(async (to, from, next) => {
         if (store.state.alias) {
             return next();
         } else {
-            return next('/doctor/login');
+            return next('/account/login');
         }
     }
     next();
@@ -331,7 +321,7 @@ router.beforeEach(async (to, from, next) => {
         if (store.state.patientUsername) {
             return next();
         } else {
-            return next('/user/login');
+            return next('/account/login');
         }
     }
     next();
@@ -362,7 +352,7 @@ router.beforeEach(async (to, from, next) => {
         if (store.state.managerHospital) {
             return next();
         } else {
-            return next('/manager/login');
+            return next('/account/login');
         }
     }
     next();

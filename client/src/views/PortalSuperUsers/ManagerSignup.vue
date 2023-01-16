@@ -44,7 +44,7 @@
                             <div class="dropdown-menu">
                                 <div class="dropdown-content" v-for="provinces in geolocationData" :key="provinces._id">
                                     <a class="dropdown-item" @click="selectProvince(provinces.province)">{{
-                                    provinces.province
+                                        provinces.province
                                     }}</a>
                                 </div>
                             </div>
@@ -399,7 +399,7 @@ export default {
                         password: this.password
                     });
                     await this.$store.commit('accountCreated', true)
-                    await this.$router.push('/manager/login')
+                    await this.$router.push('/account/login')
                 } catch (err) {
                     this.errMsg = err
                 }

@@ -16,7 +16,7 @@ export default {
     name: "imageUploadSuccessDoctor",
     created() {
         setTimeout(() => {
-            window.location.href = "/doctor/login"
+            window.location.href = "/account/login"
             this.$store.commit('imgSuccess', false)
         }, 15000)
     }

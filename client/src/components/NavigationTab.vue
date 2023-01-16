@@ -3,8 +3,11 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import socket from '../socket'
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router';
 
 const store = useStore()
+const router = useRouter()
+
 const props = defineProps({
     providerFinderMode: {
         type: Boolean,
@@ -58,7 +61,7 @@ async function logout() {
     store.commit("patientID", null);
     store.commit("patientUsername", '');
     await axios.delete("/session/patient");
-    await this.$router.push("");
+    await router.push("/account/login");
     socket.disconnect();
 }
 function notification() {

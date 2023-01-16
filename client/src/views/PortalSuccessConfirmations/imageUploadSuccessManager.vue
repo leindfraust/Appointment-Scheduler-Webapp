@@ -6,7 +6,7 @@
     <h1 class="subtitle has-text-centered">Redirecting browser in 15 seconds.</h1>
     <h1 class="subtitle has-text-centered">
       If the browser does not reload automatically, please click
-      <a href="/user/manager/login">here</a>
+      <a href="/account/login">here</a>
     </h1>
   </div>
 </template>
@@ -16,7 +16,7 @@ export default {
   name: 'imgUploadSuccessManager',
   created() {
     setTimeout(() => {
-      window.location.href = "/manager/login"
+      window.location.href = "/account/login"
       this.$store.commit('imgSuccessManager', false)
     }, 15000)
   }

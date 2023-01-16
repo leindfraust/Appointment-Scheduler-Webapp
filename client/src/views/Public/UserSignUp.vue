@@ -2,7 +2,7 @@
   <section class="hero is-fullheight">
     <div class="hero-body">
       <div class="container">
-        <router-link :to="'/user/login'"><i class="fa-solid fa-arrow-left"></i> Back to Login</router-link>
+        <router-link :to="'/account/login'"><i class="fa-solid fa-arrow-left"></i> Back to Login</router-link>
         <div class="container" style="width: 50%; margin: auto">
           <div class="notification is-danger" v-if="errMsg">
             Oops, something went wrong. Try again later or
@@ -308,7 +308,7 @@ export default {
             currentAddress: this.currentAddress
           });
           await this.$store.commit('accountCreated', true)
-          await this.$router.push("/user/login");
+          await this.$router.push("/account/login");
         } catch (err) {
           this.errMsg = err
         }

@@ -54,7 +54,7 @@ export default {
         async logout() {
             await axios.delete('/session/manager');
             await this.$store.commit("managerHospital", null);
-            await this.$router.push("/manager/login");
+            await this.$router.push("/account/login");
         },
         menuNav() {
             this.isActive = !this.isActive

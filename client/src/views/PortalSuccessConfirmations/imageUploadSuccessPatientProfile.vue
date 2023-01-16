@@ -7,7 +7,7 @@
         <h1 class="subtitle has-text-centered">Redirecting browser in 15 seconds.</h1>
         <h1 class="subtitle has-text-centered">
             If the browser does not reload automatically, please click
-            <a href="/user/manager/login">here</a>
+            <a href="/account/login">here</a>
         </h1>
     </div>
 </template>
@@ -19,7 +19,7 @@ const store = useStore()
 
 onMounted(() => {
     setTimeout(() => {
-        window.location.href = "/user/login"
+        window.location.href = "/account/login"
         store.commit('imgSuccess', false)
     }, 15000)
 });

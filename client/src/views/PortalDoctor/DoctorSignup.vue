@@ -1,6 +1,6 @@
 <template>
   <section class="section">
-    <router-link :to="'/doctor/login'"><i class="fa-solid fa-arrow-left"></i> Back to Login</router-link>
+    <router-link :to="'/account/login'"><i class="fa-solid fa-arrow-left"></i> Back to Login</router-link>
     <div class="container box animate__animated animate__fadeInLeft" style="margin: auto; width: 50%">
       <!-- I know it sucks, having a form action for only image upload while separating a post with axios for the document, but shit works so I guess it's okay.-->
       <div class="notification is-danger" v-if="errMsg">
