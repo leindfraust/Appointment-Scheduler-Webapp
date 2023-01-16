@@ -100,7 +100,7 @@
                     </div>
                   </div>
                   <div class="notification" v-if="$store.state.patientID == null">
-                    <router-link :to="'/user/login'" class="has-text-weight-bold">Login</router-link> or <router-link
+                    <router-link :to="'/account/login'" class="has-text-weight-bold">Login</router-link> or <router-link
                       :to="'/user/signup'" class="has-text-weight-bold">create an
                       account</router-link> to make an appointment.
                   </div>
@@ -160,7 +160,7 @@ export default {
       this.getDoctors(undefined)
     }
     if (await this.patientFilters.filterSpecialist) {
-      await this.getDoctors('Allergists')
+      await this.getDoctors(this.patientFilters.filterSpecialist)
     }
   },
   unmounted() {
