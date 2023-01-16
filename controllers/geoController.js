@@ -5,6 +5,7 @@ const getHospitalNearestUser = ((req, res) => {
     let province = req.body.province
     let latitude = req.body.latitude
     let longitude = req.body.longitude
+    let hospitalQuery = req.body.hospitalQuery
 
     Hospital.aggregate([{
         $geoNear: {
@@ -21,7 +22,7 @@ const getHospitalNearestUser = ((req, res) => {
             console.log(error)
             res.end()
         } else {
-            result = result.filter(x => x.status === 'Active' && x.province === province)
+            result = result.filter(x => x.status === 'Active' && x.province === province && x.hospital.toLowerCase().includes(hospitalQuery.toLowerCase()))
             let response_client = [...result]
             response_client.forEach(x => delete x.username && delete x.password && delete x.__v && delete x.email && delete x.pricing);
             res.status(200).send(response_client)
