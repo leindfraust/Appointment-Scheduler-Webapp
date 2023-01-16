@@ -10,11 +10,11 @@
   "dependencies": {
     "@popperjs/core": "^2.11.6",
     "animate.css": "^4.1.1",
-    "axios": "^1.2.1",
+    "axios": "^1.2.2",
     "bulma": "^0.9.4",
-    "chart.js": "^4.0.1",
+    "chart.js": "^4.1.1",
     "cloudinary-core": "^2.13.0",
-    "core-js": "^3.26.1",
+    "core-js": "^3.27.1",
     "glob-parent": "^6.0.2",
     "html2pdf.js": "^0.10.1",
     "paymongo.js": "^1.1.2",
@@ -28,18 +28,18 @@
     "vuex-persistedstate": "^4.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.5",
+    "@babel/core": "^7.20.7",
     "@babel/eslint-parser": "^7.19.1",
     "@vue/cli-plugin-babel": "~5.0.8",
     "@vue/cli-plugin-eslint": "~5.0.8",
     "@vue/cli-service": "^5.0.8",
     "@vue/compiler-sfc": "^3.2.45",
-    "cypress": "^12.0.1",
-    "eslint": "^8.29.0",
+    "cypress": "^12.3.0",
+    "eslint": "^8.31.0",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-vue": "^9.8.0",
     "node-sass": "^8.0.0",
-    "postcss": "^8.4.19",
+    "postcss": "^8.4.20",
     "sass-loader": "^13.2.0"
   }
 }
