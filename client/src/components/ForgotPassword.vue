@@ -2,24 +2,25 @@
 import { ref, computed } from 'vue'
 import axios from 'axios';
 
-let isLoading = ref(false)
-let errMsg = ref('')
-let modal = ref(false)
-let emailExists = ref(false)
-let code = ref('')
-let codeSent = ref(false)
-let codeVerified = ref(false)
-let codeIncorrect = ref(false)
-let newPassword = ref('')
-let confirmPassword = ref('')
-let passwordNotMatch = ref(false)
-let passwordChanged = ref(false)
-let noUserFound = ref(false)
-let userData = ref('')
-let usernameHandler = ref(props.username)
-let emailHandler = ref(props.email)
+const isLoading = ref(false)
+const errMsg = ref('')
+const modal = ref(false)
+const emailExists = ref(false)
+const code = ref('')
+const codeSent = ref(false)
+const codeVerified = ref(false)
+const codeIncorrect = ref(false)
+const newPassword = ref('')
+const confirmPassword = ref('')
+const passwordNotMatch = ref(false)
+const passwordChanged = ref(false)
+const noUserFound = ref(false)
+const checkOTP = ref(false)
+const userData = ref('')
+const usernameHandler = ref(props.username)
+const emailHandler = ref(props.email)
+const userType = ref('')
 const props = defineProps({
-    userType: String,
     username: String,
     email: String,
     forgotPasswordPromptCount: {
@@ -29,6 +30,70 @@ const props = defineProps({
 });
 const forgotPasswordPromptCountLimit = ref(2)
 const forgotPasswordPromptCount = computed(() => props.forgotPasswordPromptCount)
+
+async function getPatient() {
+    await axios.post('/api/user/verify_username', {
+        username: usernameHandler.value,
+        email: emailHandler.value
+    }).then(response => userData.value = response.data)
+    if (userData.value) {
+        noUserFound.value = false
+        try {
+            await axios.post('/api/OTPMail', {
+                email: emailHandler.value
+            }).then(codeSent.value = true)
+            codeSent.value = true
+            userType.value = 'patient'
+            checkOTP.value = false
+        } catch (err) {
+            errMsg.value = err
+        }
+    } else {
+        noUserFound.value = true
+    }
+}
+async function getDoctor() {
+    await axios.post('/api/doctor/verify_username', {
+        username: usernameHandler.value,
+        email: emailHandler.value
+    }).then(response => userData.value = response.data)
+    if (userData.value) {
+        noUserFound.value = false
+        try {
+            await axios.post('/api/OTPMail', {
+                email: emailHandler.value
+            }).then(codeSent.value = true)
+            codeSent.value = true
+            userType.value = 'doctor'
+            checkOTP.value = false
+        } catch (err) {
+            errMsg.value = err
+        }
+    } else {
+        noUserFound.value = true
+    }
+}
+async function getProvider() {
+    await axios.post('/api/manager/verify_username', {
+        username: usernameHandler.value,
+        email: emailHandler.value
+    }).then(response => userData.value = response.data)
+    if (userData.value) {
+        noUserFound.value = false
+        try {
+            await axios.post('/api/OTPMail', {
+                email: emailHandler.value
+            }).then(codeSent.value = true)
+            codeSent.value = true
+            userType.value = 'provider'
+            checkOTP.value = false
+        } catch (err) {
+            errMsg.value = err
+        }
+    } else {
+        noUserFound.value = true
+    }
+}
 async function forgotPasswordOTP() {
     if (usernameHandler.value != null || emailHandler.value != null) {
         isLoading.value = true
@@ -40,60 +105,12 @@ async function forgotPasswordOTP() {
             emailExists.value = true
         } else {
             emailExists.value = false
-            if (props.userType == 'patient') {
-                await axios.post('/api/user/verify_username', {
-                    username: usernameHandler.value,
-                    email: emailHandler.value
-                }).then(response => userData.value = response.data)
-                if (userData.value) {
-                    noUserFound.value = false
-                    try {
-                        await axios.post('/api/OTPMail', {
-                            email: emailHandler.value
-                        }).then(codeSent.value = true)
-                        codeSent.value = true
-                    } catch (err) {
-                        errMsg.value = err
-                    }
-                } else {
-                    noUserFound.value = true
-                }
-            } else if (props.userType == 'doctor') {
-                await axios.post('/api/doctor/verify_username', {
-                    username: usernameHandler.value,
-                    email: emailHandler.value
-                }).then(response => userData.value = response.data)
-                if (userData.value) {
-                    noUserFound.value = false
-                    try {
-                        await axios.post('/api/OTPMail', {
-                            email: emailHandler.value
-                        }).then(codeSent.value = true)
-                        codeSent.value = true
-                    } catch (err) {
-                        errMsg.value = err
-                    }
-                } else {
-                    noUserFound.value = true
-                }
-            } else if (props.userType == 'manager') {
-                await axios.post('/api/manager/verify_username', {
-                    username: usernameHandler.value,
-                    email: emailHandler.value
-                }).then(response => userData.value = response.data)
-                if (userData.value) {
-                    noUserFound.value = false
-                    try {
-                        await axios.post('/api/OTPMail', {
-                            email: emailHandler.value
-                        }).then(codeSent.value = true)
-                        codeSent.value = true
-                    } catch (err) {
-                        errMsg.value = err
-                    }
-                } else {
-                    noUserFound.value = true
-                }
+            checkOTP.value = true
+            while (checkOTP.value) {
+                await getPatient()
+                await getDoctor()
+                await getProvider()
+                checkOTP.value = false
             }
         }
         isLoading.value = false
@@ -114,7 +131,7 @@ async function verifyCode() {
 }
 async function pushNewPassword() {
     if (newPassword.value === confirmPassword.value) {
-        if (props.userType == 'patient') {
+        if (userType.value == 'patient') {
             try {
                 await axios.put('/api/fupdatePassword/patient', {
                     patientID: userData.value._id,
@@ -127,7 +144,7 @@ async function pushNewPassword() {
                 errMsg.value = err
                 userData.value = ''
             }
-        } else if (props.userType == 'doctor') {
+        } else if (userType.value == 'doctor') {
             try {
                 await axios.put('/api/fupdatePassword/doctor', {
                     doctorID: userData.value._id,
@@ -140,7 +157,7 @@ async function pushNewPassword() {
                 errMsg.value = err
                 userData.value = ''
             }
-        } else if (props.userType == 'manager') {
+        } else if (userType.value == 'provider') {
             try {
                 await axios.put('/api/fupdatePassword/manager', {
                     managerID: userData.value._id,
