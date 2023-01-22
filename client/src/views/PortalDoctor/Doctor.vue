@@ -138,22 +138,18 @@ function cancelModalCancel() {
   isActiveModalCancel.value = false
   socket.disconnect()
 }
-class generateRefID {
-  constructor() {
-    let result = '';
-    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let charactersLength = characters.length;
-    for (let i = 0; i < 12; i++) {
-      result += characters.charAt(Math.floor(Math.random() *
-        charactersLength));
-    }
-    refID.value = result;
+function generateRefID() {
+  let result = '';
+  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let charactersLength = characters.length;
+  for (let i = 0; i < 12; i++) {
+    result += characters.charAt(Math.floor(Math.random() *
+      charactersLength));
   }
+  refID.value = result;
 }
-class handleFile {
-  constructor(e) {
-    file.value = e.target.files[0];
-  }
+function handleFile(e) {
+  file.value = e.target.files[0];
 }
 
 </script>
