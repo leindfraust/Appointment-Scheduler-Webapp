@@ -80,19 +80,15 @@
                     </div>
                     <br />
                     <div class="field">
-                      <label class="checkbox">
-                        <input type="checkbox" :checked="paymentFirst" @click="paymentFirst = !paymentFirst">
-                        Enable <b>Payment-first</b> for this schedule
-                      </label>
                       <div class="block"></div>
-                      <div class="field" v-if="paymentFirst">
+                      <div class="field">
                         <label class="label">Payment Amount: </label>
                         <div class="control">
                           <input type="number" class="input" placeholder="amount" v-model="paymentAmount"
                             style="width: 33%;" />
                         </div>
                       </div>
-                      <p class="help" v-if="paymentFirst">Make sure you have successfully <b>activated your account</b>
+                      <p class="help">Make sure you have successfully <b>activated your account</b>
                         and had
                         already setup your <b>Payment methods</b> under
                         <b>Verification and Information</b>. Failing to setup your payment methods might delay your
@@ -103,7 +99,7 @@
                     <div class="block">
                       <button class="button" :class="{ 'is-primary': !updateSchedule, 'is-info': updateSchedule }"
                         type="button" @click="uploadSched"
-                        :disabled="selectedAppointmentCategories.length == 0 || paymentFirst ? !paymentAmount : undefined">{{
+                        :disabled="selectedAppointmentCategories.length == 0 || !paymentAmount">{{
                             updateSchedule ? 'Update Schedule'
                               :
                               'Add Schedule'
@@ -150,9 +146,8 @@
                           <p class="has-text-black">Hospital: {{ schedules.hospital }}</p>
                           <p class="has-text-black">{{ schedules.timeStart }} - {{ schedules.timeEnd }}</p>
                           <p class="has-text-black">Appointment limit: {{ schedules.appointmentLimit }}</p>
-                          <p class="has-text-black" v-if="schedules.paymentFirst">Payment Amount:
+                          <p class="has-text-black">Payment Amount:
                             {{ schedules.paymentAmount }}</p>
-                          <p class="help" v-if="schedules.paymentFirst"><b>Payment-first Appointment</b></p>
                         </div>
                       </div>
                     </div>
@@ -206,7 +201,6 @@ export default {
       appointmentCategory: '',
       appointmentCategories: [],
       selectedAppointmentCategories: [],
-      paymentFirst: false,
       paymentAmount: 500
     };
   },
@@ -262,7 +256,6 @@ export default {
               prefix: this.prefix,
               hospital: this.selectedHospital,
               appointmentCategories: this.selectedAppointmentCategories,
-              paymentFirst: this.paymentFirst,
               paymentAmount: this.paymentAmount
             }
           }).then(async response => {
@@ -285,7 +278,6 @@ export default {
           prefix: this.prefix,
           hospital: this.selectedHospital,
           appointmentCategories: this.selectedAppointmentCategories,
-          paymentFirst: this.paymentFirst,
           paymentAmount: this.paymentAmount
         });
         try {
@@ -362,7 +354,6 @@ export default {
         this.appointmentLimits = schedule.appointmentLimit
         this.selectedHospital = schedule.hospital
         this.selectedAppointmentCategories = [...schedule.appointmentCategories]
-        this.paymentFirst = schedule.paymentFirst
         this.paymentAmount = schedule.paymentAmount
       }
     },

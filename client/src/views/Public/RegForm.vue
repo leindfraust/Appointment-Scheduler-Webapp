@@ -93,7 +93,7 @@
               <div class="field">
                 <label class="label">Birthdate</label>
                 <div class="control">
-                  <v-date-picker class="block" v-model="birthDay">
+                  <v-date-picker class="block" v-model="birthDay" :max-date="new Date()">
                     <template v-slot="{ inputValue, togglePopover }">
                       <div class="is-block">
                         <a style="margin: auto" @click="togglePopover()">
@@ -127,8 +127,9 @@
             <div class="controls">
               <label class="radio">
                 <input type="radio" class="radioSched" name="schedule"
-                  @click="pickSched(index, schedules, schedules.prefix, schedules.appointmentCategories, schedules.paymentFirst, schedules.paymentAmount)" />
-                <span class="subtitle is-6 has-text-weight-semibold">&nbsp;{{ new Date(schedules.date).toDateString()
+                  @click="pickSched(index, schedules, schedules.prefix, schedules.appointmentCategories, schedules.paymentAmount)" />
+                <span class="subtitle is-6 has-text-weight-semibold">&nbsp;{{
+                  new Date(schedules.date).toDateString()
                 }}</span>
                 <br />
                 <span class="has-text-black">{{ schedules.timeStart }} - {{ schedules.timeEnd }}</span>
@@ -205,7 +206,6 @@ export default {
       client: PaymongoClient(process.env.VUE_APP_PayMongoSK),
       checkoutUrl: '',
       paymentFirstToggle: false,
-      paymentFirst: false,
       paymentAmount: '',
       paymentFailed: false,
       paymentStatus: store.state.paymentStatus,
@@ -233,7 +233,7 @@ export default {
     this.currentAddress = await this.patient.currentAddress
 
     for await (const [index, schedules] of this.doctorSched.entries()) {
-      await this.pickSched(index, schedules, schedules.prefix, schedules.appointmentCategories, schedules.paymentFirst, schedules.paymentAmount)
+      await this.pickSched(index, schedules, schedules.prefix, schedules.appointmentCategories, schedules.paymentAmount)
     }
     this.initialScheduleCheck = false
 
@@ -317,14 +317,8 @@ export default {
             priorityNum: this.prefix ? this.prefix + "-" + this.priorityNum : this.priorityNum,
             appointmentCategory: this.appointmentCategory
           }).then(async response => {
-            if (!this.paymentFirst) {
-              store.commit("patientDetails", response.data);
-              store.commit("appointed", true)
-              await this.$router.push("/success");
-            } else {
-              store.commit("patientDetails", response.data);
-              await this.createSource();
-            }
+            store.commit("patientDetails", response.data);
+            await this.createSource();
           })
         } catch (err) { this.errMsg = err }
         //if not, it fails and disables the radio
@@ -337,7 +331,7 @@ export default {
       }
       this.isLoading = false
     },
-    async pickSched(e, sched, prefix, category, paymentFirst, paymentAmount) {
+    async pickSched(e, sched, prefix, category, paymentAmount) {
       this.appointmentCategory = category[0]
       if (!this.initialScheduleCheck) {
         this.appointmentCategories = category
@@ -362,9 +356,6 @@ export default {
           this.schedAvailability = true
           this.prefix = prefix
           statusSched[e].style.display = 'block'
-        }
-        if (paymentFirst && !this.initialScheduleCheck) {
-          this.paymentFirst = true
           this.paymentFirstToggle = true
           this.paymentAmount = paymentAmount
         }
@@ -375,7 +366,6 @@ export default {
         this.schedule = null
         radio[e].checked = false
         statusSched[e].style.display = 'block'
-        this.paymentFirst = false
         this.paymentAmount = ''
         if (this.initialScheduleCheck) {
           this.doctorSched = this.doctorSched.filter(schedule => schedule != sched)
