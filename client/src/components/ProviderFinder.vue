@@ -25,7 +25,7 @@
             <div class="hero-body">
                 <div class="container">
                     <CatchError :err-msg="errMsg" />
-                    <h1 class="title is-2 is-size-3-mobile has-text-weight-bold">Find and make appointments with<span
+                    <h1 class="title is-2 is-size-3-mobile has-text-weight-bold">Find and make appointments with <span
                             class="has-text-info">clinics and hospitals</span>
                         near you.
                     </h1>
