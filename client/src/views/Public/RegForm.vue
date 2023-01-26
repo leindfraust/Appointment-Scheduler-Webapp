@@ -38,7 +38,8 @@
       <div class="modal-background"></div>
       <div class="modal-content box">
         <section class="section">
-          <div class="notification is-info">You have an existing appointment with the same schedule, do you want to
+          <div class="notification is-info">You have an existing appointment with the same schedule but different
+            details, do you still want to
             continue with your appointment?</div>
           <div class="buttons is-centered">
             <button class="button" @click="reloadPage">No</button>
@@ -47,37 +48,27 @@
         </section>
       </div>
     </div>
-    <div class="modal" :class="{ 'is-active': confirmDetails }">
-      <div class="modal-background"></div>
-      <div class="modal-content box">
-        <section class="section">
-          <div class="notification is-info">Before we continue, please confirm the patient's details to ensure they are
-            correct as they cannot be changed later on. Do you want to continue?</div>
-          <div class="buttons is-centered">
-            <button class="button" @click="confirmDetails = false">No</button>
-            <button class="button is-info"
-              @click="confirmDetails ? checkAppointmentDuplication() : confirmDetails = false">Yes</button>
-          </div>
-        </section>
-      </div>
-    </div>
-    <!-- New -->
     <div class="columns registration-form" style="width: 75%; margin: auto">
       <div class="column">
         <form>
           <div class="block">Please enter the patient's information.</div>
+          <div class="notification is-info" v-if="confirmDetails">Before we continue, please confirm the patient's
+            details to ensure they are
+            correct as they cannot be changed later on.</div>
           <div class="field is-horizontal">
             <div class="field-body">
               <div class="field">
                 <label class="label">First name</label>
                 <div class="control">
-                  <input class="input" type="text" v-model="firstName" placeholder="First Name" required />
+                  <input class="input" :class="{ 'is-info': confirmDetails }" type="text" v-model="firstName"
+                    placeholder="First Name" required />
                 </div>
               </div>
               <div class="field">
                 <label class="label">Last Name</label>
                 <div class="control">
-                  <input class="input" type="text" v-model="lastName" placeholder="Last Name" required />
+                  <input class="input" :class="{ 'is-info': confirmDetails }" type="text" v-model="lastName"
+                    placeholder="Last Name" required />
                 </div>
               </div>
             </div>
@@ -87,7 +78,8 @@
               <div class="field">
                 <label class="label">Contact Number:</label>
                 <div class="control">
-                  <input class="input" type="number" v-model="contactNum" placeholder="Contact Number" required />
+                  <input class="input" :class="{ 'is-info': confirmDetails }" type="number" v-model="contactNum"
+                    placeholder="Contact Number" required />
                 </div>
               </div>
               <div class="field">
@@ -97,7 +89,8 @@
                     <template v-slot="{ inputValue, togglePopover }">
                       <div class="is-block">
                         <a style="margin: auto" @click="togglePopover()">
-                          <input style="cursor: pointer;" :value="inputValue" class="input" readonly />
+                          <input style="cursor: pointer;" :value="inputValue" class="input"
+                            :class="{ 'is-info': confirmDetails }" readonly />
                         </a>
                       </div>
                     </template>
@@ -109,13 +102,13 @@
           <div class="field">
             <div class="control">
               <label class="label">Current Address</label>
-              <input class="input" type="text" :value="currentAddress" />
+              <input class="input" :class="{ 'is-info': confirmDetails }" type="text" :value="currentAddress" />
             </div>
           </div>
           <div class="field">
             <label class="label">Reason for your visit:</label>
-            <textarea class="textarea" style="white-space: pre-wrap;" v-model="comments"
-              placeholder="Your symptoms, general well being etc..." required></textarea>
+            <textarea class="textarea" :class="{ 'is-info': confirmDetails }" style="white-space: pre-wrap;"
+              v-model="comments" placeholder="Your symptoms, general well being etc..." required></textarea>
           </div>
         </form>
       </div>
@@ -155,12 +148,11 @@
         <div class="block has-text-centered">
           <button type="button" class="button is-info"
             :disabled="comments == null || schedule == null || firstName == '' || lastName == '' || birthDay == null || contactNum == '' || comments == '' || currentAddress == ''"
-            @click="confirmDetails = true">Submit
+            @click="confirmDetails ? checkAppointmentDuplication() : confirmDetails = true">Submit
             appointment</button>
         </div>
       </div>
     </div>
-    <!-- New -->
   </section>
 </template>
 
