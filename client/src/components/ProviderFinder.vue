@@ -60,7 +60,8 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="control is-hidden-mobile">
+
+                                    <!--<div class="control is-hidden-mobile">
                                         <div class="select is-medium">
                                             <select v-model="filterSpecialist">
                                                 <option value="">Any specialist</option>
@@ -68,7 +69,50 @@
                                                     :value="specialization">{{ specialization }}</option>
                                             </select>
                                         </div>
+                                    </div> -->
+
+                                    <div class="control is-hidden-mobile">
+                                        <div class="dropdown" :class="{ 'is-active': recSpecialistDropdown }"
+                                            style="width: 300px">
+                                            <div class="dropdown-trigger">
+                                                <div class="field">
+                                                    <div class="control"
+                                                        :class="{ 'has-icons-right': getRecLoadingSpecialist }">
+                                                        <input class="input is-medium" type="text"
+                                                            v-model="filterSpecialist"
+                                                            placeholder="Search a specialist or type a symptom..."
+                                                            @input="getRecSpecialistTimeout" style="width: 300px" />
+                                                        <span class="icon is-small is-right">
+                                                            <i class="fas fa-spinner fa-spin"
+                                                                v-if="getRecLoadingSpecialist"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="dropdown-menu">
+                                                    <div class="dropdown-content has-text-left"
+                                                        style="max-height: 15rem; overflow: auto;"
+                                                        v-if="Object.keys(specializationsSorted).length !== 0">
+                                                        <a class="dropdown-item"
+                                                            v-for="specialization in specializationsSorted"
+                                                            :key="specialization"
+                                                            @click="recSpecialistDropdown = false, filterSpecialist = specialization">{{
+                                                                specialization
+                                                            }}</a>
+                                                    </div>
+                                                    <div class="dropdown-content has-text-left"
+                                                        style="max-height: 15rem; overflow: auto;" v-else>
+                                                        <a class="dropdown-item has-text-info">
+                                                            <p>Recommending you a specialist...</p>
+                                                            <p class="help has-text-weight-bold has-text-black">powered
+                                                                by
+                                                                ChatGPT</p>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
+
                                     <div class="control is-hidden-mobile">
                                         <button class="button is-medium is-info is-rounded" @click="searchProvider('')"
                                             :disabled="province == ''">Search</button>
@@ -121,12 +165,40 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="select is-hidden-desktop is-hidden-tablet">
-                            <select v-model="filterSpecialist">
-                                <option value="">Any specialist</option>
-                                <option v-for="specialization in specializations" :key="specialization"
-                                    :value="specialization">{{ specialization }}</option>
-                            </select>
+                        <div class="dropdown is-hidden-desktop is-hidden-tablet"
+                            :class="{ 'is-active': recSpecialistDropdown }" style="width: 300px">
+                            <div class="dropdown-trigger">
+                                <div class="field">
+                                    <div class="control" :class="{ 'has-icons-right': getRecLoadingSpecialist }">
+                                        <input class="input is-medium" type="text" v-model="filterSpecialist"
+                                            placeholder="Search a specialist or type a symptom..."
+                                            @input="getRecSpecialistTimeout" style="width: 300px" />
+                                        <span class="icon is-small is-right">
+                                            <i class="fas fa-spinner fa-spin" v-if="getRecLoadingSpecialist"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="dropdown-menu">
+                                    <div class="dropdown-content has-text-left"
+                                        style="max-height: 15rem; overflow: auto;"
+                                        v-if="Object.keys(specializationsSorted).length !== 0">
+                                        <a class="dropdown-item" v-for="specialization in specializationsSorted"
+                                            :key="specialization"
+                                            @click="recSpecialistDropdown = false, filterSpecialist = specialization">{{
+                                                specialization
+                                            }}</a>
+                                    </div>
+                                    <div class="dropdown-content has-text-left"
+                                        style="max-height: 15rem; overflow: auto;" v-else>
+                                        <a class="dropdown-item has-text-info">
+                                            <p>Recommending you a specialist...</p>
+                                            <p class="help has-text-weight-bold has-text-black">powered
+                                                by
+                                                ChatGPT</p>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="block"></div>
                         <button class="button is-info is-rounded is-hidden-desktop is-hidden-tablet"
@@ -158,7 +230,11 @@ export default {
             else {
                 return false;
             }
+        },
+        specializationsSorted() {
+            return this.specializations.filter(x => x.toLowerCase().includes(this.filterSpecialist.toLowerCase()))
         }
+
     },
     async created() {
         await axios.get("/api/geolocation").then(response => this.geolocation = response.data);
@@ -196,10 +272,37 @@ export default {
             specializations: this.$store.getters.getSpecializationList,
             filterSpecialist: '',
             filterDate: undefined,
-            filterTime: ''
+            filterTime: '',
+            getRecLoadingSpecialist: false,
+            getRecSpecialistDelay: null,
+            recSpecialistDropdown: false
         };
     },
     methods: {
+        async getRecSpecialist() {
+            this.getRecLoadingSpecialist = true
+            await axios.post('/api/query-recommended-specialist', {
+                symptom: this.filterSpecialist
+            }).then(response => {
+                this.filterSpecialist = response.data
+            });
+            this.getRecLoadingSpecialist = false
+        },
+        async getRecSpecialistTimeout() {
+            this.recSpecialistDropdown = true
+            if (Object.keys(this.specializationsSorted).length == 0 || this.specializationsSorted.length == 0) {
+                if (this.getRecSpecialistDelay) {
+                    clearTimeout(this.getRecSpecialistDelay)
+                    this.getRecSpecialistDelay = null
+                }
+                this.getRecSpecialistDelay = setTimeout(this.getRecSpecialist, 5000)
+            } else {
+                if (this.getRecSpecialistDelay) {
+                    clearTimeout(this.getRecSpecialistDelay)
+                    this.getRecSpecialistDelay = null
+                }
+            }
+        },
         selectRegion(province, location) {
             this.province = province;
             if (this.locationPermissionDenied) {

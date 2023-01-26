@@ -31,11 +31,7 @@ const store = createStore({
         managerHospital: '',
         hospitalDetails: [],
         hospitalName: '',
-        specializationList: ["Allergists", "Anesthesiologists", "Cardiologists", "Colon and Rectal Surgeons", "Critical Care Medicine Specialists", " Dermatologists", "Endocrinologists", "Emergency Medicine Specialists", "Family Physicians",
-            "Gastroenterologists", "Geriatric Medicine Specialists", "General Practitioner", "Hematologists", "Hospice and Palliative Medicine Specialists", "Infectious Disease Specialists",
-            "Internists", "Medical Geneticists", "Nephrologists", "Neurologists", "Obstetricians and Gynecologists", "Oncologists", "Ophthalmologists",
-            "Osteopaths", "Otolaryngologists", "Pathologists", "Pediatricians", "Physiatrists", "Plastic Surgeons", "Podiatrists", "Preventive Medicine Specialists", "Psychiatrists", "Pulmonologists", "Radiologists", "Rheumatologists", "Sleep Medicine Specialists", "Sports Medicine Specialists", "General Surgeons",
-            "Urologists"]
+        specializationList: ["Addiction Medicine Specialists", "Allergists", "Anesthesiologists", "Cardiologists", "Dermatologists", "Emergency Medicine Physicians", "Endocrinologists", "General Surgeons", "Geriatricians", "Gastroenterologists", "Gynecologists", "Hematologists", "Hospice and Palliative Medicine Specialists", "Infectious Disease Specialists", "Infectious Disease Specialists", "Medical Genetics Specialists", "Medical Oncologists", "Neurologists", "Nephrologists", "Obstetricians", "Oncologists", "Ophthalmologists", "Orthopedic Surgeons", "Otolaryngologists", "Pain Medicine Specialists", "Pediatricians", "Pathologists", "Physical Medicine and Rehabilitation Specialists", "Plastic Surgeons", "Preventive Medicine Specialists", "Psychiatrists", "Pulmonologists", "Radiation Oncologists", "Radiologists", "Rheumatologists", "Sleep Medicine Specialists", "Sports Medicine Specialists", "Thoracic Surgeons", "Urologists", "Vascular Surgeons"]
     },
     getters: {
         getStatusAvail: state => state.statusAvailability,
