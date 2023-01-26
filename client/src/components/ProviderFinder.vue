@@ -25,8 +25,8 @@
             <div class="hero-body">
                 <div class="container">
                     <CatchError :err-msg="errMsg" />
-                    <h1 class="title is-2 is-size-3-mobile has-text-weight-bold">Find and make an appointment on <span
-                            class="has-text-info">hospitals and clinics</span>
+                    <h1 class="title is-2 is-size-3-mobile has-text-weight-bold">Find and make appointments with<span
+                            class="has-text-info">clinics and hospitals</span>
                         near you.
                     </h1>
                     <br class="is-hidden-mobile" />
@@ -60,17 +60,6 @@
                                             </select>
                                         </div>
                                     </div>
-
-                                    <!--<div class="control is-hidden-mobile">
-                                        <div class="select is-medium">
-                                            <select v-model="filterSpecialist">
-                                                <option value="">Any specialist</option>
-                                                <option v-for="specialization in specializations" :key="specialization"
-                                                    :value="specialization">{{ specialization }}</option>
-                                            </select>
-                                        </div>
-                                    </div> -->
-
                                     <div class="control is-hidden-mobile">
                                         <div class="dropdown" :class="{ 'is-active': recSpecialistDropdown }"
                                             style="width: 300px">
@@ -112,7 +101,6 @@
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="control is-hidden-mobile">
                                         <button class="button is-medium is-info is-rounded" @click="searchProvider('')"
                                             :disabled="province == ''">Search</button>
@@ -305,7 +293,7 @@ export default {
         },
         selectRegion(province, location) {
             this.province = province;
-            if (this.locationPermissionDenied) {
+            if (this.locationPermissionDenied || !this.userLatitude && !this.userLongitude) {
                 this.userLatitude = location.coordinates[1]
                 this.userLongitude = location.coordinates[0]
             }
@@ -389,40 +377,5 @@ export default {
     height: 100vh;
     background: no-repeat center url('../assets/images/background-client.png');
     background-size: cover;
-}
-
-#mental-health:hover {
-    border: 2px rgb(152, 203, 247) solid;
-    border-radius: 7px;
-}
-
-#UTI:hover {
-    border: 2px rgb(152, 203, 247) solid;
-    border-radius: 7px;
-}
-
-#stomach-pain:hover {
-    border: 2px rgb(152, 203, 247) solid;
-    border-radius: 7px;
-}
-
-#eye-health:hover {
-    border: 2px rgb(152, 203, 247) solid;
-    border-radius: 7px;
-}
-
-#dental-health:hover {
-    border: 2px rgb(152, 203, 247) solid;
-    border-radius: 7px;
-}
-
-#fever:hover {
-    border: 2px rgb(152, 203, 247) solid;
-    border-radius: 7px;
-}
-
-#sore-throat:hover {
-    border: 2px rgb(152, 203, 247) solid;
-    border-radius: 7px;
 }
 </style>
