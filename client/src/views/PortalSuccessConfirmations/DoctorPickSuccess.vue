@@ -1,37 +1,35 @@
 <template>
   <NavigationTab />
-  <section class="section is-large has-text-centered" id="background">
+  <section class="section has-text-centered" id="background">
     <div class="container is-fluid">
-      <div class="columns is-centered">
-        <div class="column is-half">
-          <h1 class="title has-text-centered">
-            You have been successfuly scheduled an appointment with
-            <p><b>{{ patient.doctorName }} {{ patient.specialization }}</b></p> on
-            <p><b>{{ new Date(patient.schedule[0].date).toDateString() }}</b></p>
-            <p><b>{{ patient.schedule[0].timeStart }}</b> -
-              <b>{{ patient.schedule[0].timeEnd }}</b>
-            </p>
-            at <b>{{ patient.hospital }}</b> for <b>{{ patient.appointmentCategory
-            }}</b>.
-          </h1>
-          <h1 class="subtitle has-text-centered">Your <b>priority number</b> is
-            <b>{{ patient.priorityNum }}</b>
-          </h1>
-          <br />
-          <p class="subtitle is-6 has-text-centered has-text-weight-bold">Reference ID: {{ patient.referenceID }}</p>
-          <div class="has-text-centered">
-            <button class="button is-rounded is-link" @click="exportPDF">Download a copy</button>
-          </div>
-        </div>
-        <div class="column">
-          <h1 class="title">Patient Details </h1><br>
-          <h1 class="subtitle"><b>First Name:</b> {{ patient.firstName }}</h1>
-          <h1 class="subtitle"><b>Last Name:</b> {{ patient.lastName }}</h1>
-          <h1 class="subtitle"><b>Contact Number:</b> {{ patient.contactNum }}</h1>
-          <h1 class="subtitle"><b>Birthday:</b> {{ patient.birthDay }}</h1>
-          <h1 class="subtitle"><b>Symptoms/Comments:</b> {{ patient.comments }}</h1>
-        </div>
+      <h1 class="title has-text-centered">
+        You have been successfuly scheduled an appointment with
+        <p><b>{{ patient.doctorName }} {{ patient.specialization }}</b></p> on
+        <p><b>{{ new Date(patient.schedule[0].date).toDateString() }}</b></p>
+        <p><b>{{ patient.schedule[0].timeStart }}</b> -
+          <b>{{ patient.schedule[0].timeEnd }}</b>
+        </p>
+        at <b>{{ patient.hospital }}</b> for <b>{{
+          patient.appointmentCategory
+        }}</b>.
+      </h1>
+      <br />
+      <h1 class="subtitle has-text-centered">Your <b>priority number</b> is
+        <b>{{ patient.priorityNum }}</b>
+      </h1>
+      <p class="subtitle is-6 has-text-centered has-text-weight-bold">Reference ID: {{ patient.referenceID }}</p>
+      <div class="has-text-centered">
+        <button class="button is-rounded is-link" @click="exportPDF">Download a copy</button>
       </div>
+    </div>
+    <br/>
+    <div class="column">
+      <h1 class="title">Patient Details </h1><br>
+      <h1 class="subtitle"><b>First Name:</b> {{ patient.firstName }}</h1>
+      <h1 class="subtitle"><b>Last Name:</b> {{ patient.lastName }}</h1>
+      <h1 class="subtitle"><b>Contact Number:</b> {{ patient.contactNum }}</h1>
+      <h1 class="subtitle"><b>Birthday:</b> {{ patient.birthDay }}</h1>
+      <h1 class="subtitle"><b>Symptoms/Comments:</b> {{ patient.comments }}</h1>
     </div>
 
     <div :class="{ 'is-hidden': pdfHide }">
@@ -56,7 +54,8 @@
           <p><b>{{ patient.schedule[0].timeStart }}</b> -
             <b>{{ patient.schedule[0].timeEnd }}</b>
           </p>
-          in <b>{{ patient.hospital }}</b> for <b>{{ patient.appointmentCategory
+          in <b>{{ patient.hospital }}</b> for <b>{{
+            patient.appointmentCategory
           }}</b>.
         </h1>
         <h1 class="subtitle has-text-centered">Your <b>priority number</b> is
