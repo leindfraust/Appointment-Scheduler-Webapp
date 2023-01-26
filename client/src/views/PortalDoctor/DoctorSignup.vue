@@ -256,10 +256,27 @@ export default {
     },
     async usernameFinder() {
       this.loadingUsername = true
+      this.usernameFound = false
+      await axios.post('/api/user/check_username', {
+        username: this.username
+      }).then(response => {
+        if (response.data) {
+          this.usernameFound = response.data
+        }
+      })
       await axios.post('/api/doctor/check_username', {
         username: this.username
       }).then(response => {
-        this.usernameFound = response.data
+        if (response.data) {
+          this.usernameFound = response.data
+        }
+      })
+      await axios.post('/api/manager/check_username', {
+        username: this.username
+      }).then(response => {
+        if (response.data) {
+          this.usernameFound = response.data
+        }
       })
       if (this.username == '') {
         this.usernameFound = ''

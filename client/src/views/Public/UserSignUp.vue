@@ -30,7 +30,7 @@
                 <div class="field">
                   <p class="control">
                     <label class="label">Age:</label>
-                    <input class="input" type="number" placeholder="age" v-model="age" required />
+                    <input class="input" type="number" placeholder="age" v-model="age" required style="width: 150px"/>
                   </p>
                 </div>
 
@@ -90,7 +90,8 @@
                       </div>
                       <div class="dropdown-menu">
                         <div class="dropdown-content" v-for="provinces in geolocationData" :key="provinces._id">
-                          <a class="dropdown-item" @click="selectProvince(provinces.province)">{{ provinces.province
+                          <a class="dropdown-item" @click="selectProvince(provinces.province)">{{
+                            provinces.province
                           }}</a>
                         </div>
                       </div>
@@ -221,9 +222,28 @@ export default {
     },
     async usernameFinder() {
       this.loadingUsername = true
+      this.usernameFound = false
       await axios.post('/api/user/check_username', {
         username: this.username
-      }).then(response => { this.usernameFound = response.data })
+      }).then(response => {
+        if (response.data) {
+          this.usernameFound = response.data
+        }
+      })
+      await axios.post('/api/doctor/check_username', {
+        username: this.username
+      }).then(response => {
+        if (response.data) {
+          this.usernameFound = response.data
+        }
+      })
+      await axios.post('/api/manager/check_username', {
+        username: this.username
+      }).then(response => {
+        if (response.data) {
+          this.usernameFound = response.data
+        }
+      })
       if (this.username == '') {
         this.usernameFound = ''
       }
