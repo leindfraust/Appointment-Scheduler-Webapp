@@ -14,7 +14,7 @@
   "author": "Leindfraust",
   "dependencies": {
     "bcrypt": "^5.1.0",
-    "chatgpt": "^3.5.1",
+    "chatgpt": "^4.1.1",
     "cloudinary": "^1.33.0",
     "connect-history-api-fallback": "^2.0.0",
     "connect-mongo": "^4.6.0",
@@ -26,14 +26,14 @@
     "helmet": "^6.0.1",
     "mongoose": "^6.9.0",
     "morgan": "^1.10.0",
-    "nodemailer": "^6.9.0",
-    "puppeteer": "^19.6.0",
+    "nodemailer": "^6.9.1",
+    "puppeteer": "^19.6.3",
     "socket.io": "^4.5.4"
   },
   "devDependencies": {
     "concurrently": "^7.6.0",
-    "cypress": "^12.4.0",
-    "eslint": "^8.32.0",
+    "cypress": "^12.5.1",
+    "eslint": "^8.33.0",
     "eslint-plugin-cypress": "^2.12.1",
     "nodemon": "^2.0.20"
   }

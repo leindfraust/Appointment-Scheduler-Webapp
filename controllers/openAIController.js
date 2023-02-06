@@ -1,26 +1,15 @@
 const getRecSpecialist = (async (req, res) => {
-    const { ChatGPTAPIBrowser } = await import('chatgpt')
+    const { ChatGPTAPI } = await import('chatgpt')
 
-    const email = process.env.openai_email
-    const password = process.env.openai_password
-
-    const api = new ChatGPTAPIBrowser({
-        email,
-        password,
-        isGoogleLogin: true,
-        debug: false,
-        minimize: true
+    const api = new ChatGPTAPI({
+        apiKey: process.env.openai_key
     })
-    await api.initSession()
-
     const prompt = `Recommend a specialist for ${req.body.symptom}, only output 1 word specialists, for example, Allergists, make it plural.`
 
     const result = await api.sendMessage(prompt)
-    const specialist = result.response.replace(/\.$/, "")
+    const specialist = result.text.split('.').join("")
     console.log(specialist)
     res.status(200).send(specialist)
-    // close the browser at the end
-    await api.closeSession()
 })
 
 module.exports = {
