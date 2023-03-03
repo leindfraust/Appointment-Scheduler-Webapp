@@ -222,7 +222,7 @@ export default {
         })
         await axios.put("/session/doctor", {
           licenseNo: this.licenseNo,
-          name: this.fullname,
+          fullname: this.fullname, //session schema
           gmail: this.gmail
         })
         await axios
