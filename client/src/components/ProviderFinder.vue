@@ -273,7 +273,7 @@ export default {
                 symptom: this.filterSpecialist
             }).then(response => {
                 this.filterSpecialist = response.data
-            });
+            }).catch(err => this.errMsg = err)
             this.getRecLoadingSpecialist = false
         },
         async getRecSpecialistTimeout() {
