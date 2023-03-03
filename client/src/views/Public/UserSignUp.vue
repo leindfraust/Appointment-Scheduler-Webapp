@@ -162,7 +162,7 @@
             <label class="checkbox">
               <input type="checkbox" @click="agreeTermsAndConditions" />
               I agree to the
-              <router-link :to="'/terms-and-conditions'">terms and conditions</router-link>
+              <router-link :to="'/terms-and-conditions'">terms and conditions</router-link> and <router-link :to="'/eula'">End User's License Agreement</router-link>
             </label>
             <br />
             <div class="has-text-right">
