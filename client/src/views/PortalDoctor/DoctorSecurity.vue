@@ -13,7 +13,7 @@
                                 <p>YOU ARE NOT VERIFIED ❌</p>
                             </div>
                             <div class="message-body">
-                                To get verified, link your
+                                To get verified, verify your
                                 <b>email account</b>.
                             </div>
                         </article>
@@ -29,7 +29,7 @@
                                             required />
                                     </div>
                                     <div v-if="incorrectPasswordValidate" class="notification is-warning">{{
-                                            currentPasswordValidateMessage
+                                        currentPasswordValidateMessage
                                     }}</div>
                                 </div>
                                 <div class="field">
@@ -39,7 +39,7 @@
                                             required :class="{ 'is-danger': passwordValidate }" />
                                     </div>
                                     <div v-if="passwordValidate" class="notification is-danger">{{
-                                            passwordValidateMessage
+                                        passwordValidateMessage
                                     }}</div>
                                 </div>
                                 <div class="field">
@@ -49,7 +49,7 @@
                                             required :class="{ 'is-danger': passwordValidate }" />
                                     </div>
                                     <div v-if="passwordValidate" class="notification is-danger">{{
-                                            passwordValidateMessage
+                                        passwordValidateMessage
                                     }}</div>
                                 </div>
                                 <div class="field">
@@ -93,6 +93,7 @@
                                         <div class="block"></div>
                                         <div class="has-text-centered" v-if="!codeError">
                                             <button class="button is-info" :disabled="OTP === ''"
+                                                :class="{ 'is-loading': verifyButtonLoading }"
                                                 @click="confirmOTPEditInfo">Confirm</button>
                                             <div class="notification is-danger" v-if="incorrectCode">Incorrect code,
                                                 please check your email thoroughly.</div>
@@ -108,7 +109,9 @@
                                             </div>
                                             <div class="block"></div>
                                             <div class="has-text-centered">
-                                                <button class="button is-success" @click="sendVerificationEmail"
+                                                <button class="button is-success"
+                                                    :class="{ 'is-loading': verifyButtonLoading }"
+                                                    @click="sendVerificationEmail"
                                                     :disabled="gmail === ''">Verify</button>
                                             </div>
                                         </div>
@@ -128,8 +131,9 @@
                                             </div>
                                             <div class="block"></div>
                                             <div class="has-text-centered" v-if="!codeError">
-                                                <button class="button is-info" :disabled="OTP === ''"
-                                                    @click="verifyEmail">Confirm</button>
+                                                <button class="button is-info"
+                                                    :class="{ 'is-loading': verifyButtonLoading }"
+                                                    :disabled="OTP === ''" @click="verifyEmail">Confirm</button>
                                                 <div class="notification is-danger" v-if="incorrectCode">Incorrect code,
                                                     please check your email thoroughly.</div>
                                             </div>
@@ -231,7 +235,8 @@ export default {
             codeError: false,
             updateInfoSuccess: false,
             incorrectCode: false,
-            errMsg: ''
+            errMsg: '',
+            verifyButtonLoading: false
         }
     },
     methods: {
@@ -305,6 +310,7 @@ export default {
             this.isActiveModal = true
         },
         async sendVerificationEmail() {
+            this.verifyButtonLoading = true
             let existingEmail = []
             this.verifyEmailSent = false
             this.codeError = false
@@ -333,9 +339,10 @@ export default {
                 this.codeError = true
                 this.emailTaken = true
             }
-
+            this.verifyButtonLoading = false
         },
         async confirmOTPEditInfo() {
+            this.verifyButtonLoading = true
             this.incorrectCode = false
             await axios.post("/api/code/verify", {
                 code: this.OTP
@@ -349,8 +356,10 @@ export default {
                     this.incorrectCode = true
                 }
             })
+            this.verifyButtonLoading = false
         },
         async verifyEmail() {
+            this.verifyButtonLoading = true
             this.incorrectCode = false
             await axios.post("/api/code/verify", {
                 code: this.OTP
@@ -377,6 +386,7 @@ export default {
                     this.incorrectCode = true
                 }
             });
+            this.verifyButtonLoading = false
         },
         async updateInfo() {
             this.updateInfoSuccess = false
