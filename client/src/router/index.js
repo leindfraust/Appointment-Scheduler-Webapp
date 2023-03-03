@@ -6,6 +6,7 @@ import store from '../store'
 const Home = () => import('../views/Public/Home.vue')
 const AboutMedicSearch = () => import('../views/Public/AboutMedicSearch.vue')
 const TermsAndConditions = () => import('../views/Public/TermsAndConditions.vue')
+const Eula = () => import('../views/Public/EULA.vue')
 const DoctorList = () => import('../views/Public/DoctorList.vue')
 const RegForm = () => import('../views/Public/RegForm.vue')
 const DoctorSignup = () => import('../views/PortalDoctor/DoctorSignup.vue')
@@ -47,6 +48,10 @@ const routes = [{
 {
     path: '/terms-and-conditions',
     component: TermsAndConditions
+},
+{
+    path: '/eula',
+    component: Eula
 },
 {
     path: '/provider',
