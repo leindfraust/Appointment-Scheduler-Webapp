@@ -7,27 +7,27 @@ import { useRouter } from 'vue-router';
 
 const store = useStore()
 const router = useRouter()
-let appointmentListOngoing = ref([])
-let appointmentListDone = ref([])
-let appointmentListCancelled = ref([])
-let patient = ref([]);
-let geolocationData = ref([])
-let citiesData = ref([])
-let userProvince = ref('')
-let userCity = ref('')
-let dropDownProvince = ref(false)
-let dropDownCity = ref(false)
-let errMsg = ref('')
-let successMsg = ref(false)
-let appointmentModal = ref(false)
-let navOngoingAppointments = ref(true)
-let navPastAppointments = ref(false)
-let navCancelledAppointments = ref(false)
-let file = ref()
-let uploadProfileButton = ref(false)
-let imgPreviewFile = ref()
-let searchBar = ref('')
-let buttonProfileImgSubmitLoading = ref(false)
+const appointmentListOngoing = ref([])
+const appointmentListDone = ref([])
+const appointmentListCancelled = ref([])
+const patient = ref([]);
+const geolocationData = ref([])
+const citiesData = ref([])
+const userProvince = ref('')
+const userCity = ref('')
+const dropDownProvince = ref(false)
+const dropDownCity = ref(false)
+const errMsg = ref('')
+const successMsg = ref(false)
+const appointmentModal = ref(false)
+const navOngoingAppointments = ref(true)
+const navPastAppointments = ref(false)
+const navCancelledAppointments = ref(false)
+const file = ref()
+const uploadProfileButton = ref(false)
+const imgPreviewFile = ref()
+const searchBar = ref('')
+const buttonProfileImgSubmitLoading = ref(false)
 
 onMounted(async () => {
     await axios.post('/api/appointmentList/patients', { id: store.state.patientID, ongoing: true }).then(response => appointmentListOngoing.value = response.data);
@@ -271,7 +271,7 @@ async function uploadProfilePhotoClient() {
                                                     :key="provinces._id">
                                                     <a class="dropdown-item"
                                                         @click="selectProvince(provinces.province)">{{
-                                                                provinces.province
+                                                            provinces.province
                                                         }}</a>
                                                 </div>
                                             </div>
@@ -295,7 +295,7 @@ async function uploadProfilePhotoClient() {
                                                 <div class="dropdown-content" v-for="cities in citiesData"
                                                     :key="cities.name">
                                                     <a class="dropdown-item" @click="selectCity(cities.name)">{{
-                                                            cities.name
+                                                        cities.name
                                                     }}</a>
                                                 </div>
                                             </div>
@@ -322,7 +322,8 @@ async function uploadProfilePhotoClient() {
             <div class="dropdown" :class="{ 'is-active': appointmentModal }">
                 <div class="dropdown-trigger">
                     <button class="button" @click="appointmentModal = !appointmentModal"><span>
-                            {{ navOngoingAppointments ? 'Ongoing Appointments' : navPastAppointments ?
+                            {{
+                                navOngoingAppointments? 'Ongoing Appointments': navPastAppointments ?
                                     'Past Appointments' : 'Cancelled Appointments'
                             }}</span><span class="icon is-small">
                             <i class="fas fa-angle-down" aria-hidden="true"></i>
@@ -380,7 +381,8 @@ async function uploadProfilePhotoClient() {
                                     @click="cancelAppointment(appointments._id)">Cancel</button>
                                 <br />
                                 <th class="has-text-black-ter">{{ appointments.referenceID }}</th>
-                                <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString()
+                                <th class="has-text-black-ter">{{
+                                    new Date(appointments.schedule[0].date).toDateString()
                                 }}</th>
                                 <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
                                 <th class="has-text-black-ter">{{ appointments.hospital }}</th>
@@ -420,7 +422,8 @@ async function uploadProfilePhotoClient() {
                             <tr>
                                 <th class="has-text-black-ter">{{ appointments.ifPatientVisited ? 'Yes' : 'No' }}</th>
                                 <th class="has-text-black-ter">{{ appointments.referenceID }}</th>
-                                <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString()
+                                <th class="has-text-black-ter">{{
+                                    new Date(appointments.schedule[0].date).toDateString()
                                 }}</th>
                                 <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
                                 <th class="has-text-black-ter">{{ appointments.hospital }}</th>
@@ -462,7 +465,8 @@ async function uploadProfilePhotoClient() {
                                     @click="deleteAppointment(appointments._id)">Delete</button>
                                 <br />
                                 <th class="has-text-black-ter">{{ appointments.referenceID }}</th>
-                                <th class="has-text-black-ter">{{ new Date(appointments.schedule[0].date).toDateString()
+                                <th class="has-text-black-ter">{{
+                                    new Date(appointments.schedule[0].date).toDateString()
                                 }}</th>
                                 <th class="has-text-black-ter">{{ appointments.priorityNum }}</th>
                                 <th class="has-text-black-ter">{{ appointments.hospital }}</th>
