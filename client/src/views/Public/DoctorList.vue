@@ -1,3 +1,83 @@
+<script setup>
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import axios from "axios";
+import NavigationTab from "../../components/NavigationTab.vue";
+import CatchError from "../../components/CatchError.vue";
+import { useStore } from "vuex";
+import { useRoute, useRouter } from 'vue-router';
+
+const store = useStore()
+const route = useRoute()
+const router = useRouter()
+
+const errMsg = ref('')
+const hospitalDetails = ref([])
+const patientDetails = ref(null)
+const doctorList = ref(null)
+const specialistList = ref([])
+const pickedSpecialist = ref(null)
+const specializationClicked = ref(false)
+const doctorSearchBar = ref('')
+const isDoctorLoading = ref(false)
+const typeClinic = ref(false)
+const patientFilters = ref(store.state.patientFilters)
+
+onMounted(async () => {
+  if (store.state.patientID !== null) {
+    await axios
+      .get("/session/patient")
+      .then(response => patientDetails.value = response.data);
+  }
+  await axios.post(`/api/manager/${route.params.hospital}`).then(response => {
+    hospitalDetails.value = response.data
+    specialistList.value = response.data.specializations.sort()
+  });
+  if (hospitalDetails.value.type == 'Clinic') {
+    typeClinic.value = true
+    getDoctors(undefined)
+  }
+  if (await patientFilters.value.filterSpecialist) {
+    await getDoctors(patientFilters.value.filterSpecialist)
+  }
+})
+
+onUnmounted(() => {
+  store.commit("patientFilters", {})
+})
+
+const doctorSearch = computed(() => {
+  if (doctorList.value) {
+    return doctorList.value.filter(x => x.name.toLowerCase().includes(doctorSearchBar.value.toLowerCase())).slice().sort((a, b) => a.visits - b.visits)
+  } else {
+    return false
+  }
+})
+
+async function getDoctors(specialization) {
+  doctorSearchBar.value = ''
+  isDoctorLoading.value = true
+  specializationClicked.value = true
+  pickedSpecialist.value = specialization;
+  await axios.post("/api/checkDoctorAvailability", {
+    hospital: hospitalDetails.value.hospital,
+    specialist: specialization,
+    filterDate: patientFilters.value.filterDatevalue,
+    filterTime: patientFilters.value.filterTimevalue
+  }).then(response => response ? doctorList.value = response.data : doctorList.value = []).catch(err => errMsg.value = err)
+  isDoctorLoading.value = false
+}
+async function pickDoctor(details, specialization) {
+  store.commit("pickedSpecialization", specialization)
+  store.commit("doctorDetails", details);
+  store.commit("statusAvailability", true);
+  store.commit("hospitalName", hospitalDetails.value.hospital);
+  if (store.state.patientID !== null) {
+    await router.push(`/user/${patientDetails.value.username}/registration`);
+  } else {
+    await router.push('/user/signup')
+  }
+}
+</script>
 <template>
   <NavigationTab />
   <div class="modal" :class="{ 'is-active': isDoctorLoading }">
@@ -13,7 +93,7 @@
         <div class="container is-fluid">
           <h1 class="title">{{ hospitalDetails.hospital }}</h1>
           <p class="subtitle">{{ hospitalDetails.barangayORStreet }}, {{ hospitalDetails.city }}, {{
-              hospitalDetails.province
+            hospitalDetails.province
           }}</p>
           <p class="subtitle is-6">{{ hospitalDetails.details[0].description }}</p>
           <div class="content">
@@ -49,7 +129,7 @@
                     " />
                   </figure>
                   <p class="subtitle has-text-centered" v-if="specialist.specialist !== 'General Practitioner'">{{
-                      specialist.specialist
+                    specialist.specialist
                   }}</p>
                 </a>
               </div>
@@ -85,7 +165,7 @@
                       <div class="content">
                         <h5>{{ doctors.name }}</h5>
                         <p><span class="has-text-weight-semibold" v-if="pickedSpecialist">{{
-                            pickedSpecialist
+                          pickedSpecialist
                         }}</span>
                           <span class="has-text-weight-semibold" v-else><span v-for="specialist in doctors.specialist"
                               :key="specialist">{{ specialist }} <br /></span></span>
@@ -117,92 +197,6 @@
     </div>
   </section>
 </template>
-
-<script>
-import axios from "axios";
-import store from "../../store";
-import NavigationTab from "../../components/NavigationTab.vue";
-import CatchError from "../../components/CatchError.vue";
-
-export default {
-  name: "DoctorList",
-  components: {
-    NavigationTab,
-    CatchError
-  },
-  data() {
-    return {
-      errMsg: '',
-      hospitalDetails: [],
-      patientDetails: null,
-      doctorList: null,
-      specialistList: [],
-      pickedSpecialist: null,
-      specializationClicked: false,
-      doctorSearchBar: '',
-      isDoctorLoading: false,
-      typeClinic: false,
-      patientFilters: store.state.patientFilters
-    };
-  },
-  async mounted() {
-    if (this.$store.state.patientID !== null) {
-      await axios
-        .get("/session/patient")
-        .then(response => this.patientDetails = response.data);
-    }
-    await axios.post(`/api/manager/${this.$route.params.hospital}`).then(response => {
-      this.hospitalDetails = response.data
-      this.specialistList = response.data.specializations.sort()
-    });
-    if (this.hospitalDetails.type == 'Clinic') {
-      this.typeClinic = true
-      this.getDoctors(undefined)
-    }
-    if (await this.patientFilters.filterSpecialist) {
-      await this.getDoctors(this.patientFilters.filterSpecialist)
-    }
-  },
-  unmounted() {
-    store.commit("patientFilters", {})
-  },
-  computed: {
-    doctorSearch() {
-      if (this.doctorList) {
-        return this.doctorList.filter(x => x.name.toLowerCase().includes(this.doctorSearchBar.toLowerCase())).slice().sort((a, b) => a.visits - b.visits)
-      } else {
-        return false
-      }
-    }
-  },
-  methods: {
-    async getDoctors(specialization) {
-      this.doctorSearchBar = ''
-      this.isDoctorLoading = true
-      this.specializationClicked = true
-      this.pickedSpecialist = specialization;
-      await axios.post("/api/checkDoctorAvailability", {
-        hospital: this.hospitalDetails.hospital,
-        specialist: specialization,
-        filterDate: this.patientFilters.filterDate,
-        filterTime: this.patientFilters.filterTime
-      }).then(response => response ? this.doctorList = response.data : this.doctorList = []).catch(err => this.errMsg = err)
-      this.isDoctorLoading = false
-    },
-    async pickDoctor(details, specialization) {
-      store.commit("pickedSpecialization", specialization)
-      store.commit("doctorDetails", details);
-      store.commit("statusAvailability", true);
-      store.commit("hospitalName", this.hospitalDetails.hospital);
-      if (this.$store.state.patientID !== null) {
-        await this.$router.push(`/user/${this.patientDetails.username}/registration`);
-      } else {
-        await this.$router.push('/user/signup')
-      }
-    },
-  },
-};
-</script>
 
 <style scoped>
 .section {
