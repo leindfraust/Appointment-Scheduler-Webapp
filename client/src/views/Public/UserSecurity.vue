@@ -4,16 +4,16 @@ import axios from 'axios'
 import { ref, onMounted } from 'vue';
 import ForgotPassword from '../../components/ForgotPassword.vue';
 
-let patient = ref([])
-let currentPassword = ref('')
-let newPassword = ref('')
-let confirmPassword = ref('')
-let errMsg = ref('')
-let passwordChanged = ref(false)
-let newPasswordNotMatch = ref(false)
-let currentPasswordIncorrect = ref(false)
-let username = ref('')
-let email = ref('')
+const patient = ref([])
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+const errMsg = ref('')
+const passwordChanged = ref(false)
+const newPasswordNotMatch = ref(false)
+const currentPasswordIncorrect = ref(false)
+const username = ref('')
+const email = ref('')
 onMounted(async () => {
     await axios.get('/session/patient').then(response => patient.value = response.data);
     username.value = await patient.value.username
