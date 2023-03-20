@@ -1,3 +1,138 @@
+<script setup>
+import axios from 'axios'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
+import FooterBlock from '../../components/FooterBlock.vue'
+import NavigationTab from '../../components/NavigationTab.vue'
+
+const store = useStore()
+const router = useRouter()
+const route = useRoute()
+
+const city = ref("");
+const isHospitalLoading = ref(false);
+const hospital = ref("");
+const geolocation = ref([]);
+const typeFilter = ref('');
+const citiesOrMunicipalities = ref([]);
+const hospitalQuery = ref('');
+const province = ref(route.query.province);
+const userLatitude = ref(route.query.userLat);
+const userLongitude = ref(route.query.userLong);
+const geoHospitalNearestUser = ref([]);
+const specializations = ref(store.getters.getSpecializationList);
+const filterSpecialist = ref(route.query.symptom);
+const filterDate = ref(new Date(route.query.date));
+const filterTime = ref(route.query.time);
+const distanceFilter = ref(true);
+const dateTimeFilter = ref(false);
+const doctorSpecialistFilter = ref([]);
+
+const geoHospitalNearestUserIndexed = computed(() => {
+    if (geoHospitalNearestUser.value) {
+        return geoHospitalNearestUser.value.slice().sort((a, b) => distanceFilter.value ? a.distance - b.distance : ((b.engagements / 10 + b.ratings * 2) * 1000 - b.distance) / 1000 - ((a.engagements / 10 + a.ratings * 2) * 1000 - a.distance) / 1000).filter(x => { return x.hospital.toLowerCase().includes(hospital.value.toLowerCase()); }).filter(x => x?.arrFilter > 0).filter(x => typeFilter.value == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == typeFilter.value).filter(x => x.city.includes(city.value)).slice().sort((a, b) => b.arrFilter - a.arrFilter);
+    } else {
+        return false;
+    }
+});
+
+onMounted(async () => {
+    await axios.get("/api/geolocation").then(response => geolocation.value = response.data);
+    await loadProvider()
+})
+
+async function unloadPropData(props) {
+    hospitalQuery.value = ''
+    if (geolocation.value.filter(prop => prop.province == props).length !== 0) {
+        province.value = props
+    } else {
+        hospitalQuery.value = props
+    }
+    await loadProvider()
+}
+
+async function bookAppointment(hospitalDetails) {
+    const filters = {
+        filterSpecialist: filterSpecialist.value,
+        filterDate: filterDate.value,
+        filterTime: filterTime.value
+    }
+    store.commit("hospitalDetails", hospitalDetails)
+    store.commit("patientFilters", filters)
+    await axios.put(`/api/manager/${hospitalDetails._id}`, {
+        engagements: hospitalDetails.engagements + 1
+    });
+    await router.push(`/${hospitalDetails._id}/doctors`)
+}
+
+async function loadProvider() {
+    isHospitalLoading.value = true;
+    if (await geolocation.value.find(x => x.province === province.value)) {
+        await router.push({
+            path: '/provider',
+            query: {
+                hospital: hospitalQuery.value,
+                province: province.value,
+                symptom: filterSpecialist.value,
+                userLat: userLatitude.value,
+                userLong: userLongitude.value,
+                date: new Date(filterDate.value).toLocaleDateString(),
+                time: filterTime.value
+            }
+        })
+        citiesOrMunicipalities.value = geolocation.value.find(x => x.province === province.value);
+        if (!hospitalQuery.value) {
+            hospitalQuery.value = ''
+        }
+        await axios.post("/api/geoFindHospitalNearestUser", {
+            province: province.value,
+            hospitalQuery: hospitalQuery.value,
+            latitude: parseFloat(userLatitude.value),
+            longitude: parseFloat(userLongitude.value)
+        }).then(response => geoHospitalNearestUser.value = response.data);
+        document.getElementById('background').style.background = 'none'
+        await filterSpecialistDateTime()
+    }
+    isHospitalLoading.value = false;
+}
+
+async function filterSpecialistDateTime() {
+    doctorSpecialistFilter.value = []
+    if (filterTime.value == undefined) {
+        filterTime.value = ''
+    }
+    await router.push({
+        path: '/provider',
+        query: {
+            hospital: hospitalQuery.value,
+            province: province.value,
+            symptom: filterSpecialist.value,
+            userLat: userLatitude.value,
+            userLong: userLongitude.value,
+            date: new Date(filterDate.value).toLocaleDateString(),
+            time: filterTime.value
+        }
+    })
+    const hospitals = geoHospitalNearestUser.value
+    for await (const hospital of hospitals) {
+        isHospitalLoading.value = true;
+        if (!hospitalQuery.value) {
+            hospitalQuery.value = ''
+        }
+        await axios.post("/api/doctor/filteration", {
+            hospital: hospital.hospital,
+            filterSpecialist: filterSpecialist.value,
+            date: filterDate.value,
+            time: filterTime.value
+        }).then(async response => {
+            doctorSpecialistFilter.value.push({ hospital: hospital.hospital, docLength: response.data.filter((doctor) => filterSpecialist.value ? hospital.specializations.find(x => x.specialist === filterSpecialist.value) && doctor.hospitalOrigin.filter(x => x === hospital.hospital) : doctor.hospitalOrigin.filter(x => x === hospital.hospital)).length })
+            isHospitalLoading.value = false;
+        });
+    }
+    geoHospitalNearestUser.value.forEach(async (x) => x["arrFilter"] = await doctorSpecialistFilter.value.find(e => x.hospital == e.hospital)?.docLength)
+}
+</script>
 <template>
     <div id="background">
         <NavigationTab :provider-finder-mode="true" :provider-provinces="geolocation" :query="province"
@@ -178,8 +313,7 @@
                                     <b>Type of Facility:</b> {{ geoHospital.type }}
                                     <span v-if="typeof geoHospital.details[0].contacts !== 'undefined'">
                                         <p class="subtitle is-6"><b>Contacts:</b> <span
-                                                v-for="(contacts, index) in geoHospital.details[0].contacts"
-                                                :key="index">
+                                                v-for="(contacts, index) in geoHospital.details[0].contacts" :key="index">
                                                 {{ contacts.contact + ' ' }}</span></p>
                                     </span>
                                 </div>
@@ -199,123 +333,6 @@
     </div>
     <FooterBlock />
 </template>
-<script>
-import axios from 'axios'
-import FooterBlock from '../../components/FooterBlock.vue';
-import NavigationTab from '../../components/NavigationTab.vue'
-
-export default {
-    name: "HospitalFinder",
-    computed: {
-        geolocationIndexed() {
-            return this.geolocation.filter(x => { return x.province.toLowerCase().includes(this.province.toLowerCase()); });
-        },
-        geoHospitalNearestUserIndexed() {
-            if (this.geoHospitalNearestUser) {
-                return this.geoHospitalNearestUser.slice().sort((a, b) => this.distanceFilter ? a.distance - b.distance : ((b.engagements / 10 + b.ratings * 2) * 1000 - b.distance) / 1000 - ((a.engagements / 10 + a.ratings * 2) * 1000 - a.distance) / 1000).filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => x?.arrFilter > 0).filter(x => this.typeFilter == '' ? x.type == 'Private' || x.type == 'Public' || x.type == 'Clinic' : x.type == this.typeFilter).filter(x => x.city.includes(this.city)).slice().sort((a, b) => b.arrFilter - a.arrFilter);
-            } else {
-                return false;
-            }
-        }
-    },
-    async mounted() {
-        await axios.get("/api/geolocation").then(response => this.geolocation = response.data);
-        await this.loadProvider()
-    },
-    data() {
-        return {
-            city: "",
-            isHospitalLoading: false,
-            checkUser: "",
-            hospital: "",
-            geolocation: [],
-            typeFilter: '',
-            citiesOrMunicipalities: [],
-            hospitalQuery: this.$route.query.hospital,
-            province: this.$route.query.province,
-            userLatitude: this.$route.query.userLat,
-            userLongitude: this.$route.query.userLong,
-            geoHospitalNearestUser: "",
-            specializations: this.$store.getters.getSpecializationList,
-            filterSpecialist: this.$route.query.symptom,
-            filterDate: new Date(this.$route.query.date),
-            filterTime: this.$route.query.time,
-            distanceFilter: true,
-            dateTimeFilter: false,
-            doctorSpecialistFilter: [],
-            provincePrompt: false
-        };
-    },
-    methods: {
-        async unloadPropData(props) {
-            this.hospitalQuery = ''
-            if (this.geolocation.filter(prop => prop.province == props).length !== 0) {
-                this.province = props
-            } else {
-                this.hospitalQuery = props
-            }
-            await this.loadProvider()
-        },
-        async bookAppointment(hospitalDetails) {
-            const filters = {
-                filterSpecialist: this.filterSpecialist,
-                filterDate: this.filterDate,
-                filterTime: this.filterTime
-            }
-            await this.$store.commit("hospitalDetails", hospitalDetails)
-            await this.$store.commit("patientFilters", filters)
-            await axios.put(`/api/manager/${hospitalDetails._id}`, {
-                engagements: hospitalDetails.engagements + 1
-            });
-            await this.$router.push(`/${hospitalDetails._id}/doctors`)
-        },
-        async loadProvider() {
-            this.isHospitalLoading = true;
-            if (await this.geolocation.find(x => x.province === this.province)) {
-                await this.$router.push({ path: '/provider', query: { hospital: this.hospitalQuery, province: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude, date: new Date(this.filterDate).toLocaleDateString(), time: this.filterTime } })
-                this.citiesOrMunicipalities = this.geolocation.find(x => x.province === this.province);
-                if (!this.hospitalQuery) {
-                    this.hospitalQuery = ''
-                }
-                await axios.post("/api/geoFindHospitalNearestUser", {
-                    province: this.province,
-                    hospitalQuery: this.hospitalQuery,
-                    latitude: parseFloat(this.userLatitude),
-                    longitude: parseFloat(this.userLongitude)
-                }).then(response => this.geoHospitalNearestUser = response.data);
-                document.getElementById('background').style.background = 'none'
-                await this.filterSpecialistDateTime()
-            }
-            this.isHospitalLoading = false;
-        },
-        async filterSpecialistDateTime() {
-            this.doctorSpecialistFilter = []
-            if (this.filterTime == undefined) {
-                this.filterTime = ''
-            }
-            await this.$router.push({ path: '/provider', query: { hospital: this.hospitalQuery, province: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude, date: new Date(this.filterDate).toLocaleDateString(), time: this.filterTime } })
-            const hospitals = this.geoHospitalNearestUser
-            for await (const hospital of hospitals) {
-                this.isHospitalLoading = true;
-                if (!this.hospitalQuery) {
-                    this.hospitalQuery = ''
-                }
-                await axios.post("/api/doctor/filteration", {
-                    hospital: hospital.hospital,
-                    filterSpecialist: this.filterSpecialist,
-                    date: this.filterDate,
-                    time: this.filterTime
-                }).then(async response => {
-                    this.doctorSpecialistFilter.push({ hospital: hospital.hospital, docLength: response.data.filter((doctor) => this.filterSpecialist ? hospital.specializations.find(x => x.specialist === this.filterSpecialist) && doctor.hospitalOrigin.filter(x => x === hospital.hospital) : doctor.hospitalOrigin.filter(x => x === hospital.hospital)).length })
-                    this.isHospitalLoading = false;
-                });
-            }
-            await this.geoHospitalNearestUser.forEach((x) => x["arrFilter"] = this.doctorSpecialistFilter.find(e => x.hospital == e.hospital)?.docLength)
-        },
-    },
-    components: { NavigationTab, FooterBlock }
-}
-</script>
 <style scoped>
 select {
     border: 0px;

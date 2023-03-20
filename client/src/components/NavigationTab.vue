@@ -46,7 +46,6 @@ onMounted(async () => {
 const isActiveNotifications = ref(false)
 const isActiveModal = ref(false)
 const isActiveProfileDropdown = ref(false)
-//const isActiveMenuDropdown = ref(false)
 const isActive = ref(false)
 const patient = store.state.patientUsername
 const notifications = ref([])
