@@ -1,59 +1,76 @@
 const Hospital = require('../models/manager');
 const Geolocation = require('../models/geolocation');
 
-const getHospitalNearestUser = ((req, res) => {
+const getHospitalNearestUser = (async (req, res) => {
     let province = req.body.province
     let latitude = req.body.latitude
     let longitude = req.body.longitude
     let hospitalQuery = req.body.hospitalQuery
 
-    Hospital.aggregate([{
-        $geoNear: {
-            near: {
-                type: 'Point',
-                coordinates: [longitude, latitude]
-            },
-            key: "location",
-            distanceField: 'distance',
-            spherical: true
-        }
-    }], (error, result) => {
-        if (error) {
-            console.log(error)
-            res.end()
-        } else {
-            result = result.filter(x => x.status === 'Active' && x.province === province && x.hospital.toLowerCase().includes(hospitalQuery.toLowerCase()))
-            let response_client = [...result]
-            response_client.forEach(x => delete x.username && delete x.password && delete x.__v && delete x.email && delete x.pricing);
-            res.status(200).send(response_client)
-        }
-    })
+    try {
+        const result = await Hospital.aggregate([
+            {
+                $geoNear: {
+                    near: {
+                        type: 'Point',
+                        coordinates: [longitude, latitude]
+                    },
+                    key: 'location',
+                    distanceField: 'distance',
+                    spherical: true
+                }
+            }
+        ]).exec();
+
+        const filteredResults = result.filter(x => x.status === 'Active' && x.province === province && x.hospital.toLowerCase().includes(hospitalQuery.toLowerCase()));
+        const responseClient = [...filteredResults].map(x => {
+            delete x.username;
+            delete x.password;
+            delete x.__v;
+            delete x.email;
+            delete x.pricing;
+            return x;
+        });
+
+        res.status(200).send(responseClient);
+    } catch (error) {
+        console.log(error);
+        res.end();
+    }
 });
 
-const getProvinceNearestUser = ((req, res) => {
+const getProvinceNearestUser = (async (req, res) => {
     let latitude = req.body.latitude
     let longitude = req.body.longitude
 
-    Geolocation.aggregate([{
-        $geoNear: {
-            near: {
-                type: 'Point',
-                coordinates: [longitude, latitude]
+    try {
+        const result = await Geolocation.aggregate([
+            {
+                $geoNear: {
+                    near: {
+                        type: 'Point',
+                        coordinates: [longitude, latitude]
+                    },
+                    key: 'location',
+                    distanceField: 'distance',
+                    spherical: true
+                }
             },
-            key: "location",
-            distanceField: 'distance',
-            spherical: true
-        }
-    }, { $limit: 1 }], (error, result) => {
-        if (error) {
-            console.log(error)
-            res.end()
-        } else {
-            let response_client = [...result]
-            delete response_client[0].citiesOrMunicipalities
-            res.status(200).send(response_client)
-        }
-    })
+            {
+                $limit: 1
+            }
+        ]).exec();
+
+        const responseClient = [...result].map(x => {
+            delete x.citiesOrMunicipalities;
+            return x;
+        });
+
+        res.status(200).send(responseClient);
+    } catch (error) {
+        console.log(error);
+        res.end();
+    }
 });
 
 const getGeolocations = (async (req, res) => {
@@ -117,71 +134,78 @@ const deleteGeolocation = (async (req, res) => {
 
 
 //pull city or municipality from a Geolocation
-const pullCity = ((req, res) => {
+const pullCity = (async (req, res) => {
     let provinceID = req.body.provinceID
     let postalCode = req.body.postalCode
     let cityOrMunicipality = req.body.cityOrMunicipality
     let latitude = req.body.latitude
     let longitude = req.body.longitude
 
-    Geolocation.findOneAndUpdate({
-        _id: provinceID
-    }, {
-        $pull: {
-            citiesOrMunicipalities: {
-                name: cityOrMunicipality,
-                postalCode: postalCode,
-                location: {
-                    type: "Point",
-                    coordinates: [longitude, latitude]
+    try {
+        const result = await Geolocation.findOneAndUpdate(
+            {
+                _id: provinceID
+            },
+            {
+                $pull: {
+                    citiesOrMunicipalities: {
+                        name: cityOrMunicipality,
+                        postalCode: postalCode,
+                        location: {
+                            type: "Point",
+                            coordinates: [longitude, latitude]
+                        }
+                    }
                 }
+            },
+            {
+                returnOriginal: false,
+                multi: true
             }
-        }
-    }, {
-        returnOriginal: false,
-        multi: true
-    }, function (error, success) {
-        if (error) {
-            console.log(error)
-        } else {
-            console.log(success)
-            res.end()
-        }
-    });
+        ).exec();
+
+        console.log(result);
+        res.end();
+    } catch (error) {
+        console.log(error);
+    }
 });
 
 //push city/municipality in a Geolocation 
-const pushCity = ((req, res) => {
+const pushCity = (async (req, res) => {
     let provinceID = req.body.provinceID
     let postalCode = req.body.postalCode
     let cityOrMunicipality = req.body.cityOrMunicipality
     let latitude = req.body.latitude
     let longitude = req.body.longitude
 
-    Geolocation.findOneAndUpdate({
-        _id: provinceID
-    }, {
-        $push: {
-            citiesOrMunicipalities: {
-                name: cityOrMunicipality,
-                postalCode: postalCode,
-                location: {
-                    type: "Point",
-                    coordinates: [longitude, latitude]
+    try {
+        const result = await Geolocation.findOneAndUpdate(
+            {
+                _id: provinceID
+            },
+            {
+                $push: {
+                    citiesOrMunicipalities: {
+                        name: cityOrMunicipality,
+                        postalCode: postalCode,
+                        location: {
+                            type: "Point",
+                            coordinates: [longitude, latitude]
+                        }
+                    }
                 }
+            },
+            {
+                returnOriginal: false
             }
+        ).exec();
 
-        }
-    }, {
-        returnOriginal: false
-    }, function (error, success) {
-        if (error) {
-            console.log(error)
-        } else {
-            console.log(success)
-            res.end()
-        }
-    });
+        console.log(result);
+        res.end();
+    } catch (error) {
+        console.log(error);
+    }
 });
 module.exports = {
     getProvinceNearestUser,
