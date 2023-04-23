@@ -34,7 +34,8 @@ const forgotPasswordPromptCount = computed(() => props.forgotPasswordPromptCount
 async function getPatient() {
     await axios.post('/api/user/verify_username', {
         username: usernameHandler.value,
-        email: emailHandler.value
+        email: emailHandler.value,
+        forgotPassword: true
     }).then(response => userData.value = response.data)
     if (userData.value) {
         noUserFound.value = false
@@ -55,7 +56,8 @@ async function getPatient() {
 async function getDoctor() {
     await axios.post('/api/doctor/verify_username', {
         username: usernameHandler.value,
-        email: emailHandler.value
+        email: emailHandler.value,
+        forgotPassword: true
     }).then(response => userData.value = response.data)
     if (userData.value) {
         noUserFound.value = false
@@ -76,7 +78,8 @@ async function getDoctor() {
 async function getProvider() {
     await axios.post('/api/manager/verify_username', {
         username: usernameHandler.value,
-        email: emailHandler.value
+        email: emailHandler.value,
+        forgotPassword: true
     }).then(response => userData.value = response.data)
     if (userData.value) {
         noUserFound.value = false
@@ -108,8 +111,11 @@ async function forgotPasswordOTP() {
             checkOTP.value = true
             while (checkOTP.value) {
                 await getPatient()
+                if (userData.value) break;
                 await getDoctor()
+                if (userData.value) break;
                 await getProvider()
+                if (userData.value) break;
                 checkOTP.value = false
             }
         }
@@ -134,7 +140,7 @@ async function pushNewPassword() {
         if (userType.value == 'patient') {
             try {
                 await axios.put('/api/fupdatePassword/patient', {
-                    patientID: userData.value._id,
+                    patientID: userData.value,
                     password: newPassword.value
                 });
                 userData.value = ''
@@ -147,7 +153,7 @@ async function pushNewPassword() {
         } else if (userType.value == 'doctor') {
             try {
                 await axios.put('/api/fupdatePassword/doctor', {
-                    doctorID: userData.value._id,
+                    doctorID: userData.value,
                     password: newPassword.value
                 });
                 userData.value = ''
@@ -160,7 +166,7 @@ async function pushNewPassword() {
         } else if (userType.value == 'provider') {
             try {
                 await axios.put('/api/fupdatePassword/manager', {
-                    managerID: userData.value._id,
+                    managerID: userData.value,
                     password: newPassword.value
                 });
                 userData.value = ''
