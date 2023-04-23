@@ -175,14 +175,11 @@ const verify_username = (async (req, res) => {
     let email = await req.body.email
     try {
         const userAccount = await Doctor.findOne({
-            username: username.trim()
+            username: username.trim(),
+            email: email
         });
         if (userAccount) {
-            if (userAccount.gmail === email) {
-                res.status(200).send(true)
-            } else {
-                res.status(200).send(false)
-            }
+            res.status(200).send(req.body.forgotPassword ? userAccount._id : true)
         } else {
             res.status(200).send(false)
         }

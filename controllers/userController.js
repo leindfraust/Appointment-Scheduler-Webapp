@@ -36,16 +36,14 @@ const check_email = (async (req, res) => {
 const verify_username = (async (req, res) => {
     let username = await req.body.username
     let email = await req.body.email
+
     try {
         const userAccount = await user.findOne({
-            username: username.trim()
+            username: username.trim(),
+            gmail: email
         });
         if (userAccount) {
-            if (userAccount.gmail === email) {
-                res.status(200).send(true)
-            } else {
-                res.status(200).send(false)
-            }
+            res.status(200).send(req.body.forgotPassword ? userAccount._id : true)
         } else {
             res.status(200).send(false)
         }
