@@ -68,9 +68,10 @@
                                                     <div class="control"
                                                         :class="{ 'has-icons-right': getRecLoadingSpecialist }">
                                                         <input class="input is-medium" type="text"
-                                                            v-model="filterSpecialist"
-                                                            placeholder="Search a specialist or type a symptom..."
+                                                            v-model="filterSpecialist" placeholder="Specialist or symptoms"
                                                             @input="getRecSpecialistTimeout" style="width: 300px" />
+                                                        <p class="help is-info">You may leave this blank if you want to get all specialists.
+                                                        </p>
                                                         <span class="icon is-small is-right">
                                                             <i class="fas fa-spinner fa-spin"
                                                                 v-if="getRecLoadingSpecialist"></i>
@@ -108,9 +109,8 @@
                                 </div>
                                 <div class="field has-addons is-medium is-hidden-desktop is-hidden-tablet">
                                     <div class="control has-icons-left">
-                                        <input class="input is-rounded" type="text" v-model="province"
-                                            style="width: 300px;" placeholder="What province are you located?"
-                                            @input="isActiveDropdown = true" />
+                                        <input class="input is-rounded" type="text" v-model="province" style="width: 300px;"
+                                            placeholder="What province are you located?" @input="isActiveDropdown = true" />
                                         <span class="icon is-left has-text-info">
                                             <i class="fa-solid fa-location-dot"></i>
                                         </span>
@@ -133,7 +133,8 @@
                                 </div>
                             </div>
                         </div>
-                        <br /><br />
+                        <br />
+                        <br />
                         <div class="columns is-mobile is-gapless is-centered is-hidden-desktop is-hidden-tablet">
                             <div class="column is-narrow">
                                 <v-date-picker v-model="filterDate" :min-date="new Date()">
@@ -167,8 +168,7 @@
                                     </div>
                                 </div>
                                 <div class="dropdown-menu">
-                                    <div class="dropdown-content has-text-left"
-                                        style="max-height: 15rem; overflow: auto;"
+                                    <div class="dropdown-content has-text-left" style="max-height: 15rem; overflow: auto;"
                                         v-if="Object.keys(specializationsSorted).length !== 0">
                                         <a class="dropdown-item" v-for="specialization in specializationsSorted"
                                             :key="specialization"
@@ -176,8 +176,8 @@
                                                 specialization
                                             }}</a>
                                     </div>
-                                    <div class="dropdown-content has-text-left"
-                                        style="max-height: 15rem; overflow: auto;" v-else>
+                                    <div class="dropdown-content has-text-left" style="max-height: 15rem; overflow: auto;"
+                                        v-else>
                                         <a class="dropdown-item has-text-info">
                                             <p>Recommending you a specialist...</p>
                                             <p class="help has-text-weight-bold has-text-black">powered
