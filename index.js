@@ -23,7 +23,7 @@ const io = require("socket.io")(server, {
 });
 
 //cors option
-let allowlist = ['https://medic-search-beta.herokuapp.com', 'http://localhost:8080']
+let allowlist = ['https://medic-search-beta.herokuapp.com', 'http://localhost:8080', 'https://medic-search.onrender.com']
 let corsOptionsDelegate = function (req, callback) {
     let corsOptions;
     if (allowlist.indexOf(req.header('Origin')) !== -1) {
