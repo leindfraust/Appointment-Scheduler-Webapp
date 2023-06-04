@@ -68,9 +68,10 @@
                                                     <div class="control"
                                                         :class="{ 'has-icons-right': getRecLoadingSpecialist }">
                                                         <input class="input is-medium" type="text"
-                                                            v-model="filterSpecialist" placeholder="Specialist or symptoms"
+                                                            v-model="filterSpecialist" placeholder="Specialist or symptom"
                                                             @input="getRecSpecialistTimeout" style="width: 300px" />
-                                                        <p class="help is-info">You may leave this blank if you want to get all specialists.
+                                                        <p class="help is-info">You may leave this blank if you want to get
+                                                            all specialists.
                                                         </p>
                                                         <span class="icon is-small is-right">
                                                             <i class="fas fa-spinner fa-spin"
@@ -160,8 +161,8 @@
                                 <div class="field">
                                     <div class="control" :class="{ 'has-icons-right': getRecLoadingSpecialist }">
                                         <input class="input is-medium" type="text" v-model="filterSpecialist"
-                                            placeholder="Search a specialist or type a symptom..."
-                                            @input="getRecSpecialistTimeout" style="width: 300px" />
+                                            placeholder="Specialist or symptom" @input="getRecSpecialistTimeout"
+                                            style="width: 300px" />
                                         <span class="icon is-small is-right">
                                             <i class="fas fa-spinner fa-spin" v-if="getRecLoadingSpecialist"></i>
                                         </span>
@@ -197,150 +198,132 @@
         </section>
     </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted, onBeforeMount } from 'vue'
 import axios from 'axios'
-import router from '../router';
 import CatchError from './CatchError.vue';
 import NavigationTab from './NavigationTab.vue'
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-export default {
-    name: "HospitalFinder",
-    computed: {
-        geolocationIndexed() {
-            return this.geolocation.filter(x => { return x.province.toLowerCase().includes(this.province.toLowerCase()); });
-        },
-        geoHospitalNearestUserIndexed() {
-            if (this.geoHospitalNearestUser && this.filterSpecialist) {
-                return this.geoHospitalNearestUser.filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => x?.specialistArrFilter > 0).filter(x => this.typeFilter == null ? x.type == 'Private' || x.type == 'Public' : x.type == this.typeFilter).filter(x => x.city.includes(this.city));
-            } else if (this.geoHospitalNearestUser) {
-                return this.geoHospitalNearestUser.filter(x => { return x.hospital.toLowerCase().includes(this.hospital.toLowerCase()); }).filter(x => this.typeFilter == null ? x.type == 'Private' || x.type == 'Public' : x.type == this.typeFilter).filter(x => x.city.includes(this.city))
-            }
-            else {
-                return false;
-            }
-        },
-        specializationsSorted() {
-            return this.specializations.filter(x => x.toLowerCase().includes(this.filterSpecialist.toLowerCase()))
-        }
+const store = useStore()
+const router = useRouter()
 
-    },
-    async created() {
-        await axios.get("/api/geolocation").then(response => this.geolocation = response.data);
-        let popup = localStorage.getItem("expire_popup")
-        if (!popup || new Date(parseInt(popup)).getTime() <= new Date().getTime()) {
-            this.locationPermissionPrompt = true
-            let date = new Date()
-            localStorage.setItem("expire_popup", date.setDate(date.getDate() + 30))
-        } else {
-            this.locationPermissionPrompt = false
-            this.getUserLocation()
-        }
-    },
-    mounted() {
-        if (this.$store.state.patientID !== null) {
-            this.checkUser = true;
-        }
-        else {
-            this.checkUser = false;
-        }
-    },
-    data() {
-        return {
-            locationPermissionPrompt: false,
-            locationPermissionDenied: false,
-            city: "",
-            checkUser: "",
-            geolocation: [],
-            citiesOrMunicipalities: [],
-            province: "",
-            userLatitude: "",
-            userLongitude: "",
-            isActiveDropdown: false,
-            errMsg: '',
-            specializations: this.$store.getters.getSpecializationList,
-            filterSpecialist: '',
-            filterDate: undefined,
-            filterTime: '',
-            getRecLoadingSpecialist: false,
-            getRecSpecialistDelay: null,
-            recSpecialistDropdown: false
-        };
-    },
-    methods: {
-        async getRecSpecialist() {
-            this.getRecLoadingSpecialist = true
-            await axios.post('/api/query-recommended-specialist', {
-                symptom: this.filterSpecialist
-            }).then(response => {
-                this.filterSpecialist = response.data
-            }).catch(err => this.errMsg = err)
-            this.getRecLoadingSpecialist = false
-        },
-        async getRecSpecialistTimeout() {
-            this.recSpecialistDropdown = true
-            if (Object.keys(this.specializationsSorted).length == 0 || this.specializationsSorted.length == 0) {
-                if (this.getRecSpecialistDelay) {
-                    clearTimeout(this.getRecSpecialistDelay)
-                    this.getRecSpecialistDelay = null
-                }
-                this.getRecSpecialistDelay = setTimeout(this.getRecSpecialist, 5000)
-            } else {
-                if (this.getRecSpecialistDelay) {
-                    clearTimeout(this.getRecSpecialistDelay)
-                    this.getRecSpecialistDelay = null
-                }
-            }
-        },
-        selectRegion(province, location) {
-            this.province = province;
-            if (this.locationPermissionDenied || !this.userLatitude && !this.userLongitude) {
-                this.userLatitude = location.coordinates[1]
-                this.userLongitude = location.coordinates[0]
-            }
-            this.isActiveDropdown = false;
-        },
-        async searchProvider() {
-            if (this.province) {
-                await router.push({ path: '/provider', query: { hospital: '', province: this.province, symptom: this.filterSpecialist, userLat: this.userLatitude, userLong: this.userLongitude, date: new Date(this.filterDate).toLocaleDateString(), time: this.filterTime } })
-            }
-        },
-        getUserLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(this.geoUserPosition, this.geoUserPositionError);
-            }
-            else {
-                alert("Geolocation is not supported by this browser");
-            }
-        },
-        async geoUserPosition(position) {
-            this.userLatitude = position.coords.latitude;
-            this.userLongitude = position.coords.longitude;
-            if (!this.locationPermissionDenied) {
-                await axios.post('/api/geolocation/geofind-near-user', {
-                    latitude: this.userLatitude,
-                    longitude: this.userLongitude
-                }).then(response => this.province = response.data[0].province).catch(err => this.errMsg = err)
-            }
-        },
-        geoUserPositionError(error) {
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    this.locationPermissionDenied = true;
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    alert("Unable to obtain Geolocation information.");
-                    break;
-                case error.TIMEOUT:
-                    alert("Request timed out.");
-                    break;
-                case error.UNKNOWN_ERROR:
-                    alert("An unknown error occured, please try again.");
-                    break;
-            }
-        }
-    },
-    components: { NavigationTab, CatchError }
+const locationPermissionPrompt = ref(false)
+const locationPermissionDenied = ref(false)
+const geolocation = ref([])
+const checkUser = ref("")
+const province = ref("")
+const citiesOrMunicipalities = ref([])
+const userLongitude = ref("")
+const userLatitude = ref("")
+const errMsg = ref('')
+const isActiveDropdown = ref(false)
+const filterSpecialist = ref('')
+const specializations = ref(store.getters.getSpecializationList)
+const filterTime = ref('')
+const filterDate = ref(undefined)
+const getRecSpecialistDelay = ref(null)
+const getRecLoadingSpecialist = ref(false)
+const recSpecialistDropdown = ref(false)
+
+const geolocationIndexed = computed(() => geolocation.value.filter(x => { return x.province.toLowerCase().includes(province.value.toLowerCase()); }))
+const specializationsSorted = computed(() => specializations.value.filter(x => x.toLowerCase().includes(filterSpecialist.value.toLowerCase())))
+
+onBeforeMount(async () => {
+    await axios.get("/api/geolocation").then(response => geolocation.value = response.data);
+    let popup = localStorage.getItem("expire_popup")
+    if (!popup || new Date(parseInt(popup)).getTime() <= new Date().getTime()) {
+        locationPermissionPrompt.value = true
+        let date = new Date()
+        localStorage.setItem("expire_popup", date.setDate(date.getDate() + 30))
+    } else {
+        locationPermissionPrompt.value = false
+        getUserLocation()
+    }
+})
+
+onMounted(async () => {
+    if (store.state.patientID !== null) {
+        checkUser.value = true;
+    }
+    else {
+        checkUser.value = false;
+    }
+})
+
+async function getRecSpecialist() {
+    getRecLoadingSpecialist.value = true
+    await axios.post('/api/query-recommended-specialist', {
+        symptom: filterSpecialist.value
+    }).then(response => {
+        filterSpecialist.value = response.data
+    }).catch(err => errMsg.value = err)
+    getRecLoadingSpecialist.value = false
 }
+async function getRecSpecialistTimeout() {
+    recSpecialistDropdown.value = true
+    if (Object.keys(specializationsSorted.value).length == 0 || specializationsSorted.value.length == 0) {
+        if (getRecSpecialistDelay.value) {
+            clearTimeout(getRecSpecialistDelay.value)
+            getRecSpecialistDelay.value = null
+        }
+        getRecSpecialistDelay.value = setTimeout(getRecSpecialist, 5000)
+    } else {
+        if (getRecSpecialistDelay.value) {
+            clearTimeout(getRecSpecialistDelay.value)
+            getRecSpecialistDelay.value = null
+        }
+    }
+}
+function selectRegion(province, location) {
+    province.value = province;
+    if (locationPermissionDenied.value || !userLatitude.value && !userLongitude.value) {
+        userLatitude.value = location.coordinates[1]
+        userLongitude.value = location.coordinates[0]
+    }
+    isActiveDropdown.value = false;
+}
+async function searchProvider() {
+    if (province.value) {
+        await router.push({ path: '/provider', query: { hospital: '', province: province.value, symptom: filterSpecialist.value, userLat: userLatitude.value, userLong: userLongitude.value, date: new Date(filterDate.value).toLocaleDateString(), time: filterTime.value } })
+    }
+}
+function getUserLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(geoUserPosition, geoUserPositionError.value);
+    }
+    else {
+        alert("Geolocation is not supported by this browser");
+    }
+}
+async function geoUserPosition(position) {
+    userLatitude.value = position.coords.latitude;
+    userLongitude.value = position.coords.longitude;
+    if (!locationPermissionDenied.value) {
+        await axios.post('/api/geolocation/geofind-near-user', {
+            latitude: userLatitude.value,
+            longitude: userLongitude.value
+        }).then(response => province.value = response.data[0].province).catch(err => errMsg.value = err)
+    }
+}
+function geoUserPositionError(error) {
+    switch (error.code) {
+        case error.PERMISSION_DENIED:
+            locationPermissionDenied.value = true;
+            break;
+        case error.POSITION_UNAVAILABLE:
+            alert("Unable to obtain Geolocation information.");
+            break;
+        case error.TIMEOUT:
+            alert("Request timed out.");
+            break;
+        case error.UNKNOWN_ERROR:
+            alert("An unknown error occured, please try again.");
+            break;
+    }
+}
+
 </script>
 <style scoped>
 @media (max-width: 991.98px) {
