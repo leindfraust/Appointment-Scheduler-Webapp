@@ -29,7 +29,7 @@ const props = defineProps({
     }
 });
 const forgotPasswordPromptCountLimit = ref(2)
-const forgotPasswordPromptCount = computed(() => props.forgotPasswordPromptCount)
+const forgotPasswordPromptCounts = computed(() => props.forgotPasswordPromptCount)
 
 async function getPatient() {
     await axios.post('/api/user/verify_username', {
@@ -184,7 +184,7 @@ async function pushNewPassword() {
 </script>
 <template>
     <a class="help has-text-danger" @click="modal = !modal"
-        v-if="forgotPasswordPromptCount >= forgotPasswordPromptCountLimit">Forgot Password</a>
+        v-if="forgotPasswordPromptCounts >= forgotPasswordPromptCountLimit">Forgot Password</a>
     <div class="modal" :class="{ 'is-active': modal }">
         <div class="modal-background"></div>
         <div class="modal-content has-text-left" style="width: 40%; margin: auto">
