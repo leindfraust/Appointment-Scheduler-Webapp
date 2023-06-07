@@ -45,4 +45,11 @@ By accessing or utilizing the "Medic Search" repository, you agree to abide by t
 
 For more information or inquiries regarding these terms, please contact the repository owner.
 
-#### Documentation work in progress
+## Members
+
+1. Romel Zerna Jr - Developer
+2. Mel Fatima Fernandez - Designer
+3. Cloyde Gubac - Researcher
+4. Gabriel Olmoguez - Researcher
+
+Documentation work in progress
