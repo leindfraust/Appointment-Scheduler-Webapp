@@ -31,7 +31,7 @@ There are mainly 3 types of accounts available. These are:
 
 ### GitHub Repository Terms and Conditions for "Medic Search"
 
-Thank you for visiting the "Medic Search" repository on GitHub. This document outlines the terms and conditions that govern the usage and protection of the content within this repository. Please read these terms carefully before accessing or utilizing any code or content contained herein.
+The following outlines the terms and conditions that govern the usage and protection of the content within this repository. Please read these terms carefully before accessing or utilizing any code or content contained herein.
 
 1. **Private Repository:** The "Medic Search" repository is set as private, meaning that only authorized individuals or teams have access to its contents. This ensures confidentiality and limits visibility to trusted parties.
 
