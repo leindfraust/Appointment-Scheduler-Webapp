@@ -27,7 +27,7 @@ onMounted(async () => {
 })
 onBeforeMount(async () => {
     await axios.get("/session/patient").then(async response => {
-        if (typeof response.data.username !== 'undefined') {
+        if (typeof response.data.username !== 'undefined' && !response.data.alias && !response.data.hospital) {
             store.commit("patientUsername", response.data.username)
             store.commit("patientID", response.data._id)
             await router.push(`/user/${store.state.patientUsername}`);
@@ -169,8 +169,8 @@ async function login() {
                                     @keyup.enter="login" required />
                             </div>
                             <div class="control" style="margin-top: 2%">
-                                <input class="input is-rounded" type="password" v-model="password"
-                                    placeholder="password" @keyup.enter="login" required />
+                                <input class="input is-rounded" type="password" v-model="password" placeholder="password"
+                                    @keyup.enter="login" required />
                             </div>
                             <h1 v-if="incorrectUserPass" class="subtitle has-text-danger">{{ validateMessage }}</h1>
                             <h1 v-else-if="incorrectUserPass == false" class="subtitle has-text-danger">{{
