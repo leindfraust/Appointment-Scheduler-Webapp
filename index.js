@@ -18,7 +18,7 @@ const server = app.listen(PORT, () => {
 });
 const io = require("socket.io")(server, {
     cors: {
-        origin: ["http://localhost:8080", "http://192.168.1.24:8080"]
+        origin: ["http://localhost:8080"]
     }
 });
 
@@ -170,68 +170,71 @@ io.on('connection', (socket) => {
     console.log('Client connected');
     socket.on('connect', () => console.log('Client connected'))
     socket.on('disconnect', () => console.log('Client disconnected'));
-    socket.on('message', (refID, title, msg, user, date) => {
-        Patient.findOneAndUpdate({
-            _id: roomNo
-        }, {
-            $push: {
-                messages: {
-                    id: refID,
-                    from: user,
-                    subject: title,
-                    message: msg,
-                    date: date,
-                    new: true
+    socket.on('message', async (refID, title, msg, user, date) => {
+
+        try {
+            const patient = await Patient.findOneAndUpdate({
+                _id: roomNo
+            }, {
+                $push: {
+                    messages: {
+                        id: refID,
+                        from: user,
+                        subject: title,
+                        message: msg,
+                        date: date,
+                        new: true
+                    },
                 },
-            },
-        }, {
-            returnOriginal: false
-        }, function (error, success) {
-            if (error) {
-                console.log(error)
-            } else {
-                io.to(roomNo).emit('send messages', success?.messages)
-            }
-        });
-    });
-    socket.on('update message', (notifications) => {
-        Patient.findOneAndUpdate({
-            _id: roomNo
-        }, {
-            messages: notifications
-        }, {
-            returnOriginal: false
-        }, function (error, success) {
-            if (error) {
-                console.log(error)
-            }
-        });
-    });
-    socket.on('delete message', (id, notif) => {
-        Patient.findOneAndUpdate({
-            _id: id
-        }, {
-            $pull: {
-                messages: {
-                    id: notif.refID,
-                    from: notif.user,
-                    subject: notif.title,
-                    message: notif.message,
-                    date: notif.date,
-                    new: notif.new
-                }
-            }
-        }, {
-            returnOriginal: false
-        }, function (error, success) {
-            if (error) {
-                console.log(error)
-            }
-        }).clone().catch((err) => {
+            }, {
+                new: true
+            })
+            io.to(roomNo).emit('send messages', patient?.messages)
+        } catch (err) {
             console.log(err)
-        }).then(response => {
-            io.to(roomNo).emit('delete messages', response?.messages)
-        });
+        }
+    });
+
+    socket.on('update message', async (notifications) => {
+        async function updatePatient() {
+            await Patient.findOneAndUpdate({
+                _id: roomNo
+            }, {
+                messages: notifications
+            }, {
+                new: true
+            })
+        }
+
+        try {
+            await updatePatient()
+        } catch (err) {
+            console.log(err)
+        }
+    });
+    socket.on('delete message', async (id, notif) => {
+
+        try {
+            const patient = await Patient.findOneAndUpdate({
+                _id: id
+            }, {
+                $pull: {
+                    messages: {
+                        id: notif.refID,
+                        from: notif.user,
+                        subject: notif.title,
+                        message: notif.message,
+                        date: notif.date,
+                        new: notif.new
+                    }
+                }
+            }, {
+                new: true
+            }).clone()
+            io.to(roomNo).emit('delete messages', patient?.messages)
+        } catch (err) {
+            console.log(err)
+        }
     });
 });
 
@@ -241,3 +244,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'client/dist/index.html'))
 
 });
+//remove console statements in production
+if (process.env.NODE_ENV !== "development") {
+    console.log = () => { };
+    console.debug = () => { };
+    console.info = () => { };
+    console.warn = () => { };
+}
