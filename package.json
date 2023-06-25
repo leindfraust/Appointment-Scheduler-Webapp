@@ -8,7 +8,7 @@
     "server": "nodemon --exec \"npm run lint && node index\"",
     "client": "npm run serve --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "start": "node index.js",
+    "start": "cd client && npm run build && cd ../ && node index.js",
     "lint": "eslint .  --ext .js"
   },
   "author": "Leindfraust",
