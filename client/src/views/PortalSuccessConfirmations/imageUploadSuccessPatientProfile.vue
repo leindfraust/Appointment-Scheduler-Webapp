@@ -1,3 +1,15 @@
+<script setup>
+import { onMounted } from 'vue'
+import { useStore } from 'vuex'
+const store = useStore()
+
+onMounted(() => {
+    setTimeout(() => {
+        window.location.href = "/account/login"
+        store.commit('imgSuccess', false)
+    }, 15000)
+});
+</script>
 <template>
     <div class="container" style="margin-top: 20%">
         <h1 class="title has-text-centered">Profile image has been changed successfully, changes may take a few minutes
@@ -12,19 +24,4 @@
     </div>
 </template>
 
-<script setup>
-import { onMounted } from 'vue'
-import { useStore } from 'vuex'
-const store = useStore()
-
-onMounted(() => {
-    setTimeout(() => {
-        window.location.href = "/account/login"
-        store.commit('imgSuccess', false)
-    }, 15000)
-});
-</script>
-
-<style>
-
-</style>
+<style></style>

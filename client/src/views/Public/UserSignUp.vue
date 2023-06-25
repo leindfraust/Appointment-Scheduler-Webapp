@@ -1,3 +1,164 @@
+<script setup>
+import axios from 'axios'
+import { ref, onBeforeMount } from 'vue'
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+
+const store = useStore()
+const router = useRouter()
+
+const firstName = ref('')
+const lastName = ref('')
+const age = ref('')
+const contactNum = ref('')
+const gmail = ref('')
+const currentAddress = ref('')
+const username = ref('')
+const password = ref('')
+const passwordRepeat = ref('')
+const sex = ref(null)
+const passwordMatch = ref('')
+const geolocationData = ref([])
+const isActiveDropdownProvince = ref(false)
+const isActiveDropdownCity = ref(false)
+const city = ref('')
+const province = ref('')
+const citiesData = ref([])
+const termsAndConditionsAgreed = ref(false)
+const errMsg = ref('')
+const usernameFound = ref('')
+const loadingUsername = ref(false)
+const emailFound = ref('')
+const loadingEmail = ref(false)
+const searchTimeout = ref(null)
+const randomChar = ref('')
+
+onBeforeMount(async () => {
+  await axios.get('/api/geolocation').then(response => geolocationData.value = response.data)
+})
+
+async function usernameFindTimeout() {
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value)
+    searchTimeout.value = null
+  }
+  searchTimeout.value = setTimeout(usernameFinder, 500)
+}
+async function usernameFinder() {
+  loadingUsername.value = true
+  usernameFound.value = false
+  await axios.post('/api/user/check_username', {
+    username: username.value
+  }).then(response => {
+    if (response.data) {
+      usernameFound.value = response.data
+    }
+  })
+  await axios.post('/api/doctor/check_username', {
+    username: username.value
+  }).then(response => {
+    if (response.data) {
+      usernameFound.value = response.data
+    }
+  })
+  await axios.post('/api/manager/check_username', {
+    username: username.value
+  }).then(response => {
+    if (response.data) {
+      usernameFound.value = response.data
+    }
+  })
+  if (username.value == '') {
+    usernameFound.value = ''
+  }
+  loadingUsername.value = false
+}
+async function emailFindTimeout() {
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value)
+    searchTimeout.value = null
+  }
+  searchTimeout.value = setTimeout(emailFinder, 500)
+}
+async function emailFinder() {
+  loadingEmail.value = true
+  await axios.post('/api/user/check_email', {
+    email: gmail.value
+  }).then(response => { emailFound.value = response.data })
+  if (gmail.value == '') {
+    emailFound.value = ''
+  }
+  loadingEmail.value = false
+}
+function agreeTermsAndConditions() {
+  termsAndConditionsAgreed.value = true
+}
+function sexMale() {
+  sex.value = "Male"
+}
+function sexFemale() {
+  sex.value = "Female"
+}
+async function selectProvince(provinceParam) {
+  city.value = ''
+  province.value = provinceParam
+  isActiveDropdownProvince.value = false
+  await axios.get('/api/geolocation').then(response => citiesData.value = response.data.find(x => x.province === provinceParam))
+  citiesData.value = await citiesData.value.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })
+}
+function selectCity(cityParam) {
+  city.value = cityParam
+  isActiveDropdownCity.value = false
+}
+function provinceDropdown() {
+  isActiveDropdownProvince.value = !isActiveDropdownProvince.value
+}
+function cityDropdown() {
+  isActiveDropdownCity.value = !isActiveDropdownCity.value
+}
+function generateRandomChar() {
+  let result = '';
+  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let charactersLength = characters.length;
+  for (let i = 0; i < 12; i++) {
+    result += characters.charAt(Math.floor(Math.random() *
+      charactersLength));
+  }
+  randomChar.value = result
+}
+async function signup() {
+  if ((password.value) !== passwordRepeat.value) {
+    passwordMatch.value = "password do not match";
+  } else {
+    passwordMatch.value = null;
+  }
+  if (password.value === passwordRepeat.value &&
+    !usernameFound.value && !emailFound.value
+  ) {
+    try {
+      if (gmail.value == '') {
+        generateRandomChar()
+      }
+      await axios.post("/api/user", {
+        username: username.value,
+        password: password.value,
+        name: [firstName.value, lastName.value],
+        age: age.value,
+        sex: sex.value,
+        contactNum: contactNum.value,
+        gmail: gmail.value == '' ? `${randomChar.value}dummyemail@email.com` : gmail.value,
+        province: province.value,
+        city: city.value,
+        currentAddress: currentAddress.value
+      });
+      store.commit('accountCreated', true)
+      await router.push("/account/login");
+    } catch (err) {
+      errMsg.value = err
+    }
+  }
+}
+</script>
 <template>
   <section class="hero is-fullheight">
     <div class="hero-body">
@@ -30,7 +191,7 @@
                 <div class="field">
                   <p class="control">
                     <label class="label">Age:</label>
-                    <input class="input" type="number" placeholder="age" v-model="age" required style="width: 150px"/>
+                    <input class="input" type="number" placeholder="age" v-model="age" required style="width: 150px" />
                   </p>
                 </div>
 
@@ -132,8 +293,7 @@
                 <div v-if="usernameFound !== ''">
                   <p class="help is-danger" v-if="usernameFound">Unavailable<i class="fas fa-spinner fa-spin"
                       v-if="loadingUsername"></i></p>
-                  <p class="help is-success" v-else>Available<i class="fas fa-spinner fa-spin"
-                      v-if="loadingUsername"></i>
+                  <p class="help is-success" v-else>Available<i class="fas fa-spinner fa-spin" v-if="loadingUsername"></i>
                   </p>
                 </div>
                 <input class="input" type="text" placeholder="username" v-model="username" @input="usernameFindTimeout"
@@ -162,7 +322,8 @@
             <label class="checkbox">
               <input type="checkbox" @click="agreeTermsAndConditions" />
               I agree to the
-              <router-link :to="'/terms-and-conditions'">terms and conditions</router-link> and <router-link :to="'/eula'">End User's License Agreement</router-link>
+              <router-link :to="'/terms-and-conditions'">terms and conditions</router-link> and <router-link
+                :to="'/eula'">End User's License Agreement</router-link>
             </label>
             <br />
             <div class="has-text-right">
@@ -175,168 +336,6 @@
     </div>
   </section>
 </template>
-<script>
-import axios from 'axios'
-
-export default {
-  username: "UserSignUp",
-  data() {
-    return {
-      firstName: '',
-      lastName: '',
-      age: '',
-      contactNum: '',
-      gmail: '',
-      currentAddress: '',
-      username: '',
-      password: '',
-      passwordRepeat: '',
-      sex: null,
-      passwordMatch: '',
-      geolocationData: [],
-      isActiveDropdownProvince: false,
-      isActiveDropdownCity: false,
-      city: '',
-      province: '',
-      citiesData: [],
-      termsAndConditionsAgreed: false,
-      errMsg: '',
-      usernameFound: '',
-      loadingUsername: false,
-      emailFound: '',
-      loadingEmail: false,
-      searchTimeout: null,
-      randomChar: ''
-    }
-  },
-  async mounted() {
-    await axios.get('/api/geolocation').then(response => this.geolocationData = response.data)
-  },
-  methods: {
-    async usernameFindTimeout() {
-      if (this.searchTimeout) {
-        clearTimeout(this.searchTimeout)
-        this.searchTimeout = null
-      }
-      this.searchTimeout = setTimeout(this.usernameFinder, 500)
-    },
-    async usernameFinder() {
-      this.loadingUsername = true
-      this.usernameFound = false
-      await axios.post('/api/user/check_username', {
-        username: this.username
-      }).then(response => {
-        if (response.data) {
-          this.usernameFound = response.data
-        }
-      })
-      await axios.post('/api/doctor/check_username', {
-        username: this.username
-      }).then(response => {
-        if (response.data) {
-          this.usernameFound = response.data
-        }
-      })
-      await axios.post('/api/manager/check_username', {
-        username: this.username
-      }).then(response => {
-        if (response.data) {
-          this.usernameFound = response.data
-        }
-      })
-      if (this.username == '') {
-        this.usernameFound = ''
-      }
-      this.loadingUsername = false
-    },
-    async emailFindTimeout() {
-      if (this.searchTimeout) {
-        clearTimeout(this.searchTimeout)
-        this.searchTimeout = null
-      }
-      this.searchTimeout = setTimeout(this.emailFinder, 500)
-    },
-    async emailFinder() {
-      this.loadingEmail = true
-      await axios.post('/api/user/check_email', {
-        email: this.gmail
-      }).then(response => { this.emailFound = response.data })
-      if (this.gmail == '') {
-        this.emailFound = ''
-      }
-      this.loadingEmail = false
-    },
-    agreeTermsAndConditions() {
-      this.termsAndConditionsAgreed = true
-    },
-    sexMale() {
-      this.sex = "Male"
-    },
-    sexFemale() {
-      this.sex = "Female"
-    },
-    async selectProvince(province) {
-      this.city = ''
-      this.province = province
-      this.isActiveDropdownProvince = false
-      await axios.get('/api/geolocation').then(response => this.citiesData = response.data.find(x => x.province === province))
-      this.citiesData = await this.citiesData.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })
-    },
-    selectCity(city) {
-      this.city = city
-      this.isActiveDropdownCity = false
-    },
-    provinceDropdown() {
-      this.isActiveDropdownProvince = !this.isActiveDropdownProvince
-    },
-    cityDropdown() {
-      this.isActiveDropdownCity = !this.isActiveDropdownCity
-    },
-    generateRandomChar() {
-      let result = '';
-      let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let charactersLength = characters.length;
-      for (let i = 0; i < 12; i++) {
-        result += characters.charAt(Math.floor(Math.random() *
-          charactersLength));
-      }
-      this.randomChar = result
-    },
-    async signup() {
-      if ((this.password) !== this.passwordRepeat) {
-        this.passwordMatch = "password do not match";
-      } else {
-        this.passwordMatch = null;
-      }
-      if (this.password === this.passwordRepeat &&
-        !this.usernameFound && !this.emailFound
-      ) {
-        try {
-          if (this.gmail == '') {
-            this.generateRandomChar()
-          }
-          await axios.post("/api/user", {
-            username: this.username,
-            password: this.password,
-            name: [this.firstName, this.lastName],
-            age: this.age,
-            sex: this.sex,
-            contactNum: this.contactNum,
-            gmail: this.gmail == '' ? `${this.randomChar}dummyemail@email.com` : this.gmail,
-            province: this.province,
-            city: this.city,
-            currentAddress: this.currentAddress
-          });
-          await this.$store.commit('accountCreated', true)
-          await this.$router.push("/account/login");
-        } catch (err) {
-          this.errMsg = err
-        }
-      }
-    }
-  }
-}
-</script>
 <style scoped>
 .hero-body {
   background: center center no-repeat url('../../assets/images/background-client-signup.png');
