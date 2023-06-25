@@ -1,3 +1,34 @@
+<script setup>
+import html2pdf from 'html2pdf.js'
+import { ref, onUnmounted } from 'vue'
+import NavigationTab from "../../components/NavigationTab.vue";
+import { useStore } from 'vuex';
+
+const store = useStore()
+
+const patient = ref(store.state.patientDetails)
+const pdfHide = ref(true)
+
+onUnmounted(() => {
+  store.commit("statusAvailability", false)
+  store.commit("patientDetails", [])
+  store.commit("appointed", false)
+})
+
+function exportPDF() {
+  pdfHide.value = false
+  let el = document.getElementById("digitalConfirmation")
+  html2pdf(el, {
+    margin: 0,
+    filename: `${patient.value.referenceID}.pdf`,
+    image: { type: 'jpeg', quality: 1 },
+    html2canvas: { scale: 1 },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+  })
+  pdfHide.value = true
+}
+
+</script>
 <template>
   <NavigationTab />
   <section class="section has-text-centered" id="background">
@@ -22,7 +53,7 @@
         <button class="button is-rounded is-link" @click="exportPDF">Download a copy</button>
       </div>
     </div>
-    <br/>
+    <br />
     <div class="column">
       <h1 class="title">Patient Details </h1><br>
       <h1 class="subtitle"><b>First Name:</b> {{ patient.firstName }}</h1>
@@ -80,41 +111,6 @@
     </div>
   </section>
 </template>
-
-<script>
-import html2pdf from 'html2pdf.js'
-import store from "../../store";
-import NavigationTab from "../../components/NavigationTab.vue";
-export default {
-  name: "pickDoctorSuccess",
-  data() {
-    return {
-      patient: store.state.patientDetails,
-      pdfHide: true
-    };
-  },
-  unmounted() {
-    store.commit("statusAvailability", false)
-    store.commit("patientDetails", [])
-    store.commit("appointed", false)
-  },
-  components: { NavigationTab },
-  methods: {
-    exportPDF() {
-      this.pdfHide = false
-      let el = document.getElementById("digitalConfirmation")
-      html2pdf(el, {
-        margin: 0,
-        filename: `${this.patient.referenceID}.pdf`,
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 1 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      })
-      this.pdfHide = true
-    }
-  }
-};
-</script>
 
 <style scoped>
 #background {

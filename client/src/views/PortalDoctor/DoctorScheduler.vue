@@ -1,10 +1,241 @@
+<script setup>
+import axios from "axios";
+import DoctorMenu from "../../components/DoctorMenu.vue"
+import CatchError from "../../components/CatchError.vue";
+import { ref, onBeforeMount, computed } from 'vue'
+
+
+const errMsg = ref('')
+const userID = ref("")
+const date = ref(new Date())
+const timeStart = ref('')
+const timeEnd = ref('')
+const timezone = ref("Asia/Hong_Kong")
+const prefix = ref('')
+const days = ref([])
+const day = ref('')
+const appointmentLimits = ref(10)
+const toggleModalSchedule = ref(false)
+const uploadSchedSuccess = ref(false)
+const loading = ref(false)
+const hospitalList = ref([])
+const selectedHospital = ref('')
+const updateSchedule = ref(false)
+const appointmentCategory = ref('')
+const appointmentCategories = ref([])
+const selectedAppointmentCategories = ref([])
+const paymentAmount = ref(500)
+
+onBeforeMount(async () => {
+  await axios.get("/session/doctor").then((response) => (days.value = response.data.schedule));
+  await axios.get("/session/doctor").then(response => appointmentCategories.value = response.data.appointmentCategories)
+  await axios.get("/session/doctor").then((response) => (userID.value = response.data._id));
+  await axios.get("/session/doctor").then(response => hospitalList.value = response.data.hospitalOrigin)
+  selectedHospital.value = await hospitalList.value[0].hospital
+})
+
+const attributes = computed(() => {
+  return days.value.map((day) => ({
+    highlight: true,
+    dates: new Date(day.date).toDateString(),
+    popover: {
+      label: `${day.hospital}, ${day.timeStart} - ${day.timeEnd}`
+    }
+  }));
+})
+const daysIndexed = computed(() => {
+  if (days.value !== '') {
+    return sortDate()
+  } else {
+    return false
+  }
+})
+
+function sortDate() {
+  return days.value.filter(x => { return new Date(x.id) > new Date() }).sort((a, b) =>
+    new Date(a.date).valueOf() - new Date(b.date).valueOf())
+}
+function timeStringConvert(timeString, dateObject) {
+  dateObject.setHours(timeString.substr(0, timeString.indexOf(":")))
+  dateObject.setMinutes(timeString.substr(3, timeString.indexOf(":")))
+  dateObject.setSeconds(timeString.substr(6, timeString.indexOf(":")))
+  return dateObject
+}
+async function uploadSched() {
+  loading.value = true
+  if (updateSchedule.value) {
+    try {
+      await axios.put(`/api/doctor/schedule_update/${userID.value}`, {
+        schedule: {
+          dayDetail: day.value,
+          id: day.value.id,
+          date: day.value.date,
+          timeStart: timeStart.value.toLocaleTimeString(),
+          timeEnd: timeEnd.value.toLocaleTimeString(),
+          appointmentLimit: appointmentLimits.value,
+          prefix: prefix.value,
+          hospital: selectedHospital.value,
+          appointmentCategories: selectedAppointmentCategories.value,
+          paymentAmount: paymentAmount.value
+        }
+      }).then(async response => {
+        await axios.put('/session/doctor', {
+          schedule: response.data.schedule
+        });
+        days.value = [...response.data.schedule]
+      });
+    } catch (err) {
+      errMsg.value = err
+    }
+  } else {
+    days.value.push({
+      dayDetail: day.value,
+      id: day.value.id,
+      date: day.value.date,
+      timeStart: timeStart.value.toLocaleTimeString(),
+      timeEnd: timeEnd.value.toLocaleTimeString(),
+      appointmentLimit: appointmentLimits.value,
+      prefix: prefix.value,
+      hospital: selectedHospital.value,
+      appointmentCategories: selectedAppointmentCategories.value,
+      paymentAmount: paymentAmount.value
+    });
+    try {
+      await axios.put(`/api/doctor/${userID.value}`, {
+        schedule: days.value,
+      });
+      await axios.put("/session/doctor", {
+        schedule: days.value,
+      }).then(() => {
+        setTimeout(async () => {
+          await axios
+            .get("/session/doctor")
+            .then((response) => (days.value = [...response.data.schedule]));
+        }, 500)
+      });
+    }
+    catch (err) {
+      errMsg.value = err
+    }
+  }
+  toggleModalSchedule.value = false
+  updateSchedule.value = false
+  uploadSchedSuccess.value = true
+  loading.value = false
+}
+async function modalSchedDelete(dayParam) {
+  if (!dayParam?.isDisabled) {
+    toggleModalSchedule.value = true;
+    const idx = days.value.findIndex((d) => d.id === dayParam.id);
+    if (idx >= 0) {
+      loading.value = true
+      days.value.splice(idx, 1);
+      toggleModalSchedule.value = false;
+      try {
+        await axios.put(`/api/doctor/${userID.value}`, {
+          schedule: days.value,
+        });
+        await axios.put("/session/doctor", {
+          schedule: days.value,
+        }).then(() => {
+          setTimeout(async () => {
+            await axios
+              .get("/session/doctor")
+              .then((response) => (days.value = [...response.data.schedule]));
+          }, 500)
+        });
+      } catch (err) {
+        errMsg.value = err
+      }
+      uploadSchedSuccess.value = true
+      loading.value = false
+    }
+  }
+}
+async function modalSchedPrompt(dayParam) {
+  const schedule = days.value.find(x => x.id == dayParam.id)
+  if (!dayParam.isDisabled && !schedule) { //checks if its disabled and it has no schedule in that day
+    toggleModalSchedule.value = true;
+    day.value = dayParam;
+    timeStart.value = dayParam.date;
+    timeEnd.value = dayParam.date;
+  } else {
+    if (!dayParam.isDisabled) { //if there was a schedule on that day, it checks again if it is disabled
+      modalSchedEdit(schedule)
+    }
+  }
+}
+
+async function modalSchedEdit(scheduleParam) {
+  updateSchedule.value = true
+  toggleModalSchedule.value = true;
+  prefix.value = scheduleParam.prefix
+  day.value = scheduleParam.dayDetail;
+  timeStart.value = timeStringConvert(scheduleParam.timeStart, new Date(scheduleParam.dayDetail.date))
+  timeEnd.value = timeStringConvert(scheduleParam.timeEnd, new Date(scheduleParam.dayDetail.date))
+  appointmentLimits.value = scheduleParam.appointmentLimit
+  selectedHospital.value = scheduleParam.hospital
+  selectedAppointmentCategories.value = [...scheduleParam.appointmentCategories]
+  paymentAmount.value = scheduleParam.paymentAmount
+}
+function modalClose() {
+  toggleModalSchedule.value = !toggleModalSchedule.value;
+  updateSchedule.value = false
+  prefix.value = ''
+  day.value = ''
+  timeStart.value = ''
+  timeEnd.value = ''
+  appointmentLimits.value = 10
+  selectedAppointmentCategories.value = []
+  appointmentCategory.value = ''
+}
+async function addAppointmentCategory() {
+  if (!appointmentCategories.value.find(x => x === appointmentCategory.value)) {
+    appointmentCategories.value.push(appointmentCategory.value)
+  }
+  try {
+    await axios.put(`/api/doctor/${userID.value}`, {
+      appointmentCategories: appointmentCategories.value
+    })
+    await axios.put('/session/doctor', {
+      appointmentCategories: appointmentCategories.value
+    })
+  } catch (err) {
+    errMsg.value = err
+  }
+  appointmentCategory.value = ''
+}
+async function deleteAppointmentCategory(category) {
+  appointmentCategories.value = appointmentCategories.value.filter(x => x !== category)
+  try {
+    await axios.put(`/api/doctor/${userID.value}`, {
+      appointmentCategories: appointmentCategories.value
+    })
+    await axios.put('/session/doctor', {
+      appointmentCategories: appointmentCategories.value
+    })
+    this.undoAppointmentCategory(category)
+  } catch (err) {
+    errMsg.value = err
+  }
+}
+function selectAppointmentCategory(category) {
+  if (!selectedAppointmentCategories.value.find(x => x === category)) {
+    selectedAppointmentCategories.value.push(category)
+  }
+}
+function undoAppointmentCategory(category) {
+  selectedAppointmentCategories.value = selectedAppointmentCategories.value.filter(x => x !== category)
+}
+
+</script>
 <template>
   <div class="main-doctor">
     <div class="columns">
       <div class="column is-2">
         <DoctorMenu />
       </div>
-      <div class="column">
+      <div class="column main-doctor-content">
         <section class="section">
           <CatchError :err-msg="errMsg" />
           <h1 class="title">SET SCHEDULES</h1>
@@ -17,13 +248,12 @@
                   <div class="content has-text-centered">
                     <div class="control block">
                       <label class="label">Prefix(OPTIONAL):</label>
-                      <input class="input" type="text" v-model="prefix" style="width: 33%;"
-                        placeholder="e.g. ROOM305" />
+                      <input class="input" type="text" v-model="prefix" style="width: 33%;" placeholder="e.g. ROOM305" />
                     </div>
                     <div class="select block">
                       <select v-model="selectedHospital">
                         <option v-for="hospital in hospitalList" :key="hospital" :value="hospital.hospital">{{
-                            hospital.hospital
+                          hospital.hospital
                         }}</option>
                       </select>
                     </div>
@@ -100,9 +330,9 @@
                       <button class="button" :class="{ 'is-primary': !updateSchedule, 'is-info': updateSchedule }"
                         type="button" @click="uploadSched"
                         :disabled="selectedAppointmentCategories.length == 0 || !paymentAmount">{{
-                            updateSchedule ? 'Update Schedule'
-                              :
-                              'Add Schedule'
+                          updateSchedule ? 'Update Schedule'
+                          :
+                          'Add Schedule'
                         }}</button>
                     </div>
                   </div>
@@ -164,251 +394,3 @@
     </div>
   </div>
 </template>
-
-<script>
-import axios from "axios";
-import store from "../../store";
-import DoctorMenu from "../../components/DoctorMenu.vue"
-import CatchError from "../../components/CatchError.vue";
-
-export default {
-  name: "SchedulerPage",
-  components: {
-    DoctorMenu,
-    CatchError
-  },
-  data() {
-    return {
-      errMsg: '',
-      alias: store.state.alias,
-      profileImg: store.state.profileImg,
-      userID: "",
-      date: new Date(),
-      timeStart: '',
-      timeEnd: '',
-      timezone: "Asia/Hong_Kong",
-      prefix: '',
-      days: [],
-      day: '',
-      appointmentLimits: 10,
-      checkServer: null,
-      toggleModalSchedule: false,
-      uploadSchedSuccess: false,
-      loading: false,
-      hospitalList: [],
-      selectedHospital: '',
-      updateSchedule: false,
-      appointmentCategory: '',
-      appointmentCategories: [],
-      selectedAppointmentCategories: [],
-      paymentAmount: 500
-    };
-  },
-  async mounted() {
-    await axios.get("/session/doctor").then((response) => (this.days = response.data.schedule));
-    await axios.get("/session/doctor").then(response => this.appointmentCategories = response.data.appointmentCategories)
-    await axios.get("/session/doctor").then((response) => (this.userID = response.data._id));
-    await axios.get("/session/doctor").then(response => this.hospitalList = response.data.hospitalOrigin)
-    this.selectedHospital = await this.hospitalList[0].hospital
-  },
-  computed: {
-    attributes() {
-      return this.days.map((day) => ({
-        highlight: true,
-        dates: new Date(day.date).toDateString(),
-        popover: {
-          label: `${day.hospital}, ${day.timeStart} - ${day.timeEnd}`
-        }
-      }));
-    },
-    daysIndexed() {
-      if (this.days !== '') {
-        return this.sortDate()
-      } else {
-        return false
-      }
-
-    }
-  },
-  methods: {
-    sortDate() {
-      return this.days.filter(x => { return new Date(x.id) > new Date() }).sort((a, b) =>
-        new Date(a.date).valueOf() - new Date(b.date).valueOf())
-    },
-    timeStringConvert(timeString, dateObject) {
-      dateObject.setHours(timeString.substr(0, timeString.indexOf(":")))
-      dateObject.setMinutes(timeString.substr(3, timeString.indexOf(":")))
-      dateObject.setSeconds(timeString.substr(6, timeString.indexOf(":")))
-      return dateObject
-    },
-    async uploadSched() {
-      this.loading = true
-      if (this.updateSchedule) {
-        try {
-          await axios.put(`/api/doctor/schedule_update/${this.userID}`, {
-            schedule: {
-              dayDetail: this.day,
-              id: this.day.id,
-              date: this.day.date,
-              timeStart: this.timeStart.toLocaleTimeString(),
-              timeEnd: this.timeEnd.toLocaleTimeString(),
-              appointmentLimit: this.appointmentLimits,
-              prefix: this.prefix,
-              hospital: this.selectedHospital,
-              appointmentCategories: this.selectedAppointmentCategories,
-              paymentAmount: this.paymentAmount
-            }
-          }).then(async response => {
-            await axios.put('/session/doctor', {
-              schedule: response.data.schedule
-            });
-            this.days = [...response.data.schedule]
-          });
-        } catch (err) {
-          this.errMsg = err
-        }
-      } else {
-        this.days.push({
-          dayDetail: this.day,
-          id: this.day.id,
-          date: this.day.date,
-          timeStart: this.timeStart.toLocaleTimeString(),
-          timeEnd: this.timeEnd.toLocaleTimeString(),
-          appointmentLimit: this.appointmentLimits,
-          prefix: this.prefix,
-          hospital: this.selectedHospital,
-          appointmentCategories: this.selectedAppointmentCategories,
-          paymentAmount: this.paymentAmount
-        });
-        try {
-          await axios.put(`/api/doctor/${this.userID}`, {
-            schedule: this.days,
-          });
-          await axios.put("/session/doctor", {
-            schedule: this.days,
-          }).then(() => {
-            setTimeout(async () => {
-              await axios
-                .get("/session/doctor")
-                .then((response) => (this.days = [...response.data.schedule]));
-            }, 500)
-          });
-        }
-        catch (err) {
-          this.errMsg = err
-        }
-      }
-      this.toggleModalSchedule = false
-      this.updateSchedule = false
-      this.uploadSchedSuccess = true
-      this.loading = false
-    },
-    async modalSchedDelete(day) {
-      if (!day?.isDisabled) {
-        this.toggleModalSchedule = true;
-        const idx = this.days.findIndex((d) => d.id === day.id);
-        if (idx >= 0) {
-          this.loading = true
-          this.days.splice(idx, 1);
-          this.toggleModalSchedule = false;
-          try {
-            await axios.put(`/api/doctor/${this.userID}`, {
-              schedule: this.days,
-            });
-            await axios.put("/session/doctor", {
-              schedule: this.days,
-            }).then(() => {
-              setTimeout(async () => {
-                await axios
-                  .get("/session/doctor")
-                  .then((response) => (this.days = [...response.data.schedule]));
-              }, 500)
-            });
-          } catch (err) {
-            this.errMsg = err
-          }
-          this.uploadSchedSuccess = true
-          this.loading = false
-        }
-      }
-    },
-    async modalSchedPrompt(day) {
-      if (!day?.isDisabled && day.attributes.length == 0) {
-        this.toggleModalSchedule = true;
-        this.day = day;
-        this.timeStart = day.date;
-        this.timeEnd = day.date;
-      } else {
-        const schedule = this.days.find(x => x.id == day.id)
-        this.modalSchedEdit(schedule)
-      }
-    },
-    async modalSchedEdit(schedule) {
-      if (!schedule.dayDetail?.isDisabled) {
-        this.updateSchedule = true
-        this.toggleModalSchedule = true;
-        this.prefix = schedule.prefix
-        this.day = schedule.dayDetail;
-        this.timeStart = this.timeStringConvert(schedule.timeStart, new Date(schedule.dayDetail.date))
-        this.timeEnd = this.timeStringConvert(schedule.timeEnd, new Date(schedule.dayDetail.date))
-        this.appointmentLimits = schedule.appointmentLimit
-        this.selectedHospital = schedule.hospital
-        this.selectedAppointmentCategories = [...schedule.appointmentCategories]
-        this.paymentAmount = schedule.paymentAmount
-      }
-    },
-    modalClose() {
-      this.toggleModalSchedule = !this.toggleModalSchedule;
-      this.updateSchedule = false
-      this.prefix = ''
-      this.day = ''
-      this.timeStart = ''
-      this.timeEnd = ''
-      this.appointmentLimits = 10
-      this.selectedAppointmentCategories = []
-      this.appointmentCategory = ''
-    },
-    async addAppointmentCategory() {
-      if (!this.appointmentCategories.find(x => x === this.appointmentCategory)) {
-        this.appointmentCategories.push(this.appointmentCategory)
-      }
-      try {
-        await axios.put(`/api/doctor/${this.userID}`, {
-          appointmentCategories: this.appointmentCategories
-        })
-        await axios.put('/session/doctor', {
-          appointmentCategories: this.appointmentCategories
-        })
-      } catch (err) {
-        this.errMsg = err
-      }
-      this.appointmentCategory = ''
-    },
-    async deleteAppointmentCategory(category) {
-      this.appointmentCategories = this.appointmentCategories.filter(x => x !== category)
-      try {
-        await axios.put(`/api/doctor/${this.userID}`, {
-          appointmentCategories: this.appointmentCategories
-        })
-        await axios.put('/session/doctor', {
-          appointmentCategories: this.appointmentCategories
-        })
-        this.undoAppointmentCategory(category)
-      } catch (err) {
-        this.errMsg = err
-      }
-    },
-    selectAppointmentCategory(category) {
-      if (!this.selectedAppointmentCategories.find(x => x === category)) {
-        this.selectedAppointmentCategories.push(category)
-      }
-    },
-    undoAppointmentCategory(category) {
-      this.selectedAppointmentCategories = this.selectedAppointmentCategories.filter(x => x !== category)
-    }
-  },
-};
-</script>
-<style scoped>
-
-</style>

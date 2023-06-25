@@ -1,10 +1,223 @@
+<script setup>
+import axios from 'axios'
+import DoctorMenu from '../../components/DoctorMenu.vue'
+import ForgotPassword from '../../components/ForgotPassword.vue';
+import { ref, onBeforeMount } from 'vue'
+
+
+const doctorDetails = ref([])
+const OTP = ref(null)
+const id = ref(null)
+const isActiveModal = ref(false)
+const currentPassword = ref(null)
+const currentPasswordValidateMessage = ref(null)
+const passwordValidateMessage = ref(null)
+const incorrectPasswordValidate = ref(null)
+const passwordValidate = ref(null)
+const password = ref(null)
+const passwordRepeat = ref(null)
+const passwordSuccess = ref(false)
+const verified = ref(null)
+const licenseNo = ref(null)
+const fullname = ref(null)
+const gmail = ref(null)
+const authorized = ref(false)
+const verifyEmailSent = ref(false)
+const emailTaken = ref(false)
+const codeError = ref(false)
+const updateInfoSuccess = ref(false)
+const incorrectCode = ref(false)
+const errMsg = ref('')
+const verifyButtonLoading = ref(false)
+
+onBeforeMount(async () => {
+    await axios.get("/session/doctor").then(response => doctorDetails.value = response.data)
+    verified.value = await doctorDetails.value.verified
+    id.value = await doctorDetails.value._id
+    licenseNo.value = await doctorDetails.value.licenseNo
+    fullname.value = await doctorDetails.value.fullname
+    gmail.value = await doctorDetails.value.gmail
+})
+
+async function updatePassword() {
+    if (await currentPassword.value !== '' && password.value !== '' && passwordRepeat.value !== '') {
+        if (password.value !== passwordRepeat.value) {
+            passwordValidate.value = true;
+            passwordValidateMessage.value = "Passwords do not match"
+            passwordSuccess.value = false
+        } else {
+            try {
+                await axios.put('/api/updatePassword/doctor', {
+                    doctorID: id.value,
+                    currentPassword: currentPassword.value,
+                    newPassword: password.value
+                }).then(response => {
+                    if (response.data) {
+                        incorrectPasswordValidate.value = false
+                        passwordValidate.value = false
+                        passwordSuccess.value = true
+                        currentPassword.value = null
+                        password.value = null
+                        passwordRepeat.value = null
+                        currentPasswordValidateMessage.value = ''
+                    } else {
+                        passwordValidate.value = false
+                        passwordSuccess.value = false
+                        incorrectPasswordValidate.value = true
+                        currentPasswordValidateMessage.value = 'Incorrect current password'
+                    }
+                });
+            } catch (err) {
+                passwordValidate.value = false
+                passwordSuccess.value = false
+                incorrectPasswordValidate.value = true
+                errMsg.value = err
+            }
+        }
+    }
+}
+function showPass() {
+    let passwordToggle = document.getElementsByClassName("password");
+    for (let i = 0; i < passwordToggle.length; i++) {
+        if (passwordToggle[i].type === "password") {
+            passwordToggle[i].type = "text";
+        } else {
+            passwordToggle[i].type = "password";
+        }
+    }
+}
+async function modalUpEditInfo() {
+    codeError.value = false
+
+    await axios.post("/api/code/email", {
+        email: gmail.value
+    }).then(async response => {
+        if (!response.data) {
+            await axios.post('/api/OTPMail', {
+                email: gmail.value
+            }).then(isActiveModal.value = true).catch(err => {
+                if (err) {
+                    codeError.value = true
+                }
+            });
+        } else {
+            isActiveModal.value = true
+            codeError.value = true
+        }
+    })
+}
+function modalUpInfoVerify() {
+    isActiveModal.value = true
+}
+async function sendVerificationEmail() {
+    verifyButtonLoading.value = true
+    let existingEmail = []
+    verifyEmailSent.value = false
+    codeError.value = false
+    emailTaken.value = false
+    await axios.get("/api/doctor").then(response => existingEmail = response.data.find(x => x.gmail === gmail.value))
+    if (typeof existingEmail !== 'undefined') {
+        await axios.post("/api/code/email", {
+            email: gmail.value
+        }).then(async response => {
+            if (!response.data) {
+                await axios.post('/api/OTPMail', {
+                    email: gmail.value
+                }).catch(err => {
+                    if (err) {
+                        codeError.value = true
+                    }
+                });
+                verifyEmailSent.value = true
+            } else {
+                verifyEmailSent.value = true
+                codeError.value = true
+            }
+        })
+    } else {
+        verifyEmailSent.value = true
+        codeError.value = true
+        emailTaken.value = true
+    }
+    verifyButtonLoading.value = false
+}
+async function confirmOTPEditInfo() {
+    verifyButtonLoading.value = true
+    incorrectCode.value = false
+    await axios.post("/api/code/verify", {
+        code: OTP.value
+    }).then(response => {
+        if (response.data) {
+            if (!codeError.value) {
+                authorized.value = true
+                isActiveModal.value = false
+            }
+        } else {
+            incorrectCode.value = true
+        }
+    })
+    verifyButtonLoading.value = false
+}
+async function verifyEmail() {
+    verifyButtonLoading.value = true
+    incorrectCode.value = false
+    await axios.post("/api/code/verify", {
+        code: OTP.value
+    }).then(async response => {
+        if (await response.data) {
+            if (!codeError.value) {
+                await axios.put(`/api/doctor/${id.value}`, {
+                    gmail: gmail.value,
+                    verified: true
+                });
+                await axios.put('/session/doctor', {
+                    gmail: gmail.value,
+                    verified: true
+                });
+                verified.value = true
+                isActiveModal.value = false
+                if (!isActiveModal.value) {
+                    await axios.get('/session/doctor').then(response => doctorDetails.value = response.data)
+                }
+            } else {
+                incorrectCode.value = true
+            }
+        } else {
+            incorrectCode.value = true
+        }
+    });
+    verifyButtonLoading.value = false
+}
+async function updateInfo() {
+    updateInfoSuccess.value = false
+    if (verified.value) {
+        await axios.put(`/api/doctor/${id.value}`, {
+            licenseNo: licenseNo.value,
+            name: fullname.value
+        })
+        await axios.put("/session/doctor", {
+            licenseNo: licenseNo.value,
+            name: fullname.value
+        })
+        await axios
+            .get("/session/doctor")
+            .then((response) => (fullname.value = response.data.fullname));
+
+        updateInfoSuccess.value = true
+    }
+}
+function closeModal() {
+    isActiveModal.value = false
+}
+
+</script>
 <template>
     <div class="main-doctor">
         <div class="columns">
             <div class="column is-2">
                 <DoctorMenu />
             </div>
-            <div class="column">
+            <div class="column main-doctor-content">
                 <section class="section">
                     <h1 class="title">SECURITY</h1>
                     <div class="container box">
@@ -20,7 +233,9 @@
                         <div class="columns">
                             <div class="column">
                                 <h1 class="title">Change password:</h1>
-                                <ForgotPassword v-if="gmail != null" :userType="'doctor'" :email='gmail' />
+                                <div v-if="gmail != null">
+                                    <ForgotPassword :userType="'doctor'" :email='gmail' />
+                                </div>
                                 <div class="block"></div>
                                 <div class="field">
                                     <div class="control">
@@ -35,8 +250,8 @@
                                 <div class="field">
                                     <div class="control">
                                         <label class="label">Create new password:</label>
-                                        <input class="input password" size="5" type="password" v-model="password"
-                                            required :class="{ 'is-danger': passwordValidate }" />
+                                        <input class="input password" size="5" type="password" v-model="password" required
+                                            :class="{ 'is-danger': passwordValidate }" />
                                     </div>
                                     <div v-if="passwordValidate" class="notification is-danger">{{
                                         passwordValidateMessage
@@ -111,8 +326,7 @@
                                             <div class="has-text-centered">
                                                 <button class="button is-success"
                                                     :class="{ 'is-loading': verifyButtonLoading }"
-                                                    @click="sendVerificationEmail"
-                                                    :disabled="gmail === ''">Verify</button>
+                                                    @click="sendVerificationEmail" :disabled="gmail === ''">Verify</button>
                                             </div>
                                         </div>
                                         <div v-if="verifyEmailSent" class="field">
@@ -124,16 +338,15 @@
                                                     again in 10 minutes.</span>
                                             </div>
                                             <div class="control has-text-centered">
-                                                <input v-if="!codeError" class="input" type="number" maxlength="4"
-                                                    id="OTP" v-model="OTP"
-                                                    oninput="this.value=this.value.slice(0,this.maxLength)"
+                                                <input v-if="!codeError" class="input" type="number" maxlength="4" id="OTP"
+                                                    v-model="OTP" oninput="this.value=this.value.slice(0,this.maxLength)"
                                                     :disabled="codeError || OTP == ''" />
                                             </div>
                                             <div class="block"></div>
                                             <div class="has-text-centered" v-if="!codeError">
                                                 <button class="button is-info"
-                                                    :class="{ 'is-loading': verifyButtonLoading }"
-                                                    :disabled="OTP === ''" @click="verifyEmail">Confirm</button>
+                                                    :class="{ 'is-loading': verifyButtonLoading }" :disabled="OTP === ''"
+                                                    @click="verifyEmail">Confirm</button>
                                                 <div class="notification is-danger" v-if="incorrectCode">Incorrect code,
                                                     please check your email thoroughly.</div>
                                             </div>
@@ -178,8 +391,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button class="button is-link" :disabled="!authorized"
-                                    @click="updateInfo">Confirm</button>
+                                <button class="button is-link" :disabled="!authorized" @click="updateInfo">Confirm</button>
                                 <div v-if="updateInfoSuccess" class="notification is-success is-light">Changes have been
                                     updated successfully.</div>
                             </div>
@@ -190,228 +402,6 @@
         </div>
     </div>
 </template>
-<script>
-import axios from 'axios'
-import DoctorMenu from '../../components/DoctorMenu.vue'
-import { defineAsyncComponent } from 'vue'
-
-export default {
-    name: 'DoctorSecurity',
-    components: {
-        DoctorMenu,
-        ForgotPassword: defineAsyncComponent(() => import('../../components/ForgotPassword.vue'))
-    },
-    async mounted() {
-        await axios.get("/session/doctor").then(response => this.doctorDetails = response.data)
-        this.verified = await this.doctorDetails.verified
-        this.id = await this.doctorDetails._id
-        this.licenseNo = await this.doctorDetails.licenseNo
-        this.fullname = await this.doctorDetails.fullname
-        this.gmail = await this.doctorDetails.gmail
-    },
-    data() {
-        return {
-            doctorDetails: [],
-            OTP: null,
-            id: null,
-            isActiveModal: false,
-            currentPassword: null,
-            currentPasswordValidate: null,
-            currentPasswordValidateMessage: null,
-            currentValidateMessage: null,
-            passwordValidateMessage: null,
-            incorrectPasswordValidate: null,
-            passwordValidate: null,
-            password: null,
-            passwordRepeat: null,
-            passwordSuccess: false,
-            verified: null,
-            licenseNo: null,
-            fullname: null,
-            gmail: null,
-            authorized: false,
-            verifyEmailSent: false,
-            emailTaken: false,
-            codeError: false,
-            updateInfoSuccess: false,
-            incorrectCode: false,
-            errMsg: '',
-            verifyButtonLoading: false
-        }
-    },
-    methods: {
-        async updatePassword() {
-            if (await this.currentPassword !== '' && this.password !== '' && this.passwordRepeat !== '') {
-                if (this.password !== this.passwordRepeat) {
-                    this.passwordValidate = true;
-                    this.passwordValidateMessage = "Passwords do not match"
-                    this.passwordSuccess = false
-                } else {
-                    try {
-                        await axios.put('/api/updatePassword/doctor', {
-                            doctorID: this.id,
-                            currentPassword: this.currentPassword,
-                            newPassword: this.password
-                        }).then(response => {
-                            if (response.data) {
-                                this.incorrectPasswordValidate = false
-                                this.passwordValidate = false
-                                this.passwordSuccess = true
-                                this.currentPassword = null
-                                this.password = null
-                                this.passwordRepeat = null
-                            } else {
-                                this.passwordValidate = false
-                                this.passwordSuccess = false
-                                this.incorrectPasswordValidate = true
-                                this.currentPasswordValidateMessage = 'Incorrect current password'
-                            }
-                        });
-                    } catch (err) {
-                        this.passwordValidate = false
-                        this.passwordSuccess = false
-                        this.incorrectPasswordValidate = true
-                        this.errMsg = err
-                    }
-                }
-            }
-        },
-        showPass() {
-            let passwordToggle = document.getElementsByClassName("password");
-            for (let i = 0; i < passwordToggle.length; i++) {
-                if (passwordToggle[i].type === "password") {
-                    passwordToggle[i].type = "text";
-                } else {
-                    passwordToggle[i].type = "password";
-                }
-            }
-        },
-        async modalUpEditInfo() {
-            this.codeError = false
-
-            await axios.post("/api/code/email", {
-                email: this.gmail
-            }).then(async response => {
-                if (!response.data) {
-                    await axios.post('/api/OTPMail', {
-                        email: this.gmail
-                    }).then(this.isActiveModal = true).catch(err => {
-                        if (err) {
-                            this.codeError = true
-                        }
-                    });
-                } else {
-                    this.isActiveModal = true
-                    this.codeError = true
-                }
-            })
-        },
-        async modalUpInfoVerify() {
-            this.isActiveModal = true
-        },
-        async sendVerificationEmail() {
-            this.verifyButtonLoading = true
-            let existingEmail = []
-            this.verifyEmailSent = false
-            this.codeError = false
-            this.emailTaken = false
-            await axios.get("/api/doctor").then(response => existingEmail = response.data.find(x => x.gmail === this.gmail))
-            if (typeof existingEmail !== 'undefined') {
-                await axios.post("/api/code/email", {
-                    email: this.gmail
-                }).then(async response => {
-                    if (!response.data) {
-                        await axios.post('/api/OTPMail', {
-                            email: this.gmail
-                        }).catch(err => {
-                            if (err) {
-                                this.codeError = true
-                            }
-                        });
-                        this.verifyEmailSent = true
-                    } else {
-                        this.verifyEmailSent = true
-                        this.codeError = true
-                    }
-                })
-            } else {
-                this.verifyEmailSent = true
-                this.codeError = true
-                this.emailTaken = true
-            }
-            this.verifyButtonLoading = false
-        },
-        async confirmOTPEditInfo() {
-            this.verifyButtonLoading = true
-            this.incorrectCode = false
-            await axios.post("/api/code/verify", {
-                code: this.OTP
-            }).then(response => {
-                if (response.data) {
-                    if (!this.codeError) {
-                        this.authorized = true
-                        this.isActiveModal = false
-                    }
-                } else {
-                    this.incorrectCode = true
-                }
-            })
-            this.verifyButtonLoading = false
-        },
-        async verifyEmail() {
-            this.verifyButtonLoading = true
-            this.incorrectCode = false
-            await axios.post("/api/code/verify", {
-                code: this.OTP
-            }).then(async response => {
-                if (await response.data) {
-                    if (!this.codeError) {
-                        await axios.put(`/api/doctor/${this.id}`, {
-                            gmail: this.gmail,
-                            verified: true
-                        });
-                        await axios.put('/session/doctor', {
-                            gmail: this.gmail,
-                            verified: true
-                        });
-                        this.verified = true
-                        this.isActiveModal = false
-                        if (!this.isActiveModal) {
-                            await axios.get('/session/doctor').then(response => this.doctorDetails = response.data)
-                        }
-                    } else {
-                        this.incorrectCode = true
-                    }
-                } else {
-                    this.incorrectCode = true
-                }
-            });
-            this.verifyButtonLoading = false
-        },
-        async updateInfo() {
-            this.updateInfoSuccess = false
-            if (this.verified) {
-                await axios.put(`/api/doctor/${this.id}`, {
-                    licenseNo: this.licenseNo,
-                    name: this.fullname
-                })
-                await axios.put("/session/doctor", {
-                    licenseNo: this.licenseNo,
-                    name: this.fullname
-                })
-                await axios
-                    .get("/session/doctor")
-                    .then((response) => (this.fullname = response.data.fullname));
-
-                this.updateInfoSuccess = true
-            }
-        },
-        closeModal() {
-            this.isActiveModal = false
-        }
-    }
-}
-</script>
 <style scoped>
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {

@@ -1,10 +1,141 @@
+<script setup>
+import axios from "axios";
+import DoctorMenu from "../../components/DoctorMenu.vue";
+import { useStore } from "vuex";
+import { ref, onBeforeMount } from "vue";
+
+const store = useStore()
+
+const alias = ref(store.state.alias)
+const fullname = ref(null)
+const infoValidate = ref(null)
+const infoValidateMessage = ref(null)
+const doctorDetails = ref(null)
+const id = ref(null)
+const hospitalOrigin = ref(null)
+const specialist = ref(null)
+const hospital = ref(null)
+const gmail = ref(null)
+const specializationList = ref(store.getters.getSpecializationList)
+const hospitalList = ref([])
+const isActiveDropdownSpecialist = ref(false)
+const licenseNo = ref(null)
+const verified = ref(null)
+const modalActive = ref(false)
+const registrationCode = ref('')
+const errorCode = ref(false)
+const duplicateHospital = ref(false)
+const fileReady = ref(false)
+const imgPreviewFile = ref(null)
+
+onBeforeMount(async () => {
+  await axios.get("/session/doctor").then(response => doctorDetails.value = response.data)
+  verified.value = await doctorDetails.value.verified
+  licenseNo.value = await doctorDetails.value.licenseNo
+  fullname.value = await doctorDetails.value.fullname
+  id.value = await doctorDetails.value._id
+  specialist.value = await doctorDetails.value.specialist
+  gmail.value = await doctorDetails.value.gmail
+  hospitalOrigin.value = await doctorDetails.value.hospitalOrigin
+  await axios.get('/api/manager').then(response => hospitalList.value = response.data)
+})
+
+async function updateInfo() {
+  if (!verified.value) {
+    await axios.put(`/api/doctor/${id.value}`, {
+      licenseNo: licenseNo.value,
+      name: fullname.value,
+      gmail: gmail.value
+    })
+    await axios.put("/session/doctor", {
+      licenseNo: licenseNo.value,
+      fullname: fullname.value, //session schema
+      gmail: gmail.value
+    })
+    await axios
+      .get("/session/doctor")
+      .then((response) => (fullname.value = response.data.fullname));
+
+    infoValidate.value = true
+    infoValidateMessage.value = "changes saved successfully"
+  }
+}
+function handleFile(e) {
+  imgPreviewFile.value = URL.createObjectURL(e.target.files[0])
+  fileReady.value = true
+  store.commit('imgSuccess', true)
+}
+function dropdownSpecialist() {
+  isActiveDropdownSpecialist.value = !isActiveDropdownSpecialist.value
+}
+async function addSpecialization(specialistParam) {
+  if (!specialist.value.find(x => x === specialistParam)) {
+    specialist.value.push(specialistParam)
+    isActiveDropdownSpecialist.value = false
+    await axios.put(`/api/doctor/${id.value}`, {
+      specialist: specialist.value
+    });
+    await axios.put('/session/doctor', {
+      specialist: specialist.value
+    });
+    await axios.get('/session/doctor').then(response => specialist.value = response.data.specialist)
+  }
+}
+async function addHospital() {
+  errorCode.value = false
+  duplicateHospital.value = false
+  await axios.post('/api/doctor/check_registrationCode', {
+    registrationCode: registrationCode.value
+  }).then(response => hospital.value = response.data)
+  if (hospital.value) {
+    if (hospitalOrigin.value.find(x => x.hospital == hospital.value.hospital)) {
+      duplicateHospital.value = true
+    } else {
+      hospitalOrigin.value.push({ hospital: hospital.value.hospital })
+      await axios.put(`/api/doctor/${id.value}`, {
+        hospitalOrigin: hospitalOrigin.value
+      });
+      await axios.put('/session/doctor', {
+        hospitalOrigin: hospitalOrigin.value
+      });
+      await axios.get('/session/doctor').then(response => hospitalOrigin.value = response.data.hospitalOrigin)
+      modalActive.value = false
+    }
+  } else {
+    errorCode.value = true
+  }
+}
+async function pullSpecialization(specializationParam) {
+  specialist.value = specialist.value.filter(x => x !== specializationParam)
+  await axios.put(`/api/doctor/${id.value}`, {
+    specialist: specialist.value
+  });
+  await axios.put('/session/doctor', {
+    specialist: specialist.value
+  });
+  await axios.get('/session/doctor').then(response => specialist.value = response.data.specialist)
+}
+async function pullHospital(hospitalParam) {
+  hospitalOrigin.value = hospitalOrigin.value.filter(x => x.hospital !== hospitalParam)
+  await axios.put(`/api/doctor/${id.value}`, {
+    hospitalOrigin: hospitalOrigin.value
+  });
+  await axios.put('/session/doctor', {
+    hospitalOrigin: hospitalOrigin.value
+  });
+  await axios.get('/session/doctor').then(response => hospitalOrigin.value = response.data.hospitalOrigin)
+}
+function modalClose() {
+  modalActive.value = false
+}
+</script>
 <template>
   <div class="main-doctor">
     <div class="columns">
       <div class="column is-2">
         <DoctorMenu />
       </div>
-      <div class="column">
+      <div class="column main-doctor-content">
         <section class="section">
           <h1 class="title">PROFILE</h1>
           <div class="container box is-fluid">
@@ -48,12 +179,11 @@
                   </figure>
                   <div class="control">
                     <input type="hidden" name="alias" :value="(alias)" />
-                    <input class="input is-hidden" id="file-input" type="file" name="imgFile"
-                      @change="handleFile($event)" required />
+                    <input class="input is-hidden" id="file-input" type="file" name="imgFile" @change="handleFile($event)"
+                      required />
                   </div>
                   <div class="buttons is-centered" v-if="fileReady">
-                    <button type="button" class="button"
-                      @click="fileReady = false, imgPreviewFile = null">Cancel</button>
+                    <button type="button" class="button" @click="fileReady = false, imgPreviewFile = null">Cancel</button>
                     <button type="submit" value="Upload" class="button is-info">Upload Picture</button>
                   </div>
                 </form>
@@ -160,160 +290,6 @@
     </div>
   </div>
 </template>
-
-<script>
-import store from "../../store";
-import axios from "axios";
-import DoctorMenu from "../../components/DoctorMenu.vue";
-
-export default {
-  name: "DoctorProfile",
-  data() {
-    return {
-      alias: store.state.alias,
-      fullname: null,
-      password: null,
-      passwordRepeat: null,
-      infoValidate: null,
-      infoValidateMessage: null,
-      doctorDetails: null,
-      id: null,
-      profileImg: store.state.profileImg,
-      hospitalOrigin: null,
-      specialist: null,
-      hospital: null,
-      gmail: null,
-      specializationList: this.$store.getters.getSpecializationList,
-      hospitalList: [],
-      isActiveDropdownSpecialist: false,
-      licenseNo: null,
-      verified: null,
-      modalActive: false,
-      registrationCode: '',
-      errorCode: false,
-      duplicateHospital: false,
-      codeSent: false,
-      selectedHospital: '',
-      fileReady: false,
-      imgPreviewFile: null
-    };
-  },
-  components: {
-    DoctorMenu
-  },
-  async mounted() {
-    await axios.get("/session/doctor").then(response => this.doctorDetails = response.data)
-    this.verified = await this.doctorDetails.verified
-    this.licenseNo = await this.doctorDetails.licenseNo
-    this.fullname = await this.doctorDetails.fullname
-    this.id = await this.doctorDetails._id
-    this.specialist = await this.doctorDetails.specialist
-    this.gmail = await this.doctorDetails.gmail
-    this.hospitalOrigin = await this.doctorDetails.hospitalOrigin
-    await axios.get('/api/manager').then(response => this.hospitalList = response.data)
-  },
-  methods: {
-    async updateInfo() {
-      if (!this.verified) {
-        await axios.put(`/api/doctor/${this.id}`, {
-          licenseNo: this.licenseNo,
-          name: this.fullname,
-          gmail: this.gmail
-        })
-        await axios.put("/session/doctor", {
-          licenseNo: this.licenseNo,
-          fullname: this.fullname, //session schema
-          gmail: this.gmail
-        })
-        await axios
-          .get("/session/doctor")
-          .then((response) => (this.fullname = response.data.fullname));
-
-        this.infoValidate = true
-        this.infoValidateMessage = "changes saved successfully"
-      }
-    },
-    handleFile(e) {
-      this.imgPreviewFile = URL.createObjectURL(e.target.files[0])
-      this.fileReady = true
-      store.commit('imgSuccess', true)
-    },
-    showPass() {
-      let passwordToggle = document.getElementsByClassName("password");
-      for (let i = 0; i < passwordToggle.length; i++) {
-        if (passwordToggle[i].type === "password") {
-          passwordToggle[i].type = "text";
-        } else {
-          passwordToggle[i].type = "password";
-        }
-      }
-    },
-    dropdownSpecialist() {
-      this.isActiveDropdownSpecialist = !this.isActiveDropdownSpecialist
-    },
-    async addSpecialization(specialist) {
-      if (!this.specialist.find(x => x === specialist)) {
-        this.specialist.push(specialist)
-        this.isActiveDropdownSpecialist = false
-        await axios.put(`/api/doctor/${this.id}`, {
-          specialist: this.specialist
-        });
-        await axios.put('/session/doctor', {
-          specialist: this.specialist
-        });
-        await axios.get('/session/doctor').then(response => this.specialist = response.data.specialist)
-      }
-    },
-    async addHospital() {
-      this.errorCode = false
-      this.duplicateHospital = false
-      await axios.post('/api/doctor/check_registrationCode', {
-        registrationCode: this.registrationCode
-      }).then(response => this.hospital = response.data)
-      if (this.hospital) {
-        if (this.hospitalOrigin.find(x => x.hospital == this.hospital.hospital)) {
-          this.duplicateHospital = true
-        } else {
-          this.hospitalOrigin.push({ hospital: this.hospital.hospital })
-          await axios.put(`/api/doctor/${this.id}`, {
-            hospitalOrigin: this.hospitalOrigin
-          });
-          await axios.put('/session/doctor', {
-            hospitalOrigin: this.hospitalOrigin
-          });
-          await axios.get('/session/doctor').then(response => this.hospitalOrigin = response.data.hospitalOrigin)
-          this.modalActive = false
-        }
-      } else {
-        this.errorCode = true
-      }
-    },
-    async pullSpecialization(specialization) {
-      this.specialist = this.specialist.filter(x => x !== specialization)
-      await axios.put(`/api/doctor/${this.id}`, {
-        specialist: this.specialist
-      });
-      await axios.put('/session/doctor', {
-        specialist: this.specialist
-      });
-      await axios.get('/session/doctor').then(response => this.specialist = response.data.specialist)
-    },
-    async pullHospital(hospital) {
-      this.hospitalOrigin = this.hospitalOrigin.filter(x => x.hospital !== hospital)
-      await axios.put(`/api/doctor/${this.id}`, {
-        hospitalOrigin: this.hospitalOrigin
-      });
-      await axios.put('/session/doctor', {
-        hospitalOrigin: this.hospitalOrigin
-      });
-      await axios.get('/session/doctor').then(response => this.hospitalOrigin = response.data.hospitalOrigin)
-    },
-    modalClose() {
-      this.modalActive = false
-    }
-  },
-};
-</script>
 
 <style scoped>
 .dropdown-menu {

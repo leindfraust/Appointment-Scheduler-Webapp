@@ -1,8 +1,205 @@
+<script setup>
+import axios from 'axios'
+import { ref, computed } from 'vue'
+import { useStore } from 'vuex';
+
+
+const store = useStore()
+
+const licenseCode = ref('')
+const alias = ref('')
+const name = ref('')
+const registrationCode = ref('')
+const username = ref('')
+const password = ref('')
+const passwordRepeat = ref('')
+const gmail = ref('')
+const passwordMatch = ref(null)
+const aliasFound = ref('')
+const usernameFound = ref('')
+const registrationCodeFound = ref('')
+const emailFound = ref('')
+const loadingUsername = ref(false)
+const loadingAlias = ref(false)
+const loadingRegistrationCode = ref(false)
+const loadingEmail = ref(false)
+const specializationsSelected = ref([])
+const specializationList = ref(store.getters.getSpecializationList)
+const searchBarSpecialization = ref('')
+const errMsg = ref('')
+const searchTimeoutUsername = ref(null)
+const searchTimeoutAlias = ref(null)
+const searchTimeoutRegistrationCode = ref(null)
+const searchTimeoutEmail = ref(null)
+
+const specializationListIndexed = computed(() => specializationList.value.filter(x => x.toLowerCase().includes(searchBarSpecialization.value.toLowerCase())))
+
+async function registrationCodeFindTimeout() {
+  if (searchTimeoutRegistrationCode.value) {
+    clearTimeout(searchTimeoutRegistrationCode.value)
+    searchTimeoutRegistrationCode.value = null
+  }
+  searchTimeoutRegistrationCode.value = setTimeout(registrationCodeFinder, 500)
+}
+async function emailFindTimeout() {
+  if (searchTimeoutEmail.value) {
+    clearTimeout(searchTimeoutEmail.value)
+    searchTimeoutEmail.value = null
+  }
+  searchTimeoutEmail.value = setTimeout(emailFinder, 500)
+}
+async function usernameFindTimeout() {
+  if (searchTimeoutUsername.value) {
+    clearTimeout(searchTimeoutUsername.value)
+    searchTimeoutUsername.value = null
+  }
+  searchTimeoutUsername.value = setTimeout(usernameFinder, 500)
+}
+async function aliasFindTimeout() {
+  if (searchTimeoutAlias.value) {
+    clearTimeout(searchTimeoutAlias.value)
+    searchTimeoutAlias.value = null
+  }
+  searchTimeoutAlias.value = setTimeout(aliasFinder, 500)
+}
+async function registrationCodeFinder() {
+  loadingRegistrationCode.value = true
+  await axios.post('/api/doctor/check_registrationCode', {
+    registrationCode: registrationCode.value
+  }).then(response => {
+    registrationCodeFound.value = response.data
+  });
+  if (registrationCode.value == '') {
+    registrationCodeFound.value = ''
+  }
+  loadingRegistrationCode.value = false
+}
+async function emailFinder() {
+  loadingEmail.value = true
+  await axios.post('/api/doctor/check_email', {
+    email: gmail.value
+  }).then(response => {
+    emailFound.value = response.data
+  })
+  if (gmail.value == '') {
+    emailFound.value = ''
+  }
+  loadingEmail.value = false
+}
+async function usernameFinder() {
+  loadingUsername.value = true
+  usernameFound.value = false
+  await axios.post('/api/user/check_username', {
+    username: username.value
+  }).then(response => {
+    if (response.data) {
+      usernameFound.value = response.data
+    }
+  })
+  await axios.post('/api/doctor/check_username', {
+    username: username.value
+  }).then(response => {
+    if (response.data) {
+      usernameFound.value = response.data
+    }
+  })
+  await axios.post('/api/manager/check_username', {
+    username: username.value
+  }).then(response => {
+    if (response.data) {
+      usernameFound.value = response.data
+    }
+  })
+  if (username.value == '') {
+    usernameFound.value = ''
+  }
+  loadingUsername.value = false
+}
+async function aliasFinder() {
+  loadingAlias.value = true
+  await axios.post('/api/doctor/check_alias', {
+    alias: alias.value
+  }).then(response => {
+    aliasFound.value = response.data
+  })
+  if (alias.value == '') {
+    aliasFound.value = ''
+  }
+  loadingAlias.value = false
+}
+async function create(e) {
+  //password, alias and username checks
+  if ((password.value) !== passwordRepeat.value) {
+    passwordMatch.value = "password do not match";
+    await e.preventDefault();
+    if (registrationCode.value) {
+      if (registrationCodeFound.value != null || !registrationCodeFound.value) {
+        await e.preventDefault();
+      }
+    }
+    if (alias.value) {
+      if (aliasFound.value == null || aliasFound.value) {
+        await e.preventDefault();
+      }
+    }
+    if (username.value) {
+      if (usernameFound.value == null || usernameFound.value) {
+        await e.preventDefault();
+      }
+    }
+  } else {
+    passwordMatch.value = null;
+
+    if (registrationCode.value) {
+      if (registrationCodeFound.value == null || !registrationCodeFound.value) {
+        await e.preventDefault();
+      }
+    }
+    if (alias.value) {
+      if (aliasFound.value == null || aliasFound.value) {
+        await e.preventDefault();
+      }
+    }
+    if (username.value) {
+      if (usernameFound.value == null || usernameFound.value) {
+        await e.preventDefault();
+      }
+    }
+  }
+  //if no errors, proceed to POST
+  if (password.value === passwordRepeat.value &&
+    !aliasFound.value &&
+    !usernameFound.value &&
+    !emailFound.value &&
+    registrationCodeFound.value // only passes when a registration code is found
+  ) {
+    await axios.post("/api/doctor", {
+      alias: alias.value,
+      licenseNo: licenseCode.value,
+      name: name.value,
+      gmail: gmail.value,
+      specialist: specializationsSelected.value,
+      username: username.value,
+      password: password.value,
+      hospitalOrigin: [registrationCodeFound.value]
+    }).catch(err => errMsg.value = err);
+    store.commit("imgSuccess", true)
+  }
+}
+function selectSpecialization(specialization) {
+  if (!specializationsSelected.value.find(x => x === specialization)) {
+    specializationsSelected.value.push(specialization);
+  }
+}
+function undoSpecialization(specialization) {
+  specializationsSelected.value = specializationsSelected.value.filter(x => x !== specialization)
+}
+
+</script>
 <template>
   <section class="section">
     <router-link :to="'/account/login'"><i class="fa-solid fa-arrow-left"></i> Back to Login</router-link>
     <div class="container box animate__animated animate__fadeInLeft" style="margin: auto; width: 50%">
-      <!-- I know it sucks, having a form action for only image upload while separating a post with axios for the document, but shit works so I guess it's okay.-->
       <div class="notification is-danger" v-if="errMsg">
         Oops, something went wrong. Try again later or
         <router-link :to="'/contactus'">contact us</router-link>
@@ -18,7 +215,7 @@
             </div>
             <div class="field">
               <label class="label">Alias</label>
-              <div v-if="aliasFound !== ''">
+              <span v-if="aliasFound !== ''">
                 <p class="help is-danger" v-if="aliasFound">
                   Unavailable
                   <i class="fas fa-spinner fa-spin" v-if="loadingAlias"></i>
@@ -27,7 +224,7 @@
                   Available
                   <i class="fas fa-spinner fa-spin" v-if="loadingAlias"></i>
                 </p>
-              </div>
+              </span>
               <div class="control">
                 <input class="input" type="text" v-model="alias" placeholder="alias" name="alias" required
                   @input="aliasFindTimeout" />
@@ -161,210 +358,6 @@
     </div>
   </section>
 </template>
-
-<script>
-import axios from "axios";
-
-export default {
-  name: "SignUp",
-  computed: {
-    specializationListIndexed() {
-      return this.specializationList.filter(x => x.toLowerCase().includes(this.searchBarSpecialization.toLowerCase()))
-    }
-  },
-  data() {
-    return {
-      licenseCode: '',
-      alias: '',
-      name: '',
-      registrationCode: '',
-      username: '',
-      password: '',
-      passwordRepeat: '',
-      gmail: '',
-      passwordMatch: null,
-      aliasFound: '',
-      usernameFound: '',
-      registrationCodeFound: '',
-      emailFound: '',
-      loadingUsername: false,
-      loadingAlias: false,
-      loadingRegistrationCode: false,
-      loadingEmail: false,
-      specializationsSelected: [],
-      specializationList: this.$store.getters.getSpecializationList,
-      searchBarSpecialization: '',
-      errMsg: '',
-      searchTimeoutUsername: null,
-      searchTimeoutAlias: null,
-      searchTimeoutRegistrationCode: null,
-      searchTimeoutEmail: null
-    };
-  },
-  methods: {
-    async registrationCodeFindTimeout() {
-      if (this.searchTimeoutRegistrationCode) {
-        clearTimeout(this.searchTimeoutRegistrationCode)
-        this.searchTimeoutRegistrationCode = null
-      }
-      this.searchTimeoutRegistrationCode = setTimeout(this.registrationCodeFinder, 500)
-    },
-    async emailFindTimeout() {
-      if (this.searchTimeoutEmail) {
-        clearTimeout(this.searchTimeoutEmail)
-        this.searchTimeoutEmail = null
-      }
-      this.searchTimeoutEmail = setTimeout(this.emailFinder, 500)
-    },
-    async usernameFindTimeout() {
-      if (this.searchTimeoutUsername) {
-        clearTimeout(this.searchTimeoutUsername)
-        this.searchTimeoutUsername = null
-      }
-      this.searchTimeoutUsername = setTimeout(this.usernameFinder, 500)
-    },
-    async aliasFindTimeout() {
-      if (this.searchTimeoutAlias) {
-        clearTimeout(this.searchTimeoutAlias)
-        this.searchTimeoutAlias = null
-      }
-      this.searchTimeoutAlias = setTimeout(this.aliasFinder, 500)
-    },
-    async registrationCodeFinder() {
-      this.loadingRegistrationCode = true
-      await axios.post('/api/doctor/check_registrationCode', {
-        registrationCode: this.registrationCode
-      }).then(response => {
-        this.registrationCodeFound = response.data
-      });
-      if (this.registrationCode == '') {
-        this.registrationCodeFound = ''
-      }
-      this.loadingRegistrationCode = false
-    },
-    async emailFinder() {
-      this.loadingEmail = true
-      await axios.post('/api/doctor/check_email', {
-        email: this.gmail
-      }).then(response => {
-        this.emailFound = response.data
-      })
-      if (this.gmail == '') {
-        this.emailFound = ''
-      }
-      this.loadingEmail = false
-    },
-    async usernameFinder() {
-      this.loadingUsername = true
-      this.usernameFound = false
-      await axios.post('/api/user/check_username', {
-        username: this.username
-      }).then(response => {
-        if (response.data) {
-          this.usernameFound = response.data
-        }
-      })
-      await axios.post('/api/doctor/check_username', {
-        username: this.username
-      }).then(response => {
-        if (response.data) {
-          this.usernameFound = response.data
-        }
-      })
-      await axios.post('/api/manager/check_username', {
-        username: this.username
-      }).then(response => {
-        if (response.data) {
-          this.usernameFound = response.data
-        }
-      })
-      if (this.username == '') {
-        this.usernameFound = ''
-      }
-      this.loadingUsername = false
-    },
-    async aliasFinder() {
-      this.loadingAlias = true
-      await axios.post('/api/doctor/check_alias', {
-        alias: this.alias
-      }).then(response => {
-        this.aliasFound = response.data
-      })
-      if (this.alias == '') {
-        this.aliasFound = ''
-      }
-      this.loadingAlias = false
-    },
-    async create(e) {
-      //password, alias and username checks
-      if ((this.password) !== this.passwordRepeat) {
-        this.passwordMatch = "password do not match";
-        await e.preventDefault();
-        if (this.registrationCode) {
-          if (this.registrationCodeFound != null || !this.registrationCodeFound) {
-            await e.preventDefault();
-          }
-        }
-        if (this.alias) {
-          if (this.aliasFound == null || this.aliasFound) {
-            await e.preventDefault();
-          }
-        }
-        if (this.username) {
-          if (this.usernameFound == null || this.usernameFound) {
-            await e.preventDefault();
-          }
-        }
-      } else {
-        this.passwordMatch = null;
-
-        if (this.registrationCode) {
-          if (this.registrationCodeFound == null || !this.registrationCodeFound) {
-            await e.preventDefault();
-          }
-        }
-        if (this.alias) {
-          if (this.aliasFound == null || this.aliasFound) {
-            await e.preventDefault();
-          }
-        }
-        if (this.username) {
-          if (this.usernameFound == null || this.usernameFound) {
-            await e.preventDefault();
-          }
-        }
-      }
-      //if no errors, proceed to POST
-      if (this.password === this.passwordRepeat &&
-        !this.aliasFound &&
-        !this.usernameFound &&
-        !this.emailFound &&
-        this.registrationCodeFound // only passes when a registration code is found
-      ) {
-        await axios.post("/api/doctor", {
-          alias: this.alias,
-          licenseNo: this.licenseCode,
-          name: this.name,
-          gmail: this.gmail,
-          specialist: this.specializationsSelected,
-          username: this.username,
-          password: this.password,
-          hospitalOrigin: [this.registrationCodeFound]
-        }).catch(err => this.errMsg = err);
-        await this.$store.commit("imgSuccess", true)
-      }
-    },
-    selectSpecialization(specialization) {
-      if (!this.specializationsSelected.find(x => x === specialization)) {
-        this.specializationsSelected.push(specialization);
-      }
-    },
-    undoSpecialization(specialization) {
-      this.specializationsSelected = this.specializationsSelected.filter(x => x !== specialization)
-    }
-  },
-};
-</script>
 
 <style scoped>
 @media (max-width: 991.98px) {
