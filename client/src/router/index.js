@@ -3,14 +3,14 @@ import {
     createWebHistory
 } from 'vue-router'
 import store from '../store'
-const Home = () => import('../views/Public/Home.vue')
+const HomeView = () => import('../views/Public/HomeView.vue')
 const AboutMedicSearch = () => import('../views/Public/AboutMedicSearch.vue')
 const TermsAndConditions = () => import('../views/Public/TermsAndConditions.vue')
 const Eula = () => import('../views/Public/EULA.vue')
 const DoctorList = () => import('../views/Public/DoctorList.vue')
 const RegForm = () => import('../views/Public/RegForm.vue')
 const DoctorSignup = () => import('../views/PortalDoctor/DoctorSignup.vue')
-const Doctor = () => import('../views/PortalDoctor/Doctor.vue')
+const DoctorAppointments = () => import('../views/PortalDoctor/DoctorAppointments.vue')
 const DoctorScheduler = () => import('../views/PortalDoctor/DoctorScheduler.vue')
 const DoctorProfile = () => import('../views/PortalDoctor/DoctorProfile.vue')
 const DoctorCancelledAppointments = () => import('../views/PortalDoctor/DoctorCancelledAppointments.vue')
@@ -30,7 +30,7 @@ const UserProfile = () => import('../views/Public/UserProfile.vue')
 const UserSecurity = () => import('../views/Public/UserSecurity.vue')
 const SuperUser = () => import('../views/PortalSuperUsers/SuperUser.vue')
 const SuperUserLogin = () => import('../views/PortalSuperUsers/SuperUserLogin.vue')
-const Manager = () => import('../views/PortalSuperUsers/Manager.vue')
+const ManagerDashboard = () => import('../views/PortalSuperUsers/ManagerDashboard.vue')
 const ManagerSignup = () => import('../views/PortalSuperUsers/ManagerSignup.vue')
 const ManagerProfile = () => import('../views/PortalSuperUsers/ManagerProfile.vue')
 const ManagerSecurity = () => import('../views/PortalSuperUsers/ManagerSecurity.vue')
@@ -39,7 +39,7 @@ const PageNotExist = () => import('../views/Public/PageNotExist.vue')
 
 const routes = [{
     path: '/',
-    component: Home,
+    component: HomeView,
 },
 {
     path: '/about',
@@ -64,7 +64,7 @@ const routes = [{
 //Manager/Hospital account routes
 {
     path: '/manager/:user',
-    component: Manager,
+    component: ManagerDashboard,
     meta: {
         requiresManagerAuth: true
     }
@@ -105,49 +105,49 @@ const routes = [{
     component: DoctorSignup,
 },
 {
-    path: '/doctor/:user/appointments',
-    component: Doctor,
+    path: `/doctor/${store.state.alias}/appointments`,
+    component: DoctorAppointments,
     meta: {
         requiresAuth: true
     },
 },
 {
-    path: '/doctor/:user/appointments/history',
+    path: `/doctor/${store.state.alias}/appointments/history`,
     component: DoctorPatientHistory,
     meta: {
         requiresAuth: true
     }
 },
 {
-    path: '/doctor/:user/appointments/cancelled',
+    path: `/doctor/${store.state.alias}/appointments/cancelled`,
     component: DoctorCancelledAppointments,
     meta: {
         requiresAuth: true
     }
 },
 {
-    path: '/doctor/:user/schedule',
+    path: `/doctor/${store.state.alias}/schedule`,
     component: DoctorScheduler,
     meta: {
         requiresAuth: true
     },
 },
 {
-    path: '/doctor/:user/profile',
+    path: `/doctor/${store.state.alias}/profile`,
     component: DoctorProfile,
     meta: {
         requiresAuth: true
     },
 },
 {
-    path: '/doctor/:user/security',
+    path: `/doctor/${store.state.alias}/security`,
     component: DoctorSecurity,
     meta: {
         requiresAuth: true
     },
 },
 {
-    path: '/doctor/:user/payment',
+    path: `/doctor/${store.state.alias}/payment`,
     component: DoctorPayment,
     meta: {
         requiresAuth: true
@@ -312,7 +312,7 @@ router.beforeEach(async (to, from, next) => {
 
         //check patient session
         await axios.get("/session/patient").then(async response => {
-            if (typeof response.data.username !== 'undefined') {
+            if (typeof response.data.username !== 'undefined' && !response.data.alias && !response.data.hospital) {
                 store.commit("patientUsername", response.data.username)
                 store.commit("patientID", response.data._id)
             } else {
