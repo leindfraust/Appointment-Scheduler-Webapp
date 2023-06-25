@@ -45,7 +45,7 @@ async function deleteAppointment(id) {
             <div class="column is-2">
                 <DoctorMenu />
             </div>
-            <div class="column">
+            <div class="column main-doctor-content">
                 <section class="section">
                     <CatchError :err-msg="errMsg" />
                     <h1 class="title">CANCELLED APPOINTMENTS</h1>

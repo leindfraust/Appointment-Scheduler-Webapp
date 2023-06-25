@@ -66,7 +66,7 @@ async function updateBankDetails() {
             <div class="column is-2">
                 <DoctorMenu />
             </div>
-            <div class="column">
+            <div class="column main-doctor-content">
                 <section class="section">
                     <h1 class="title">PAYMENT</h1>
                     <div class="container box is-fluid">
@@ -81,14 +81,13 @@ async function updateBankDetails() {
                                 <b>VERIFICATION AND INFORMATION.</b>
                             </div>
                         </article>
-                        <p class="title is-4">Link your e-Wallets or Bank account to accept payment.</p>
+                        <p class="title is-4">Link your e-Wallets or Bank accounts to accept payment.</p>
                         <p class="help">By providing the information below, you agreed to let Medic Search
                             <b>hold
                                 your
                                 payments</b> until every week for your payout. Medic Search will <b>charge 1%
                                 transaction fee</b> for
-                            every successful appointments. This only applies to <b>payment-first</b>
-                            appointments.
+                            every successful appointments. Your bank may charge additional fee.
                         </p>
                         <br />
                         <div class="columns">
@@ -144,8 +143,7 @@ async function updateBankDetails() {
                                 </div>
                                 <br />
                                 <div class="buttons is-centered" v-if="gcashMethod || mayaMethod">
-                                    <button class="button"
-                                        @click="gcashMethod = false, mayaMethod = false">Cancel</button>
+                                    <button class="button" @click="gcashMethod = false, mayaMethod = false">Cancel</button>
                                     <button class="button is-info" @click="updateBankDetails"
                                         :class="{ 'is-loading': buttonUpdateLoading }">Confirm</button>
                                 </div>
