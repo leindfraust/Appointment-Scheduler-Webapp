@@ -8,7 +8,8 @@
     "server": "nodemon --exec \"npm run lint && node index\"",
     "client": "npm run serve --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "start": "cd client && npm run build && cd ../ && node index.js",
+    "render": "concurrently \"npm install -g @vue/cli\" \"npm install\" && cd client && npm run build",
+    "start": "node index.js",
     "lint": "eslint .  --ext .js"
   },
   "author": "Leindfraust",
