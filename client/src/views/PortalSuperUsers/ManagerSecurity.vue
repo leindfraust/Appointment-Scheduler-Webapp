@@ -4,15 +4,15 @@ import { ref, onMounted } from 'vue'
 import ManagerMenu from '../../components/ManagerMenu.vue';
 import ForgotPassword from '../../components/ForgotPassword.vue';
 
-let currentPassword = ref('')
-let newPassword = ref('')
-let confirmPassword = ref('')
-let passwordNotMatched = ref(false)
-let managerID = ref('')
-let errMsg = ref('')
-let passwordChanged = ref(false)
-let incorrectCurrentPassword = ref(false)
-let registrationCode = ref('')
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+const passwordNotMatched = ref(false)
+const managerID = ref('')
+const errMsg = ref('')
+const passwordChanged = ref(false)
+const incorrectCurrentPassword = ref(false)
+const registrationCode = ref('')
 
 onMounted(async () => {
     await axios.get('/session/manager').then(response => managerID.value = response.data._id)
@@ -100,8 +100,7 @@ async function changePassword() {
                             <input class="input" type="text" v-model="registrationCode" />
                         </div>
                         <div class="control">
-                            <a class="button" @click="updateRegistrationCode"><i
-                                    class="fa-solid fa-arrows-rotate"></i></a>
+                            <a class="button" @click="updateRegistrationCode"><i class="fa-solid fa-arrows-rotate"></i></a>
                         </div>
                     </div>
                     <hr>
@@ -120,8 +119,7 @@ async function changePassword() {
                     <div class="field">
                         <label class="label">New Password</label>
                         <div class="control">
-                            <input type="password" class="input password" v-model="newPassword"
-                                placeholder="New password">
+                            <input type="password" class="input password" v-model="newPassword" placeholder="New password">
                         </div>
                         <p class="help is-danger" v-if="passwordNotMatched">Password do not match.</p>
                     </div>
