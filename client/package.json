@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "render": "npm install @vue/cli && npm run build",
+    "render": "npm install --force --legacy-peer-deps && npm run build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
