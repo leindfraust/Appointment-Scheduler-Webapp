@@ -1,8 +1,6 @@
 <script setup>
-import HomeView from '../../views/Public/Home'
+import HomeView from '../Public/HomeView.vue'
 </script>
 <template>
     <HomeView />
 </template>
-<style scoped>
-</style>
