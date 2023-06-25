@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onBeforeMount, computed } from 'vue'
 import axios from 'axios'
 import groupBy from 'lodash/groupBy'
 import CatchError from '../../components/CatchError.vue'
@@ -8,7 +8,7 @@ import socket from '../../socket'
 import { useStore } from 'vuex'
 
 const store = useStore()
-onMounted(async () => {
+onBeforeMount(async () => {
   await axios.post('/api/appointmentList/doctors', { id: store.state.doctorID, ongoing: false }).then(response => appointmentSched.value = response.data);
   await axios.get('/session/doctor').then(response => doctorName.value = response.data.fullname)
   await axios.get('/session/doctor').then(response => messageHistory.value = response.data.messageHistory.reverse())
@@ -155,7 +155,7 @@ function handleFile(e) {
       <div class="column is-2">
         <DoctorMenu />
       </div>
-      <div class="column">
+      <div class="column main-doctor-content">
         <div class="modal" :class="{ 'is-active': isActiveModal }">
           <div class="modal-background"></div>
           <div class="modal-content">
