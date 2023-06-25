@@ -19,8 +19,9 @@ const checkOTP = ref(false)
 const userData = ref('')
 const usernameHandler = ref(props.username)
 const emailHandler = ref(props.email)
-const userType = ref('')
+const userType = ref(props.userType)
 const props = defineProps({
+    userType: String,
     username: String,
     email: String,
     forgotPasswordPromptCount: {
