@@ -1,3 +1,35 @@
+<script setup>
+import axios from 'axios'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+
+const store = useStore()
+const router = useRouter()
+
+const isActive = ref(false)
+const managerHospital = ref(null)
+
+onMounted(async () => await axios.get('/session/manager').then(response => managerHospital.value = response.data.hospital))
+
+async function logout() {
+    await axios.delete('/session/manager');
+    store.commit("managerHospital", null);
+    await router.push("/account/login");
+}
+function menuNav() {
+    isActive.value = !isActive.value
+}
+function navProfile() {
+    router.push(`/manager/${managerHospital.value}/profile`);
+}
+function navDoctors() {
+    router.push(`/manager/${managerHospital.value}`)
+}
+function navChangePass() {
+    router.push(`/manager/${managerHospital.value}/security`)
+}
+</script>
 <template>
     <nav class="navbar is-hidden-desktop">
         <div class="navbar-brand">
@@ -36,41 +68,6 @@
         <button class="button is-danger" @click="logout">Logout</button>
     </aside>
 </template>
-<script>
-import axios from 'axios'
-
-export default {
-    name: 'ManagerMenu',
-    data() {
-        return {
-            isActive: true,
-            managerHospital: ''
-        }
-    },
-    async mounted() {
-        await axios.get('/session/manager').then(response => this.managerHospital = response.data.hospital)
-    },
-    methods: {
-        async logout() {
-            await axios.delete('/session/manager');
-            await this.$store.commit("managerHospital", null);
-            await this.$router.push("/account/login");
-        },
-        menuNav() {
-            this.isActive = !this.isActive
-        },
-        navProfile() {
-            this.$router.push(`/manager/${this.managerHospital}/profile`);
-        },
-        navDoctors() {
-            this.$router.push(`/manager/${this.managerHospital}`)
-        },
-        navChangePass() {
-            this.$router.push(`/manager/${this.managerHospital}/security`)
-        }
-    }
-}
-</script>
 <style>
 .fixedMenu {
     position: fixed;

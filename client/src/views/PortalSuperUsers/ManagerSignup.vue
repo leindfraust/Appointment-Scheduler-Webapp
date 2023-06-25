@@ -1,3 +1,182 @@
+<script setup>
+import axios from 'axios'
+import { ref, onBeforeMount, computed } from 'vue'
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+
+const store = useStore()
+const router = useRouter()
+
+const geolocationData = ref([])
+const isActiveDropdownProvince = ref(false)
+const isActiveDropdownCity = ref(false)
+const registrationCode = ref('')
+const pricing = ref('')
+const hospital = ref('')
+const email = ref('')
+const hospitalType = ref('')
+const latitude = ref('')
+const longitude = ref('')
+const barangayORStreet = ref('')
+const postalCode = ref('')
+const city = ref('')
+const province = ref('')
+const username = ref('')
+const password = ref('')
+const confirmPassword = ref('')
+const loadingUsername = ref(false)
+const loadingProvider = ref(false)
+const usernameFound = ref('')
+const providerFound = ref('')
+const passwordNotMatch = ref(false)
+const citiesData = ref([])
+const specializationsSelected = ref([])
+const specializationList = ref(store.getters.getSpecializationList)
+const searchBar = ref('')
+const errMsg = ref('')
+const searchTimeout = ref(null)
+
+onBeforeMount(async () => {
+    await axios.get('/api/geolocation').then(response => geolocationData.value = response.data)
+})
+const specializationListIndexed = computed(() => specializationList.value.filter(x => x.toLowerCase().includes(searchBar.value.toLowerCase())))
+
+function generateCode() {
+    let result = '';
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let charactersLength = characters.length;
+    for (let i = 0; i < 12; i++) {
+        result += characters.charAt(Math.floor(Math.random() *
+            charactersLength));
+    }
+    registrationCode.value = result.toUpperCase()
+}
+async function usernameFindTimeout() {
+    if (searchTimeout.value) {
+        clearTimeout(searchTimeout.value)
+        searchTimeout.value = null
+    }
+    searchTimeout.value = setTimeout(usernameFinder, 500)
+}
+async function usernameFinder() {
+    loadingUsername.value = true
+    usernameFound.value = false
+    await axios.post('/api/user/check_username', {
+        username: username.value
+    }).then(response => {
+        if (response.data) {
+            usernameFound.value = response.data
+        }
+    })
+    await axios.post('/api/doctor/check_username', {
+        username: username.value
+    }).then(response => {
+        if (response.data) {
+            usernameFound.value = response.data
+        }
+    })
+    await axios.post('/api/manager/check_username', {
+        username: username.value
+    }).then(response => {
+        if (response.data) {
+            usernameFound.value = response.data
+        }
+    })
+    if (username.value == '') {
+        usernameFound.value = ''
+    }
+    loadingUsername.value = false
+}
+async function providerFindTimeout() {
+    if (searchTimeout.value) {
+        clearTimeout(searchTimeout.value)
+        searchTimeout.value = null
+    }
+    searchTimeout.value = setTimeout(providerFinder, 500)
+}
+async function providerFinder() {
+    loadingProvider.value = true
+    await axios.post('/api/manager/check_provider', {
+        provider: hospital.value
+    }).then(response => { providerFound.value = response.data })
+    if (hospital.value == '') {
+        providerFound.value = ''
+    }
+    loadingProvider.value = false
+}
+async function selectProvince(provinceParam) {
+    city.value = ''
+    province.value = provinceParam
+    isActiveDropdownProvince.value = false
+    await axios.get('/api/geolocation').then(response => citiesData.value = response.data.find(x => x.province === province.value))
+    citiesData.value = await citiesData.value.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })
+}
+function selectCity(cityParam) {
+    city.value = cityParam
+    isActiveDropdownCity.value = false
+}
+function selectStandardPlan() {
+    pricing.value = 'Standard'
+}
+function selectPremiumPlan() {
+    pricing.value = 'Premium'
+}
+function provinceDropdown() {
+    isActiveDropdownProvince.value = !isActiveDropdownProvince.value
+}
+function cityDropdown() {
+    isActiveDropdownCity.value = !isActiveDropdownCity.value
+}
+function selectSpecialization(specialization) {
+    if (!specializationsSelected.value.find(x => x.specialist === specialization)) {
+        specializationsSelected.value.push({
+            specialist: specialization
+        });
+    }
+}
+function undoSpecialization(specialization) {
+    specializationsSelected.value = specializationsSelected.value.filter(x => x.specialist !== specialization)
+}
+async function create() {
+    generateCode()
+    passwordNotMatch.value = false
+
+    if (password.value !== confirmPassword.value) {
+        passwordNotMatch.value = true
+    } else {
+        passwordNotMatch.value = false
+    }
+
+    if (password.value === confirmPassword.value && !usernameFound.value && !providerFound.value) {
+        try {
+            await axios.post('/api/manager', {
+                registrationCode: registrationCode.value,
+                pricing: pricing.value,
+                status: 'Inactive',
+                hospital: hospital.value,
+                type: hospitalType.value,
+                email: email.value,
+                province: province.value,
+                city: city.value,
+                barangayORStreet: barangayORStreet.value,
+                postalCode: postalCode.value,
+                location: {
+                    type: 'Point',
+                    coordinates: [longitude.value, latitude.value]
+                },
+                specializations: specializationsSelected.value,
+                username: username.value,
+                password: password.value
+            });
+            store.commit('accountCreated', true)
+            await router.push('/account/login')
+        } catch (err) {
+            errMsg.value = err
+        }
+    }
+}
+
+</script>
 <template>
     <section class="section" style="background-color: whitesmoke;">
         <div class="container box" style="width: 50%; margin: auto;">
@@ -141,8 +320,7 @@
                         </div>
                         <div class="control">
                             <label class="label">Confirm Password</label>
-                            <input class="input" type="password" placeholder="Confirm Password"
-                                v-model="confirmPassword" />
+                            <input class="input" type="password" placeholder="Confirm Password" v-model="confirmPassword" />
                         </div>
                         <div class="notification is-light is-danger" v-if="passwordNotMatch">Password does not match.
                         </div>
@@ -171,8 +349,7 @@
                             <button v-for="(specialist, index) in specializationsSelected" :key="index"
                                 class="button is-light" style="margin: 5px">
                                 {{ specialist.specialist }}&nbsp;
-                                <span class="has-text-danger"
-                                    @click="undoSpecialization(specialist.specialist)">X</span>
+                                <span class="has-text-danger" @click="undoSpecialization(specialist.specialist)">X</span>
                             </button>
                         </div>
                     </div>
@@ -244,189 +421,6 @@
         </div>
     </section>
 </template>
-<script>
-import axios from 'axios'
-
-export default {
-    name: "ManagerSignup",
-    async mounted() {
-        await axios.get('/api/geolocation').then(response => this.geolocationData = response.data)
-    },
-    computed: {
-        specializationListIndexed() {
-            return this.specializationList.filter(x => x.toLowerCase().includes(this.searchBar.toLowerCase()))
-        }
-    },
-    data() {
-        return {
-            geolocationData: [],
-            isActiveDropdownProvince: false,
-            isActiveDropdownCity: false,
-            registrationCode: '',
-            pricing: '',
-            hospital: '',
-            email: '',
-            hospitalType: '',
-            latitude: '',
-            longitude: '',
-            barangayORStreet: '',
-            postalCode: '',
-            city: '',
-            province: '',
-            username: '',
-            password: '',
-            confirmPassword: '',
-            loadingUsername: false,
-            loadingProvider: false,
-            usernameFound: '',
-            providerFound: '',
-            passwordNotMatch: false,
-            citiesData: [],
-            specializationsSelected: [],
-            specializationList: this.$store.getters.getSpecializationList,
-            searchBar: '',
-            errMsg: '',
-            searchTimeout: null
-        }
-    },
-    methods: {
-        generateCode() {
-            let result = '';
-            let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let charactersLength = characters.length;
-            for (let i = 0; i < 12; i++) {
-                result += characters.charAt(Math.floor(Math.random() *
-                    charactersLength));
-            }
-            this.registrationCode = result.toUpperCase()
-        },
-        async usernameFindTimeout() {
-            if (this.searchTimeout) {
-                clearTimeout(this.searchTimeout)
-                this.searchTimeout = null
-            }
-            this.searchTimeout = setTimeout(this.usernameFinder, 500)
-        },
-        async usernameFinder() {
-            this.loadingUsername = true
-            this.usernameFound = false
-            await axios.post('/api/user/check_username', {
-                username: this.username
-            }).then(response => {
-                if (response.data) {
-                    this.usernameFound = response.data
-                }
-            })
-            await axios.post('/api/doctor/check_username', {
-                username: this.username
-            }).then(response => {
-                if (response.data) {
-                    this.usernameFound = response.data
-                }
-            })
-            await axios.post('/api/manager/check_username', {
-                username: this.username
-            }).then(response => {
-                if (response.data) {
-                    this.usernameFound = response.data
-                }
-            })
-            if (this.username == '') {
-                this.usernameFound = ''
-            }
-            this.loadingUsername = false
-        },
-        async providerFindTimeout() {
-            if (this.searchTimeout) {
-                clearTimeout(this.searchTimeout)
-                this.searchTimeout = null
-            }
-            this.searchTimeout = setTimeout(this.providerFinder, 500)
-        },
-        async providerFinder() {
-            this.loadingProvider = true
-            await axios.post('/api/manager/check_provider', {
-                provider: this.hospital
-            }).then(response => { this.providerFound = response.data })
-            if (this.hospital == '') {
-                this.providerFound = ''
-            }
-            this.loadingProvider = false
-        },
-        async selectProvince(province) {
-            this.city = ''
-            this.province = province
-            this.isActiveDropdownProvince = false
-            await axios.get('/api/geolocation').then(response => this.citiesData = response.data.find(x => x.province === province))
-            this.citiesData = await this.citiesData.citiesOrMunicipalities.sort((a, b) => { return a.name > b.name ? 1 : -1 })
-        },
-        selectCity(city) {
-            this.city = city
-            this.isActiveDropdownCity = false
-        },
-        selectStandardPlan() {
-            this.pricing = 'Standard'
-        },
-        selectPremiumPlan() {
-            this.pricing = 'Premium'
-        },
-        provinceDropdown() {
-            this.isActiveDropdownProvince = !this.isActiveDropdownProvince
-        },
-        cityDropdown() {
-            this.isActiveDropdownCity = !this.isActiveDropdownCity
-        },
-        selectSpecialization(specialization) {
-            if (!this.specializationsSelected.find(x => x.specialist === specialization)) {
-                this.specializationsSelected.push({
-                    specialist: specialization
-                });
-            }
-        },
-        undoSpecialization(specialization) {
-            this.specializationsSelected = this.specializationsSelected.filter(x => x.specialist !== specialization)
-        },
-        async create() {
-            this.generateCode()
-            this.passwordNotMatch = false
-
-            if (this.password !== this.confirmPassword) {
-                this.passwordNotMatch = true
-            } else {
-                this.passwordNotMatch = false
-            }
-
-            if (this.password === this.confirmPassword && !this.usernameFound && !this.providerFound) {
-                try {
-                    await axios.post('/api/manager', {
-                        registrationCode: this.registrationCode,
-                        pricing: this.pricing,
-                        status: 'Inactive',
-                        hospital: this.hospital,
-                        type: this.hospitalType,
-                        email: this.email,
-                        province: this.province,
-                        city: this.city,
-                        barangayORStreet: this.barangayORStreet,
-                        postalCode: this.postalCode,
-                        location: {
-                            type: 'Point',
-                            coordinates: [this.longitude, this.latitude]
-                        },
-                        specializations: this.specializationsSelected,
-                        username: this.username,
-                        password: this.password
-                    });
-                    await this.$store.commit('accountCreated', true)
-                    await this.$router.push('/account/login')
-                } catch (err) {
-                    this.errMsg = err
-                }
-            }
-        }
-    }
-}
-</script>
 <style scoped>
 .dropdown-menu {
     max-height: 20em;

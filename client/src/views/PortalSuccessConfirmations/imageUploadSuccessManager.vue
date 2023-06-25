@@ -1,3 +1,16 @@
+<script setup>
+import { onBeforeMount } from 'vue';
+import { useStore } from 'vuex';
+
+const store = useStore()
+
+onBeforeMount(() => {
+  setTimeout(() => {
+    window.location.href = "/account/login"
+    store.commit('imgSuccessManager', false)
+  }, 15000)
+})
+</script>
 <template>
   <div class="container" style="margin-top: 20%">
     <h1 class="title has-text-centered">Hospital image changed successfully, changes may take a few minutes to hours to
@@ -11,18 +24,4 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'imgUploadSuccessManager',
-  created() {
-    setTimeout(() => {
-      window.location.href = "/account/login"
-      this.$store.commit('imgSuccessManager', false)
-    }, 15000)
-  }
-}
-</script>
-
-<style>
-
-</style>
+<style></style>

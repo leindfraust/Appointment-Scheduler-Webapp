@@ -1,3 +1,106 @@
+<script setup>
+import axios from 'axios'
+import ManagerMenuVue from '../../components/ManagerMenu.vue'
+import { Chart, registerables } from 'chart.js'
+import { LineChart } from 'vue-chart-3'
+import { ref, computed, onBeforeMount } from 'vue'
+
+const loading = ref(false)
+const hospitalStatus = ref('')
+const managerHospital = ref('')
+const searchBar = ref('')
+const isActiveModal = ref(false)
+const doctorAccounts = ref([])
+const email = ref('')
+const id = ref('')
+const lineChartData = ref([])
+const lineChartOptions = ref({
+    responsive: true,
+    plugins: {
+        legend: {
+            display: true,
+        },
+        title: {
+            display: true,
+            text: 'Appointment counts throughout this year',
+        },
+    },
+})
+const hospitalAppointments = ref([])
+const doctorAccountsIndexed = computed(() => doctorAccounts.value.filter(x => { return x.name.toLowerCase().includes(searchBar.value.toLowerCase()) || x.alias.toLowerCase().includes(searchBar.value.toLowerCase()) || x.specialist.find(x => x.toLowerCase().includes(searchBar.value.toLowerCase())) }))
+
+Chart.register(...registerables)
+
+onBeforeMount(async () => {
+    loading.value = true
+    await axios.get('/session/manager').then(response => managerHospital.value = response.data)
+    await axios.post(`/api/manager/${managerHospital.value._id}`).then(response => hospitalStatus.value = response.data)
+    await axios.post('/api/doctor/manager', { hospital: managerHospital.value.hospital }).then(response => doctorAccounts.value = response.data)
+    await axios.post('/api/appointmentList/managers', { hospital: managerHospital.value.hospital }).then(response => hospitalAppointments.value = response.data);
+
+    //line chart variables
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    let schedules = []
+    let dataArrLineVisited = []
+    let dataArrLineNotVisited = []
+    let dataArrLineCancelled = []
+    hospitalAppointments.value.forEach(x => {
+        if (new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear()) return schedules.push(monthNames[x.schedule[0].dayDetail.month - 1])
+    })
+    let lineChartLabel = [...new Set(schedules)]
+
+    lineChartLabel.forEach(e => dataArrLineVisited.push(hospitalAppointments.value.filter(x => new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear() && monthNames[x.schedule[0].dayDetail.month] == e && x.ifPatientVisited).length))
+    lineChartLabel.forEach(e => dataArrLineNotVisited.push(hospitalAppointments.value.filter(x => new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear() && monthNames[x.schedule[0].dayDetail.month] == e && !x.ifPatientVisited).length))
+    lineChartLabel.forEach(e => dataArrLineCancelled.push(hospitalAppointments.value.filter(x => new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear() && monthNames[x.schedule[0].dayDetail.month] == e && x.ifPatientCancelled).length))
+    lineChartData.value = {
+        labels: lineChartLabel,
+        datasets: [
+            {
+                label: 'Confirmed Appointments',
+                data: dataArrLineVisited,
+                backgroundColor: ['#77CEFF'],
+            },
+            {
+                label: 'Cancelled Appointments',
+                data: dataArrLineCancelled,
+                backgroundColor: ['orange'],
+            },
+            {
+                label: "No Action Appointments",
+                data: dataArrLineNotVisited,
+                backgroundColor: ['red']
+            }
+        ]
+    }
+    loading.value = false
+})
+
+function doctorRecoverEmail(idParam, emailParam) {
+    id.value = idParam
+    email.value = emailParam
+    isActiveModal.value = true
+}
+async function updateData() {
+    await axios.put(`/api/doctor/${id.value}`, {
+        gmail: email.value
+    });
+    await axios.get('/api/doctor').then(response => doctorAccounts.value = response.data)
+    isActiveModal.value = !isActiveModal.value
+}
+async function doctorRemove(id) {
+    await axios.post('/api/doctorPullHospital', {
+        doctorID: id,
+        hospital: managerHospital.value.hospital
+    });
+    await axios.get('/api/doctor').then(response => doctorAccounts.value = response.data)
+}
+function closeModal() {
+    isActiveModal.value = false
+}
+
+</script>
 <template>
     <div class="modal" :class="{ 'is-active': loading }">
         <div class="modal-background"></div>
@@ -11,7 +114,7 @@
             <section class="section">
                 <div class="notification is-light is-danger" v-if="hospitalStatus.status == 'Inactive'">The account is
                     not activated yet and will not be displayed on hospital searches, complete the hospital's
-                    <router-link :to="`/manager/${this.managerHospital.hospital}/profile`" class="has-text-link">
+                    <router-link :to="`/manager/${managerHospital.hospital}/profile`" class="has-text-link">
                         profile</router-link> to activate the account.
                 </div>
                 <h1 class="title">{{ managerHospital.hospital }}</h1>
@@ -47,8 +150,8 @@
                                                 <strong
                                                     v-if="new Date(schedule.date).getTime() == new Date(new Date().toDateString()).getTime() && schedule.hospital == managerHospital.hospital"
                                                     class="has-text-info">TODAY: </strong> {{ `${new
-        Date(schedule.date).toDateString()}, ${schedule.timeStart} -
-                                                    ${schedule.timeEnd}`
+                                                        Date(schedule.date).toDateString()}, ${schedule.timeStart} -
+                                                                                                    ${schedule.timeEnd}`
                                                     }}
                                             </p>
                                         </span>
@@ -121,122 +224,4 @@
         </div>
     </div>
 </template>
-<script>
-import axios from 'axios'
-import ManagerMenuVue from '../../components/ManagerMenu.vue'
-import { Chart, registerables } from 'chart.js'
-import { LineChart } from 'vue-chart-3'
-
-Chart.register(...registerables)
-
-export default {
-    name: "ManagerDashboard",
-    components: {
-        ManagerMenuVue,
-        LineChart
-    },
-    computed: {
-        doctorAccountsIndexed() {
-            return this.doctorAccounts.filter(x => { return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) || x.alias.toLowerCase().includes(this.searchBar.toLowerCase()) || x.specialist.find(x => x.toLowerCase().includes(this.searchBar.toLowerCase())) })
-        },
-    },
-    async mounted() {
-        this.loading = true
-        await axios.get('/session/manager').then(response => this.managerHospital = response.data)
-        await axios.post(`/api/manager/${this.managerHospital._id}`).then(response => this.hospitalStatus = response.data)
-        await axios.post('/api/doctor/manager', { hospital: this.managerHospital.hospital }).then(response => this.doctorAccounts = response.data)
-        await axios.post('/api/appointmentList/managers', { hospital: this.managerHospital.hospital }).then(response => this.hospitalAppointments = response.data);
-
-        //line chart variables
-        const monthNames = ["January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
-        let schedules = []
-        let dataArrLineVisited = []
-        let dataArrLineNotVisited = []
-        let dataArrLineCancelled = []
-        this.hospitalAppointments.forEach(x => {
-            if (new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear()) return schedules.push(monthNames[x.schedule[0].dayDetail.month - 1])
-        })
-        let lineChartLabel = [...new Set(schedules)]
-
-        lineChartLabel.forEach(e => dataArrLineVisited.push(this.hospitalAppointments.filter(x => new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear() && monthNames[x.schedule[0].dayDetail.month] == e && x.ifPatientVisited).length))
-        lineChartLabel.forEach(e => dataArrLineNotVisited.push(this.hospitalAppointments.filter(x => new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear() && monthNames[x.schedule[0].dayDetail.month] == e && !x.ifPatientVisited).length))
-        lineChartLabel.forEach(e => dataArrLineCancelled.push(this.hospitalAppointments.filter(x => new Date(x.schedule[0].date).getFullYear() == new Date().getFullYear() && monthNames[x.schedule[0].dayDetail.month] == e && x.ifPatientCancelled).length))
-        this.lineChartData = {
-            labels: lineChartLabel,
-            datasets: [
-                {
-                    label: 'Confirmed Appointments',
-                    data: dataArrLineVisited,
-                    backgroundColor: ['#77CEFF'],
-                },
-                {
-                    label: 'Cancelled Appointments',
-                    data: dataArrLineCancelled,
-                    backgroundColor: ['orange'],
-                },
-                {
-                    label: "No Action Appointments",
-                    data: dataArrLineNotVisited,
-                    backgroundColor: ['red']
-                }
-            ]
-        }
-        this.loading = false
-    },
-    data() {
-        return {
-            loading: false,
-            hospitalStatus: '',
-            managerHospital: '',
-            searchBar: '',
-            isActiveModal: false,
-            doctorAccounts: [],
-            email: '',
-            id: '',
-            lineChartData: [],
-            lineChartOptions: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                    },
-                    title: {
-                        display: true,
-                        text: 'Appointment counts throughout this year',
-                    },
-                },
-            },
-            hospitalAppointments: []
-        }
-    },
-    methods: {
-        doctorRecoverEmail(id, email) {
-            this.id = id
-            this.email = email
-            this.isActiveModal = true
-        },
-        async updateData() {
-            await axios.put(`/api/doctor/${this.id}`, {
-                gmail: this.email
-            });
-            await axios.get('/api/doctor').then(response => this.doctorAccounts = response.data)
-            this.isActiveModal = !this.isActiveModal
-        },
-        async doctorRemove(id) {
-            await axios.post('/api/doctorPullHospital', {
-                doctorID: id,
-                hospital: this.managerHospital.hospital
-            });
-            await axios.get('/api/doctor').then(response => this.doctorAccounts = response.data)
-        },
-        closeModal() {
-            this.isActiveModal = false
-        },
-    }
-}
-</script>
-<style scoped>
-
-</style>
+<style scoped></style>
