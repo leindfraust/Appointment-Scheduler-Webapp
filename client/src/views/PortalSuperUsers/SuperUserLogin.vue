@@ -1,3 +1,67 @@
+<script setup>
+import axios from 'axios'
+import { ref, onBeforeMount } from 'vue'
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+
+const store = useStore()
+const router = useRouter()
+
+const modalActive = ref(false)
+const statusMessage = ref('')
+const superUserEmail = ref('')
+const superUserConfirmEmail = ref('')
+const superUserCode = ref('')
+const superUserConfirmCode = ref('')
+
+onBeforeMount(async () => {
+    await axios.get('/session/superuser').then(response => superUserConfirmEmail.value = response.data)
+
+    if (typeof superUserConfirmEmail.value.superuser !== 'undefined') {
+        store.commit('superUserAuth', true)
+        await router.push('/superuser')
+    } else {
+        await axios.delete("/session/superuser");
+    }
+})
+
+
+async function authenticateMail() {
+    await axios.post('/api/code/superuser', {
+        email: superUserEmail.value
+    }).then(response => superUserConfirmEmail.value = response.data)
+    if (superUserConfirmEmail.value) {
+        await axios.post('/api/loginReqMail', {
+            email: superUserEmail.value
+        }).then(modalActive.value = true).catch(err => {
+            if (err) {
+                statusMessage.value = err
+            }
+        });
+    } else {
+        statusMessage.value = 'invalid developer'
+        superUserEmail.value = ''
+    }
+}
+async function authenticateCode() {
+    await axios.post('/api/code/verify', {
+        code: superUserCode.value
+    }).then(response => superUserConfirmCode.value = response.data)
+    if (superUserConfirmCode.value) {
+        await axios.post('/session/superuser', {
+            superuser: superUserEmail.value
+        });
+        store.commit('superUserAuth', true)
+        await router.push('/superuser')
+    } else {
+        statusMessage.value = 'invalid code'
+        superUserCode.value = ''
+    }
+}
+function modalClose() {
+    modalActive.value = false
+}
+</script>
 <template>
     <div class="container" style="width: 33%; margin-top: 15%">
         <h1 class="title has-text-centered">Welcome Superuser/Developer</h1>
@@ -34,72 +98,6 @@
         </div>
     </div>
 </template>
-<script>
-import axios from 'axios'
-
-export default {
-    name: "SuperUserLogin",
-    async beforeCreate() {
-        await axios.get('/session/superuser').then(response => this.superUserConfirmEmail = response.data)
-
-        if (typeof this.superUserConfirmEmail.superuser !== 'undefined') {
-            this.$store.commit('superUserAuth', true)
-            await this.$router.push('/superuser')
-        } else {
-            await axios.delete("/session/superuser");
-        }
-    },
-    data() {
-        return {
-
-            modalActive: false,
-            statusMessage: '',
-            superUserEmail: '',
-            superUserConfirmEmail: '',
-            superUserCode: '',
-            superUserConfirmCode: '',
-            gmails: []
-        }
-    },
-    methods: {
-        async authenticateMail() {
-            await axios.post('/api/code/superuser', {
-                email: this.superUserEmail
-            }).then(response => this.superUserConfirmEmail = response.data)
-            if (this.superUserConfirmEmail) {
-                await axios.post('/api/loginReqMail', {
-                    email: this.superUserEmail
-                }).then(this.modalActive = true).catch(err => {
-                    if (err) {
-                        this.statusMessage = err
-                    }
-                });
-            } else {
-                this.statusMessage = 'invalid developer'
-                this.superUserEmail = ''
-            }
-        },
-        async authenticateCode() {
-            await axios.post('/api/code/verify', {
-                code: this.superUserCode
-            }).then(response => this.superUserConfirmCode = response.data)
-            if (this.superUserConfirmCode) {
-                await axios.post('/session/superuser', {
-                    superuser: this.superUserEmail
-                });
-                await this.$store.commit('superUserAuth', true)
-                await this.$router.push('/superuser')
-            } else {
-                this.statusMessage = 'invalid code'
-                this.superUserCode = ''
-            }
-        },
-        modalClose() {
-            this.modalActive = false
-        }
-    }
-}
-</script>
 <style scoped>
 @media (max-width: 991.98px) {
     .container {

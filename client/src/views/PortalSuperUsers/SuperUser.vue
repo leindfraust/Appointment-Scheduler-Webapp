@@ -1,3 +1,302 @@
+<script setup>
+import axios from 'axios'
+import { ref, computed, onBeforeMount } from 'vue'
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+import groupBy from 'lodash/groupBy'
+
+const store = useStore()
+const router = useRouter()
+
+const searchBar = ref('')
+const superUser = ref('')
+const managerAccounts = ref([])
+const doctorAccounts = ref([])
+const patientAccounts = ref([])
+const ticketList = ref([])
+const isActiveMenu = ref(true)
+const isActiveDashboard = ref(true)
+const isActiveManager = ref(false)
+const isActiveDoctor = ref(false)
+const isActivePatient = ref(false)
+const isActiveGeolocation = ref(false)
+const isActiveTickets = ref(false)
+const isActiveModal = ref(false)
+const isActiveDropdownEditStatus = ref(false)
+const isActiveDropdownEditPricing = ref(false)
+const isActiveDropdownItemOne = ref(false)
+const isActiveDropdownItemTwo = ref(false)
+const isActiveDropdownPricingItemOne = ref(false)
+const isActiveDropdownPricingItemTwo = ref(false)
+const isActiveDropdownProvince = ref(false)
+const id = ref('')
+const email = ref('')
+const status = ref('')
+const type = ref('')
+const pricing = ref('')
+const province = ref('')
+const provinceLatitude = ref('')
+const provinceLongitude = ref('')
+const cityOrMunicipality = ref('')
+const latitude = ref('')
+const longitude = ref('')
+const postalCode = ref('')
+const provinceList = ref([])
+const selectedProvince = ref('')
+const selectedProvinceID = ref('')
+const provincePostSuccess = ref(false)
+const cityOrMunicipalityPostSuccess = ref(false)
+
+
+onBeforeMount(async () => {
+    await axios.get("/session/superuser").then(response => superUser.value = response.data.superuser)
+    await axios.get("/api/geolocation").then(response => provinceList.value = response.data)
+})
+
+const managerAccountsIndexed = computed(() => managerAccounts.value.filter(x => { return x.hospital.toLowerCase().includes(searchBar.value.toLowerCase()) }))
+const doctorAccountsIndexed = computed(() => doctorAccounts.value.filter(x => { return x.name.toLowerCase().includes(searchBar.value.toLowerCase()) || x.specialist.find(x => x.toLowerCase().includes(searchBar.value.toLowerCase())) }))
+const patientAccountsIndexed = computed(() => patientAccounts.value.filter(x => { return x.name[0].toLowerCase().includes(searchBar.value.toLowerCase()) || x.name[1].toLowerCase().includes(searchBar.value.toLowerCase()) }))
+const ticketsIndexed = computed(() => ticketList.value.filter(x => { return x.id.toLowerCase().includes(searchBar.value.toLowerCase()) || x.type.toLowerCase().includes(searchBar.value.toLowerCase()) || x.email.toLowerCase().includes(searchBar.value.toLowerCase()) }))
+const provinceAndCitiesIndexed = computed(() => {
+    return groupBy(
+        provinceList.value.filter(x => {
+            return (x.citiesOrMunicipalities.find(x => { return x.name.toLowerCase().includes(searchBar.value.toLowerCase()) }));
+
+        }),
+        "province"
+    )
+})
+
+function dashboard() {
+    isActiveMenu.value = true
+    isActiveDashboard.value = true
+    isActiveManager.value = false
+    isActiveDoctor.value = false
+    isActivePatient.value = false
+    isActiveGeolocation.value = false
+    isActiveTickets.value = false
+}
+async function manager() {
+    isActiveMenu.value = true
+    isActiveDashboard.value = false
+    isActiveManager.value = true
+    isActiveDoctor.value = false
+    isActivePatient.value = false
+    isActiveGeolocation.value = false
+    isActiveTickets.value = false
+
+    await axios.get("/api/manager").then(response => managerAccounts.value = response.data)
+}
+async function doctor() {
+    isActiveMenu.value = true
+    isActiveDashboard.value = false
+    isActiveManager.value = false
+    isActiveDoctor.value = true
+    isActivePatient.value = false
+    isActiveGeolocation.value = false
+    isActiveTickets.value = false
+
+    await axios.get("/api/doctor").then(response => doctorAccounts.value = response.data)
+}
+async function patient() {
+    isActiveMenu.value = true
+    isActiveDashboard.value = false
+    isActiveManager.value = false
+    isActiveDoctor.value = false
+    isActivePatient.value = true
+    isActiveGeolocation.value = false
+    isActiveTickets.value = false
+
+    await axios.get("/api/user").then(response => patientAccounts.value = response.data)
+}
+async function tickets() {
+    isActiveMenu.value = true
+    isActiveDashboard.value = false
+    isActiveManager.value = false
+    isActiveDoctor.value = false
+    isActivePatient.value = false
+    isActiveGeolocation.value = false
+    isActiveTickets.value = true
+
+    await axios.get("/api/superuser").then(response => ticketList.value = response.data[0].tickets)
+}
+async function geolocation() {
+    isActiveMenu.value = true
+    isActiveDashboard.value = false
+    isActiveManager.value = false
+    isActiveDoctor.value = false
+    isActivePatient.value = false
+    isActiveGeolocation.value = true
+    isActiveTickets.value = false
+
+    await axios.get("/api/geolocation").then(response => provinceList.value = response.data)
+}
+async function managerEdit(idParam, emailParam) {
+    isActiveModal.value = !isActiveModal.value
+    id.value = idParam
+    email.value = emailParam
+    type.value = 'manager'
+}
+async function doctorRecoverEmail(idParam, emailParam) {
+    isActiveModal.value = !isActiveModal.value
+    id.value = idParam
+    email.value = emailParam
+    type.value = 'doctor'
+}
+async function patientRecoverEmail(idParam, emailParam) {
+    isActiveModal.value = !isActiveModal.value
+    id.value = idParam
+    email.value = emailParam
+    type.value = 'patient'
+}
+async function updateData() {
+    if (type.value == 'manager') {
+        await axios.put(`/api/manager/${id.value}`, {
+            status: status.value,
+            pricing: pricing.value,
+            email: email.value
+        });
+        await axios.get('/api/manager').then(response => managerAccounts.value = response.data)
+        isActiveModal.value = !isActiveModal.value
+    } else if (type.value == 'doctor') {
+        await axios.put(`/api/doctor/${id.value}`, {
+            gmail: email.value
+        });
+        await axios.get('/api/doctor').then(response => doctorAccounts.value = response.data)
+        isActiveModal.value = !isActiveModal.value
+    } else if (type.value == 'patient') {
+        await axios.put(`/api/user/${id.value}`, {
+            gmail: email.value
+        });
+        await axios.get('/api/user').then(response => patientAccounts.value = response.data)
+        isActiveModal.value = !isActiveModal.value
+    }
+}
+async function managerDelete(id) {
+    await axios.delete(`/api/manager/${id}`)
+    await axios.get('/api/manager').then(response => managerAccounts.value = response.data)
+}
+async function doctorDelete(id) {
+    await axios.delete(`/api/doctor/${id}`)
+    await axios.get('/api/doctor').then(response => doctorAccounts.value = response.data)
+}
+async function patientDelete(id) {
+    await axios.delete(`/api/user/${id}`)
+    await axios.get('/api/user').then(response => patientAccounts.value = response.data)
+
+}
+async function cityDelete(id, city, latitude, longitude, postalCode) {
+    await axios.post("/api/provinceCityPull", {
+        provinceID: id,
+        cityOrMunicipality: city,
+        latitude: latitude,
+        longitude: longitude,
+        postalCode: postalCode
+    });
+    await axios.get("/api/geolocation").then(response => provinceList.value = response.data)
+}
+async function deleteProvince(id) {
+    await axios.delete(`/api/geolocation/${id}`)
+    await axios.get("/api/geolocation").then(response => provinceList.value = response.data)
+}
+function closeModal() {
+    isActiveModal.value = false
+}
+function dropdown() {
+    isActiveDropdownEditStatus.value = !isActiveDropdownEditStatus.value
+}
+function dropdownPricing() {
+    isActiveDropdownEditPricing.value = !isActiveDropdownEditPricing.value
+}
+function statusActive() {
+    status.value = 'Active'
+    isActiveDropdownItemOne.value = true
+    isActiveDropdownItemTwo.value = false
+}
+function statusInactive() {
+    status.value = 'Inactive'
+    isActiveDropdownItemOne.value = false
+    isActiveDropdownItemTwo.value = true
+}
+function pricingStandard() {
+    pricing.value = 'Standard'
+    isActiveDropdownPricingItemOne.value = true
+    isActiveDropdownPricingItemTwo.value = false
+}
+function pricingPremium() {
+    pricing.value = 'Premium'
+    isActiveDropdownPricingItemOne.value = false
+    isActiveDropdownPricingItemTwo.value = true
+}
+async function provincePost() {
+    await axios.post('/api/geolocation', {
+        province: province.value,
+        location: {
+            type: 'Point',
+            coordinates: [provinceLongitude.value, provinceLatitude.value]
+        },
+    });
+    await axios.get("/api/geolocation").then(response => provinceList.value = response.data)
+    provincePostSuccess.value = true
+}
+async function cityOrMunicipalityPost() {
+    await axios.post('/api/provinceUpdate', {
+        provinceID: selectedProvinceID.value,
+        cityOrMunicipality: cityOrMunicipality.value,
+        latitude: latitude.value,
+        longitude: longitude.value,
+        postalCode: postalCode.value
+    });
+    cityOrMunicipalityPostSuccess.value = true
+    selectedProvince.value = ''
+    selectedProvinceID.value = ''
+    cityOrMunicipality.value = ''
+    latitude.value = ''
+    longitude.value = ''
+
+    await axios.get("/api/geolocation").then(response => provinceList.value = response.data)
+}
+function provinceDropdownActive() {
+    isActiveDropdownProvince.value = !isActiveDropdownProvince.value
+}
+function chooseProvince(idParam, provinceName) {
+    selectedProvinceID.value = idParam
+    selectedProvince.value = provinceName
+    isActiveDropdownProvince.value = false
+}
+async function closeTicket(id) {
+    await axios.post('/api/superuser/updateTicket', {
+        ticketID: id,
+        ticketActive: false
+    });
+    await axios.get("/api/superuser").then(response => ticketList.value = response.data[0].tickets)
+}
+async function reopenTicket(id) {
+    await axios.post('/api/superuser/updateTicket', {
+        ticketID: id,
+        ticketActive: true
+    });
+    await axios.get("/api/superuser").then(response => ticketList.value = response.data[0].tickets)
+}
+async function deleteTicket(id, type, email, title, message, active) {
+    await axios.post('/api/superuser/deleteTicket', {
+        ticketID: id,
+        email: email,
+        ticketType: type,
+        ticketTitle: title,
+        ticketMessage: message,
+        ticketActive: active
+    });
+    await axios.get("/api/superuser").then(response => ticketList.value = response.data[0].tickets)
+}
+async function logout() {
+    await axios.delete("/session/superuser");
+    store.commit("superUserAuth", false)
+    await router.push("/superuser/login")
+}
+
+
+</script>
 <template>
     <div class="columns">
         <div class="column is-2">
@@ -297,7 +596,7 @@
                             <a class="has-text-danger" @click="deleteProvince(geolocation[0]._id)">Delete Province</a>
                             <p class="subtitle has-text-black">Province: {{ index }}</p>
                             <p class="subtitle is-6 has-text-black">Latitude: {{
-                                    geolocation[0].location.coordinates[1]
+                                geolocation[0].location.coordinates[1]
                             }}
                             </p>
                             <p class="subtitle is-6 has-text-black">Longitude: {{ geolocation[0].location.coordinates[0]
@@ -371,8 +670,8 @@
                                 </div>
                                 <div class="dropdown-menu" id="dropdown-menu" role="menu">
                                     <div class="dropdown-content" v-for="province in provinceList" :key="province._id">
-                                        <a @click="chooseProvince(province._id, province.province)"
-                                            class="dropdown-item">{{ province.province }}</a>
+                                        <a @click="chooseProvince(province._id, province.province)" class="dropdown-item">{{
+                                            province.province }}</a>
                                     </div>
                                 </div>
                             </div>
@@ -399,311 +698,4 @@
         </div>
     </div>
 </template>
-<script>
-import axios from 'axios'
-import groupBy from 'lodash/groupBy'
-
-export default {
-    name: "SuperUser",
-    computed: {
-        managerAccountsIndexed() {
-            return this.managerAccounts.filter(x => { return x.hospital.toLowerCase().includes(this.searchBar.toLowerCase()) })
-        },
-        doctorAccountsIndexed() {
-            return this.doctorAccounts.filter(x => { return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) || x.specialist.find(x => x.toLowerCase().includes(this.searchBar.toLowerCase())) })
-        },
-        patientAccountsIndexed() {
-            return this.patientAccounts.filter(x => { return x.name[0].toLowerCase().includes(this.searchBar.toLowerCase()) || x.name[1].toLowerCase().includes(this.searchBar.toLowerCase()) })
-        },
-        ticketsIndexed() {
-            return this.ticketList.filter(x => { return x.id.toLowerCase().includes(this.searchBar.toLowerCase()) || x.type.toLowerCase().includes(this.searchBar.toLowerCase()) || x.email.toLowerCase().includes(this.searchBar.toLowerCase()) })
-        },
-        provinceAndCitiesIndexed() {
-            return groupBy(
-                this.provinceList.filter(x => {
-                    return (x.citiesOrMunicipalities.find(x => { return x.name.toLowerCase().includes(this.searchBar.toLowerCase()) }));
-
-                }),
-                "province"
-            )
-        }
-    },
-    async mounted() {
-        await axios.get("/session/superuser").then(response => this.superUser = response.data.superuser)
-        await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
-    },
-    data() {
-        return {
-            searchBar: '',
-            superUser: '',
-            managerAccounts: [],
-            doctorAccounts: [],
-            patientAccounts: [],
-            ticketList: [],
-            isActiveMenu: true,
-            isActiveDashboard: true,
-            isActiveManager: false,
-            isActiveDoctor: false,
-            isActivePatient: false,
-            isActiveGeolocation: false,
-            isActiveTickets: false,
-            isActiveModal: false,
-            isActiveDropdownEditStatus: false,
-            isActiveDropdownEditPricing: false,
-            isActiveDropdownItemOne: false,
-            isActiveDropdownItemTwo: false,
-            isActiveDropdownPricingItemOne: false,
-            isActiveDropdownPricingItemTwo: false,
-            isActiveDropdownProvince: false,
-            id: '',
-            email: '',
-            status: '',
-            type: '',
-            province: '',
-            provinceLatitude: '',
-            provinceLongitude: '',
-            cityOrMunicipality: '',
-            latitude: '',
-            longitude: '',
-            postalCode: '',
-            provinceList: [],
-            selectedProvince: '',
-            selectedProvinceID: '',
-            provincePostSuccess: false,
-            cityOrMunicipalityPostSuccess: false
-        }
-    },
-    methods: {
-        dashboard() {
-            this.isActiveMenu = true
-            this.isActiveDashboard = true
-            this.isActiveManager = false
-            this.isActiveDoctor = false
-            this.isActivePatient = false
-            this.isActiveGeolocation = false
-            this.isActiveTickets = false
-        },
-        async manager() {
-            this.isActiveMenu = true
-            this.isActiveDashboard = false
-            this.isActiveManager = true
-            this.isActiveDoctor = false
-            this.isActivePatient = false
-            this.isActiveGeolocation = false
-            this.isActiveTickets = false
-
-            await axios.get("/api/manager").then(response => this.managerAccounts = response.data)
-        },
-        async doctor() {
-            this.isActiveMenu = true
-            this.isActiveDashboard = false
-            this.isActiveManager = false
-            this.isActiveDoctor = true
-            this.isActivePatient = false
-            this.isActiveGeolocation = false
-            this.isActiveTickets = false
-
-            await axios.get("/api/doctor").then(response => this.doctorAccounts = response.data)
-        },
-        async patient() {
-            this.isActiveMenu = true
-            this.isActiveDashboard = false
-            this.isActiveManager = false
-            this.isActiveDoctor = false
-            this.isActivePatient = true
-            this.isActiveGeolocation = false
-            this.isActiveTickets = false
-
-            await axios.get("/api/user").then(response => this.patientAccounts = response.data)
-        },
-        async tickets() {
-            this.isActiveMenu = true
-            this.isActiveDashboard = false
-            this.isActiveManager = false
-            this.isActiveDoctor = false
-            this.isActivePatient = false
-            this.isActiveGeolocation = false
-            this.isActiveTickets = true
-
-            await axios.get("/api/superuser").then(response => this.ticketList = response.data[0].tickets)
-        },
-        async geolocation() {
-            this.isActiveMenu = true
-            this.isActiveDashboard = false
-            this.isActiveManager = false
-            this.isActiveDoctor = false
-            this.isActivePatient = false
-            this.isActiveGeolocation = true
-            this.isActiveTickets = false
-
-            await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
-        },
-        async managerEdit(id, email) {
-            this.isActiveModal = !this.isActiveModal
-            this.id = id
-            this.email = email
-            this.type = 'manager'
-        },
-        async doctorRecoverEmail(id, email) {
-            this.isActiveModal = !this.isActiveModal
-            this.id = id
-            this.email = email
-            this.type = 'doctor'
-        },
-        async patientRecoverEmail(id, email) {
-            this.isActiveModal = !this.isActiveModal
-            this.id = id
-            this.email = email
-            this.type = 'patient'
-        },
-        async updateData() {
-            if (this.type == 'manager') {
-                await axios.put(`/api/manager/${this.id}`, {
-                    status: this.status,
-                    pricing: this.pricing,
-                    email: this.email
-                });
-                await axios.get('/api/manager').then(response => this.managerAccounts = response.data)
-                this.isActiveModal = !this.isActiveModal
-            } else if (this.type == 'doctor') {
-                await axios.put(`/api/doctor/${this.id}`, {
-                    gmail: this.email
-                });
-                await axios.get('/api/doctor').then(response => this.doctorAccounts = response.data)
-                this.isActiveModal = !this.isActiveModal
-            } else if (this.type == 'patient') {
-                await axios.put(`/api/user/${this.id}`, {
-                    gmail: this.email
-                });
-                await axios.get('/api/user').then(response => this.patientAccounts = response.data)
-                this.isActiveModal = !this.isActiveModal
-            }
-        },
-        async managerDelete(id) {
-            await axios.delete(`/api/manager/${id}`)
-            await axios.get('/api/manager').then(response => this.managerAccounts = response.data)
-        },
-        async doctorDelete(id) {
-            await axios.delete(`/api/doctor/${id}`)
-            await axios.get('/api/doctor').then(response => this.doctorAccounts = response.data)
-        },
-        async patientDelete(id) {
-            await axios.delete(`/api/user/${id}`)
-            await axios.get('/api/user').then(response => this.patientAccounts = response.data)
-
-        },
-        async cityDelete(id, city, latitude, longitude, postalCode) {
-            await axios.post("/api/provinceCityPull", {
-                provinceID: id,
-                cityOrMunicipality: city,
-                latitude: latitude,
-                longitude: longitude,
-                postalCode: postalCode
-            });
-            await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
-        },
-        async deleteProvince(id) {
-            await axios.delete(`/api/geolocation/${id}`)
-            await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
-        },
-        closeModal() {
-            this.isActiveModal = false
-        },
-        dropdown() {
-            this.isActiveDropdownEditStatus = !this.isActiveDropdownEditStatus
-        },
-        dropdownPricing() {
-            this.isActiveDropdownEditPricing = !this.isActiveDropdownEditPricing
-        },
-        statusActive() {
-            this.status = 'Active'
-            this.isActiveDropdownItemOne = true
-            this.isActiveDropdownItemTwo = false
-        },
-        statusInactive() {
-            this.status = 'Inactive'
-            this.isActiveDropdownItemOne = false
-            this.isActiveDropdownItemTwo = true
-        },
-        pricingStandard() {
-            this.pricing = 'Standard'
-            this.isActiveDropdownPricingItemOne = true
-            this.isActiveDropdownPricingItemTwo = false
-        },
-        pricingPremium() {
-            this.pricing = 'Premium'
-            this.isActiveDropdownPricingItemOne = false
-            this.isActiveDropdownPricingItemTwo = true
-        },
-        async provincePost() {
-            await axios.post('/api/geolocation', {
-                province: this.province,
-                location: {
-                    type: 'Point',
-                    coordinates: [this.provinceLongitude, this.provinceLatitude]
-                },
-            });
-            await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
-            this.provincePostSuccess = true
-        },
-        async cityOrMunicipalityPost() {
-            await axios.post('/api/provinceUpdate', {
-                provinceID: this.selectedProvinceID,
-                cityOrMunicipality: this.cityOrMunicipality,
-                latitude: this.latitude,
-                longitude: this.longitude,
-                postalCode: this.postalCode
-            });
-            this.cityOrMunicipalityPostSuccess = true
-            this.selectedProvince = ''
-            this.selectedProvinceID = ''
-            this.cityOrMunicipality = ''
-            this.latitude = ''
-            this.longitude = ''
-
-            await axios.get("/api/geolocation").then(response => this.provinceList = response.data)
-        },
-        provinceDropdownActive() {
-            this.isActiveDropdownProvince = !this.isActiveDropdownProvince
-        },
-        chooseProvince(id, provinceName) {
-            this.selectedProvinceID = id
-            this.selectedProvince = provinceName
-            this.isActiveDropdownProvince = false
-        },
-        async closeTicket(id) {
-            await axios.post('/api/superuser/updateTicket', {
-                ticketID: id,
-                ticketActive: false
-            });
-            await axios.get("/api/superuser").then(response => this.ticketList = response.data[0].tickets)
-        },
-        async reopenTicket(id) {
-            await axios.post('/api/superuser/updateTicket', {
-                ticketID: id,
-                ticketActive: true
-            });
-            await axios.get("/api/superuser").then(response => this.ticketList = response.data[0].tickets)
-        },
-        async deleteTicket(id, type, email, title, message, active) {
-            await axios.post('/api/superuser/deleteTicket', {
-                ticketID: id,
-                email: email,
-                ticketType: type,
-                ticketTitle: title,
-                ticketMessage: message,
-                ticketActive: active
-            });
-            await axios.get("/api/superuser").then(response => this.ticketList = response.data[0].tickets)
-        },
-        async logout() {
-            await axios.delete("/session/superuser");
-            await this.$store.commit("superUserAuth", false)
-            await this.$router.push("/superuser/login")
-        }
-    }
-}
-</script>
-<style scoped>
-
-</style>
+<style scoped></style>

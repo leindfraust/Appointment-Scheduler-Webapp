@@ -1,3 +1,239 @@
+<script setup>
+import axios from "axios";
+import NavigationTab from "../../components/NavigationTab.vue";
+import CatchError from "../../components/CatchError.vue";
+import PaymongoClient from 'paymongo.js'
+import { useStore } from "vuex";
+import { ref, onBeforeMount } from 'vue'
+
+const store = useStore()
+
+const checkPatientRecord = ref(null)
+const patient = ref(null)
+const doctorSched = ref(store.state.doctorDetails.schedule)
+const firstName = ref(null)
+const lastName = ref(null)
+const birthDay = ref(null)
+const comments = ref(null)
+const contactNum = ref(null)
+const schedule = ref(null)
+const currentAddress = ref(null)
+const priorityNum = ref(null)
+const patientsAppointed = ref(null)
+const doctorDetails = ref(store.state.doctorDetails)
+const pickedSpecialization = ref(store.state.pickedSpecialization)
+const isLoading = ref(false)
+const schedAvailability = ref(false)
+const radioIndex = ref(null)
+const prefix = ref(null)
+const hospital = ref(store.state.hospitalName)
+const refID = ref(null)
+const errMsg = ref('')
+const initialScheduleCheck = ref(true)
+const appointmentCategory = ref('')
+const appointmentCategories = ref([])
+const client = ref(PaymongoClient(process.env.VUE_APP_PayMongoSK))
+const checkoutUrl = ref('')
+const paymentFirstToggle = ref(false)
+const paymentAmount = ref('')
+const paymentFailed = ref(false)
+const paymentStatus = ref(store.state.paymentStatus)
+const doubleAppointmentID = ref(false)
+const multipleAppointment = ref(false)
+const confirmDetails = ref(false)
+
+onBeforeMount(async () => {
+  if (paymentStatus.value !== 'pending') {
+    if (paymentStatus.value == 'failed') {
+      paymentFailed.value = true
+      store.commit("paymentStatus", 'pending')
+    }
+  }
+
+  doctorSched.value = doctorSched.value.filter(x => new Date(x.date).getTime() > new Date().getTime() && x.hospital === hospital.value).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  await axios.get('/session/patient').then(response => patient.value = response.data)
+  firstName.value = await patient.value.name[0]
+  lastName.value = await patient.value.name[1]
+  checkPatientRecord.value = await doctorDetails.value.patients.find(x => x.patient === patient.value._id)
+  currentAddress.value = await patient.value.currentAddress
+
+  for await (const [index, schedules] of doctorSched.value.entries()) {
+    await pickSched(index, schedules, schedules.prefix, schedules.appointmentCategories, schedules.paymentAmount)
+  }
+  initialScheduleCheck.value = false
+})
+
+async function checkAppointmentDuplication() {
+  confirmDetails.value = false
+  try {
+    await axios.post('/api/appointmentList/check-double-appointment', {
+      firstName: firstName.value,
+      lastName: lastName.value,
+      schedule: schedule.value,
+      patientID: patient.value._id,
+      doctorID: doctorDetails.value._id
+    }).then(response => response.data ? doubleAppointmentID.value = response.data : doubleAppointmentID.value = false)
+    if (!doubleAppointmentID.value) {
+      await axios.post('/api/appointmentList/check-multiple-appointment', {
+        schedule: schedule.value,
+        patientID: patient.value._id,
+        doctorID: doctorDetails.value._id
+      }).then(response => response.data ? multipleAppointment.value = true : multipleAppointment.value = false)
+    }
+  } catch (err) {
+    errMsg.value = err
+  }
+  if (!doubleAppointmentID.value && !multipleAppointment.value) {
+    await appoint()
+  }
+}
+async function reAppointment() {
+  await axios.delete(`/api/appointmentList/${doubleAppointmentID.value}`).catch(err => errMsg.value = err)
+  doubleAppointmentID.value = false
+  await appoint()
+}
+async function appoint() {
+  isLoading.value = true
+  let radio = document.getElementsByClassName('radioSched');
+  let statusSched = document.getElementsByClassName('statusSched')
+  //check appointed patients in the selected date
+  await axios
+    .post("/api/appointmentList/doctors/checkPriority", {
+      doctorID: doctorDetails.value._id,
+      schedule: schedule.value.date
+    }).then(response => patientsAppointed.value = response.data);
+  //check how many appointed patients in regards to the appointment limit set by the doctor
+  if (await patientsAppointed.value < schedule.value.appointmentLimit) {
+    //if appointed patients is less then the appointment limit
+    await axios
+      .post("/api/appointmentList/doctors/checkPriority", {
+        doctorID: doctorDetails.value._id,
+        schedule: schedule.value.date
+      }).then(response => priorityNum.value = response.data + 1);
+    try {
+      //if patient is new to the doctor, patient will be recorded as list of patients in doctor's profile
+      if (typeof checkPatientRecord.value === 'undefined' || !checkPatientRecord.value) {
+        await axios.post('/api/patientUpdate', {
+          doctorID: doctorDetails.value._id,
+          patientID: patient.value._id,
+          patientFullName: firstName.value + " " + lastName.value
+        });
+      }
+      generateRefID()
+
+      await axios.put(`/api/manager/${store.state.hospitalDetails._id}`, {
+        engagements: store.state.hospitalDetails.engagements + 5
+      }); //added egagement just for hitting submit button
+
+      await axios.post("/api/appointmentList", {
+        referenceID: refID.value,
+        hospital: hospital.value,
+        doctorID: doctorDetails.value._id,
+        doctorName: doctorDetails.value.name,
+        doctorSpecialization: pickedSpecialization.value,
+        patientID: patient.value._id,
+        firstName: firstName.value,
+        lastName: lastName.value,
+        contactNum: contactNum.value,
+        birthDay: birthDay.value.toDateString(),
+        comments: comments.value,
+        schedule: schedule.value,
+        priorityNum: prefix.value ? prefix.value + "-" + priorityNum.value : priorityNum.value,
+        appointmentCategory: appointmentCategory.value
+      }).then(async response => {
+        store.commit("patientDetails", response.data);
+        await createSource();
+      })
+    } catch (err) { errMsg.value = err }
+    //if not, it fails and disables the radio
+  } else {
+    schedAvailability.value = false
+    schedule.value = null
+    radio[radioIndex.value].checked = false
+    radio[radioIndex.value].disabled = true
+    statusSched[radioIndex.value].style.display = 'block'
+  }
+  isLoading.value = false
+}
+async function pickSched(e, sched, prefixParam, category, paymentAmountParam) {
+  appointmentCategory.value = category[0]
+  if (!initialScheduleCheck.value) {
+    appointmentCategories.value = category
+  }
+  radioIndex.value = e
+  isLoading.value = true
+  let radio = document.getElementsByClassName('radioSched');
+  let statusSched = document.getElementsByClassName('statusSched')
+  for (let i = 0; i < statusSched.length; i++) {
+    statusSched[i].style.display = 'none'
+  }
+  schedule.value = await sched;
+  await axios.post("/api/appointmentList/doctors/checkPriority", {
+    doctorID: doctorDetails.value._id,
+    schedule: schedule.value.date
+  }).then(response => patientsAppointed.value = response.data);
+  //check how many appointed patients in regards to the appointment limit set by the doctor
+  //if available
+  if (await patientsAppointed.value < schedule.value.appointmentLimit) {
+    isLoading.value = false
+    if (!initialScheduleCheck.value) {
+      schedAvailability.value = true
+      prefix.value = prefixParam
+      statusSched[e].style.display = 'block'
+      paymentFirstToggle.value = true
+      paymentAmount.value = paymentAmountParam
+    }
+    // if not available
+  } else {
+    isLoading.value = false
+    schedAvailability.value = false
+    schedule.value = null
+    radio[e].checked = false
+    statusSched[e].style.display = 'block'
+    paymentAmount.value = ''
+    if (initialScheduleCheck.value) {
+      doctorSched.value = doctorSched.value.filter(schedule => schedule != sched)
+    }
+  }
+  if (initialScheduleCheck.value) {
+    schedule.value = null
+  }
+}
+function generateRefID() {
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += Math.floor(Math.random() * 9);
+  }
+  refID.value = result.toUpperCase()
+}
+async function createSource() {
+  const route = location.origin
+  try {
+    await client.value.source.create({
+      type: "gcash", // gcash | grab_pay
+      currency: "PHP",
+      amount: parseInt(`${paymentAmount.value}00`),
+      redirect: {
+        success: `${route}/payment-status`,
+        failed: `${route}/payment-status`,
+      },
+    }).then(response => {
+      checkoutUrl.value = response.data.attributes.redirect.checkout_url
+      store.commit("paymentID", response.data.id)
+    });
+    if (checkoutUrl.value) {
+      window.location.replace(checkoutUrl.value);
+    }
+  } catch (err) {
+    isLoading.value = false
+    errMsg.value = err
+  }
+}
+function reloadPage() {
+  location.reload()
+}
+
+</script>
 <template>
   <NavigationTab />
   <section class="section">
@@ -155,254 +391,6 @@
     </div>
   </section>
 </template>
-
-<script>
-import axios from "axios";
-import store from "../../store";
-import NavigationTab from "../../components/NavigationTab.vue";
-import CatchError from "../../components/CatchError.vue";
-import PaymongoClient from 'paymongo.js'
-
-export default {
-  name: "RegForm",
-  components: {
-    NavigationTab,
-    CatchError
-  },
-  data() {
-    return {
-      checkPatientRecord: null,
-      patient: null,
-      doctorSched: store.state.doctorDetails.schedule,
-      firstName: null,
-      lastName: null,
-      birthDay: null,
-      comments: null,
-      contactNum: null,
-      schedule: null,
-      currentAddress: null,
-      priorityNum: null,
-      patientsAppointed: null,
-      doctorDetails: store.state.doctorDetails,
-      pickedSpecialization: store.state.pickedSpecialization,
-      isLoading: false,
-      schedAvailability: false,
-      radioIndex: null,
-      prefix: null,
-      hospital: store.state.hospitalName,
-      refID: null,
-      errMsg: '',
-      initialScheduleCheck: true,
-      appointmentCategory: '',
-      appointmentCategories: [],
-      client: PaymongoClient(process.env.VUE_APP_PayMongoSK),
-      checkoutUrl: '',
-      paymentFirstToggle: false,
-      paymentAmount: '',
-      paymentFailed: false,
-      paymentStatus: store.state.paymentStatus,
-      paymentSuccesPatientDetails: store.state.patientDetails,
-      paymentWindowWaiting: false,
-      doubleAppointmentID: false,
-      multipleAppointment: false,
-      confirmDetails: false
-    };
-  },
-  async created() {
-    if (this.paymentStatus !== 'pending') {
-      if (this.paymentStatus == 'failed') {
-        this.paymentFailed = true
-        store.commit("paymentStatus", 'pending')
-      }
-    }
-  },
-  async mounted() {
-    this.doctorSched = this.doctorSched.filter(x => new Date(x.date).getTime() > new Date().getTime() && x.hospital === this.hospital).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    await axios.get('/session/patient').then(response => this.patient = response.data)
-    this.firstName = await this.patient.name[0]
-    this.lastName = await this.patient.name[1]
-    this.checkPatientRecord = await this.doctorDetails.patients.find(x => x.patient === this.patient._id)
-    this.currentAddress = await this.patient.currentAddress
-
-    for await (const [index, schedules] of this.doctorSched.entries()) {
-      await this.pickSched(index, schedules, schedules.prefix, schedules.appointmentCategories, schedules.paymentAmount)
-    }
-    this.initialScheduleCheck = false
-
-  },
-  methods: {
-    async checkAppointmentDuplication() {
-      this.confirmDetails = false
-      try {
-        await axios.post('/api/appointmentList/check-double-appointment', {
-          firstName: this.firstName,
-          lastName: this.lastName,
-          schedule: this.schedule,
-          patientID: this.patient._id,
-          doctorID: this.doctorDetails._id
-        }).then(response => response.data ? this.doubleAppointmentID = response.data : this.doubleAppointmentID = false)
-        if (!this.doubleAppointmentID) {
-          await axios.post('/api/appointmentList/check-multiple-appointment', {
-            schedule: this.schedule,
-            patientID: this.patient._id,
-            doctorID: this.doctorDetails._id
-          }).then(response => response.data ? this.multipleAppointment = true : this.multipleAppointment = false)
-        }
-      } catch (err) {
-        this.errMsg = err
-      }
-      if (!this.doubleAppointmentID && !this.multipleAppointment) {
-        await this.appoint()
-      }
-    },
-    async reAppointment() {
-      await axios.delete(`/api/appointmentList/${this.doubleAppointmentID}`).catch(err => this.errMsg = err)
-      this.doubleAppointmentID = false
-      await this.appoint()
-    },
-    async appoint() {
-      this.isLoading = true
-      let radio = document.getElementsByClassName('radioSched');
-      let statusSched = document.getElementsByClassName('statusSched')
-      //check appointed patients in the selected date
-      await axios
-        .post("/api/appointmentList/doctors/checkPriority", {
-          doctorID: this.doctorDetails._id,
-          schedule: this.schedule.date
-        }).then(response => this.patientsAppointed = response.data);
-      //check how many appointed patients in regards to the appointment limit set by the doctor
-      if (await this.patientsAppointed < this.schedule.appointmentLimit) {
-        //if appointed patients is less then the appointment limit
-        await axios
-          .post("/api/appointmentList/doctors/checkPriority", {
-            doctorID: this.doctorDetails._id,
-            schedule: this.schedule.date
-          }).then(response => this.priorityNum = response.data + 1);
-        try {
-          //if patient is new to the doctor, patient will be recorded as list of patients in doctor's profile
-          if (typeof this.checkPatientRecord === 'undefined' || !this.checkPatientRecord) {
-            await axios.post('/api/patientUpdate', {
-              doctorID: this.doctorDetails._id,
-              patientID: this.patient._id,
-              patientFullName: this.firstName + " " + this.lastName
-            });
-          }
-          this.generateRefID()
-
-          await axios.put(`/api/manager/${store.state.hospitalDetails._id}`, {
-            engagements: store.state.hospitalDetails.engagements + 5
-          }); //added egagement just for hitting submit button
-
-          await axios.post("/api/appointmentList", {
-            referenceID: this.refID,
-            hospital: this.hospital,
-            doctorID: this.doctorDetails._id,
-            doctorName: this.doctorDetails.name,
-            doctorSpecialization: this.pickedSpecialization,
-            patientID: this.patient._id,
-            firstName: this.firstName,
-            lastName: this.lastName,
-            contactNum: this.contactNum,
-            birthDay: this.birthDay.toDateString(),
-            comments: this.comments,
-            schedule: this.schedule,
-            priorityNum: this.prefix ? this.prefix + "-" + this.priorityNum : this.priorityNum,
-            appointmentCategory: this.appointmentCategory
-          }).then(async response => {
-            store.commit("patientDetails", response.data);
-            await this.createSource();
-          })
-        } catch (err) { this.errMsg = err }
-        //if not, it fails and disables the radio
-      } else {
-        this.schedAvailability = false
-        this.schedule = null
-        radio[this.radioIndex].checked = false
-        radio[this.radioIndex].disabled = true
-        statusSched[this.radioIndex].style.display = 'block'
-      }
-      this.isLoading = false
-    },
-    async pickSched(e, sched, prefix, category, paymentAmount) {
-      this.appointmentCategory = category[0]
-      if (!this.initialScheduleCheck) {
-        this.appointmentCategories = category
-      }
-      this.radioIndex = e
-      this.isLoading = true
-      let radio = document.getElementsByClassName('radioSched');
-      let statusSched = document.getElementsByClassName('statusSched')
-      for (let i = 0; i < statusSched.length; i++) {
-        statusSched[i].style.display = 'none'
-      }
-      this.schedule = await sched;
-      await axios.post("/api/appointmentList/doctors/checkPriority", {
-        doctorID: this.doctorDetails._id,
-        schedule: this.schedule.date
-      }).then(response => this.patientsAppointed = response.data);
-      //check how many appointed patients in regards to the appointment limit set by the doctor
-      //if available
-      if (await this.patientsAppointed < this.schedule.appointmentLimit) {
-        this.isLoading = false
-        if (!this.initialScheduleCheck) {
-          this.schedAvailability = true
-          this.prefix = prefix
-          statusSched[e].style.display = 'block'
-          this.paymentFirstToggle = true
-          this.paymentAmount = paymentAmount
-        }
-        // if not available
-      } else {
-        this.isLoading = false
-        this.schedAvailability = false
-        this.schedule = null
-        radio[e].checked = false
-        statusSched[e].style.display = 'block'
-        this.paymentAmount = ''
-        if (this.initialScheduleCheck) {
-          this.doctorSched = this.doctorSched.filter(schedule => schedule != sched)
-        }
-      }
-      if (this.initialScheduleCheck) {
-        this.schedule = null
-      }
-    },
-    generateRefID() {
-      let result = '';
-      for (let i = 0; i < 6; i++) {
-        result += Math.floor(Math.random() * 9);
-      }
-      this.refID = result.toUpperCase()
-    },
-    async createSource() {
-      const route = location.origin
-      try {
-        await this.client.source.create({
-          type: "gcash", // gcash | grab_pay
-          currency: "PHP",
-          amount: parseInt(`${this.paymentAmount}00`),
-          redirect: {
-            success: `${route}/payment-status`,
-            failed: `${route}/payment-status`,
-          },
-        }).then(response => {
-          this.checkoutUrl = response.data.attributes.redirect.checkout_url
-          store.commit("paymentID", response.data.id)
-        });
-        if (this.checkoutUrl) {
-          window.location.replace(this.checkoutUrl);
-        }
-      } catch (err) {
-        this.isLoading = false
-        this.errMsg = err
-      }
-    },
-    reloadPage() {
-      location.reload()
-    }
-  },
-};
-</script>
 
 <style scoped>
 .statusSched {
