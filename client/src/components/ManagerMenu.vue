@@ -33,7 +33,7 @@ function navChangePass() {
 <template>
     <nav class="navbar is-hidden-desktop">
         <div class="navbar-brand">
-            <a role="button" class="navbar-burger" :class="{ 'is-active': !isActive }" aria-label="menu"
+            <a role="button" class="navbar-burger" :class="{ 'is-active': isActive }" aria-label="menu"
                 aria-expanded="false" data-target="navbar" @click="menuNav">
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
@@ -41,7 +41,7 @@ function navChangePass() {
             </a>
         </div>
     </nav>
-    <aside class="menu box" :class="{ 'is-hidden-mobile': isActive, 'fixedMenu': isActive }"
+    <aside class="menu box" :class="{ 'is-hidden-mobile': !isActive, 'fixedMenu': !isActive }"
         style="background-color: white; padding: 20px; height: 100vh">
         <p class="menu-label">General</p>
         <ul class="menu-list">
