@@ -86,7 +86,7 @@ async function updateData() {
     await axios.put(`/api/doctor/${id.value}`, {
         gmail: email.value
     });
-    await axios.get('/api/doctor').then(response => doctorAccounts.value = response.data)
+    await axios.post('/api/doctor/manager', { hospital: managerHospital.value.hospital }).then(response => doctorAccounts.value = response.data)
     isActiveModal.value = !isActiveModal.value
 }
 async function doctorRemove(id) {
@@ -94,7 +94,7 @@ async function doctorRemove(id) {
         doctorID: id,
         hospital: managerHospital.value.hospital
     });
-    await axios.get('/api/doctor').then(response => doctorAccounts.value = response.data)
+    await axios.post('/api/doctor/manager', { hospital: managerHospital.value.hospital }).then(response => doctorAccounts.value = response.data)
 }
 function closeModal() {
     isActiveModal.value = false
