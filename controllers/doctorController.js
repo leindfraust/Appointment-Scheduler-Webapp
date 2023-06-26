@@ -269,25 +269,25 @@ const pullDoctorHospital = (async (req, res) => {
     let doctorID = await req.body.doctorID
     let hospital = await req.body.hospital
 
-    Doctor.findOneAndUpdate({
-        _id: doctorID
-    }, {
-        $pull: {
-            hospitalOrigin: {
-                hospital: hospital
+    try {
+        const pullOperation = await Doctor.findOneAndUpdate({
+            _id: doctorID
+        }, {
+            $pull: {
+                hospitalOrigin: {
+                    hospital: hospital
+                }
             }
-        }
-    }, {
-        returnOriginal: false,
-        multi: true
-    }, function (error, success) {
-        if (error) {
-            console.log(error)
-        } else {
-            console.log(success)
+        }, {
+            new: true
+        })
+        if (pullOperation) {
             res.status(200).end()
         }
-    });
+    } catch (err) {
+        console.log(err)
+        res.status(500).send(err)
+    }
 });
 
 //add patient records to the doctor of a new patient
@@ -296,26 +296,26 @@ const pushPatientDoctor = (async (req, res) => {
     let patientID = await req.body.patientID
     let patientFullName = await req.body.patientFullName
 
-    Doctor.findOneAndUpdate({
-        _id: doctorID
-    }, {
-        $push: {
-            patients: {
-                patient: patientID,
-                patientName: patientFullName
+    try {
+        const pushOperation = await Doctor.findOneAndUpdate({
+            _id: doctorID
+        }, {
+            $push: {
+                patients: {
+                    patient: patientID,
+                    patientName: patientFullName
+                }
             }
-        }
-    }, {
-        returnOriginal: false
-    }, function (error, success) {
-        if (error) {
-            console.log(error)
-            res.status(500)
-        } else {
-            console.log(success)
+        }, {
+            new: true
+        })
+        if (pushOperation) {
             res.status(200).end()
         }
-    });
+    } catch (err) {
+        console.log(err)
+        res.status(500).send(err)
+    }
 });
 
 const pullPatientDoctor = (async (req, res) => {
@@ -323,86 +323,83 @@ const pullPatientDoctor = (async (req, res) => {
     let patientID = await req.body.patientID
     let patientFullName = await req.body.patientFullName
 
-    Doctor.findOneAndUpdate({
-        _id: doctorID
-    }, {
-        $pull: {
-            patients: {
-                patient: patientID,
-                patientName: patientFullName
+    try {
+        const pullOperation = await Doctor.findOneAndUpdate({
+            _id: doctorID
+        }, {
+            $pull: {
+                patients: {
+                    patient: patientID,
+                    patientName: patientFullName
+                }
             }
-        }
-    }, {
-        returnOriginal: false
-    }, function (error, success) {
-        if (error) {
-            console.log(error)
-            res.status(500)
-        } else {
-            console.log(success)
+        }, {
+            mew: true
+        })
+        if (pullOperation) {
             res.status(200).end()
         }
-    });
+    } catch (err) {
+        console.log(err)
+        res.status(500).send(err)
+    }
 });
 
 //get copy of doctor's messages to a patient
-const pushMessages = ((req, res) => {
-    Doctor.findOneAndUpdate({
-        _id: req.body.id
-    }, {
-        $push: {
-            messageHistory: req.body.message
-        },
-    }, {
-        returnOriginal: false
-    }, ((err, success) => {
-        if (err) {
-            console.log(err)
-        } else {
-            console.log(success)
-            res.status(200).send(success.messageHistory)
-        }
-    }))
+const pushMessages = (async (req, res) => {
+    try {
+        const doctorMsg = await Doctor.findOneAndUpdate({
+            _id: req.body.id
+        }, {
+            $push: {
+                messageHistory: req.body.message
+            },
+        }, {
+            new: true
+        })
+        res.status(200).send(doctorMsg.messageHistory)
+    } catch (err) {
+        console.log(err)
+        res.status(500).send(err)
+    }
 });
 
 //delete a copy of a doctor's message to a patient
-const pullMessage = ((req, res) => {
-    Doctor.findOneAndUpdate({
-        _id: req.body.id
-    }, {
-        $pull: {
-            messageHistory: req.body.message
-        },
-    }, {
-        returnOriginal: false
-    }, ((err, success) => {
-        if (err) {
-            console.log(err)
-        } else {
-            console.log(success)
-            res.status(200).send(success.messageHistory)
-        }
-    }))
+const pullMessage = (async (req, res) => {
+    try {
+        const doctorMsg = await Doctor.findOneAndUpdate({
+            _id: req.body.id
+        }, {
+            $pull: {
+                messageHistory: req.body.message
+            },
+        }, {
+            new: true
+        })
+        res.status(200).send(doctorMsg.messageHistory)
+    } catch (err) {
+        console.log(err)
+        res.status(500).send(err)
+    }
 });
 
 //delete all copies of a doctor's message to a patient
-const clearMessages = ((req, res) => {
-    Doctor.findOneAndUpdate({
-        _id: req.body.id
-    }, {
-        $set: {
-            messageHistory: Array
-        },
-    }, {
-        returnOriginal: false
-    }, ((err, success) => {
-        if (err) {
-            console.log(err)
-        } else {
-            console.log(success)
-            res.status(200).send(success.messageHistory)
-        }
-    }))
+const clearMessages = (async (req, res) => {
+    try {
+        const doctorMsg = await Doctor.findOneAndUpdate({
+            _id: req.body.id
+        }, {
+            $set: {
+                messageHistory: Array
+            },
+        }, {
+            new: true
+        })
+        res.status(200).send(doctorMsg.messageHistory)
+    } catch (err) {
+        console.log(err)
+        res.status(500).send(err)
+    }
 });
 
 module.exports = {
