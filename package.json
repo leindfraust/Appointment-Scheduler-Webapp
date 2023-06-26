@@ -8,7 +8,7 @@
     "server": "nodemon --exec \"npm run lint && node index\"",
     "client": "npm run serve --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "render": "npm install --omit=dev && npm run build --prefix client",
+    "render": "npm install --omit=dev && npm install ---force --legacy-peer-deps -omit=dev --prefix client && npm run build --prefix client",
     "start": "node index.js",
     "lint": "eslint .  --ext .js"
   },
