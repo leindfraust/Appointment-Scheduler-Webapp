@@ -1,4 +1,4 @@
-module.exports = {
-    mongoUri: process.env.mongouri,
-    PORT: process.env.PORT || 5000,
-}
+const mongoUri = process.env.mongouri;
+const PORT = process.env.PORT || 5000;
+
+export { mongoUri, PORT };
