@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {
+import {
     getManagers,
     getManager,
     pushManager,
@@ -9,7 +9,7 @@ const {
     verify_username,
     check_username,
     check_provider
-} = require('../../controllers/managerController')
+} from '../../controllers/managerController.js'
 
 router.post('/check_username', check_username)
 
@@ -27,4 +27,4 @@ router.put('/:id', updateManager);
 
 router.delete('/:id', deleteManager);
 
-module.exports = router;
+export default router;

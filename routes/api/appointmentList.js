@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express'
 const router = express.Router();
-const {
+import {
     getAppointments,
     pushAppointment,
     checkDoubleAppointment,
@@ -12,7 +12,7 @@ const {
     getAppointmentsforManager,
     getAppointmentsforDoctorCheckPriority,
     getCancelledAppointmentsforPatientAndDoctor
-} = require('../../controllers/appointmentController')
+} from '../../controllers/appointmentController.js'
 
 router.get('/', getAppointments);
 
@@ -36,4 +36,4 @@ router.put('/:id', updateAppointment);
 
 router.delete('/:id', deleteAppointment);
 
-module.exports = router;
+export default router

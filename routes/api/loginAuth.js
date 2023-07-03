@@ -1,10 +1,10 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {
+import {
     patientAuth,
     doctorAuth,
     managerAuth
-} = require('../../controllers/authController')
+} from '../../controllers/authController.js'
 
 //patient login
 router.post('/patient', patientAuth);
@@ -15,4 +15,4 @@ router.post('/doctor', doctorAuth);
 //manager login
 router.post('/manager', managerAuth);
 
-module.exports = router
+export default router 
