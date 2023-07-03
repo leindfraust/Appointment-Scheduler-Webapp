@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 const {
     Schema
 } = mongoose;
@@ -25,6 +25,4 @@ const geolocationSchema = new Schema({
 geolocationSchema.index({
     location: '2dsphere'
 })
-const geolocation = mongoose.model('geolocation', geolocationSchema);
-
-module.exports = geolocation
+export const Geolocation = mongoose.model('geolocation', geolocationSchema);

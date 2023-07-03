@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 const {
     Schema
 } = mongoose;
@@ -80,6 +80,4 @@ const managerSchema = new Schema({
 managerSchema.index({
     location: '2dsphere'
 })
-const manager = mongoose.model('manager', managerSchema);
-
-module.exports = manager
+export const Manager = mongoose.model('manager', managerSchema);

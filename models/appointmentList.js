@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 const {
     Schema
 } = mongoose;
@@ -62,6 +62,4 @@ const appointmentSchema = new Schema({
     }
 });
 
-const appointmentList = mongoose.model('appointmentList', appointmentSchema);
-
-module.exports = appointmentList
+export const AppointmentList = mongoose.model('appointmentList', appointmentSchema);

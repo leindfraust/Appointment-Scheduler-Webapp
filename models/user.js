@@ -1,17 +1,16 @@
-const mongoose = require('mongoose')
-const {
-    Schema
-} = mongoose;
+import mongoose from 'mongoose';
+
+const { Schema } = mongoose;
 
 const userSchema = new Schema({
     username: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
     },
     password: {
         type: String,
-        required: true
+        required: true,
     },
     name: {
         type: Array,
@@ -19,36 +18,34 @@ const userSchema = new Schema({
     },
     age: {
         type: Number,
-        required: true
+        required: true,
     },
     sex: {
         type: String,
-        required: true
+        required: true,
     },
     contactNum: {
         type: Number,
-        required: true
+        required: true,
     },
     gmail: {
         type: String,
         unique: true,
-        sparse: true
+        sparse: true,
     },
     province: {
         type: String,
-        required: true
+        required: true,
     },
     city: {
         type: String,
-        required: true
+        required: true,
     },
     currentAddress: {
         type: String,
-        required: true
+        required: true,
     },
-    messages: Array
+    messages: Array,
 });
 
-const user = mongoose.model('user', userSchema);
-
-module.exports = user
+export const User = mongoose.model('user', userSchema);
