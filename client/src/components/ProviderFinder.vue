@@ -276,8 +276,8 @@ async function getRecSpecialistTimeout() {
         }
     }
 }
-function selectRegion(province, location) {
-    province.value = province;
+function selectRegion(provinceParam, location) {
+    province.value = provinceParam;
     if (locationPermissionDenied.value || !userLatitude.value && !userLongitude.value) {
         userLatitude.value = location.coordinates[1]
         userLongitude.value = location.coordinates[0]
