@@ -1,5 +1,5 @@
-const nodemailer = require('nodemailer')
-const authenticationCode = require('../models/authenticationCodes');
+import { AuthenticationCode } from '../models/authenticationCodes.js';
+import nodemailer from 'nodemailer'
 
 //nodemailer config
 let transporter = nodemailer.createTransport({
@@ -30,7 +30,7 @@ const loginReqMail = ((req, res) => {
             res.status(400).end();
         } else {
             console.log('Email sent: ' + info.response);
-            const newAuthenticationCode = new authenticationCode({
+            const newAuthenticationCode = new AuthenticationCode({
                 email: email,
                 code: code
             });
@@ -64,7 +64,7 @@ const OTPMail = ((req, res) => {
             res.status(400).end();
         } else {
             console.log('Email sent: ' + info.response);
-            const newAuthenticationCode = new authenticationCode({
+            const newAuthenticationCode = new AuthenticationCode({
                 email: email,
                 code: code
             });
@@ -105,7 +105,7 @@ const supportMail = ((req, res) => {
     });
 });
 
-module.exports = {
+export {
     loginReqMail,
     OTPMail,
     supportMail

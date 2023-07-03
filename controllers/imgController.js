@@ -1,54 +1,54 @@
-const formidable = require('formidable')
-const cloudinary = require('cloudinary')
+import formidable from 'formidable'
+import cloudinary from 'cloudinary'
 
 cloudinary.config({
     cloud_name: process.env.cloudinary_cloud_name,
     api_key: process.env.cloudinary_api_key,
-    api_secret: process.env.cloudinary_api_secret
+    api_secret: process.env.cloudinary_api_secret,
+    secure: true
 });
 
 const imgUpload = ((req, res, next) => {
 
     const form = formidable({
-        multiples: true
+        multiples: true,
+        keepExtensions: true
     })
     form.parse(req, (err, fields, files) => {
         if (err) {
             next(err);
             return;
         }
-        cloudinary.v2.uploader.upload(files.imgFile.filepath, {
-            public_id: fields.alias,
+        cloudinary.v2.uploader.upload(files.imgFile[0].filepath, {
+            public_id: fields.alias[0],
             folder: "assets/doctors/",
             overwrite: true,
             invalidate: true,
             format: "jpg"
-        }, function (error, result) {
-            if (error) {
-                console.log(error)
-            } else {
-                console.log(result)
-            }
-        });
+        }).then(result => {
+            console.log(result)
+            res.status(200).redirect('/imgUploadSuccess')
+        }).catch(err => {
+            console.log(err)
+            res.status(500).end()
+        })
     });
-    setTimeout(() => {
-        res.status(200).redirect('/imgUploadSuccess')
-    }, 5000)
 });
 
 //doctor can upload an image as a message to the patient
 const imgUploadImgMsg = ((req, res, next) => {
 
     const form = formidable({
-        multiples: true
+        multiples: true,
+        keepExtensions: true
     })
     form.parse(req, (err, fields, files) => {
         if (err) {
             next(err);
             return;
         }
-        cloudinary.v2.uploader.upload(files.imgFile.filepath, {
-            public_id: fields.doctorID + fields.id,
+        cloudinary.v2.uploader.upload(files.imgFile[0].filepath, {
+            public_id: fields.doctorID[0] + fields.id[0],
             folder: "assets/patientimgmsg/doctorCopy/",
             overwrite: true,
             invalidate: true,
@@ -58,7 +58,7 @@ const imgUploadImgMsg = ((req, res, next) => {
                 console.log(error)
             } else {
                 console.log(result)
-                cloudinary.v2.uploader.add_tag(fields.doctorID, `assets/patientimgmsg/doctorCopy/${fields.doctorID + fields.id}`, {
+                cloudinary.v2.uploader.add_tag(fields.doctorID[0], `assets/patientimgmsg/doctorCopy/${fields.doctorID[0] + fields.id[0]}`, {
                     invalidate: true
                 }, (err, result) => {
                     if (err) {
@@ -67,20 +67,19 @@ const imgUploadImgMsg = ((req, res, next) => {
                         console.log(result)
                     }
                 })
-                cloudinary.v2.uploader.upload(files.imgFile.filepath, {
-                    public_id: fields.id,
+                cloudinary.v2.uploader.upload(files.imgFile[0].filepath, {
+                    public_id: fields.id[0],
                     folder: "assets/patientimgmsg/patientCopy/",
                     overwrite: true,
                     invalidate: true,
                     format: "jpg"
-                }, function (error, result) {
-                    if (error) {
-                        console.log(error)
-                    } else {
-                        console.log(result)
-                        res.status(200).end()
-                    }
-                });
+                }).then(result => {
+                    console.log(result)
+                    res.status(200).end()
+                }).catch(err => {
+                    console.log(err)
+                    res.status(500).end()
+                })
             }
         });
     });
@@ -90,27 +89,27 @@ const imgUploadImgMsg = ((req, res, next) => {
 const imgUploadVisitation = ((req, res, next) => {
 
     const form = formidable({
-        multiples: true
+        multiples: true,
+        keepExtensions: true
     })
     form.parse(req, (err, fields, files) => {
         if (err) {
             next(err);
             return;
         }
-        cloudinary.v2.uploader.upload(files.imgFile.filepath, {
-            public_id: fields.id,
+        cloudinary.v2.uploader.upload(files.imgFile[0].filepath, {
+            public_id: fields.id[0],
             folder: "assets/patientimgmsg/patientCopy/",
             overwrite: true,
             invalidate: true,
             format: "jpg"
-        }, function (error, result) {
-            if (error) {
-                console.log(error)
-            } else {
-                console.log(result)
-                res.status(200).end()
-            }
-        });
+        }).then(result => {
+            console.log(result)
+            res.status(200).end()
+        }).catch(err => {
+            console.log(err)
+            res.status(500).end()
+        })
     });
 });
 
@@ -119,14 +118,12 @@ const imgUploadImgMsgDeletePatient = ((req, res) => {
 
     cloudinary.v2.api.delete_resources([req.body.id], {
         invalidate: true
-    }, (err, success) => {
-        if (err) {
-            console.log(err)
-            res.status(400);
-        } else {
-            console.log(success)
-            res.status(200).end()
-        }
+    }).then(result => {
+        console.log(result)
+        res.status(200).end()
+    }).catch(err => {
+        console.log(err)
+        res.status(500).end()
     })
 });
 
@@ -135,14 +132,12 @@ const imgUploadImgMsgDeleteDoctor = ((req, res) => {
 
     cloudinary.v2.api.delete_resources([req.body.doctorID + req.body.id], {
         invalidate: true
-    }, (err, success) => {
-        if (err) {
-            console.log(err)
-            res.status(400);
-        } else {
-            console.log(success)
-            res.status(200).end()
-        }
+    }).then(result => {
+        console.log(result)
+        res.status(200).end()
+    }).catch(err => {
+        console.log(err)
+        res.status(500).end()
     })
 });
 
@@ -151,96 +146,99 @@ const imgUploadImgMsgClearDoctor = ((req, res) => {
 
     cloudinary.v2.api.delete_resources_by_tag(req.body.doctorID, {
         invalidate: true
-    }, (err, success) => {
-        if (err) {
-            console.log(err)
-            res.status(400);
-        } else {
-            console.log(success)
-            res.status(200).end()
-        }
+    }).then(result => {
+        console.log(result)
+        res.status(200).end()
+    }).catch(err => {
+        console.log(err)
+        res.status(500).end()
     })
 });
 
 //patient profile image upload
 const imgUploadPatient = ((req, res, next) => {
-
     const form = formidable({
-        multiples: true
+        multiples: true,
+        keepExtensions: true
     })
     form.parse(req, (err, fields, files) => {
         if (err) {
             next(err);
             return;
         }
-        cloudinary.v2.uploader.upload(files.imgFile.filepath, {
-            public_id: fields.username,
+        cloudinary.v2.uploader.upload(files.imgFile[0].filepath, {
+            public_id: fields.username[0],
             folder: "assets/patients/",
             overwrite: true,
             invalidate: true,
             format: "jpg"
-        }, function (error, result) {
-            console.log(result, error);
-        });
+        }).then(result => {
+            console.log(result)
+            res.status(200).redirect('/imgUploadSuccessPatient')
+        }).catch(err => {
+            console.log(err)
+            res.status(500).end()
+        })
     });
-    setTimeout(() => {
-        res.status(200).send(true)
-    }, 5000)
 });
 
 //doctor signup image upload
 const imgUploadDoctor = ((req, res, next) => {
 
     const form = formidable({
-        multiples: true
+        multiples: true,
+        keepExtensions: true
     })
     form.parse(req, (err, fields, files) => {
         if (err) {
             next(err);
             return;
         }
-        cloudinary.v2.uploader.upload(files.imgFile.filepath, {
-            public_id: fields.alias,
+        cloudinary.v2.uploader.upload(files.imgFile[0].filepath, {
+            public_id: fields.alias[0],
             folder: "assets/doctors/",
             overwrite: true,
             invalidate: true,
             format: "jpg"
-        }, function (error, result) {
-            console.log(result, error);
-        });
+        }).then(result => {
+            console.log(result)
+            res.status(200).redirect('/imgUploadSuccessDoctor')
+        }).catch(err => {
+            console.log(err)
+            res.status(500).end()
+        })
     });
-    setTimeout(() => {
-        res.status(200).redirect('/imgUploadSuccessDoctor')
-    }, 5000)
 });
 
 //manager upload photo 
 const imgUploadManager = ((req, res, next) => {
 
     const form = formidable({
-        multiples: true
+        multiples: true,
+        keepExtensions: true
     })
     form.parse(req, (err, fields, files) => {
         if (err) {
             next(err);
             return;
         }
-        cloudinary.v2.uploader.upload(files.imgFile.filepath, {
-            public_id: fields.hospital,
+        cloudinary.v2.uploader.upload(files.imgFile[0].filepath, {
+            public_id: fields.hospital[0],
             folder: "assets/managers/",
             overwrite: true,
             invalidate: true,
             format: "jpg"
-        }, function (error, result) {
-            console.log(result, error);
-        });
+        }).then(result => {
+            console.log(result)
+            res.status(200).redirect('/imgUploadSuccessManager')
+        }).catch(err => {
+            console.log(err)
+            res.status(500).end()
+        })
     });
-    setTimeout(() => {
-        res.status(200).redirect('/imgUploadSuccessManager')
-    }, 5000)
 });
 
-module.exports = {
+export {
     imgUpload,
     imgUploadImgMsg,
     imgUploadVisitation,

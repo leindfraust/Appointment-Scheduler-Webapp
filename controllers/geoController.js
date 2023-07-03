@@ -1,14 +1,16 @@
-const Hospital = require('../models/manager');
-const Geolocation = require('../models/geolocation');
+import { Geolocation } from '../models/geolocation.js';
 
 const getHospitalNearestUser = (async (req, res) => {
+
+    const { Manager } = await import('../models/manager.js')
+
     let province = req.body.province
     let latitude = req.body.latitude
     let longitude = req.body.longitude
     let hospitalQuery = req.body.hospitalQuery
 
     try {
-        const result = await Hospital.aggregate([
+        const result = await Manager.aggregate([
             {
                 $geoNear: {
                     near: {
@@ -207,7 +209,7 @@ const pushCity = (async (req, res) => {
         console.log(error);
     }
 });
-module.exports = {
+export {
     getProvinceNearestUser,
     getHospitalNearestUser,
     getGeolocations,
