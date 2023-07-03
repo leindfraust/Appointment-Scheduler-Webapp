@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {patientUpdatePassword, doctorUpdatePassword, managerUpdatePassword} = require('../../controllers/passwordController')
+import { patientUpdatePassword, doctorUpdatePassword, managerUpdatePassword } from '../../controllers/passwordController.js'
 
 router.put('/patient', patientUpdatePassword);
 
@@ -8,4 +8,4 @@ router.put('/doctor', doctorUpdatePassword);
 
 router.put('/manager', managerUpdatePassword)
 
-module.exports = router
+export default router

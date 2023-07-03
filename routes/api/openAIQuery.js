@@ -1,9 +1,9 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
-const { getRecSpecialist } = require('../../controllers/openAIController')
+import { getRecSpecialist } from '../../controllers/openAIController.js'
 
 router.post('/query-recommended-specialist', getRecSpecialist)
 
-module.exports = router;
+export default router;
 

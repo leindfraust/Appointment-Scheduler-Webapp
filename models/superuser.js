@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 const {
     Schema
 } = mongoose;
@@ -8,6 +8,4 @@ const superUserSchema = new Schema({
     gmail: Array
 });
 
-const superUser = mongoose.model('superUser', superUserSchema);
-
-module.exports = superUser
+export const SuperUser = mongoose.model('superUser', superUserSchema);

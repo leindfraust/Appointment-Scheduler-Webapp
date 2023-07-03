@@ -1,8 +1,8 @@
-const Superuser = require('../models/superuser');
+import { SuperUser } from "../models/superuser.js";
 
 const getSuperusers = (async (req, res) => {
     try {
-        const SuperuserList = await Superuser.find()
+        const SuperuserList = await SuperUser.find()
         if (!SuperuserList) throw new Error('no items')
         res.status(200).send(SuperuserList)
     } catch (error) {
@@ -13,7 +13,7 @@ const getSuperusers = (async (req, res) => {
 });
 
 const pushSuperuser = (async (req, res) => {
-    const newSuperuser = new Superuser(req.body)
+    const newSuperuser = new SuperUser(req.body)
     try {
         const SuperuserList = await newSuperuser.save()
         res.status(200).end()
@@ -29,7 +29,7 @@ const updateSuperuser = (async (req, res) => {
         id
     } = req.params
     try {
-        const response = await Superuser.findByIdAndUpdate(id, req.body)
+        const response = await SuperUser.findByIdAndUpdate(id, req.body)
         if (!response) throw new Error('cannot update')
         res.status(200).end()
     } catch (err) {
@@ -44,7 +44,7 @@ const deleteSuperuser = (async (req, res) => {
         id
     } = req.params
     try {
-        const removed = await Superuser.findByIdAndDelete(id)
+        const removed = await SuperUser.findByIdAndDelete(id)
         if (!removed) throw new Error('something went wrong, try again later')
         res.status(200).end()
     } catch (err) {
@@ -61,7 +61,7 @@ const submitTicket = (async (req, res) => {
     let ticketID = req.body.ticketID
     let ticketMessage = req.body.ticketMessage
     try {
-        const superuser = await Superuser.findOneAndUpdate({
+        const superuser = await SuperUser.findOneAndUpdate({
             _id: '6187884b847ca9434716e7ba'
         }, {
             $push: {
@@ -90,7 +90,7 @@ const deleteTicket = (async (req, res) => {
     let ticketID = req.body.ticketID
     let ticketMessage = req.body.ticketMessage
     let ticketActive = req.body.ticketActive
-    Superuser.findOneAndUpdate({
+    SuperUser.findOneAndUpdate({
         _id: '6187884b847ca9434716e7ba'
     }, {
         $pull: {
@@ -119,7 +119,7 @@ const deleteTicket = (async (req, res) => {
 const updateTicket = (async (req, res) => {
     let ticketID = req.body.ticketID
     let ticketActive = req.body.ticketActive
-    Superuser.findOneAndUpdate({
+    SuperUser.findOneAndUpdate({
         _id: '6187884b847ca9434716e7ba',
         'tickets.id': ticketID
     }, {
@@ -136,7 +136,7 @@ const updateTicket = (async (req, res) => {
     });
 });
 
-module.exports = {
+export {
     getSuperusers,
     pushSuperuser,
     updateSuperuser,

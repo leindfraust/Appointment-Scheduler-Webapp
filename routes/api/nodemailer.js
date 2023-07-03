@@ -1,10 +1,10 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {
+import {
     loginReqMail,
     OTPMail,
     supportMail
-} = require('../../controllers/nodemailController')
+} from '../../controllers/nodemailController.js'
 
 router.post('/loginReqMail', loginReqMail);
 
@@ -14,4 +14,4 @@ router.post('/OTPMail', OTPMail);
 //Contact Support
 router.post('/SupportMail', supportMail);
 
-module.exports = router;
+export default router;

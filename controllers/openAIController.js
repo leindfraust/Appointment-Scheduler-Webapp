@@ -1,4 +1,4 @@
-const getRecSpecialist = (async (req, res) => {
+export const getRecSpecialist = (async (req, res) => {
     const { ChatGPTAPI } = await import('chatgpt')
 
     const api = new ChatGPTAPI({
@@ -11,7 +11,3 @@ const getRecSpecialist = (async (req, res) => {
     console.log(specialist)
     res.status(200).send(specialist)
 })
-
-module.exports = {
-    getRecSpecialist
-}

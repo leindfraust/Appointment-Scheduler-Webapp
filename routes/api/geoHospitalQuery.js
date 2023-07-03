@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {getHospitalNearestUser} = require('../../controllers/geoController')
+import { getHospitalNearestUser } from '../../controllers/geoController.js'
 
 //geospatial query find near hospital in user's current location
 router.post('/geoFindHospitalNearestUser', getHospitalNearestUser);
 
-module.exports = router;
+export default router;

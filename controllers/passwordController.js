@@ -1,7 +1,7 @@
-const bcrypt = require('bcrypt')
-const Doctor = require('../models/doctor');
-const Patient = require('../models/user')
-const Manager = require('../models/manager')
+import bcrypt from 'bcrypt'
+import { Doctor } from '../models/doctor.js';
+import { User } from '../models/user.js';
+import { Manager } from '../models/manager.js';
 
 const patientUpdatePassword = (async (req, res) => {
     let patientID = req.body.patientID
@@ -9,12 +9,12 @@ const patientUpdatePassword = (async (req, res) => {
     let newPassword = req.body.newPassword
 
     try {
-        const result = await Patient.findOne({ _id: patientID });
+        const result = await User.findOne({ _id: patientID });
         const match = await bcrypt.compare(currentPassword, result.password);
 
         if (match) {
             const hash = await bcrypt.hash(newPassword, 10);
-            await Patient.findOneAndUpdate(
+            await User.findOneAndUpdate(
                 { _id: patientID },
                 { $set: { password: hash } },
                 { returnOriginal: false }
@@ -88,7 +88,7 @@ const patientfUpdatePassword = (async (req, res) => {
 
     try {
         const hash = await bcrypt.hash(password, 10);
-        await Patient.findOneAndUpdate(
+        await User.findOneAndUpdate(
             { _id: patientID },
             { $set: { password: hash } },
             { returnOriginal: false }
@@ -138,7 +138,7 @@ const managerfUpdatePassword = (async (req, res) => {
     }
 });
 
-module.exports = {
+export {
     patientUpdatePassword,
     doctorUpdatePassword,
     managerUpdatePassword,

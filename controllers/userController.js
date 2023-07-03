@@ -1,10 +1,9 @@
-const bcrypt = require('bcrypt');
-const user = require('../models/user');
+import { User } from '../models/user.js';
 
 const check_username = (async (req, res) => {
     let username = await req.body.username
     try {
-        const userAccount = await user.findOne({
+        const userAccount = await User.findOne({
             username: new RegExp(`^${username.trim()}$`, 'i')
         });
         if (userAccount) {
@@ -20,7 +19,7 @@ const check_username = (async (req, res) => {
 const check_email = (async (req, res) => {
     let email = await req.body.email
     try {
-        const userAccount = await user.findOne({
+        const userAccount = await User.findOne({
             gmail: new RegExp(`^${email.trim()}$`, 'i')
         });
         if (userAccount) {
@@ -38,7 +37,7 @@ const verify_username = (async (req, res) => {
     let email = await req.body.email
 
     try {
-        const userAccount = await user.findOne({
+        const userAccount = await User.findOne({
             username: username.trim(),
             gmail: email
         });
@@ -54,7 +53,7 @@ const verify_username = (async (req, res) => {
 
 const getUsers = (async (req, res) => {
     try {
-        const userList = await user.find().select('-password -username')
+        const userList = await User.find().select('-password -username')
         if (!userList) throw new Error('no items')
         res.status(200).send(userList)
     } catch (error) {
@@ -66,12 +65,14 @@ const getUsers = (async (req, res) => {
 
 const pushUser = (async (req, res) => {
 
+    const bcrypt = await import('bcrypt')
+
     bcrypt.hash(req.body.password, 10, async (err, hash) => {
         if (err) {
             res.status(500).send(err)
         } else {
             req.body.password = hash
-            const newuser = new user(req.body)
+            const newuser = new User(req.body)
             try {
                 const userList = await newuser.save()
                 if (!userList) throw new Error('Cannot save')
@@ -90,7 +91,7 @@ const updateUser = (async (req, res) => {
         id
     } = req.params
     try {
-        const response = await user.findByIdAndUpdate(id, req.body)
+        const response = await User.findByIdAndUpdate(id, req.body)
         if (!response) throw new Error('cannot update')
         res.status(200).end()
     } catch (err) {
@@ -105,7 +106,7 @@ const deleteUser = (async (req, res) => {
         id
     } = req.params
     try {
-        const removed = await user.findByIdAndDelete(id)
+        const removed = await User.findByIdAndDelete(id)
 
         if (!removed) throw new Error('something went wrong, try again later')
         res.status(200).send(removed)
@@ -116,7 +117,7 @@ const deleteUser = (async (req, res) => {
     }
 });
 
-module.exports = {
+export {
     check_username,
     check_email,
     verify_username,

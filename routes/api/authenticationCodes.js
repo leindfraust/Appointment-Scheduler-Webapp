@@ -1,13 +1,13 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {
+import {
     verifySuperUser,
     verifyEmail,
     verifyCode,
     pushCode,
     updateCode,
     deleteCode
-} = require('../../controllers/authCodeController')
+} from '../../controllers/authCodeController.js'
 
 router.post('/superuser', verifySuperUser);
 
@@ -21,4 +21,4 @@ router.put('/:id', updateCode);
 
 router.delete('/:id', deleteCode);
 
-module.exports = router;
+export default router;

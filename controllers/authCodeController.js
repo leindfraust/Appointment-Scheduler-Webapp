@@ -1,9 +1,9 @@
-const authenticationCode = require('../models/authenticationCodes');
-const superuser = require('../models/superuser')
+import { AuthenticationCode } from '../models/authenticationCodes.js';
 
 const verifySuperUser = (async (req, res) => {
+    const { SuperUser } = await import('../models/superuser.js')
     try {
-        const authSuperuser = await superuser.findOne({
+        const authSuperuser = await SuperUser.findOne({
             gmail: req.body.email
         });
         if (!authSuperuser) {
@@ -21,7 +21,7 @@ const verifySuperUser = (async (req, res) => {
 //for forgot password
 const verifyEmail = (async (req, res) => {
     try {
-        const email = await authenticationCode.findOne({
+        const email = await AuthenticationCode.findOne({
             email: req.body.email
         });
         if (!email) {
@@ -38,7 +38,7 @@ const verifyEmail = (async (req, res) => {
 
 const verifyCode = (async (req, res) => {
     try {
-        const authCode = await authenticationCode.findOne({
+        const authCode = await AuthenticationCode.findOne({
             code: req.body.code
         });
         if (!authCode) {
@@ -54,7 +54,7 @@ const verifyCode = (async (req, res) => {
 });
 
 const pushCode = (async (req, res) => {
-    const newAuthenticationCode = new authenticationCode(req.body)
+    const newAuthenticationCode = new AuthenticationCode(req.body)
     try {
         const authCode = await newAuthenticationCode.save()
         if (!authCode) throw new Error('Cannot save')
@@ -71,7 +71,7 @@ const updateCode = (async (req, res) => {
         id
     } = req.params
     try {
-        const response = await authenticationCode.findByIdAndUpdate(id, req.body)
+        const response = await AuthenticationCode.findByIdAndUpdate(id, req.body)
         if (!response) throw new Error('cannot update')
         const updated = {
             ...response._doc,
@@ -90,7 +90,7 @@ const deleteCode = (async (req, res) => {
         id
     } = req.params
     try {
-        const removed = await authenticationCode.findByIdAndDelete(id)
+        const removed = await AuthenticationCode.findByIdAndDelete(id)
         if (!removed) throw new Error('something went wrong, try again later')
         res.status(200).send(removed)
     } catch (err) {
@@ -100,7 +100,7 @@ const deleteCode = (async (req, res) => {
     }
 });
 
-module.exports = {
+export {
     verifySuperUser,
     verifyEmail,
     verifyCode,
