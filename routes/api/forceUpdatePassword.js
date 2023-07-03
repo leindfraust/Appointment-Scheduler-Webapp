@@ -1,12 +1,10 @@
-//for Forgot Password component in Vue
-
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {
+import {
     patientfUpdatePassword,
     doctorfUpdatePassword,
     managerfUpdatePassword
-} = require('../../controllers/passwordController')
+} from '../../controllers/passwordController.js'
 
 router.put('/patient', patientfUpdatePassword);
 
@@ -14,4 +12,4 @@ router.put('/doctor', doctorfUpdatePassword);
 
 router.put('/manager', managerfUpdatePassword);
 
-module.exports = router
+export default router

@@ -1,15 +1,13 @@
-const bcrypt = require('bcrypt')
-const Doctor = require('../models/doctor');
-const Patient = require('../models/user')
-const Manager = require('../models/manager')
+import bcrypt from 'bcrypt'
 
 //patient login
 const patientAuth = (async (req, res) => {
+    const { User } = await import('../models/user.js')
     let username = req.body.username
     let password = req.body.password
 
     try {
-        const result = await Patient.findOne({ username: username }).exec();
+        const result = await User.findOne({ username: username }).exec();
 
         if (result) {
             const userDetails = result;
@@ -33,6 +31,9 @@ const patientAuth = (async (req, res) => {
 
 //doctor login
 const doctorAuth = (async (req, res) => {
+
+    const { Doctor } = await import('../models/doctor.js')
+
     let username = req.body.username
     let password = req.body.password
 
@@ -61,6 +62,9 @@ const doctorAuth = (async (req, res) => {
 
 //manager login
 const managerAuth = (async (req, res) => {
+
+    const { Manager } = await import('../models/manager.js')
+
     let username = req.body.username
     let password = req.body.password
 
@@ -86,7 +90,7 @@ const managerAuth = (async (req, res) => {
     }
 });
 
-module.exports = {
+export {
     patientAuth,
     doctorAuth,
     managerAuth

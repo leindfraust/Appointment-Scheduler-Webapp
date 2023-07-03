@@ -72,7 +72,9 @@ async function authPatient() {
                     });
                     store.commit("patientUsername", dynamicUser.value.username)
                     store.commit("patientID", dynamicUser.value._id)
-                    await router.push(`/user/${dynamicUser.value.username}`);
+                    if (store.state.patientUsername == dynamicUser.value.username) {
+                        await router.push(`/user/${store.state.patientUsername}`);
+                    }
                 }
             })
 }
@@ -106,7 +108,9 @@ async function authDoctor() {
                     store.commit("alias", dynamicUser.value.alias);
                     store.commit("doctorID", dynamicUser.value._id);
                     store.commit("doctorName", dynamicUser.value.name);
-                    await router.push(`/doctor/${dynamicUser.value.alias}/appointments`);
+                    if (store.state.alias == dynamicUser.value.alias) {
+                        await router.push(`/doctor/${store.state.alias}/appointments`);
+                    }
                 }
             })
 }
@@ -125,7 +129,9 @@ async function providerLogin() {
                     hospital: dynamicUser.value.hospital
                 });
                 store.commit("managerHospital", dynamicUser.value.hospital);
-                await router.push(`/manager/${dynamicUser.value.hospital}`);
+                if (store.state.managerHospital == dynamicUser.value.hospital) {
+                    await router.push(`/manager/${store.state.managerHospital}`);
+                }
             }
         });
 }

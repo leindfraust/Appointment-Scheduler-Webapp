@@ -1,9 +1,9 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {
+import {
     pullCity,
     pushCity
-} = require('../../controllers/geoController')
+} from '../../controllers/geoController.js'
 
 //pull city or municipality from a geolocation
 router.post('/provinceCityPull', pullCity);
@@ -11,4 +11,4 @@ router.post('/provinceCityPull', pullCity);
 //push city/municipality in a geolocation 
 router.post('/provinceUpdate', pushCity);
 
-module.exports = router;
+export default router;

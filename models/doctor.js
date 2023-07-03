@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 const {
     Schema
 } = mongoose;
@@ -52,6 +52,4 @@ const doctorSchema = new Schema({
     messageHistory: Array
 });
 
-const doctor = mongoose.model('doctor', doctorSchema);
-
-module.exports = doctor
+export const Doctor = mongoose.model('doctor', doctorSchema);

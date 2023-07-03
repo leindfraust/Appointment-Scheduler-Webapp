@@ -1,27 +1,27 @@
-require("dotenv").config()
-const express = require('express');
-const session = require('express-session');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const MongoStore = require('connect-mongo');
-const history = require('connect-history-api-fallback');
-const app = express();
-const path = require('path');
-const mongoose = require('mongoose');
-const {
+import 'dotenv/config.js'
+import express from 'express';
+import session from 'express-session';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import history from 'connect-history-api-fallback';
+import MongoStore from 'connect-mongo'
+import path from 'path';
+import mongoose from 'mongoose';
+import {
     PORT,
     mongoUri
-} = require('./config');
+} from './config.js';
+const app = express();
 const server = app.listen(PORT, () => {
     console.log(`listening to ${PORT}`);
 });
-const io = require("socket.io")(server, {
+import { Server } from "socket.io";
+const io = new Server(server, {
     cors: {
         origin: ["http://localhost:8080"]
     }
 });
-
 //cors option
 let allowlist = ['https://medic-search-beta.herokuapp.com', 'http://localhost:8080', 'https://medic-search.onrender.com']
 let corsOptionsDelegate = function (req, callback) {
@@ -59,7 +59,7 @@ app.use(helmet({
         policy: "same-origin"
     }
 }));
-app.use(express.static(path.join(__dirname, 'client/dist')))
+app.use(express.static(path.join(new URL('.', import.meta.url).pathname, 'client/dist')))
 app.use(async (req, res, next) => {
     if (await app.get('env') === 'production' && !req.secure) {
         return res.redirect("https://" + req.headers.host + req.url);
@@ -88,92 +88,94 @@ if (app.get('env') === 'production') {
 }
 
 app.use(session(sess));
-const sessDoctor = require('./sessions/doctor')
-const sessPatient = require('./sessions/user')
-const sessManager = require('./sessions/manager')
-const sessSuperuser = require('./sessions/superuser')
+const sessDoctor = await import('./sessions/doctor.js');
+const sessPatient = await import('./sessions/user.js');
+const sessManager = await import('./sessions/manager.js');
+const sessSuperuser = await import('./sessions/superuser.js');
 
-app.use('/session/doctor', sessDoctor)
-app.use('/session/patient', sessPatient)
-app.use('/session/manager', sessManager)
-app.use('/session/superuser', sessSuperuser)
+app.use('/session/doctor', sessDoctor.default);
+app.use('/session/patient', sessPatient.default);
+app.use('/session/manager', sessManager.default);
+app.use('/session/superuser', sessSuperuser.default);
 
 /* schemas and route logic */
 
 //accounts
-const user = require('./routes/api/user')
-const doctor = require('./routes/api/doctor')
-const manager = require('./routes/api/manager')
-const superuser = require('./routes/api/superuser')
+const user = await import('./routes/api/user.js');
+const doctor = await import('./routes/api/doctor.js');
+const manager = await import('./routes/api/manager.js');
+const superuser = await import('./routes/api/superuser.js');
 
-const appointmentList = require('./routes/api/appointmentList')
-const authenticationCodeRoute = require('./routes/api/authenticationCodes')
-const geolocation = require('./routes/api/geolocation')
-const doctorQuery = require('./routes/api/doctorQuery')
-const provinceQuery = require('./routes/api/provinceQuery')
-const geoHospitalQuery = require('./routes/api/geoHospitalQuery')
-const imgUploader = require('./routes/api/imgUploader')
-const nodemailer = require('./routes/api/nodemailer')
-const openAIQuery = require('./routes/api/openAIQuery')
+const appointmentList = await import('./routes/api/appointmentList.js');
+const authenticationCodeRoute = await import('./routes/api/authenticationCodes.js');
+const geolocation = await import('./routes/api/geolocation.js');
+const doctorQuery = await import('./routes/api/doctorQuery.js');
+const provinceQuery = await import('./routes/api/provinceQuery.js');
+const geoHospitalQuery = await import('./routes/api/geoHospitalQuery.js');
+const imgUploader = await import('./routes/api/imgUploader.js');
+const nodemailer = await import('./routes/api/nodemailer.js');
+const openAIQuery = await import('./routes/api/openAIQuery.js');
 
-const loginAuth = require('./routes/api/loginAuth')
-const updatePassword = require('./routes/api/updatePassword');
-const fupdatePassword = require('./routes/api/forceUpdatePassword');
+const loginAuth = await import('./routes/api/loginAuth.js');
+const updatePassword = await import('./routes/api/updatePassword.js');
+const fupdatePassword = await import('./routes/api/forceUpdatePassword.js');
 
 /* APIs */
 
 //accounts
-app.use('/api/user', user)
-app.use('/api/doctor', doctor)
-app.use('/api/manager', manager)
-app.use('/api/superuser', superuser)
+app.use('/api/user', user.default);
+app.use('/api/doctor', doctor.default);
+app.use('/api/manager', manager.default);
+app.use('/api/superuser', superuser.default);
 
-app.use('/api/appointmentList', appointmentList)
-app.use('/api/code', authenticationCodeRoute)
-app.use('/api/geolocation', geolocation)
-app.use('/api', doctorQuery)
-app.use('/api', provinceQuery)
-app.use('/api', geoHospitalQuery)
-app.use('/api', imgUploader)
-app.use('/api', nodemailer)
-app.use('/api', openAIQuery)
+app.use('/api/appointmentList', appointmentList.default);
+app.use('/api/code', authenticationCodeRoute.default);
+app.use('/api/geolocation', geolocation.default);
+app.use('/api', doctorQuery.default);
+app.use('/api', provinceQuery.default);
+app.use('/api', geoHospitalQuery.default);
+app.use('/api', imgUploader.default);
+app.use('/api', nodemailer.default);
+app.use('/api', openAIQuery.default);
 
-app.use('/api/auth', loginAuth)
-app.use('/api/updatePassword', updatePassword)
-app.use('/api/fupdatePassword', fupdatePassword)
+app.use('/api/auth', loginAuth.default);
+app.use('/api/updatePassword', updatePassword.default);
+app.use('/api/fupdatePassword', fupdatePassword.default);
 
-//connect to mongoDB
+//connect to MongoDB
 const dbConnect = async () => {
-    mongoose.connect(mongoUri, {
+    await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-    })
+    });
 };
 
-dbConnect().then(() => console.log('MongoDB online')).catch((err) => console.log(err))
+dbConnect().then(() => console.log('MongoDB online')).catch((err) => console.log(err));
 
 //socket io
-io.on('connection', (socket) => {
-    let roomNo = null
-    const Patient = require('./models/user')
+io.on('connection', async (socket) => {
+
+    const { User } = await import('./models/user.js')
+
+    let roomNo = null;
     socket.on('join room', (id) => {
-        socket.join(id)
-        roomNo = id
-        Patient.find({
+        socket.join(id);
+        roomNo = id;
+        User.find({
             _id: id
         }).then(response => {
-            io.to(roomNo).emit('messages', response[0].messages)
+            io.to(roomNo).emit('messages', response[0].messages);
         }).catch(error => {
             //ignore type error
-        })
+        });
     });
     console.log('Client connected');
-    socket.on('connect', () => console.log('Client connected'))
+    socket.on('connect', () => console.log('Client connected'));
     socket.on('disconnect', () => console.log('Client disconnected'));
     socket.on('message', async (refID, title, msg, user, date) => {
 
         try {
-            const patient = await Patient.findOneAndUpdate({
+            const patient = await User.findOneAndUpdate({
                 _id: roomNo
             }, {
                 $push: {
@@ -183,39 +185,40 @@ io.on('connection', (socket) => {
                         subject: title,
                         message: msg,
                         date: date,
-                        new: true
+                        new:
+                            true
                     },
                 },
             }, {
                 new: true
-            })
-            io.to(roomNo).emit('send messages', patient?.messages)
+            });
+            io.to(roomNo).emit('send messages', patient?.messages);
         } catch (err) {
-            console.log(err)
+            console.log(err);
         }
     });
 
     socket.on('update message', async (notifications) => {
         async function updatePatient() {
-            await Patient.findOneAndUpdate({
+            await User.findOneAndUpdate({
                 _id: roomNo
             }, {
                 messages: notifications
             }, {
                 new: true
-            })
+            });
         }
 
         try {
-            await updatePatient()
+            await updatePatient();
         } catch (err) {
-            console.log(err)
+            console.log(err);
         }
     });
-    socket.on('delete message', async (id, notif) => {
 
+    socket.on('delete message', async (id, notif) => {
         try {
-            const patient = await Patient.findOneAndUpdate({
+            const patient = await User.findOneAndUpdate({
                 _id: id
             }, {
                 $pull: {
@@ -230,24 +233,26 @@ io.on('connection', (socket) => {
                 }
             }, {
                 new: true
-            }).clone()
-            io.to(roomNo).emit('delete messages', patient?.messages)
+            }).clone();
+            io.to(roomNo).emit('delete messages', patient?.messages);
         } catch (err) {
-            console.log(err)
+            console.log(err);
         }
     });
 });
 
 //serve dist in node local server
 app.get('/', (req, res) => {
-
-    res.sendFile(path.join(__dirname, 'client/dist/index.html'))
-
+    res.sendFile(path.join(__dirname, 'client/dist/index.html'));
 });
+
 //remove console statements in production
-if (process.env.NODE_ENV !== "development") {
+if (process.env.NODE_ENV == "production") {
     console.log = () => { };
     console.debug = () => { };
     console.info = () => { };
     console.warn = () => { };
 }
+
+export default app;
+

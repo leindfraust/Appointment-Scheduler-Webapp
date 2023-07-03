@@ -1,12 +1,12 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {
+import {
     getGeolocations,
     pushGeolocation,
     updateGeolocation,
     deleteGeolocation,
     getProvinceNearestUser
-} = require('../../controllers/geoController')
+} from '../../controllers/geoController.js'
 
 router.get('/', getGeolocations);
 
@@ -18,4 +18,4 @@ router.put('/:id', updateGeolocation);
 
 router.delete('/:id', deleteGeolocation);
 
-module.exports = router;
+export default router;

@@ -1,12 +1,14 @@
-const bcrypt = require('bcrypt')
-const Doctor = require('../models/doctor');
-const Manager = require('../models/manager');
-const cloudinary = require('cloudinary')
+import bcrypt from 'bcrypt'
+import cloudinary from 'cloudinary'
+
+import { Doctor } from '../models/doctor.js';
+
 
 cloudinary.config({
     cloud_name: process.env.cloudinary_cloud_name,
     api_key: process.env.cloudinary_api_key,
-    api_secret: process.env.cloudinary_api_secret
+    api_secret: process.env.cloudinary_api_secret,
+    secure: true
 });
 
 const getDoctors = (async (req, res) => {
@@ -107,6 +109,9 @@ const checkAvailabilityDoctors = (async (req, res) => {
 })
 
 const check_registrationCode = (async (req, res) => {
+
+    const { Manager } = await import('../models/manager.js')
+
     let registrationCode = await req.body.registrationCode
     try {
         const hospital = await Manager.findOne({
@@ -402,7 +407,7 @@ const clearMessages = (async (req, res) => {
     }
 });
 
-module.exports = {
+export {
     check_registrationCode,
     check_alias,
     check_email,

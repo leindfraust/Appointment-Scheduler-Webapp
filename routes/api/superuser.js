@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {
+import {
     getSuperusers,
     pushSuperuser,
     updateSuperuser,
@@ -8,7 +8,7 @@ const {
     submitTicket,
     updateTicket,
     deleteTicket
-} = require('../../controllers/superuserController')
+} from '../../controllers/superuserController.js'
 
 router.get('/', getSuperusers);
 
@@ -24,4 +24,4 @@ router.post('/deleteTicket', deleteTicket);
 
 router.post('/updateTicket', updateTicket);
 
-module.exports = router;
+export default router;

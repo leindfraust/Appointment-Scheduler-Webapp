@@ -63,7 +63,7 @@ const routes = [{
 },
 //Manager/Hospital account routes
 {
-    path: '/manager/:user',
+    path: `/manager/${store.state.managerHospital}`,
     component: ManagerDashboard,
     meta: {
         requiresManagerAuth: true
@@ -74,14 +74,14 @@ const routes = [{
     component: ManagerSignup
 },
 {
-    path: '/manager/:user/profile',
+    path: `/manager/${store.state.managerHospital}/profile`,
     component: ManagerProfile,
     meta: {
         requiresManagerAuth: true
     }
 },
 {
-    path: '/manager/:user/security',
+    path: `/manager/${store.state.managerHospital}/security`,
     component: ManagerSecurity,
     meta: {
         requiresManagerAuth: true
@@ -199,14 +199,14 @@ const routes = [{
     component: DoctorList,
 },
 {
-    path: '/user/:user/',
+    path: `/user/${store.state.patientUsername}/`,
     component: User,
     meta: {
         requiresAuthPatient: true
     }
 },
 {
-    path: '/user/:user/profile',
+    path: `/user/${store.state.patientUsername}/profile`,
     component: UserProfile,
     name: UserProfile,
     meta: {
@@ -214,7 +214,7 @@ const routes = [{
     }
 },
 {
-    path: '/user/:user/security',
+    path: `/user/${store.state.patientUsername}/security`,
     component: UserSecurity,
     meta: {
         requiresAuthPatient: true
@@ -228,7 +228,7 @@ const routes = [{
     },
 },
 {
-    path: '/user/:user/registration',
+    path: `/user/${store.state.patientUsername}/registration`,
     component: RegForm,
     meta: {
         requireProcess: true

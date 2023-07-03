@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {
+import {
     pushPatientDoctor,
     pullDoctorHospital,
     pushMessages,
@@ -8,7 +8,7 @@ const {
     pullMessage,
     clearMessages,
     pullPatientDoctor
-} = require('../../controllers/doctorController')
+} from '../../controllers/doctorController.js'
 
 //pull doctor from a hospital
 router.post('/doctorPullHospital', pullDoctorHospital);
@@ -26,4 +26,4 @@ router.post('/clearMsg', clearMessages)
 
 router.post('/checkDoctorAvailability', checkAvailabilityDoctors)
 
-module.exports = router;
+export default router;

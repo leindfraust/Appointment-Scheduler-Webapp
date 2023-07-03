@@ -1,4 +1,4 @@
-const AppointmentList = require('../models/appointmentList');
+import { AppointmentList } from '../models/appointmentList.js';
 
 const getAppointments = (async (req, res) => {
     try {
@@ -157,7 +157,7 @@ const deleteAppointment = (async (req, res) => {
     }
 });
 
-module.exports = {
+export {
     getAppointments,
     checkDoubleAppointment,
     checkMultipleAppointment,

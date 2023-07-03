@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {
+import {
     getDoctors,
     getDoctorsForFilter,
     pushDoctor,
@@ -13,7 +13,7 @@ const {
     check_email,
     updateDoctorSchedule,
     getDoctorsForManager
-} = require('../../controllers/doctorController');
+} from '../../controllers/doctorController.js'
 
 router.post('/check_registrationCode', check_registrationCode)
 
@@ -39,4 +39,4 @@ router.put('/schedule_update/:id', updateDoctorSchedule);
 
 router.delete('/:id', deleteDoctor);
 
-module.exports = router;
+export default router;

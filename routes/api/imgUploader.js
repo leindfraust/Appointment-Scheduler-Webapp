@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {
+import {
     imgUpload,
     imgUploadDoctor,
     imgUploadManager,
@@ -10,7 +10,7 @@ const {
     imgUploadImgMsgClearDoctor,
     imgUploadPatient,
     imgUploadVisitation
-} = require('../../controllers/imgController')
+} from '../../controllers/imgController.js'
 //doctor image change profile picture upload
 router.post('/imgUpload', imgUpload);
 
@@ -38,4 +38,4 @@ router.post('/imgUploadDoctor', imgUploadDoctor);
 //manager upload photo 
 router.post('/imgUploadManager', imgUploadManager);
 
-module.exports = router;
+export default router;

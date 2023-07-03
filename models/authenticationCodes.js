@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 const {
     Schema
 } = mongoose;
@@ -23,6 +23,4 @@ const authenticationCodeSchema = new Schema({
     }
 });
 
-const authenticationCode = mongoose.model('authenticationCode', authenticationCodeSchema);
-
-module.exports = authenticationCode
+export const AuthenticationCode = mongoose.model('authenticationCode', authenticationCodeSchema);
