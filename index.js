@@ -49,7 +49,7 @@ app.use(helmet({
     contentSecurityPolicy: {
         useDefault: true,
         directives: {
-            "img-src": ["'self'", "data:", "https://res.cloudinary.com", "https://ui-avatars.com", "https://medic-search.onrender.com/", "https://render.com/", "*.https://medic-search.onrender.com/"],
+            "img-src": ["'self'", "data:", "https://res.cloudinary.com", "https://ui-avatars.com", "blob:https://medic-search.onrender.com/"],
             "connect-src": ["'self'", "https://use.fontawesome.com", "https://ka-f.fontawesome.com", "https://res.cloudinary.com", "https://api.paymongo.com"],
             "script-src": ["'self'", "https://use.fontawesome.com", "maps.googleapis.com", "https://kit.fontawesome.com/4ca5ad86da.js"],
             "frame-src": ["'self'", "https://www.google.com/maps", "https://maps.google.com/"]
