@@ -10,7 +10,7 @@ const router = useRouter()
 const isActive = ref(false)
 const managerHospital = ref(null)
 
-onMounted(async () => await axios.get('/session/manager').then(response => managerHospital.value = response.data.hospital))
+onMounted(async () => await axios.get('/session/manager').then(response => managerHospital.value = response.data._id))
 
 async function logout() {
     await axios.delete('/session/manager');

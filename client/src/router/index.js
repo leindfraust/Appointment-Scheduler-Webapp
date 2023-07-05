@@ -348,7 +348,7 @@ router.beforeEach(async (to, from, next) => {
         //check provider/manager session
         await axios.get("/session/manager").then(async response => {
             if (typeof response.data.hospital !== 'undefined') {
-                store.commit("managerHospital", response.data.hospital);
+                store.commit("managerHospital", response.data._id);
             } else {
                 store.commit("managerHospital", null);
                 await axios.delete('/session/manager');
