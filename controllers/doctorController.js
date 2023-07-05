@@ -62,6 +62,9 @@ const getDoctorsForFilter = (async (req, res) => {
             "hospitalOrigin.hospital": req.body.hospital,
             schedule: { $elemMatch: { date: { $gt: new Date(today).toISOString() }, timeStart: { $regex: `.*${req.body.time}.*` }, hospital: req.body.hospital } }
         }
+        if (req.body.filterSpecialist) {
+            querySpecialistWithDateTime.specialist = req.body.filterSpecialist
+        }
     }
 
     try {
