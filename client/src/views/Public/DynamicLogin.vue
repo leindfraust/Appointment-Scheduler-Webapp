@@ -43,7 +43,7 @@ onBeforeMount(async () => {
     })
     await axios.get("/session/manager").then(async response => {
         if (typeof response.data.hospital !== 'undefined') {
-            store.commit("managerHospital", response.data.hospital);
+            store.commit("managerHospital", response.data._id);
             await router.push(`/manager/${store.state.managerHospital}`);
         }
     })
@@ -72,8 +72,8 @@ async function authPatient() {
                     });
                     store.commit("patientUsername", dynamicUser.value.username)
                     store.commit("patientID", dynamicUser.value._id)
-                    if (store.state.patientUsername == dynamicUser.value.username) {
-                        await router.push(`/user/${store.state.patientUsername}`);
+                    if (await store.state.patientUsername == dynamicUser.value.username) {
+                        await router.push(`/user/${await store.state.patientUsername}`);
                     }
                 }
             })
@@ -108,8 +108,8 @@ async function authDoctor() {
                     store.commit("alias", dynamicUser.value.alias);
                     store.commit("doctorID", dynamicUser.value._id);
                     store.commit("doctorName", dynamicUser.value.name);
-                    if (store.state.alias == dynamicUser.value.alias) {
-                        await router.push(`/doctor/${store.state.alias}/appointments`);
+                    if (await store.state.alias == dynamicUser.value.alias) {
+                        await router.push(`/doctor/${await store.state.alias}/appointments`);
                     }
                 }
             })
@@ -128,9 +128,9 @@ async function providerLogin() {
                     registrationCode: dynamicUser.value.registrationCode,
                     hospital: dynamicUser.value.hospital
                 });
-                store.commit("managerHospital", dynamicUser.value.hospital);
-                if (store.state.managerHospital == dynamicUser.value.hospital) {
-                    await router.push(`/manager/${store.state.managerHospital}`);
+                store.commit("managerHospital", dynamicUser.value._id);
+                if (await store.state.managerHospital == dynamicUser.value._id) {
+                    await router.push(`/manager/${await store.state.managerHospital}`);
                 }
             }
         });
