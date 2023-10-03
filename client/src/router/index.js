@@ -108,49 +108,49 @@ const routes = [{
     path: `/doctor/${store.state.alias}/appointments`,
     component: DoctorAppointments,
     meta: {
-        requiresAuth: true
+        requiresAuthDoctor: true
     },
 },
 {
     path: `/doctor/${store.state.alias}/appointments/history`,
     component: DoctorPatientHistory,
     meta: {
-        requiresAuth: true
+        requiresAuthDoctor: true
     }
 },
 {
     path: `/doctor/${store.state.alias}/appointments/cancelled`,
     component: DoctorCancelledAppointments,
     meta: {
-        requiresAuth: true
+        requiresAuthDoctor: true
     }
 },
 {
     path: `/doctor/${store.state.alias}/schedule`,
     component: DoctorScheduler,
     meta: {
-        requiresAuth: true
+        requiresAuthDoctor: true
     },
 },
 {
     path: `/doctor/${store.state.alias}/profile`,
     component: DoctorProfile,
     meta: {
-        requiresAuth: true
+        requiresAuthDoctor: true
     },
 },
 {
     path: `/doctor/${store.state.alias}/security`,
     component: DoctorSecurity,
     meta: {
-        requiresAuth: true
+        requiresAuthDoctor: true
     },
 },
 {
     path: `/doctor/${store.state.alias}/payment`,
     component: DoctorPayment,
     meta: {
-        requiresAuth: true
+        requiresAuthDoctor: true
     },
 },
 //Confirmation routes
@@ -252,137 +252,123 @@ import axios from 'axios'
 import socket from '../socket'
 
 //route guards
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
     if (to.matched.some(route => route.meta.requireImgUploadSuccess)) {
         if (store.state.imgSuccess === true) {
-            return next();
+            return true;
         } else {
-            return next('/account/login');
+            return '/account/login';
         }
     }
-    next();
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
     if (to.matched.some(route => route.meta.requireImgUploadSuccessManager)) {
         if (store.state.imgSuccessManager) {
-            return next();
+            return true;
         } else {
-            return next('/account/login');
+            return '/account/login';
         }
     }
-    next();
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
     if (to.matched.some(route => route.meta.requireSuccessPickDoctor)) {
         if (store.state.appointed) {
-            return next();
+            return true;
         } else {
-            return next('/user/:user/registration');
+            return '/user/:user/registration';
         }
     }
-    next();
 });
 
-router.beforeEach(async (to, from, next) => {
-    if (to.matched.some(route => route.meta.requiresAuth)) {
-        //check doctor session
-        await axios.get("/session/doctor").then(async response => {
-            if (typeof response.data.alias !== 'undefined') {
-                store.commit("alias", response.data.alias);
-                store.commit("doctorID", response.data._id);
-                store.commit("doctorName", response.data.fullname);
-            } else {
-                store.commit("alias", null);
-                await axios.delete("/session/doctor");
-            }
-        });
-        if (store.state.alias) {
-            return next();
+router.beforeEach(async (to) => {
+    //check doctor session
+    await axios.get("/session/doctor").then(async response => {
+        if (typeof response.data.alias !== 'undefined') {
+            store.commit("alias", response.data.alias);
+            store.commit("doctorID", response.data._id);
+            store.commit("doctorName", response.data.fullname);
         } else {
-            return next('/account/login');
+            store.commit("alias", null);
+            await axios.delete("/session/doctor");
+        }
+    });
+    if (await to.meta.requiresAuthDoctor && !store.state.alias) {
+        return {
+            path: '/account/login',
+            query: { redirect: to.fullPath }
         }
     }
-    next();
 });
 
-router.beforeEach(async (to, from, next) => {
-    if (to.matched.some(route => route.meta.requiresAuthPatient)) {
-
-        //check patient session
-        await axios.get("/session/patient").then(async response => {
-            if (typeof response.data.username !== 'undefined' && !response.data.alias && !response.data.hospital) {
-                store.commit("patientUsername", response.data.username)
-                store.commit("patientID", response.data._id)
-            } else {
-                store.commit("patientID", null);
-                store.commit("patientUsername", '');
-                await axios.delete("/session/patient");
-                socket.disconnect();
-            }
-        });
-
-        if (store.state.patientUsername) {
-            return next();
+router.beforeEach(async (to) => {
+    await axios.get("/session/patient").then(async response => {
+        if (typeof response.data.username !== 'undefined' && !response.data.alias && !response.data.hospital) {
+            store.commit("patientUsername", response.data.username)
+            store.commit("patientID", response.data._id)
         } else {
-            return next('/account/login');
+            store.commit("patientID", null);
+            store.commit("patientUsername", '');
+            await axios.delete("/session/patient");
+            socket.disconnect();
+        }
+    });
+    if (await to.meta.requiresAuthPatient && !store.state.patientUsername) {
+
+        return {
+            path: '/account/login',
+            query: { redirect: to.fullPath }
         }
     }
-    next();
 });
 
-router.beforeEach((to, from, next) => {
-    if (to.matched.some(route => route.meta.requiresSuperUserAuth)) {
-        if (store.state.superUserAuth) {
-            return next();
-        } else {
-            return next('/superuser/login');
+router.beforeEach((to) => {
+    if (to.meta.requiresSuperUserAuth && !store.state.superUserAuth) {
+        return {
+            path: '/superuser/login',
+            query: { redirect: to.fullPath }
         }
     }
-    next();
 });
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to) => {
+    await axios.get("/session/manager").then(async response => {
+        if (typeof response.data.hospital !== 'undefined') {
+            store.commit("managerHospital", response.data._id);
+        } else {
+            store.commit("managerHospital", null);
+            await axios.delete('/session/manager');
+        }
+    });
     if (to.matched.some(route => route.meta.requiresManagerAuth)) {
         //check provider/manager session
-        await axios.get("/session/manager").then(async response => {
-            if (typeof response.data.hospital !== 'undefined') {
-                store.commit("managerHospital", response.data._id);
-            } else {
-                store.commit("managerHospital", null);
-                await axios.delete('/session/manager');
-            }
-        });
         if (store.state.managerHospital) {
-            return next();
+            return true;
         } else {
-            return next('/account/login');
+            return '/account/login';
         }
     }
-    next();
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
     if (to.matched.some(route => route.meta.requireProcess)) {
         if (store.state.statusAvailability) {
-            return next();
+            return true;
         } else {
-            return next('/');
+            return '/';
         }
     }
-    next();
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
     if (to.matched.some(route => route.meta.requirePaymentTransacted)) {
         if (store.state.paymentID) {
-            return next();
+            return true;
         } else {
-            return next('/');
+            return '/';
         }
     }
-    next();
 });
 
 export default router
