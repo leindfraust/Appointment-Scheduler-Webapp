@@ -252,23 +252,26 @@ onMounted(async () => {
     }
 })
 
-async function getRecSpecialist() {
-    getRecLoadingSpecialist.value = true
-    await axios.post('/api/query-recommended-specialist', {
-        symptom: filterSpecialist.value
-    }).then(response => {
-        filterSpecialist.value = response.data
-    }).catch(err => errMsg.value = err)
-    getRecLoadingSpecialist.value = false
-}
+
 async function getRecSpecialistTimeout() {
+
+    const getRecLoadingSpecialistTime = async () => {
+        getRecLoadingSpecialist.value = true
+        await axios.post('/api/query-recommended-specialist', {
+            symptom: filterSpecialist.value
+        }).then(response => {
+            filterSpecialist.value = response.data
+        }).catch(err => errMsg.value = err)
+        getRecLoadingSpecialist.value = false
+    }
+
     recSpecialistDropdown.value = true
     if (Object.keys(specializationsSorted.value).length == 0 || specializationsSorted.value.length == 0) {
         if (getRecSpecialistDelay.value) {
             clearTimeout(getRecSpecialistDelay.value)
             getRecSpecialistDelay.value = null
         }
-        getRecSpecialistDelay.value = setTimeout(getRecSpecialist, 5000)
+        getRecSpecialistDelay.value = setTimeout(getRecLoadingSpecialistTime, 5000)
     } else {
         if (getRecSpecialistDelay.value) {
             clearTimeout(getRecSpecialistDelay.value)
