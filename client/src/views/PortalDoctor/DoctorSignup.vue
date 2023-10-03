@@ -2,7 +2,7 @@
 import axios from 'axios'
 import { ref, computed } from 'vue'
 import { useStore } from 'vuex';
-
+import { useUsernameCheck } from '../../composables/usernameCheck'
 
 const store = useStore()
 
@@ -16,10 +16,9 @@ const passwordRepeat = ref('')
 const gmail = ref('')
 const passwordMatch = ref(null)
 const aliasFound = ref('')
-const usernameFound = ref('')
+const { usernameFound, loadingUsername } = useUsernameCheck(username)
 const registrationCodeFound = ref('')
 const emailFound = ref('')
-const loadingUsername = ref(false)
 const loadingAlias = ref(false)
 const loadingRegistrationCode = ref(false)
 const loadingEmail = ref(false)
@@ -27,7 +26,6 @@ const specializationsSelected = ref([])
 const specializationList = ref(store.getters.getSpecializationList)
 const searchBarSpecialization = ref('')
 const errMsg = ref('')
-const searchTimeoutUsername = ref(null)
 const searchTimeoutAlias = ref(null)
 const searchTimeoutRegistrationCode = ref(null)
 const searchTimeoutEmail = ref(null)
@@ -47,13 +45,6 @@ async function emailFindTimeout() {
     searchTimeoutEmail.value = null
   }
   searchTimeoutEmail.value = setTimeout(emailFinder, 500)
-}
-async function usernameFindTimeout() {
-  if (searchTimeoutUsername.value) {
-    clearTimeout(searchTimeoutUsername.value)
-    searchTimeoutUsername.value = null
-  }
-  searchTimeoutUsername.value = setTimeout(usernameFinder, 500)
 }
 async function aliasFindTimeout() {
   if (searchTimeoutAlias.value) {
@@ -85,35 +76,6 @@ async function emailFinder() {
     emailFound.value = ''
   }
   loadingEmail.value = false
-}
-async function usernameFinder() {
-  loadingUsername.value = true
-  usernameFound.value = false
-  await axios.post('/api/user/check_username', {
-    username: username.value
-  }).then(response => {
-    if (response.data) {
-      usernameFound.value = response.data
-    }
-  })
-  await axios.post('/api/doctor/check_username', {
-    username: username.value
-  }).then(response => {
-    if (response.data) {
-      usernameFound.value = response.data
-    }
-  })
-  await axios.post('/api/manager/check_username', {
-    username: username.value
-  }).then(response => {
-    if (response.data) {
-      usernameFound.value = response.data
-    }
-  })
-  if (username.value == '') {
-    usernameFound.value = ''
-  }
-  loadingUsername.value = false
 }
 async function aliasFinder() {
   loadingAlias.value = true
@@ -281,8 +243,7 @@ function undoSpecialization(specialization) {
                 </p>
               </div>
               <div class="control">
-                <input class="input" type="text" v-model="username" @input="usernameFindTimeout" placeholder="username"
-                  required />
+                <input class="input" type="text" v-model="username" placeholder="username" required />
               </div>
             </div>
             <div class="field">

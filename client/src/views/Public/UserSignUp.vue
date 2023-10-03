@@ -3,6 +3,7 @@ import axios from 'axios'
 import { ref, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { useUsernameCheck } from '../../composables/usernameCheck'
 
 const store = useStore()
 const router = useRouter()
@@ -26,53 +27,16 @@ const province = ref('')
 const citiesData = ref([])
 const termsAndConditionsAgreed = ref(false)
 const errMsg = ref('')
-const usernameFound = ref('')
-const loadingUsername = ref(false)
 const emailFound = ref('')
 const loadingEmail = ref(false)
 const searchTimeout = ref(null)
+const { usernameFound, loadingUsername } = useUsernameCheck(username)
 const randomChar = ref('')
 
 onBeforeMount(async () => {
   await axios.get('/api/geolocation').then(response => geolocationData.value = response.data)
 })
 
-async function usernameFindTimeout() {
-  if (searchTimeout.value) {
-    clearTimeout(searchTimeout.value)
-    searchTimeout.value = null
-  }
-  searchTimeout.value = setTimeout(usernameFinder, 500)
-}
-async function usernameFinder() {
-  loadingUsername.value = true
-  usernameFound.value = false
-  await axios.post('/api/user/check_username', {
-    username: username.value
-  }).then(response => {
-    if (response.data) {
-      usernameFound.value = response.data
-    }
-  })
-  await axios.post('/api/doctor/check_username', {
-    username: username.value
-  }).then(response => {
-    if (response.data) {
-      usernameFound.value = response.data
-    }
-  })
-  await axios.post('/api/manager/check_username', {
-    username: username.value
-  }).then(response => {
-    if (response.data) {
-      usernameFound.value = response.data
-    }
-  })
-  if (username.value == '') {
-    usernameFound.value = ''
-  }
-  loadingUsername.value = false
-}
 async function emailFindTimeout() {
   if (searchTimeout.value) {
     clearTimeout(searchTimeout.value)
@@ -296,8 +260,7 @@ async function signup() {
                   <p class="help is-success" v-else>Available<i class="fas fa-spinner fa-spin" v-if="loadingUsername"></i>
                   </p>
                 </div>
-                <input class="input" type="text" placeholder="username" v-model="username" @input="usernameFindTimeout"
-                  required />
+                <input class="input" type="text" placeholder="username" v-model="username" required />
               </div>
             </div>
             <div class="field is-horizontal">
