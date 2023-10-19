@@ -285,13 +285,13 @@ router.beforeEach((to) => {
 router.beforeEach(async (to) => {
     //check doctor session
     await axios.get("/session/doctor").then(async response => {
-        if (typeof response.data.alias !== 'undefined') {
+        if (typeof await response.data.alias !== 'undefined') {
             store.commit("alias", response.data.alias);
             store.commit("doctorID", response.data._id);
             store.commit("doctorName", response.data.fullname);
         } else {
             store.commit("alias", null);
-            await axios.delete("/session/doctor");
+            if (!response.data._id) await axios.delete("/session/doctor");
         }
     });
     if (await to.meta.requiresAuthDoctor && !store.state.alias) {
@@ -310,7 +310,7 @@ router.beforeEach(async (to) => {
         } else {
             store.commit("patientID", null);
             store.commit("patientUsername", '');
-            await axios.delete("/session/patient");
+            if (!response.data._id) await axios.delete("/session/patient");
             socket.disconnect();
         }
     });
@@ -338,7 +338,7 @@ router.beforeEach(async (to) => {
             store.commit("managerHospital", response.data._id);
         } else {
             store.commit("managerHospital", null);
-            await axios.delete('/session/manager');
+            if (!response.data._id) await axios.delete('/session/manager');
         }
     });
     if (to.matched.some(route => route.meta.requiresManagerAuth)) {
