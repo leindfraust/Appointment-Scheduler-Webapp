@@ -8,7 +8,6 @@ const store = useStore()
 const authCheck = ref(true)
 //reload once if authenticating of an account results in error
 onBeforeMount(async () => {
-    console.log(store.state.managerHospital)
     if (await store.state.patientUsername || await store.state.alias || await store.state.managerHospital) {
         router.go()
     } else {
